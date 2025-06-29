@@ -23,7 +23,9 @@ export interface IStorage {
   // User operations
   // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createLocalUser(userData: { email: string; firstName?: string; lastName?: string; passwordHash: string }): Promise<User>;
 
   // Transaction operations
   getTransactions(userId: string): Promise<Transaction[]>;
@@ -56,6 +58,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
@@ -66,6 +73,22 @@ export class DatabaseStorage implements IStorage {
           ...userData,
           updatedAt: new Date(),
         },
+      })
+      .returning();
+    return user;
+  }
+
+  async createLocalUser(userData: { email: string; firstName?: string; lastName?: string; passwordHash: string }): Promise<User> {
+    const userId = `local_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: userId,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        passwordHash: userData.passwordHash,
+        provider: 'local',
       })
       .returning();
     return user;
