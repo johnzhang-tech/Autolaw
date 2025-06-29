@@ -121,7 +121,7 @@ export default function Dashboard() {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
       
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
+      <div className="flex-1 w-full min-w-0 h-screen overflow-hidden">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
