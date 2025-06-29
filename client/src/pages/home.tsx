@@ -1,171 +1,199 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Upload, BarChart3, MessageCircleQuestion } from "lucide-react";
+import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle } from "lucide-react";
 
 export default function Home() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user } = useAuth();
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
-  };
+  const { data: transactions = [] } = useQuery({
+    queryKey: ["/api/transactions"],
+  });
 
-  const getInitials = (firstName?: string | null, lastName?: string | null) => {
-    if (!firstName && !lastName) return "U";
-    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
-  };
+  const totalDocuments = transactions.reduce((acc: number, transaction: any) => {
+    return acc + (transaction.documents?.length || 0);
+  }, 0);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-primary mr-2" />
-              <span className="text-xl font-bold text-slate-900">DocuAI</span>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.profileImageUrl || ""} alt={user?.firstName || "User"} />
-                <AvatarFallback>{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm text-slate-600">
-                {user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : user?.email}
-              </span>
-              <Button variant="outline" onClick={handleLogout}>
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="flex h-screen bg-white">
+      {/* Sidebar */}
+      <Sidebar 
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Welcome to DocuAI
-          </h1>
-          <p className="text-lg text-slate-600 mt-2">
-            Your intelligent real estate document analysis platform
-          </p>
-        </div>
+      <main className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-900">
+              Welcome to DocuAI
+            </h1>
+            <p className="text-lg text-slate-600 mt-2">
+              Your intelligent real estate document analysis platform
+            </p>
+          </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Upload Documents</CardTitle>
-              <Upload className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Upload new documents for AI analysis
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">View Analytics</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Analyze your document portfolio
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ask Questions</CardTitle>
-              <MessageCircleQuestion className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Query your documents with AI
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                View your recent document activity
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Documents */}
-          <div className="lg:col-span-2">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
-              <CardHeader>
-                <CardTitle>Recent Documents</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Documents</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No documents uploaded yet</p>
-                  <p className="text-sm">Upload your first document to get started</p>
-                </div>
+                <div className="text-2xl font-bold">{totalDocuments}</div>
+                <p className="text-xs text-muted-foreground">
+                  Documents across all transactions
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Transactions</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{transactions.length}</div>
+                <p className="text-xs text-muted-foreground">
+                  Real estate transactions
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">AI Analysis</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">
+                  Documents analyzed today
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Risk Alerts</CardTitle>
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">
+                  Potential risks identified
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Quick Stats */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Total Documents</span>
-                  <span className="font-medium">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Analyzed Today</span>
-                  <span className="font-medium">0</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Risks Identified</span>
-                  <span className="font-medium">0</span>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Quick Actions Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Recent Activity */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <FileText className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                      <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
+                      <p className="text-sm mb-4">Create your first transaction to get started</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {transactions.slice(0, 5).map((transaction: any) => (
+                        <div key={transaction.id} className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FileText className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-slate-900">{transaction.name}</h4>
+                            <p className="text-sm text-slate-500">{transaction.transactionType}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              {transaction.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Getting Started</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
-                    <span>Upload your first document</span>
+            {/* Getting Started */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Getting Started</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-white text-xs font-bold">1</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900">Create a Transaction</h4>
+                        <p className="text-sm text-slate-500">Start by creating a real estate transaction</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-slate-300 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-white text-xs font-bold">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900">Upload Documents</h4>
+                        <p className="text-sm text-slate-500">Add contracts, HOA docs, and other files</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-slate-300 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-white text-xs font-bold">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-900">Get AI Analysis</h4>
+                        <p className="text-sm text-slate-500">Review automated insights and risk assessment</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
-                    <span>Review AI analysis results</span>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tips</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Use the Q&A feature to ask specific questions about documents</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Upload multiple document types for comprehensive analysis</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Check the Dashboard for portfolio insights</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
-                    <span>Ask questions about your documents</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </main>
