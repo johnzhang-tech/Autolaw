@@ -7,6 +7,7 @@ import { z } from "zod";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
+import { generateDocumentResponse, generateChatTitle } from './openai';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -132,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document chat endpoint
+  // OpenAI-powered document chat endpoint
   app.post('/api/documents/:id/chat', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -144,22 +145,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Document not found' });
       }
 
-      // Generate AI response based on document analysis
-      let response = "I can help you understand this HOA document. ";
+      // Generate AI response using OpenAI
+      const aiResponse = await generateDocumentResponse(message, {
+        fileName: document.originalFileName,
+        fileType: document.mimeType,
+        analysisResult: document.analysisResult,
+        riskScore: document.riskScore ?? undefined
+      });
+
+      res.json({ response: aiResponse });
+    } catch (error: any) {
+      console.error('Document chat error:', error);
+      res.status(500).json({ 
+        message: 'Failed to process your question. Please try again.',
+        error: error.message 
+      });
+    }
+  });
+
+  // General chat endpoint for Q&A without specific document
+  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+    try {
+      const { message, sessionId } = req.body;
       
-      if (message.toLowerCase().includes('risk')) {
-        response += `The risk score for this document is ${document.riskScore || 50}/100.`;
-      } else if (message.toLowerCase().includes('fee')) {
-        response += "I found information about HOA fees and payment schedules in this document.";
-      } else if (message.toLowerCase().includes('compliance')) {
-        response += "This document has been reviewed for compliance issues and violations.";
-      } else {
-        response += "What specific aspect of this HOA document would you like to know about?";
+      if (!message) {
+        return res.status(400).json({ message: 'Message is required' });
       }
 
-      res.json({ response });
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to process chat message' });
+      // For general HOA questions without specific document context
+      const aiResponse = await generateDocumentResponse(message, {
+        fileName: 'General HOA Question',
+        fileType: 'text/plain',
+        analysisResult: null,
+        riskScore: undefined
+      });
+
+      // If sessionId provided, save the conversation
+      if (sessionId) {
+        await storage.createChatMessage({
+          sessionId: parseInt(sessionId),
+          role: 'user',
+          content: message
+        });
+
+        await storage.createChatMessage({
+          sessionId: parseInt(sessionId),
+          role: 'assistant',
+          content: aiResponse
+        });
+      }
+
+      res.json({ response: aiResponse });
+    } catch (error: any) {
+      console.error('General chat error:', error);
+      res.status(500).json({ 
+        message: 'Failed to process your question. Please try again.',
+        error: error.message 
+      });
     }
   });
 
