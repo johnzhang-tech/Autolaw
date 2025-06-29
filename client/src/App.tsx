@@ -12,6 +12,7 @@ import QA from "@/pages/qa";
 import Documents from "@/pages/documents";
 import Dashboard from "@/pages/dashboard";
 import Manage from "@/pages/manage";
+import Pricing from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +20,9 @@ function Router() {
 
   return (
     <Switch>
+      {/* Public routes */}
+      <Route path="/pricing" component={Pricing} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
