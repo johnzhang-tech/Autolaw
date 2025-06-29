@@ -176,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const aiResponse = await generateDocumentResponse(message, {
         fileName: 'General HOA Question',
         fileType: 'text/plain',
-        analysisResult: null,
+        analysisResult: undefined,
         riskScore: undefined
       });
 
