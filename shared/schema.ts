@@ -63,6 +63,29 @@ export const documents = pgTable("documents", {
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   analyzedAt: timestamp("analyzed_at"),
   analysisResult: jsonb("analysis_result"),
+  analysisStatus: varchar("analysis_status").default("pending"), // pending, processing, completed, failed
+  riskScore: integer("risk_score"), // 1-100 risk assessment
+  complianceIssues: text("compliance_issues").array(),
+  summaryPdfPath: varchar("summary_pdf_path"), // Path to generated summary PDF
+  queueJobId: varchar("queue_job_id"), // Bull queue job ID for reliability
+  retryCount: integer("retry_count").default(0),
+  lastError: text("last_error"),
+});
+
+// Message queue jobs table for network reliability
+export const queueJobs = pgTable("queue_jobs", {
+  id: serial("id").primaryKey(),
+  jobId: varchar("job_id").unique().notNull(),
+  jobType: varchar("job_type").notNull(), // 'document_analysis', 'pdf_generation'
+  userId: varchar("user_id").notNull(),
+  documentId: integer("document_id").references(() => documents.id),
+  jobData: text("job_data").notNull(), // JSON stringified job data
+  status: varchar("status").default("pending"), // pending, active, completed, failed, delayed
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
 });
 
 // Chat sessions for Q&A
@@ -107,6 +130,13 @@ export const documentsRelations = relations(documents, ({ one }) => ({
   user: one(users, {
     fields: [documents.userId],
     references: [users.id],
+  }),
+}));
+
+export const queueJobsRelations = relations(queueJobs, ({ one }) => ({
+  document: one(documents, {
+    fields: [queueJobs.documentId],
+    references: [documents.id],
   }),
 }));
 
