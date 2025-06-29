@@ -100,8 +100,41 @@ DocuAI is a full-stack web application designed for real estate professionals to
 
 ## Changelog
 
-- June 29, 2025. Initial setup
+- June 29, 2025. Initial setup with landing page and authentication
+- June 29, 2025. Added comprehensive sidebar navigation and document management system
+  - Created left sidebar navigation with Create, Home, Documents, Dashboard, Q&A, and Manage sections
+  - Implemented database schema for transactions, documents, chat sessions, and messages
+  - Added file upload functionality with document categorization
+  - Built Q&A chat interface with AI-powered real estate document analysis
+  - Created analytics dashboard with portfolio insights and risk alerts
+  - Implemented transaction and document management features
+
+## Recent Architectural Changes
+
+### Database Schema Expansion
+- Added `transactions` table for real estate transaction management
+- Added `documents` table for file uploads with metadata and analysis results
+- Added `chatSessions` and `chatMessages` tables for Q&A functionality
+- Implemented proper relationships between all entities
+
+### Navigation System
+- Built collapsible sidebar navigation matching the provided design reference
+- Implemented 6 main sections: Create, Home, Documents, Dashboard, Q&A, Manage
+- Added proper routing and page structure for each section
+
+### Document Management
+- File upload with drag-and-drop support
+- Document categorization (HOA, Contract, Inspection, Financial, Legal)
+- Analysis status tracking and metadata storage
+- Transaction-based document organization
+
+### AI Integration Preparation
+- Chat interface ready for OpenAI integration
+- Structured response system for real estate document analysis
+- Risk assessment and compliance monitoring framework
+- Document categorization and intelligent Q&A responses
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Real estate expertise: Focus on HOA documents, contract analysis, risk assessment, and compliance monitoring.
