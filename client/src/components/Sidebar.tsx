@@ -78,6 +78,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   return (
     <div className={cn(
       "h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300",
+      "hidden md:flex", // Hide sidebar on mobile, show on medium screens and up
       collapsed ? "w-20" : "w-64"
     )}>
       {/* Header with toggle */}

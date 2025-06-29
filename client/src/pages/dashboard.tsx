@@ -13,8 +13,11 @@ import {
   BarChart3,
   Activity,
   Calendar,
-  Clock
+  Clock,
+  Plus,
+  MessageCircleQuestion
 } from "lucide-react";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -118,8 +121,19 @@ export default function Dashboard() {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
       
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <div className="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64'}`}>
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <FileText className="h-6 w-6 text-blue-600" />
+            <span className="font-bold text-gray-900">DocuAI</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-600">Dashboard</span>
+          </div>
+        </div>
+        
+        <div className="p-4 md:p-6 space-y-6 overflow-y-auto h-full pb-20 md:pb-6">
           {/* Header */}
           <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
@@ -369,6 +383,32 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </div>
+        
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+          <div className="flex justify-around items-center">
+            <Link href="/" className="flex flex-col items-center py-1 px-2">
+              <Home className="h-5 w-5 text-gray-600" />
+              <span className="text-xs text-gray-600 mt-1">Home</span>
+            </Link>
+            <Link href="/create" className="flex flex-col items-center py-1 px-2">
+              <Plus className="h-5 w-5 text-blue-600" />
+              <span className="text-xs text-blue-600 mt-1">Create</span>
+            </Link>
+            <Link href="/dashboard" className="flex flex-col items-center py-1 px-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <span className="text-xs text-blue-600 mt-1 font-medium">Dashboard</span>
+            </Link>
+            <Link href="/qa" className="flex flex-col items-center py-1 px-2">
+              <MessageCircleQuestion className="h-5 w-5 text-gray-600" />
+              <span className="text-xs text-gray-600 mt-1">Q&A</span>
+            </Link>
+            <Link href="/documents" className="flex flex-col items-center py-1 px-2">
+              <FileText className="h-5 w-5 text-gray-600" />
+              <span className="text-xs text-gray-600 mt-1">Docs</span>
+            </Link>
           </div>
         </div>
       </div>
