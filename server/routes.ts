@@ -2,15 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertTransactionSchema, insertDocumentSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
+import { z } from "zod";
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import { queueDocumentAnalysis, getJobStatus, queuePDFGeneration } from './queue';
-import { insertTransactionSchema, insertDocumentSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
-import { z } from "zod";
-import multer from "multer";
-import path from "path";
-import fs from "fs/promises";
 
 // Configure multer for file uploads
 const upload = multer({
