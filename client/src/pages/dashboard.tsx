@@ -1,279 +1,377 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  FileText, 
   TrendingUp, 
+  FileText, 
   AlertTriangle, 
-  CheckCircle,
-  Clock,
-  DollarSign,
+  DollarSign, 
+  Shield, 
   Home,
-  Calendar
+  BarChart3,
+  Activity,
+  Calendar,
+  Clock
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
+
+interface AnalyticsData {
+  overview: {
+    transactionCount: number;
+    documentCount: number;
+    avgRiskScore: number;
+    highRiskDocs: number;
+    activeTransactions: number;
+  };
+  documentTypes: Record<string, number>;
+  commonRisks: Array<{ risk: string; count: number }>;
+  recentDocs: Array<{
+    id: number;
+    fileName: string;
+    category: string;
+    riskScore?: number;
+    createdAt: string;
+  }>;
+  monthlyUploads: Array<{
+    month: string;
+    uploads: number;
+  }>;
+}
 
 export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const { data: transactions = [] } = useQuery({
-    queryKey: ["/api/transactions"],
+  // Fetch analytics data from backend
+  const { data: analytics, isLoading } = useQuery<AnalyticsData>({
+    queryKey: ["/api/analytics/dashboard"],
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+    },
   });
 
-  // Calculate analytics data
-  const totalTransactions = (transactions as any[]).length;
-  const activeTransactions = (transactions as any[]).filter(t => t.status === 'active').length;
-  const totalDocuments = (transactions as any[]).reduce((acc, t) => acc + (t.documents?.length || 0), 0);
-  
-  // Mock data for analytics - would come from actual analysis
-  const riskAlerts = 3;
-  const analysisComplete = Math.floor(totalDocuments * 0.7);
-  const pendingReview = totalDocuments - analysisComplete;
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar 
+          collapsed={sidebarCollapsed} 
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        />
+        <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading analytics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform document types data for pie chart
+  const documentTypesData = analytics ? Object.entries(analytics.documentTypes).map(([type, count]) => ({
+    name: type.charAt(0).toUpperCase() + type.slice(1),
+    value: count,
+    color: {
+      hoa: '#3B82F6',
+      contract: '#10B981',
+      inspection: '#F59E0B',
+      financial: '#8B5CF6',
+      legal: '#EF4444',
+      other: '#6B7280'
+    }[type] || '#6B7280'
+  })) : [];
+
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#6B7280'];
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar 
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        collapsed={sidebarCollapsed} 
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
-
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Analytics Dashboard</h1>
-            <p className="text-lg text-slate-600 mt-2">
-              Comprehensive insights across your real estate portfolio
-            </p>
+      
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+        <div className="p-4 md:p-6 space-y-6 overflow-y-auto h-full">
+          {/* Header */}
+          <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
+            <p className="text-sm md:text-base text-gray-600">Monitor your real estate document portfolio and transaction insights</p>
           </div>
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
+          {/* Key Metrics - Mobile Responsive Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-6">
+            <Card className="bg-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-                <Home className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Transactions</CardTitle>
+                <Home className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalTransactions}</div>
-                <p className="text-xs text-muted-foreground">
-                  {activeTransactions} active
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Documents Analyzed</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analysisComplete}</div>
-                <p className="text-xs text-muted-foreground">
-                  {pendingReview} pending review
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Risk Alerts</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">{riskAlerts}</div>
-                <p className="text-xs text-muted-foreground">
-                  Requires attention
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Analysis Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {totalDocuments > 0 ? Math.round((analysisComplete / totalDocuments) * 100) : 0}%
+                <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  {analytics?.overview.transactionCount || 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Completion rate
+                <p className="text-xs text-green-600 flex items-center mt-1">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  {analytics?.overview.activeTransactions || 0} active
                 </p>
               </CardContent>
             </Card>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Recent Risk Alerts */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
-                  Risk Alerts
-                </CardTitle>
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Documents</CardTitle>
+                <FileText className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3 p-3 bg-red-50 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-red-900">HOA Special Assessment</h4>
-                      <p className="text-sm text-red-700">123 Main St - Upcoming $5,000 special assessment for roof repairs</p>
-                      <p className="text-xs text-red-600 mt-1">2 days ago</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-yellow-900">Contract Deadline</h4>
-                      <p className="text-sm text-yellow-700">456 Oak Ave - Inspection contingency expires in 3 days</p>
-                      <p className="text-xs text-yellow-600 mt-1">1 day ago</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3 p-3 bg-orange-50 rounded-lg">
-                    <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-orange-900">Low HOA Reserves</h4>
-                      <p className="text-sm text-orange-700">789 Pine St - HOA reserve fund below recommended 25%</p>
-                      <p className="text-xs text-orange-600 mt-1">3 days ago</p>
-                    </div>
-                  </div>
+                <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  {analytics?.overview.documentCount || 0}
                 </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  reviewed
+                </p>
               </CardContent>
             </Card>
 
-            {/* Analysis Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
-                  Analysis Summary
-                </CardTitle>
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Avg Risk</CardTitle>
+                <Shield className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-green-900">Contract Reviews</h4>
-                      <p className="text-sm text-green-700">All purchase agreements analyzed</p>
-                    </div>
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  </div>
-                  
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-blue-900">HOA Documents</h4>
-                      <p className="text-sm text-blue-700">Financial statements reviewed</p>
-                    </div>
-                    <Clock className="h-5 w-5 text-blue-500" />
-                  </div>
-                  
-                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium text-purple-900">Title Reports</h4>
-                      <p className="text-sm text-purple-700">Clean title for all properties</p>
-                    </div>
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  </div>
+                <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  {analytics?.overview.avgRiskScore || 0}/100
                 </div>
+                <p className="text-xs text-orange-600 mt-1">
+                  {(analytics?.overview.avgRiskScore || 0) > 70 ? 'High' : 
+                   (analytics?.overview.avgRiskScore || 0) > 40 ? 'Medium' : 'Low'} risk
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">High Risk</CardTitle>
+                <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-red-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  {analytics?.overview.highRiskDocs || 0}
+                </div>
+                <p className="text-xs text-red-600 mt-1">
+                  need attention
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white col-span-2 lg:col-span-1">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium text-gray-600">This Month</CardTitle>
+                <Calendar className="h-3 w-3 md:h-4 md:w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg md:text-2xl font-bold text-gray-900">
+                  {analytics?.monthlyUploads.slice(-1)[0]?.uploads || 0}
+                </div>
+                <p className="text-xs text-purple-600 mt-1">
+                  uploads
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Portfolio Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2">
+          {/* Charts Section - Mobile Responsive */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Upload Trend Chart */}
+            <Card className="bg-white">
               <CardHeader>
-                <CardTitle>Transaction Timeline</CardTitle>
+                <CardTitle className="text-base md:text-lg font-semibold text-gray-900">Upload Trend</CardTitle>
+                <CardDescription className="text-sm">Document uploads over time</CardDescription>
               </CardHeader>
               <CardContent>
-                {(transactions as any[]).length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No transactions to display</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {(transactions as any[]).slice(0, 5).map((transaction: any) => (
-                      <div key={transaction.id} className="flex items-center space-x-4 p-4 border border-slate-200 rounded-lg">
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Home className="h-6 w-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-slate-900">{transaction.name}</h4>
-                          <p className="text-sm text-slate-500">{transaction.transactionType} • {transaction.status}</p>
-                          {transaction.address && (
-                            <p className="text-xs text-slate-400">{transaction.address}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-slate-900">
-                            {new Date(transaction.createdAt).toLocaleDateString()}
-                          </p>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            transaction.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {transaction.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="h-48 md:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={analytics?.monthlyUploads || []}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12 }}
+                        stroke="#666"
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12 }}
+                        stroke="#666"
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="uploads" 
+                        stroke="#3B82F6" 
+                        strokeWidth={2}
+                        dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
-            <Card>
+            {/* Document Types Pie Chart */}
+            <Card className="bg-white">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle className="text-base md:text-lg font-semibold text-gray-900">Document Types</CardTitle>
+                <CardDescription className="text-sm">Distribution by category</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-48 md:h-64">
+                  {documentTypesData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={documentTypesData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={40}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {documentTypesData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            fontSize: '12px'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                      No documents uploaded yet
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Risk Analysis and Recent Activity */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Common Risks */}
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-base md:text-lg font-semibold text-gray-900">Common Risks Found</CardTitle>
+                <CardDescription className="text-sm">Most frequent compliance issues</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="p-3 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                        <FileText className="h-4 w-4 text-white" />
+                  {(analytics?.commonRisks || []).map((item, index) => (
+                    <div key={item.risk} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <Badge 
+                          variant={item.count > 5 ? 'destructive' : 
+                                  item.count > 2 ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {item.count > 5 ? 'High' : item.count > 2 ? 'Med' : 'Low'}
+                        </Badge>
+                        <span className="text-xs md:text-sm text-gray-700 font-medium">{item.risk}</span>
                       </div>
-                      <div>
-                        <h4 className="font-medium text-emerald-900">Upload Documents</h4>
-                        <p className="text-sm text-emerald-700">Add new files for analysis</p>
+                      <span className="text-sm font-bold text-gray-900">{item.count}</span>
+                    </div>
+                  ))}
+                  {(analytics?.commonRisks || []).length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">No risk patterns detected yet</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="bg-white">
+              <CardHeader>
+                <CardTitle className="text-base md:text-lg font-semibold text-gray-900">Recent Documents</CardTitle>
+                <CardDescription className="text-sm">Latest uploads and analysis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(analytics?.recentDocs || []).map((doc) => (
+                    <div key={doc.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs md:text-sm font-medium text-gray-900 truncate">
+                          {doc.fileName}
+                        </div>
+                        <div className="text-xs text-gray-500 flex items-center space-x-2">
+                          <span className="capitalize">{doc.category}</span>
+                          {doc.riskScore && (
+                            <>
+                              <span>•</span>
+                              <span className={`font-medium ${
+                                doc.riskScore > 70 ? 'text-red-600' : 
+                                doc.riskScore > 40 ? 'text-orange-600' : 'text-green-600'
+                              }`}>
+                                Risk: {doc.riskScore}/100
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-400 flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(doc.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                        <TrendingUp className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-blue-900">View Reports</h4>
-                        <p className="text-sm text-blue-700">Generate detailed analysis</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-3 bg-purple-50 rounded-lg cursor-pointer hover:bg-purple-100 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                        <AlertTriangle className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-purple-900">Review Risks</h4>
-                        <p className="text-sm text-purple-700">Address identified issues</p>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
+                  {(analytics?.recentDocs || []).length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">No documents uploaded yet</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

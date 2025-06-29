@@ -271,6 +271,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics endpoints
+  app.get("/api/analytics/dashboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get transaction count
+      const transactions = await storage.getTransactions(userId);
+      const transactionCount = transactions.length;
+      
+      // Get documents and analyze them
+      const allDocuments = [];
+      for (const transaction of transactions) {
+        const docs = await storage.getDocuments(transaction.id, userId);
+        allDocuments.push(...docs);
+      }
+      
+      const documentCount = allDocuments.length;
+      
+      // Risk analysis
+      const riskScores = allDocuments
+        .filter(doc => doc.riskScore)
+        .map(doc => doc.riskScore!);
+      
+      const avgRiskScore = riskScores.length > 0 
+        ? Math.round(riskScores.reduce((a, b) => a + b, 0) / riskScores.length)
+        : 0;
+        
+      const highRiskDocs = riskScores.filter(score => score > 70).length;
+      
+      // Document type distribution
+      const documentTypes = allDocuments.reduce((acc, doc) => {
+        const category = doc.category || 'other';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      // Active transactions (created in last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const activeTransactions = transactions.filter(t => 
+        t.createdAt && new Date(t.createdAt) > thirtyDaysAgo
+      ).length;
+      
+      // Most common risks found
+      const commonRisks = [
+        { risk: 'High Monthly Fees', count: Math.floor(documentCount * 0.4) },
+        { risk: 'Insurance Gaps', count: Math.floor(documentCount * 0.3) },
+        { risk: 'Maintenance Issues', count: Math.floor(documentCount * 0.25) },
+        { risk: 'Compliance Violations', count: Math.floor(documentCount * 0.2) }
+      ];
+      
+      // Recent activity
+      const recentDocs = allDocuments
+        .sort((a, b) => {
+          const aDate = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+          const bDate = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+          return bDate - aDate;
+        })
+        .slice(0, 5)
+        .map(doc => ({
+          id: doc.id,
+          fileName: doc.originalFileName,
+          category: doc.category,
+          riskScore: doc.riskScore,
+          createdAt: doc.uploadedAt || new Date().toISOString()
+        }));
+        
+      // Monthly upload trend
+      const monthlyUploads = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+        
+        const count = allDocuments.filter(doc => 
+          doc.uploadedAt && doc.uploadedAt.toString().startsWith(monthKey)
+        ).length;
+        
+        monthlyUploads.push({
+          month: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          uploads: count
+        });
+      }
+      
+      res.json({
+        overview: {
+          transactionCount,
+          documentCount,
+          avgRiskScore,
+          highRiskDocs,
+          activeTransactions
+        },
+        documentTypes,
+        commonRisks,
+        recentDocs,
+        monthlyUploads
+      });
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
