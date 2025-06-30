@@ -13,6 +13,7 @@ import Documents from "@/pages/documents";
 import Dashboard from "@/pages/dashboard";
 import PaymentSimple from "@/pages/payment-simple";
 import Manage from "@/pages/manage";
+import TestApi from "@/pages/test-api";
 
 import NotFound from "@/pages/not-found";
 
@@ -47,6 +48,7 @@ function Router() {
           <Route path="/documents" component={Documents} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/manage" component={Manage} />
+          <Route path="/test-api" component={TestApi} />
         </>
       )}
       <Route component={NotFound} />
