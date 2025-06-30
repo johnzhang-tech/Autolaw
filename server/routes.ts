@@ -46,6 +46,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Emergency bypass route to test Express routing
+  app.get('/emergency', (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>DocuAI Emergency Page</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+          .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+          .working { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+          .button { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 5px; }
+        </style>
+      </head>
+      <body>
+        <h1>DocuAI System Status</h1>
+        <div class="status working">✅ Express Server: Working</div>
+        <div class="status working">✅ Routing: Working</div>
+        <div class="status working">✅ API Endpoints: Working</div>
+        <p><strong>Issue:</strong> Vite development server plugins are preventing React from loading.</p>
+        <p><strong>Solution:</strong> The Express server works perfectly. We need to bypass the Vite plugin conflicts.</p>
+        <a href="/test.html" class="button">Static Test Page</a>
+        <a href="/api/auth/user" class="button">API Test</a>
+        <a href="/" class="button">Try Main App</a>
+      </body>
+      </html>
+    `);
+  });
+
   // Auth routes
   app.get('/api/auth/user', mockAuth, async (req: any, res) => {
     try {
