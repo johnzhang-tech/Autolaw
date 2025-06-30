@@ -285,21 +285,22 @@ Mobile Upload Requirements: Drag-and-drop upload, network reliability with queue
 - **Trust Indicators**: Security badges, uptime guarantees, and professional testimonials section
 - **Mobile Optimization**: Stack layouts on mobile, touch-friendly toggles, and swipe-friendly interfaces
 
-## Current Features - S3-Compatible Document Storage System
+## Current Features - HomeDocsInterfaces Object Storage System
 
-### ✅ Enterprise-Grade File Storage Implementation
-- **S3-Compatible Storage**: Full AWS S3 and S3-compatible service support (MinIO, DigitalOcean Spaces)
+### ✅ Custom Object Storage Implementation
+- **HomeDocsInterfaces Storage**: Custom local object storage with transaction-based folder organization
+- **Transaction-Based Organization**: Files organized by transaction (e.g., HomeDocsInterfaces/Property_Name_123/)
 - **PostgreSQL Metadata**: Comprehensive document metadata storage with file tracking
-- **Secure Upload Pipeline**: File validation, virus scanning preparation, and integrity verification
-- **Presigned URL Downloads**: Secure, time-limited download URLs for file access
-- **Storage Status Monitoring**: Health checks and configuration validation endpoints
+- **Multiple File Upload**: Support for up to 10 files at once with real-time progress tracking
+- **Enhanced File Types**: PDF, DOC, DOCX, TXT, JPEG, PNG, GIF support
+- **Direct Download**: Secure file serving without external dependencies
 
 ### 🔧 Technical Implementation Details
-- **Database Schema**: Extended documents table with S3 fields (s3Key, s3Bucket, s3Region, s3Url, etag)
-- **File Validation**: Type checking, size limits (10MB), and MIME type validation
+- **Database Schema**: Extended documents table with filePath and fileHash fields for local storage
+- **File Validation**: Type checking, size limits (10MB), and MIME type validation  
 - **Upload Tracking**: Status monitoring (pending, uploading, completed, failed) with error handling
-- **Unique File Keys**: UUID-based S3 keys organized by user and date for efficient storage
-- **Multi-Environment**: Supports AWS S3, MinIO, DigitalOcean Spaces with endpoint configuration
+- **Folder Organization**: Transaction-based folders with sanitized names and unique timestamps
+- **Local Storage Service**: Custom service handling file operations and integrity verification
 
 ### 📁 Document Metadata Storage
 - **Document-Level Info**: doc_id, s3_key, filename, mime_type, uploaded_at, uploader_id
