@@ -119,26 +119,8 @@ export default function Payment() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Fetch payment history
-  const { data: paymentHistory, isLoading: isLoadingHistory } = useQuery({
+  const { data: paymentHistory, isLoading: isLoadingHistory } = useQuery<PaymentTransaction[]>({
     queryKey: ["/api/payments/history"],
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to load payment history",
-        variant: "destructive",
-      });
-    },
   });
 
   // Create payment intent mutation
