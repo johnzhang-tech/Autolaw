@@ -319,6 +319,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // HomeDocsInterfaces browser endpoint
+  app.get('/api/storage/browse', mockAuth, async (req: any, res) => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      const baseDir = path.join(process.cwd(), 'uploads', 'HomeDocsInterfaces');
+      
+      if (!fs.existsSync(baseDir)) {
+        return res.json({ folders: [], files: [] });
+      }
+      
+      const folders = [];
+      const files = [];
+      
+      // Get transaction folders
+      const items = fs.readdirSync(baseDir);
+      
+      for (const item of items) {
+        const itemPath = path.join(baseDir, item);
+        const stat = fs.statSync(itemPath);
+        
+        if (stat.isDirectory()) {
+          // Get files in transaction folder
+          const transactionFiles = fs.readdirSync(itemPath);
+          const folderInfo = {
+            name: item,
+            path: `HomeDocsInterfaces/${item}`,
+            fileCount: transactionFiles.length,
+            totalSize: transactionFiles.reduce((total, file) => {
+              const filePath = path.join(itemPath, file);
+              return total + fs.statSync(filePath).size;
+            }, 0),
+            files: transactionFiles.map(file => {
+              const filePath = path.join(itemPath, file);
+              const fileStat = fs.statSync(filePath);
+              return {
+                name: file,
+                size: fileStat.size,
+                modified: fileStat.mtime,
+                path: `HomeDocsInterfaces/${item}/${file}`
+              };
+            })
+          };
+          folders.push(folderInfo);
+        }
+      }
+      
+      res.json({ folders, files, totalFolders: folders.length });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: 'Failed to browse HomeDocsInterfaces storage', 
+        error: error.message 
+      });
+    }
+  });
+
   // Auth user endpoint
   app.get('/api/auth/user', mockAuth, async (req: any, res) => {
     try {
