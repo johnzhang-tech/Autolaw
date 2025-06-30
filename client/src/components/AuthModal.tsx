@@ -66,7 +66,9 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       });
 
       if (response.ok) {
-        window.location.reload(); // Refresh to update auth state
+        // Use the Enter Demo functionality instead of reloading
+        localStorage.removeItem('docuai_logged_out');
+        window.location.href = '/';
       } else {
         const error = await response.json();
         toast({
