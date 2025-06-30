@@ -39,11 +39,13 @@ export default function Create() {
 
   const createTransactionMutation = useMutation({
     mutationFn: async (data: TransactionForm) => {
-      return await apiRequest("POST", "/api/transactions", data);
+      const response = await apiRequest("POST", "/api/transactions", data);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       setIsTransactionDialogOpen(false);
+      form.reset();
       toast({
         title: "Success",
         description: "Transaction created successfully",
@@ -51,7 +53,26 @@ export default function Create() {
     },
     onError: (error: any) => {
       console.error('Transaction creation error:', error);
-      const errorMessage = error?.message || "Failed to create transaction";
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        cause: error?.cause
+      });
+      
+      let errorMessage = "Failed to create transaction";
+      if (error?.message) {
+        // Extract meaningful error from the response
+        if (error.message.includes('400:')) {
+          errorMessage = "Please check all required fields are filled correctly";
+        } else if (error.message.includes('401:')) {
+          errorMessage = "You need to be logged in to create transactions";
+        } else if (error.message.includes('500:')) {
+          errorMessage = "Server error - please try again";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Error",
         description: errorMessage,
