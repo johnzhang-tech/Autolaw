@@ -23,6 +23,7 @@ function Router() {
     <Switch>
       {/* Public routes */}
       <Route path="/pricing" component={Pricing} />
+      <Route path="/payment" component={PaymentSimple} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
@@ -34,7 +35,6 @@ function Router() {
           <Route path="/qa" component={QA} />
           <Route path="/documents" component={Documents} />
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/payment" component={PaymentSimple} />
           <Route path="/manage" component={Manage} />
         </>
       )}
