@@ -27,11 +27,26 @@ export function useAuth() {
       window.location.href = '/api/logout';
     },
     login: async () => {
-      localStorage.removeItem('docuai_logged_out');
-      setIsLoggedOut(false);
-      // Refetch user data instead of reloading the page
-      await refetch();
-      queryClient.invalidateQueries();
+      try {
+        // Clear localStorage flag
+        localStorage.removeItem('docuai_logged_out');
+        setIsLoggedOut(false);
+        
+        // Call the login endpoint to clear session logout flag
+        await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        // Refetch user data to update authentication state
+        await refetch();
+        queryClient.invalidateQueries();
+      } catch (error) {
+        console.error('Login failed:', error);
+        // Reset logout state if login fails
+        localStorage.setItem('docuai_logged_out', 'true');
+        setIsLoggedOut(true);
+      }
     },
     refreshAuth: async () => {
       await refetch();
