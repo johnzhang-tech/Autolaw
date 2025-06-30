@@ -7,6 +7,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import { generateDocumentResponse, generateChatTitle } from './openai';
+import { s3Service } from './s3Service';
+import S3Service from './s3Service';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
@@ -110,9 +112,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate file
       try {
-        s3Service.validateFile(req.file.buffer, req.file.mimetype);
-      } catch (validationError) {
-        return res.status(400).json({ message: validationError.message });
+        s3Service.constructor.validateFile(req.file.buffer, req.file.mimetype);
+      } catch (validationError: unknown) {
+        const errorMessage = validationError instanceof Error ? validationError.message : 'File validation failed';
+        return res.status(400).json({ message: errorMessage });
       }
 
       // Generate S3 key

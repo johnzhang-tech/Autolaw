@@ -133,9 +133,10 @@ class S3Service {
         etag: result.ETag?.replace(/"/g, '') || '',
         fileSize: buffer.length,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('S3 upload error:', error);
-      throw new Error(`Failed to upload file to S3: ${error.message}`);
+      throw new Error(`Failed to upload file to S3: ${errorMessage}`);
     }
   }
 
@@ -150,9 +151,10 @@ class S3Service {
       });
 
       return await getSignedUrl(this.client, command, { expiresIn });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error generating download URL:', error);
-      throw new Error(`Failed to generate download URL: ${error.message}`);
+      throw new Error(`Failed to generate download URL: ${errorMessage}`);
     }
   }
 
@@ -167,9 +169,10 @@ class S3Service {
       });
 
       await this.client.send(command);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('S3 delete error:', error);
-      throw new Error(`Failed to delete file from S3: ${error.message}`);
+      throw new Error(`Failed to delete file from S3: ${errorMessage}`);
     }
   }
 
@@ -227,9 +230,9 @@ class S3Service {
       
       await this.client.send(command);
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       // If error is NoSuchKey, connection is working
-      if (error.name === 'NoSuchKey') {
+      if (error instanceof Error && error.name === 'NoSuchKey') {
         return true;
       }
       console.error('S3 connection test failed:', error);
