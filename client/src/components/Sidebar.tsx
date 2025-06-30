@@ -28,13 +28,11 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/logout", { method: "POST" });
-      // Force page reload to clear auth state and redirect to landing
-      window.location.reload();
+      // Clear auth and redirect to landing
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: redirect to logout endpoint
-      window.location.href = "/api/logout";
+      window.location.href = "/";
     }
   };
 

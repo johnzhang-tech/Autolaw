@@ -51,6 +51,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logout endpoint
+  app.get('/api/logout', (req: any, res) => {
+    res.redirect('/');
+  });
+
+  app.post('/api/logout', (req: any, res) => {
+    res.json({ success: true, message: "Logged out successfully" });
+  });
+
   // Configure multer for file uploads
   const upload = multer({
     dest: 'uploads/temp/',
