@@ -14,6 +14,7 @@ import { Upload, FileText, Plus, Folder, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
   name: z.string().min(1, "Transaction name is required"),
@@ -38,11 +39,7 @@ export default function Create() {
 
   const createTransactionMutation = useMutation({
     mutationFn: async (data: TransactionForm) => {
-      return await apiRequest("/api/transactions", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", "/api/transactions", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
@@ -52,10 +49,12 @@ export default function Create() {
         description: "Transaction created successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Transaction creation error:', error);
+      const errorMessage = error?.message || "Failed to create transaction";
       toast({
         title: "Error",
-        description: "Failed to create transaction",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -69,10 +68,17 @@ export default function Create() {
         formData.append("file", file);
         formData.append("category", "general");
         
-        const result = await apiRequest(`/api/transactions/${transactionId}/documents`, {
+        const response = await fetch(`/api/transactions/${transactionId}/documents`, {
           method: "POST",
           body: formData,
+          credentials: "include",
         });
+        
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
         results.push(result);
       }
       return results;
@@ -208,7 +214,13 @@ export default function Create() {
                           
                           <div>
                             <Label htmlFor="transactionType">Transaction Type</Label>
-                            <Select onValueChange={(value) => form.setValue("transactionType", value)}>
+                            <Select 
+                              value={form.watch("transactionType")} 
+                              onValueChange={(value) => {
+                                form.setValue("transactionType", value);
+                                form.clearErrors("transactionType");
+                              }}
+                            >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>
