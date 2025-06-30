@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  CreditCard,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -66,6 +67,12 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       label: "Q&A",
       href: "/qa",
       description: "Ask questions",
+    },
+    {
+      icon: CreditCard,
+      label: "Payment",
+      href: "/payment",
+      description: "Billing & subscriptions",
     },
     {
       icon: Settings,

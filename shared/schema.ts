@@ -107,6 +107,22 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Payment transactions table
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: varchar("currency", { length: 3 }).notNull().default("usd"),
+  status: varchar("status", { length: 20 }).notNull(), // 'pending', 'succeeded', 'failed', 'canceled'
+  tier: varchar("tier", { length: 50 }).notNull(), // 'reporting', 'reporting_qa', 'advanced'
+  tierName: varchar("tier_name", { length: 100 }).notNull(),
+  paymentMethod: varchar("payment_method", { length: 50 }), // 'card', 'bank_transfer', etc.
+  billingAddress: jsonb("billing_address"), // Store billing address as JSON
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),

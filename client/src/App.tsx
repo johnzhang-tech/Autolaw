@@ -11,6 +11,7 @@ import Upload from "@/pages/upload";
 import QA from "@/pages/qa";
 import Documents from "@/pages/documents";
 import Dashboard from "@/pages/dashboard";
+import Payment from "@/pages/payment";
 import Manage from "@/pages/manage";
 import Pricing from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
@@ -33,6 +34,7 @@ function Router() {
           <Route path="/qa" component={QA} />
           <Route path="/documents" component={Documents} />
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/payment" component={Payment} />
           <Route path="/manage" component={Manage} />
         </>
       )}
