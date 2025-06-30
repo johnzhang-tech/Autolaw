@@ -13,15 +13,8 @@ import { queueDocumentAnalysis } from './queue';
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
   const mockAuth = (req: any, res: any, next: any) => {
-    console.log('=== MOCK AUTH DEBUG ===');
-    console.log('Session exists:', !!req.session);
-    console.log('Session loggedOut:', req.session?.loggedOut);
-    console.log('Request URL:', req.url);
-    console.log('Request method:', req.method);
-    
     // Check if user has been logged out
     if (req.session && req.session.loggedOut) {
-      console.log('Rejecting request: User logged out');
       return res.status(401).json({ message: "Unauthorized" });
     }
     
@@ -33,7 +26,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         last_name: "User"
       }
     };
-    console.log('Mock auth successful, proceeding to next middleware');
     next();
   };
 

@@ -101,17 +101,18 @@
     
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- PWA Service Worker Registration - Temporarily Disabled -->
+    <!-- PWA Service Worker Registration -->
     <script>
-      // Unregister existing service workers to fix JavaScript execution issues
+      // Register Service Worker for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-              registration.unregister();
-              console.log('Unregistered service worker:', registration);
-            }
-          });
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
         });
       }
       
