@@ -97,7 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const transactionFolder = `${transaction.name.replace(/[^a-zA-Z0-9-]/g, '_')}_${transaction.id}`;
           const s3Key = `HomeDocsInterfaces/${transactionFolder}/${Date.now()}_${file.originalname}`;
           
-          // Create initial document record
+          // Create initial document record for HomeDocsInterfaces storage
           const document = await storage.createDocument({
             transactionId: parseInt(transactionId),
             userId,
@@ -108,9 +108,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             category: category || 'hoa',
             uploaderId: userId,
             uploadStatus: 'uploading',
-            s3Key,
-            s3Bucket: process.env.S3_BUCKET || 'homedocsinterfaces',
-            s3Region: process.env.AWS_REGION || 'us-east-1',
             analysisStatus: 'pending'
           });
 
@@ -266,26 +263,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Document not found' });
       }
 
-      if (document.uploadStatus !== 'completed' || !document.s3Key) {
-        return res.status(400).json({ message: 'Document not available for download' });
+      if (document.uploadStatus !== 'completed' || !document.filePath) {
+        return res.status(400).json({ message: 'Document not available for download from HomeDocsInterfaces' });
       }
 
       try {
-        const downloadUrl = await s3Service.generateDownloadUrl(document.s3Key, 3600);
-        
-        res.json({
-          success: true,
-          downloadUrl,
-          filename: document.originalFileName,
-          fileSize: document.fileSize,
-          mimeType: document.mimeType,
-          expiresIn: 3600
-        });
-      } catch (s3Error: unknown) {
-        const errorMessage = s3Error instanceof Error ? s3Error.message : 'S3 download error';
-        console.error('S3 download URL generation failed:', s3Error);
+        // For HomeDocsInterfaces local storage, serve file directly
+        if (document.filePath) {
+          const fileBuffer = await localStorageService.getFile(document.filePath);
+          
+          res.setHeader('Content-Type', document.mimeType);
+          res.setHeader('Content-Disposition', `attachment; filename="${document.originalFileName}"`);
+          res.setHeader('Content-Length', document.fileSize.toString());
+          
+          res.send(fileBuffer);
+        } else {
+          res.status(404).json({ message: 'File not found in HomeDocsInterfaces storage' });
+        }
+      } catch (downloadError: unknown) {
+        const errorMessage = downloadError instanceof Error ? downloadError.message : 'Download error';
+        console.error('HomeDocsInterfaces download failed:', downloadError);
         res.status(500).json({ 
-          message: 'Failed to generate download URL', 
+          message: 'Failed to download from HomeDocsInterfaces', 
           error: errorMessage 
         });
       }
@@ -295,22 +294,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // S3 service status endpoint
+  // HomeDocsInterfaces storage status endpoint
   app.get('/api/storage/status', mockAuth, async (req: any, res) => {
     try {
-      const isConfigured = s3Service.isConfigured();
-      const isConnected = isConfigured ? await s3Service.testConnection() : false;
+      const isConfigured = localStorageService.isConfigured();
+      const stats = localStorageService.getStorageStats();
       
       res.json({
+        storageType: 'HomeDocsInterfaces',
         configured: isConfigured,
-        connected: isConnected,
-        bucket: process.env.S3_BUCKET || 'homedocsinterfaces',
-        region: process.env.AWS_REGION || 'us-east-1',
-        endpoint: process.env.S3_ENDPOINT || 'default'
+        connected: isConfigured,
+        stats: {
+          totalFiles: stats.totalFiles,
+          totalSize: `${(stats.totalSize / 1024 / 1024).toFixed(2)} MB`,
+          transactions: stats.transactions
+        },
+        location: 'uploads/HomeDocsInterfaces'
       });
     } catch (error: any) {
       res.status(500).json({ 
-        message: 'Storage status check failed', 
+        message: 'HomeDocsInterfaces storage status check failed', 
         error: error.message 
       });
     }

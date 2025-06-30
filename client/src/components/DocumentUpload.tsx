@@ -298,11 +298,28 @@ export function DocumentList({ transactionId }: DocumentListProps) {
 
   const downloadMutation = useMutation({
     mutationFn: async (documentId: number) => {
-      return await apiRequest('GET', `/api/documents/${documentId}/download`);
+      // For HomeDocsInterfaces, download directly as blob
+      const response = await fetch(`/api/documents/${documentId}/download`);
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('content-disposition');
+      const filename = contentDisposition?.match(/filename="(.+)"/)?.[1] || 'document';
+      
+      return { blob, filename };
     },
     onSuccess: (data) => {
-      // Open download URL in new tab
-      window.open(data.downloadUrl, '_blank');
+      // Create download link for HomeDocsInterfaces file
+      const url = window.URL.createObjectURL(data.blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     },
     onError: (error: Error) => {
       toast({

@@ -74,7 +74,8 @@ class LocalStorageService {
         hash
       };
     } catch (error) {
-      throw new Error(`Failed to save file locally: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to save file locally: ${message}`);
     }
   }
 
