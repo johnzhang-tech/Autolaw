@@ -278,3 +278,44 @@ Mobile Upload Requirements: Drag-and-drop upload, network reliability with queue
 - **Clear CTAs**: Distinct buttons for each plan (Free Trial, Contact Sales, Get Started)
 - **Trust Indicators**: Security badges, uptime guarantees, and professional testimonials section
 - **Mobile Optimization**: Stack layouts on mobile, touch-friendly toggles, and swipe-friendly interfaces
+
+## Current Features - S3-Compatible Document Storage System
+
+### ✅ Enterprise-Grade File Storage Implementation
+- **S3-Compatible Storage**: Full AWS S3 and S3-compatible service support (MinIO, DigitalOcean Spaces)
+- **PostgreSQL Metadata**: Comprehensive document metadata storage with file tracking
+- **Secure Upload Pipeline**: File validation, virus scanning preparation, and integrity verification
+- **Presigned URL Downloads**: Secure, time-limited download URLs for file access
+- **Storage Status Monitoring**: Health checks and configuration validation endpoints
+
+### 🔧 Technical Implementation Details
+- **Database Schema**: Extended documents table with S3 fields (s3Key, s3Bucket, s3Region, s3Url, etag)
+- **File Validation**: Type checking, size limits (10MB), and MIME type validation
+- **Upload Tracking**: Status monitoring (pending, uploading, completed, failed) with error handling
+- **Unique File Keys**: UUID-based S3 keys organized by user and date for efficient storage
+- **Multi-Environment**: Supports AWS S3, MinIO, DigitalOcean Spaces with endpoint configuration
+
+### 📁 Document Metadata Storage
+- **Document-Level Info**: doc_id, s3_key, filename, mime_type, uploaded_at, uploader_id
+- **File Integrity**: ETag verification, file size validation, and upload status tracking
+- **Analysis Integration**: Links to AI analysis results and risk assessment scores
+- **Audit Trail**: Complete upload history with retry counts and error logging
+
+### 🔐 Security & Access Control
+- **Presigned URLs**: Secure, temporary download links (1-hour expiration)
+- **Access Control**: User-based document access with authentication validation
+- **File Type Restrictions**: PDF, DOC, DOCX, TXT, images only - no executable files
+- **Size Limits**: 10MB maximum file size with configurable limits
+- **Storage Isolation**: User-specific S3 key prefixes for data separation
+
+### 🌐 S3-Compatible Services Support
+- **AWS S3**: Native support with IAM roles and bucket policies
+- **MinIO**: Self-hosted S3-compatible storage for on-premises deployment
+- **DigitalOcean Spaces**: Cost-effective S3-compatible cloud storage
+- **Configuration**: Environment variables for endpoint, credentials, and bucket settings
+
+### 📊 Storage Management APIs
+- **Upload Endpoint**: `/api/upload` - Multipart file upload with S3 storage
+- **Download Endpoint**: `/api/documents/:id/download` - Presigned URL generation
+- **Status Endpoint**: `/api/storage/status` - S3 connectivity and configuration check
+- **Document Listing**: Enhanced document metadata in existing transaction endpoints
