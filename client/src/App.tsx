@@ -23,7 +23,7 @@ function Router() {
     <Switch>
       {/* Public routes */}
       <Route path="/pricing" component={Pricing} />
-      <Route path="/payment" component={PaymentSimple} />
+      <Route path="/billing" component={PaymentSimple} />
       
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
