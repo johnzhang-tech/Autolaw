@@ -128,6 +128,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
   documents: many(documents),
   chatSessions: many(chatSessions),
+  paymentTransactions: many(paymentTransactions),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one, many }) => ({
@@ -172,6 +173,13 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   session: one(chatSessions, {
     fields: [chatMessages.sessionId],
     references: [chatSessions.id],
+  }),
+}));
+
+export const paymentTransactionsRelations = relations(paymentTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentTransactions.userId],
+    references: [users.id],
   }),
 }));
 
@@ -221,3 +229,6 @@ export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;

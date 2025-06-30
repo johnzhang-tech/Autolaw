@@ -4,6 +4,7 @@ import {
   documents,
   chatSessions,
   chatMessages,
+  paymentTransactions,
   type User,
   type UpsertUser,
   type Transaction,
@@ -14,6 +15,8 @@ import {
   type InsertChatSession,
   type ChatMessage,
   type InsertChatMessage,
+  type PaymentTransaction,
+  type InsertPaymentTransaction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -47,6 +50,12 @@ export interface IStorage {
   createChatSession(session: InsertChatSession): Promise<ChatSession>;
   getChatMessages(sessionId: number, userId: string): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+
+  // Payment operations
+  getPaymentTransactions(userId: string): Promise<PaymentTransaction[]>;
+  getPaymentTransaction(id: number, userId: string): Promise<PaymentTransaction | undefined>;
+  createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
+  updatePaymentTransaction(id: number, userId: string, updates: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -217,6 +226,40 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+
+  // Payment operations
+  async getPaymentTransactions(userId: string): Promise<PaymentTransaction[]> {
+    return await db
+      .select()
+      .from(paymentTransactions)
+      .where(eq(paymentTransactions.userId, userId))
+      .orderBy(desc(paymentTransactions.createdAt));
+  }
+
+  async getPaymentTransaction(id: number, userId: string): Promise<PaymentTransaction | undefined> {
+    const [transaction] = await db
+      .select()
+      .from(paymentTransactions)
+      .where(and(eq(paymentTransactions.id, id), eq(paymentTransactions.userId, userId)));
+    return transaction;
+  }
+
+  async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
+    const [newTransaction] = await db
+      .insert(paymentTransactions)
+      .values(transaction)
+      .returning();
+    return newTransaction;
+  }
+
+  async updatePaymentTransaction(id: number, userId: string, updates: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction> {
+    const [updatedTransaction] = await db
+      .update(paymentTransactions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(eq(paymentTransactions.id, id), eq(paymentTransactions.userId, userId)))
+      .returning();
+    return updatedTransaction;
   }
 }
 

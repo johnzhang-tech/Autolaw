@@ -375,6 +375,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment routes
+  app.get('/api/payments/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const paymentHistory = await storage.getPaymentTransactions(userId);
+      
+      // Format payment history for frontend
+      const formattedHistory = paymentHistory.map(payment => ({
+        id: payment.id.toString(),
+        amount: payment.amount / 100, // Convert from cents to dollars
+        currency: payment.currency,
+        status: payment.status,
+        tier: payment.tierName,
+        createdAt: payment.createdAt?.toISOString() || new Date().toISOString(),
+        paymentMethod: payment.paymentMethod || 'card'
+      }));
+      
+      res.json(formattedHistory);
+    } catch (error) {
+      console.error("Error fetching payment history:", error);
+      res.status(500).json({ message: "Failed to fetch payment history" });
+    }
+  });
+
+  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tierId, billingAddress } = req.body;
+      
+      // Define payment tiers
+      const paymentTiers = {
+        reporting: { price: 2000, name: "Reporting Only" }, // $20.00 in cents
+        reporting_qa: { price: 3000, name: "Reporting + Q&A" }, // $30.00 in cents
+        advanced: { price: 9900, name: "Advanced Features" } // $99.00 in cents
+      };
+      
+      const tier = paymentTiers[tierId as keyof typeof paymentTiers];
+      if (!tier) {
+        return res.status(400).json({ message: "Invalid payment tier" });
+      }
+
+      // For now, simulate successful payment processing
+      // This will be replaced with actual Stripe integration when keys are provided
+      const mockPaymentTransaction = await storage.createPaymentTransaction({
+        userId,
+        amount: tier.price,
+        currency: 'usd',
+        status: 'succeeded', // Mock success
+        tier: tierId,
+        tierName: tier.name,
+        paymentMethod: 'card',
+        billingAddress: billingAddress,
+        stripePaymentIntentId: `pi_mock_${Date.now()}`
+      });
+
+      res.json({
+        success: true,
+        transactionId: mockPaymentTransaction.id,
+        message: "Payment processed successfully (mock mode)"
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Failed to process payment" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
