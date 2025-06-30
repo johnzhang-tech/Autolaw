@@ -33,7 +33,7 @@ export default function Create() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: transactions = [] } = useQuery({
+  const { data: transactions = [] } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
 
@@ -152,8 +152,9 @@ export default function Create() {
   };
 
   const onSubmit = (data: TransactionForm) => {
+    console.log('Form data being submitted:', data);
+    console.log('Form errors:', form.formState.errors);
     createTransactionMutation.mutate(data);
-    form.reset();
   };
 
   return (
@@ -258,7 +259,7 @@ export default function Create() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {transactions.map((transaction: any) => (
+                      {transactions.map((transaction: Transaction) => (
                         <Button
                           key={transaction.id}
                           variant={selectedTransaction === transaction.id ? "default" : "outline"}
