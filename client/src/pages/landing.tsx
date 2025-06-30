@@ -93,7 +93,7 @@ export default function Landing() {
                 <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   How It Works
                 </a>
-                <a href="/pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                <a href="#pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   Pricing
                 </a>
               </div>
@@ -294,6 +294,86 @@ export default function Landing() {
               </Button>
             </div>
             <p className="text-blue-200 text-sm mt-6">No credit card required • Full access • Cancel anytime</p>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Simple, Transparent Pricing
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Choose the perfect plan for your real estate business. Start with a free trial and upgrade anytime.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {/* Starter Plan */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Starter</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">Free</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 text-sm text-slate-600">
+                    <li>• 25 documents/month</li>
+                    <li>• Basic document analysis</li>
+                    <li>• Risk assessment reports</li>
+                    <li>• Email support</li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Get Started Free
+                  </Button>
+                </div>
+              </div>
+
+              {/* Professional Plan */}
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-primary p-8 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Most Popular
+                  </span>
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Professional</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">$30</span>
+                    <span className="text-slate-600">/month</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 text-sm text-slate-600">
+                    <li>• 100 documents/month</li>
+                    <li>• AI-powered Q&A chat</li>
+                    <li>• Advanced analytics</li>
+                    <li>• Priority support</li>
+                  </ul>
+                  <Button className="w-full">
+                    Start Free Trial
+                  </Button>
+                </div>
+              </div>
+
+              {/* Enterprise Plan */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Enterprise</h3>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">$99</span>
+                    <span className="text-slate-600">/month</span>
+                  </div>
+                  <ul className="space-y-3 mb-8 text-sm text-slate-600">
+                    <li>• Unlimited documents</li>
+                    <li>• Custom AI models</li>
+                    <li>• API access</li>
+                    <li>• Phone support</li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Contact Sales
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
