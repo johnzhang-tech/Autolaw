@@ -101,7 +101,15 @@ export default function Landing() {
                   How It Works
                 </button>
                 <button 
-                  onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Pricing button clicked');
+                    const pricingElement = document.getElementById('pricing');
+                    console.log('Pricing element found:', pricingElement);
+                    if (pricingElement) {
+                      pricingElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Pricing
