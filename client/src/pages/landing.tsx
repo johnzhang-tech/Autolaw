@@ -88,12 +88,18 @@ export default function Landing() {
             {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a href="#features" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                <button 
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
+                >
                   Features
-                </a>
-                <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                </button>
+                <button 
+                  onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
+                >
                   How It Works
-                </a>
+                </button>
                 <button 
                   onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
@@ -125,12 +131,18 @@ export default function Landing() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                   <nav className="flex flex-col space-y-4 mt-8">
-                    <a href="#features" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
+                    <button 
+                      onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
+                    >
                       Features
-                    </a>
-                    <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
+                    </button>
+                    <button 
+                      onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
+                    >
                       How It Works
-                    </a>
+                    </button>
                     <button 
                       onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
                       className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
