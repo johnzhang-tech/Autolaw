@@ -103,7 +103,7 @@ const paymentTiers: PaymentTier[] = [
   }
 ];
 
-export default function Payment() {
+function Payment() {
   const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState<PaymentTier | null>(null);
   const [billingAddress, setBillingAddress] = useState<BillingAddress>({
@@ -508,3 +508,5 @@ export default function Payment() {
     </div>
   );
 }
+
+export default Payment;
