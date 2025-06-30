@@ -22,6 +22,7 @@ function Router() {
   return (
     <Switch>
       {/* Public routes */}
+      <Route path="/pricing" component={Pricing} />
       <Route path="/billing" component={PaymentSimple} />
       
       {isLoading || !isAuthenticated ? (
