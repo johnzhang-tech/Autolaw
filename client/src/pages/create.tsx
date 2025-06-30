@@ -177,13 +177,48 @@ export default function Create() {
     console.log('Form data:', data);
     console.log('Form errors:', form.formState.errors);
     console.log('Form valid:', form.formState.isValid);
-    console.log('All form values:', {
-      name: form.getValues('name'),
-      address: form.getValues('address'),
-      transactionType: form.getValues('transactionType')
-    });
     
-    createTransactionMutation.mutate(data);
+    // Bypass mutation and test direct API call
+    const testDirect = async () => {
+      try {
+        console.log('Testing direct fetch call...');
+        const response = await fetch('/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error:', errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Direct API success:', result);
+        
+        toast({
+          title: "Success",
+          description: "Transaction created successfully",
+        });
+        
+        setIsTransactionDialogOpen(false);
+        form.reset();
+        queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      } catch (error: any) {
+        console.error('Direct API error:', error);
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    };
+    
+    testDirect();
   };
 
   return (
@@ -216,6 +251,11 @@ export default function Create() {
                           New
                         </Button>
                       </DialogTrigger>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Create New Transaction</DialogTitle>
@@ -305,50 +345,7 @@ export default function Create() {
                         </Button>
                       ))}
                       
-                      {/* Temporary API test button */}
-                      <Button
-                        variant="secondary"
-                        className="w-full mt-4"
-                        onClick={async () => {
-                          try {
-                            console.log('Testing direct API call...');
-                            const response = await fetch('/api/transactions', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              credentials: 'include',
-                              body: JSON.stringify({
-                                name: 'Direct API Test',
-                                transactionType: 'purchase',
-                                address: '123 Test St'
-                              })
-                            });
-                            
-                            if (!response.ok) {
-                              throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-                            }
-                            
-                            const result = await response.json();
-                            console.log('API Success:', result);
-                            
-                            toast({
-                              title: "Success",
-                              description: "Direct API call worked!",
-                            });
-                            
-                            // Refresh transactions
-                            queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-                          } catch (error: any) {
-                            console.error('Direct API Error:', error);
-                            toast({
-                              title: "Direct API Error",
-                              description: error.message,
-                              variant: "destructive",
-                            });
-                          }
-                        }}
-                      >
-                        Test Direct API Call
-                      </Button>
+
                     </div>
                   )}
                 </CardContent>
