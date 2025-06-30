@@ -12,7 +12,8 @@ import {
   Shield, 
   Zap, 
   Play, 
-  Menu
+  Menu,
+  Check
 } from "lucide-react";
 
 export default function Landing() {
@@ -93,7 +94,7 @@ export default function Landing() {
                 <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   How It Works
                 </a>
-                <a href="/pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                <a href="#pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   Pricing
                 </a>
               </div>
@@ -127,7 +128,7 @@ export default function Landing() {
                     <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
                       How It Works
                     </a>
-                    <a href="/pricing" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
+                    <a href="#pricing" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
                       Pricing
                     </a>
                     <Button variant="outline" onClick={openSignInModal} className="sm:hidden justify-start">
@@ -297,7 +298,152 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Pricing Section */}
+        <section id="pricing" className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
+                Simple, transparent pricing
+              </h2>
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+                Choose the perfect plan for your real estate document analysis needs. All plans include our core AI features with no hidden fees.
+              </p>
+              
+              {/* Monthly/Annual Toggle */}
+              <div className="flex items-center justify-center space-x-4 mb-12">
+                <span className="text-slate-600">Monthly</span>
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" />
+                  <div className="w-12 h-6 bg-slate-300 rounded-full relative cursor-pointer">
+                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform"></div>
+                  </div>
+                </div>
+                <span className="text-slate-600">Annual</span>
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+                  Save 20%
+                </span>
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Starter Plan */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Starter</h3>
+                  <div className="mb-6">
+                    <span className="text-5xl font-bold text-slate-900">$0</span>
+                    <div className="text-slate-600 mt-1">Forever Free</div>
+                  </div>
+                  <ul className="space-y-4 mb-8 text-left">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">25 documents/month</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">50 chat sessions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Basic analytics</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Email support</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Get Started Free
+                  </Button>
+                </div>
+              </div>
+
+              {/* Professional Plan */}
+              <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-8 relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    Most Popular
+                  </span>
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Professional</h3>
+                  <div className="mb-6">
+                    <span className="text-5xl font-bold text-slate-900">$29</span>
+                    <span className="text-slate-600">/per month</span>
+                    <div className="text-slate-600 mt-1">Ideal for active real estate professionals and small teams handling multiple</div>
+                  </div>
+                  <ul className="space-y-4 mb-8 text-left">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">250 documents/month</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">500 chat sessions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Advanced analytics</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">API access</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Priority support</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                    Start Free Trial
+                  </Button>
+                </div>
+              </div>
+
+              {/* Enterprise Plan */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative">
+                <div className="absolute -top-4 right-4">
+                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    Best Value
+                  </span>
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Enterprise</h3>
+                  <div className="mb-6">
+                    <span className="text-5xl font-bold text-slate-900">$99</span>
+                    <span className="text-slate-600">/per month</span>
+                    <div className="text-slate-600 mt-1">Comprehensive solution for real estate</div>
+                  </div>
+                  <ul className="space-y-4 mb-8 text-left">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Unlimited documents</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Unlimited chat sessions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Full API access</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Phone support</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Custom integrations</span>
+                    </li>
+                  </ul>
+                  <Button variant="outline" className="w-full">
+                    Contact Sales
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
