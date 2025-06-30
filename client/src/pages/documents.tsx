@@ -39,12 +39,16 @@ export default function Documents() {
     const allDocuments: (Document & { transactionName: string })[] = [];
     
     for (const transaction of transactions as Transaction[]) {
-      const docs = await apiRequest(`/api/transactions/${transaction.id}/documents`);
-      const docsWithTransaction = docs.map((doc: Document) => ({
-        ...doc,
-        transactionName: transaction.name,
-      }));
-      allDocuments.push(...docsWithTransaction);
+      try {
+        const docs = await apiRequest('GET', `/api/transactions/${transaction.id}/documents`);
+        const docsWithTransaction = docs.map((doc: Document) => ({
+          ...doc,
+          transactionName: transaction.name,
+        }));
+        allDocuments.push(...docsWithTransaction);
+      } catch (error) {
+        console.error(`Failed to fetch documents for transaction ${transaction.id}:`, error);
+      }
     }
     
     return allDocuments;
