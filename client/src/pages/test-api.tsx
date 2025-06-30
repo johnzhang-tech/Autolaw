@@ -41,14 +41,24 @@ export default function TestApi() {
       console.log('Response status:', response.status);
       console.log('Response headers:', Object.fromEntries(response.headers));
       
+      // Log response text before parsing
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        console.error('Error response:', responseText);
+        throw new Error(`HTTP ${response.status}: ${responseText}`);
       }
       
-      const result = await response.json();
-      console.log('Success result:', result);
+      // Parse JSON from text
+      let result;
+      try {
+        result = JSON.parse(responseText);
+        console.log('Parsed result:', result);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error(`Failed to parse response: ${responseText}`);
+      }
       
       toast({
         title: "Success!",
