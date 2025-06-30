@@ -13,7 +13,7 @@ import Documents from "@/pages/documents";
 import Dashboard from "@/pages/dashboard";
 import PaymentSimple from "@/pages/payment-simple";
 import Manage from "@/pages/manage";
-import Pricing from "@/pages/pricing";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
