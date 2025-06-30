@@ -173,21 +173,15 @@ export default function Create() {
   };
 
   const onSubmit = (data: TransactionForm) => {
-    console.log('Form data being submitted:', data);
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Form data:', data);
     console.log('Form errors:', form.formState.errors);
-    console.log('Form is valid:', form.formState.isValid);
-    console.log('Transaction type value:', form.watch("transactionType"));
-    
-    // Add validation check
-    if (!data.name || !data.transactionType) {
-      console.error('Missing required fields:', { name: data.name, transactionType: data.transactionType });
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
+    console.log('Form valid:', form.formState.isValid);
+    console.log('All form values:', {
+      name: form.getValues('name'),
+      address: form.getValues('address'),
+      transactionType: form.getValues('transactionType')
+    });
     
     createTransactionMutation.mutate(data);
   };
@@ -251,9 +245,9 @@ export default function Create() {
                           <div>
                             <Label htmlFor="transactionType">Transaction Type</Label>
                             <Select 
-                              value={form.watch("transactionType")} 
+                              value={form.watch("transactionType") || ""} 
                               onValueChange={(value) => {
-                                form.setValue("transactionType", value);
+                                form.setValue("transactionType", value, { shouldValidate: true });
                                 form.clearErrors("transactionType");
                               }}
                             >
@@ -275,21 +269,6 @@ export default function Create() {
                           <div className="flex justify-end space-x-2">
                             <Button type="button" variant="outline" onClick={() => setIsTransactionDialogOpen(false)}>
                               Cancel
-                            </Button>
-                            <Button 
-                              type="button" 
-                              variant="secondary" 
-                              onClick={() => {
-                                console.log('Direct test mutation');
-                                createTransactionMutation.mutate({
-                                  name: "Test Direct Call",
-                                  transactionType: "purchase",
-                                  address: ""
-                                });
-                              }}
-                              disabled={createTransactionMutation.isPending}
-                            >
-                              Test Direct
                             </Button>
                             <Button type="submit" disabled={createTransactionMutation.isPending}>
                               {createTransactionMutation.isPending ? "Creating..." : "Create"}
