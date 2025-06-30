@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple upload endpoint for mobile
+  // S3-compatible document upload endpoint
   app.post('/api/upload', mockAuth, upload.single('document'), async (req: any, res) => {
     try {
       if (!req.file) {
@@ -103,21 +103,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { transactionId, category } = req.body;
 
-      // Simulate AI analysis with mock data
-      const mockAnalysis = {
-        summary: "HOA document analysis completed successfully. Found key compliance areas requiring attention.",
-        riskScore: Math.floor(Math.random() * 100),
-        complianceIssues: [
-          "Monthly fees schedule requires review",
-          "Property maintenance guidelines updated"
-        ],
-        recommendations: [
-          "Review fee payment schedule",
-          "Update insurance documentation"
-        ]
-      };
+      // Validate required fields
+      if (!transactionId) {
+        return res.status(400).json({ message: 'Transaction ID is required' });
+      }
 
-      // Create document record
+      // Validate file
+      try {
+        s3Service.validateFile(req.file.buffer, req.file.mimetype);
+      } catch (validationError) {
+        return res.status(400).json({ message: validationError.message });
+      }
+
+      // Generate S3 key
+      const s3Key = s3Service.generateS3Key(userId, req.file.originalname, req.file.mimetype);
+      
+      // Create initial document record with pending upload status
       const document = await storage.createDocument({
         transactionId: parseInt(transactionId),
         userId,
@@ -126,16 +127,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         category: category || 'hoa',
-        analysisResult: mockAnalysis,
-        analysisStatus: 'completed',
-        riskScore: mockAnalysis.riskScore
+        uploaderId: userId,
+        uploadStatus: 'uploading',
+        s3Key,
+        s3Bucket: process.env.S3_BUCKET || 'docuai-documents',
+        s3Region: process.env.AWS_REGION || 'us-east-1',
+        analysisStatus: 'pending'
       });
 
-      res.json({
-        message: 'Document uploaded and analyzed successfully',
-        document,
-        analysis: mockAnalysis
-      });
+      try {
+        // Upload to S3-compatible storage
+        const uploadResult = await s3Service.uploadFile(
+          req.file.buffer,
+          s3Key,
+          req.file.mimetype,
+          req.file.originalname
+        );
+
+        // Update document with successful upload details
+        const updatedDocument = await storage.updateDocument(document.id, userId, {
+          uploadStatus: 'completed',
+          s3Url: uploadResult.s3Url,
+          etag: uploadResult.etag,
+          fileSize: uploadResult.fileSize
+        });
+
+        // Simulate AI analysis for now (replace with actual AI service later)
+        const mockAnalysis = {
+          summary: "HOA document analysis completed successfully. Found key compliance areas requiring attention.",
+          riskScore: Math.floor(Math.random() * 100),
+          complianceIssues: [
+            "Monthly fees schedule requires review",
+            "Property maintenance guidelines updated"
+          ],
+          recommendations: [
+            "Review fee payment schedule",
+            "Update insurance documentation"
+          ],
+          documentType: category || 'hoa',
+          confidence: 0.95,
+          processedAt: new Date().toISOString()
+        };
+
+        // Update with analysis results
+        await storage.updateDocument(document.id, userId, {
+          analysisResult: mockAnalysis,
+          analysisStatus: 'completed',
+          riskScore: mockAnalysis.riskScore,
+          analyzedAt: new Date()
+        });
+
+        res.json({
+          success: true,
+          message: 'Document uploaded and analyzed successfully',
+          document: {
+            ...updatedDocument,
+            analysisResult: mockAnalysis,
+            analysisStatus: 'completed',
+            riskScore: mockAnalysis.riskScore
+          },
+          upload: {
+            s3Key: uploadResult.s3Key,
+            s3Url: uploadResult.s3Url,
+            fileSize: uploadResult.fileSize,
+            etag: uploadResult.etag
+          }
+        });
+
+      } catch (uploadError) {
+        console.error('S3 upload failed:', uploadError);
+        
+        // Update document status to failed
+        await storage.updateDocument(document.id, userId, {
+          uploadStatus: 'failed',
+          lastError: uploadError.message
+        });
+
+        res.status(500).json({ 
+          message: 'File upload to storage failed', 
+          error: uploadError.message 
+        });
+      }
+
     } catch (error: any) {
       console.error('Upload error:', error);
       res.status(500).json({ message: 'Upload failed', error: error.message });

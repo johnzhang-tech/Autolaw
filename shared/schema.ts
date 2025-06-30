@@ -50,23 +50,40 @@ export const transactions = pgTable("transactions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Documents table
+// Documents table with S3-compatible storage
 export const documents = pgTable("documents", {
   id: serial("id").primaryKey(),
   transactionId: integer("transaction_id").notNull(),
   userId: varchar("user_id").notNull(),
-  fileName: varchar("file_name").notNull(),
-  originalFileName: varchar("original_file_name").notNull(),
+  
+  // File identification and metadata
+  fileName: varchar("file_name").notNull(), // Generated unique filename
+  originalFileName: varchar("original_file_name").notNull(), // User's original filename
   fileSize: integer("file_size").notNull(),
   mimeType: varchar("mime_type").notNull(),
   category: varchar("category"), // "contract", "hoa", "inspection", "financial", etc.
+  
+  // S3-compatible storage fields
+  s3Key: varchar("s3_key").notNull(), // S3 object key/path
+  s3Bucket: varchar("s3_bucket").notNull(), // S3 bucket name
+  s3Region: varchar("s3_region").default("us-east-1"), // S3 region
+  s3Url: varchar("s3_url"), // Full S3 URL for access
+  etag: varchar("etag"), // S3 ETag for integrity verification
+  
+  // Upload tracking
   uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploaderId: varchar("uploader_id").notNull(), // Who uploaded it
+  uploadStatus: varchar("upload_status").default("pending"), // pending, uploading, completed, failed
+  
+  // Analysis tracking
   analyzedAt: timestamp("analyzed_at"),
   analysisResult: jsonb("analysis_result"),
   analysisStatus: varchar("analysis_status").default("pending"), // pending, processing, completed, failed
   riskScore: integer("risk_score"), // 1-100 risk assessment
   complianceIssues: text("compliance_issues").array(),
   summaryPdfPath: varchar("summary_pdf_path"), // Path to generated summary PDF
+  
+  // Queue and error handling
   queueJobId: varchar("queue_job_id"), // Bull queue job ID for reliability
   retryCount: integer("retry_count").default(0),
   lastError: text("last_error"),
