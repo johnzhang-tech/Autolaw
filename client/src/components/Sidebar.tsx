@@ -26,8 +26,16 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const [location] = useLocation();
   const { user } = useAuth();
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      // Force page reload to clear auth state and redirect to landing
+      window.location.reload();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Fallback: redirect to logout endpoint
+      window.location.href = "/api/logout";
+    }
   };
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
