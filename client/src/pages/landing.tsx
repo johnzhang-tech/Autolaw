@@ -94,9 +94,12 @@ export default function Landing() {
                 <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   How It Works
                 </a>
-                <a href="#pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                <button 
+                  onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
+                >
                   Pricing
-                </a>
+                </button>
               </div>
             </div>
 
@@ -128,9 +131,12 @@ export default function Landing() {
                     <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
                       How It Works
                     </a>
-                    <a href="#pricing" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
+                    <button 
+                      onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
+                    >
                       Pricing
-                    </a>
+                    </button>
                     <Button variant="outline" onClick={openSignInModal} className="sm:hidden justify-start">
                       Sign In
                     </Button>
