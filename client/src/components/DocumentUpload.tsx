@@ -28,12 +28,12 @@ interface DocumentUploadProps {
 export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Upload mutation
+  // Multiple file upload mutation for HomeDocsInterfaces Object Storage
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const response = await fetch('/api/upload', {
@@ -49,13 +49,23 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
       return response.json();
     },
     onSuccess: (data) => {
+      const { successful, failed, storageLocation, transaction } = data.summary;
+      
       toast({
-        title: "Upload Successful",
-        description: "Your document is being analyzed. This may take a few minutes.",
+        title: "Upload Complete",
+        description: `${successful} files uploaded to ${storageLocation}. ${failed > 0 ? `${failed} files failed.` : 'All files processed successfully.'}`,
       });
-      setSelectedFile(null);
+      
+      setSelectedFiles([]);
       setUploadProgress(0);
-      onUploadComplete?.(data.document);
+      
+      // Notify parent about uploads
+      if (data.uploadResults?.length > 0) {
+        data.uploadResults.forEach((result: any) => {
+          onUploadComplete?.(result.document);
+        });
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', transactionId, 'documents'] });
     },
     onError: (error: Error) => {
