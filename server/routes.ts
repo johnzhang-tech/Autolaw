@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTransactionSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from 'multer';
@@ -10,11 +9,38 @@ import fs from 'fs/promises';
 import { generateDocumentResponse, generateChatTitle } from './openai';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Simple mock auth for development
+  const mockAuth = (req: any, res: any, next: any) => {
+    req.user = {
+      claims: {
+        sub: "mock-user-1",
+        email: "demo@docuai.com",
+        first_name: "Demo",
+        last_name: "User"
+      }
+    };
+    next();
+  };
+
+  // Ensure mock user exists in database
+  app.use(async (req: any, res: any, next: any) => {
+    try {
+      const mockUser = {
+        id: "mock-user-1",
+        email: "demo@docuai.com",
+        firstName: "Demo", 
+        lastName: "User",
+        profileImageUrl: "https://via.placeholder.com/40"
+      };
+      await storage.upsertUser(mockUser);
+    } catch (error) {
+      console.error("Error creating mock user:", error);
+    }
+    next();
+  });
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -40,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Simple upload endpoint for mobile
-  app.post('/api/upload', isAuthenticated, upload.single('document'), async (req: any, res) => {
+  app.post('/api/upload', mockAuth, upload.single('document'), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -89,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Transaction routes
-  app.get("/api/transactions", isAuthenticated, async (req: any, res) => {
+  app.get("/api/transactions", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactions = await storage.getTransactions(userId);
@@ -100,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/transactions", isAuthenticated, async (req: any, res) => {
+  app.post("/api/transactions", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = insertTransactionSchema.parse({
@@ -121,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document routes
-  app.get("/api/transactions/:transactionId/documents", isAuthenticated, async (req: any, res) => {
+  app.get("/api/transactions/:transactionId/documents", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.transactionId);
@@ -134,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // OpenAI-powered document chat endpoint
-  app.post('/api/documents/:id/chat', isAuthenticated, async (req: any, res) => {
+  app.post('/api/documents/:id/chat', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const documentId = parseInt(req.params.id);
@@ -164,7 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // General chat endpoint for Q&A without specific document
-  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+  app.post('/api/chat', mockAuth, async (req: any, res) => {
     try {
       const { message, sessionId } = req.body;
       
@@ -206,7 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat session routes
-  app.get("/api/chat-sessions", isAuthenticated, async (req: any, res) => {
+  app.get("/api/chat-sessions", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessions = await storage.getChatSessions(userId);
@@ -217,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat-sessions", isAuthenticated, async (req: any, res) => {
+  app.post("/api/chat-sessions", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = insertChatSessionSchema.parse({
@@ -237,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/chat-sessions/:sessionId/messages", isAuthenticated, async (req: any, res) => {
+  app.get("/api/chat-sessions/:sessionId/messages", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessionId = parseInt(req.params.sessionId);
@@ -249,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/chat-sessions/:sessionId/messages", isAuthenticated, async (req: any, res) => {
+  app.post("/api/chat-sessions/:sessionId/messages", mockAuth, async (req: any, res) => {
     try {
       const sessionId = parseInt(req.params.sessionId);
 
@@ -272,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics endpoints
-  app.get("/api/analytics/dashboard", isAuthenticated, async (req: any, res) => {
+  app.get("/api/analytics/dashboard", mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -376,7 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes
-  app.get('/api/payments/history', isAuthenticated, async (req: any, res) => {
+  app.get('/api/payments/history', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const paymentHistory = await storage.getPaymentTransactions(userId);
@@ -399,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/payments/create-intent', isAuthenticated, async (req: any, res) => {
+  app.post('/api/payments/create-intent', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { tierId, billingAddress } = req.body;
