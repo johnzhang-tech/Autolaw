@@ -161,13 +161,13 @@ export default function Landing() {
 
               {/* CTA Buttons */}
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button size="lg" onClick={openSignUpModal} className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <Button size="lg" onClick={login} className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                   <Zap className="w-5 h-5 mr-2" />
-                  Start Free Trial
+                  Enter Demo
                 </Button>
-                <Button variant="outline" size="lg" className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-xl">
+                <Button variant="outline" size="lg" onClick={openSignUpModal} className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-xl">
                   <Play className="w-5 h-5 mr-2" />
-                  Watch Demo
+                  Get Started
                 </Button>
               </div>
 
