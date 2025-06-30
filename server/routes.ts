@@ -5,7 +5,7 @@ import { insertTransactionSchema, insertChatSessionSchema, insertChatMessageSche
 import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
-import { localStorageService } from './localStorageService';
+import { replitObjectStorage } from './replitObjectStorage';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
@@ -97,7 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const transactionFolder = `${transaction.name.replace(/[^a-zA-Z0-9-]/g, '_')}_${transaction.id}`;
           const s3Key = `HomeDocsInterfaces/${transactionFolder}/${Date.now()}_${file.originalname}`;
           
-          // Create initial document record for HomeDocsInterfaces storage
+          // Create initial document record for Replit Object Storage
           const document = await storage.createDocument({
             transactionId: parseInt(transactionId),
             userId,
@@ -111,8 +111,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             analysisStatus: 'pending'
           });
 
-          // Upload to HomeDocsInterfaces Local Storage
-          const uploadResult = await localStorageService.saveFile(
+          // Upload to Replit Object Storage (HomeDocsInterfaces bucket)
+          const uploadResult = await replitObjectStorage.uploadFile(
             file.buffer,
             transaction.name,
             transaction.id,
@@ -123,9 +123,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update document with successful upload details
           const updatedDocument = await storage.updateDocument(document.id, userId, {
             uploadStatus: 'completed',
-            filePath: uploadResult.filePath,
-            fileSize: uploadResult.fileSize,
-            fileHash: uploadResult.hash
+            s3Key: uploadResult.objectKey,
+            s3Bucket: uploadResult.bucketName,
+            s3Url: uploadResult.objectUrl,
+            etag: uploadResult.etag,
+            fileSize: uploadResult.fileSize
           });
 
           // Mock AI analysis for now (will integrate with Ragflow later)
@@ -159,10 +161,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               riskScore: mockAnalysis.riskScore
             },
             upload: {
-              filePath: uploadResult.filePath,
-              fileName: uploadResult.fileName,
+              objectKey: uploadResult.objectKey,
+              bucketName: uploadResult.bucketName,
+              objectUrl: uploadResult.objectUrl,
               fileSize: uploadResult.fileSize,
-              hash: uploadResult.hash,
+              etag: uploadResult.etag,
               transactionFolder
             }
           });
@@ -263,28 +266,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Document not found' });
       }
 
-      if (document.uploadStatus !== 'completed' || !document.filePath) {
-        return res.status(400).json({ message: 'Document not available for download from HomeDocsInterfaces' });
+      if (document.uploadStatus !== 'completed' || !document.s3Key) {
+        return res.status(400).json({ message: 'Document not available for download from Replit Object Storage' });
       }
 
       try {
-        // For HomeDocsInterfaces local storage, serve file directly
-        if (document.filePath) {
-          const fileBuffer = await localStorageService.getFile(document.filePath);
-          
-          res.setHeader('Content-Type', document.mimeType);
-          res.setHeader('Content-Disposition', `attachment; filename="${document.originalFileName}"`);
-          res.setHeader('Content-Length', document.fileSize.toString());
-          
-          res.send(fileBuffer);
-        } else {
-          res.status(404).json({ message: 'File not found in HomeDocsInterfaces storage' });
-        }
+        // Generate presigned URL for Replit Object Storage download
+        const downloadUrl = await replitObjectStorage.generateDownloadUrl(document.s3Key, 3600);
+        
+        res.json({
+          success: true,
+          downloadUrl,
+          filename: document.originalFileName,
+          fileSize: document.fileSize,
+          mimeType: document.mimeType,
+          expiresIn: 3600
+        });
       } catch (downloadError: unknown) {
         const errorMessage = downloadError instanceof Error ? downloadError.message : 'Download error';
-        console.error('HomeDocsInterfaces download failed:', downloadError);
+        console.error('Replit Object Storage download failed:', downloadError);
         res.status(500).json({ 
-          message: 'Failed to download from HomeDocsInterfaces', 
+          message: 'Failed to generate download URL from Replit Object Storage', 
           error: errorMessage 
         });
       }
@@ -294,26 +296,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // HomeDocsInterfaces storage status endpoint
+  // Replit Object Storage status endpoint
   app.get('/api/storage/status', mockAuth, async (req: any, res) => {
     try {
-      const isConfigured = localStorageService.isConfigured();
-      const stats = localStorageService.getStorageStats();
+      const isConfigured = replitObjectStorage.isConfigured();
+      const connectionTest = await replitObjectStorage.testConnection();
       
       res.json({
-        storageType: 'HomeDocsInterfaces',
+        storageType: 'Replit Object Storage',
         configured: isConfigured,
-        connected: isConfigured,
-        stats: {
-          totalFiles: stats.totalFiles,
-          totalSize: `${(stats.totalSize / 1024 / 1024).toFixed(2)} MB`,
-          transactions: stats.transactions
-        },
-        location: 'uploads/HomeDocsInterfaces'
+        connected: connectionTest,
+        bucketName: 'HomeDocsInterfaces',
+        location: 'Replit Object Storage (Cloud)'
       });
     } catch (error: any) {
       res.status(500).json({ 
-        message: 'HomeDocsInterfaces storage status check failed', 
+        message: 'Replit Object Storage status check failed', 
         error: error.message 
       });
     }
