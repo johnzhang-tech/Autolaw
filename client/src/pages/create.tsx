@@ -304,6 +304,51 @@ export default function Create() {
                           </div>
                         </Button>
                       ))}
+                      
+                      {/* Temporary API test button */}
+                      <Button
+                        variant="secondary"
+                        className="w-full mt-4"
+                        onClick={async () => {
+                          try {
+                            console.log('Testing direct API call...');
+                            const response = await fetch('/api/transactions', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              credentials: 'include',
+                              body: JSON.stringify({
+                                name: 'Direct API Test',
+                                transactionType: 'purchase',
+                                address: '123 Test St'
+                              })
+                            });
+                            
+                            if (!response.ok) {
+                              throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                            }
+                            
+                            const result = await response.json();
+                            console.log('API Success:', result);
+                            
+                            toast({
+                              title: "Success",
+                              description: "Direct API call worked!",
+                            });
+                            
+                            // Refresh transactions
+                            queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+                          } catch (error: any) {
+                            console.error('Direct API Error:', error);
+                            toast({
+                              title: "Direct API Error",
+                              description: error.message,
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      >
+                        Test Direct API Call
+                      </Button>
                     </div>
                   )}
                 </CardContent>
