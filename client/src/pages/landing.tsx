@@ -22,6 +22,18 @@ export default function Landing() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { login } = useAuth();
 
+  // Scroll navigation handlers - completely isolated from router
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+    setIsMobileMenuOpen(false); // Close mobile menu after navigation
+  };
+
   const openSignInModal = () => {
     setAuthMode("signin");
     setIsAuthModalOpen(true);
@@ -89,27 +101,19 @@ export default function Landing() {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
                 <button 
-                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollToSection('features')}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Features
                 </button>
                 <button 
-                  onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollToSection('how-it-works')}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   How It Works
                 </button>
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    console.log('Pricing button clicked');
-                    const pricingElement = document.getElementById('pricing');
-                    console.log('Pricing element found:', pricingElement);
-                    if (pricingElement) {
-                      pricingElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={() => scrollToSection('pricing')}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Pricing
@@ -140,19 +144,19 @@ export default function Landing() {
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                   <nav className="flex flex-col space-y-4 mt-8">
                     <button 
-                      onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => scrollToSection('features')}
                       className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
                     >
                       Features
                     </button>
                     <button 
-                      onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => scrollToSection('how-it-works')}
                       className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
                     >
                       How It Works
                     </button>
                     <button 
-                      onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+                      onClick={() => scrollToSection('pricing')}
                       className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
                     >
                       Pricing

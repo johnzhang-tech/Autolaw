@@ -37,11 +37,6 @@ function Router() {
           <Route path="/manage" component={Manage} />
         </>
       )}
-      <Route path="/pricing" component={() => {
-        // Redirect any legacy pricing routes to landing page
-        window.location.href = "/#pricing";
-        return null;
-      }} />
       <Route component={NotFound} />
     </Switch>
   );
