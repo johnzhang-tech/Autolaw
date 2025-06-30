@@ -69,12 +69,6 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       description: "Ask questions",
     },
     {
-      icon: CreditCard,
-      label: "Payment",
-      href: "/manage",
-      description: "Billing & subscriptions",
-    },
-    {
       icon: Settings,
       label: "Manage",
       href: "/manage",
