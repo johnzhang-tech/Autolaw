@@ -175,6 +175,8 @@ export default function Create() {
   const onSubmit = (data: TransactionForm) => {
     console.log('Form data being submitted:', data);
     console.log('Form errors:', form.formState.errors);
+    console.log('Form is valid:', form.formState.isValid);
+    console.log('Transaction type value:', form.watch("transactionType"));
     createTransactionMutation.mutate(data);
   };
 
@@ -338,8 +340,8 @@ export default function Create() {
                       accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
                     />
                     <label htmlFor="file-upload">
-                      <Button variant="outline" className="cursor-pointer">
-                        Choose Files
+                      <Button type="button" variant="outline" className="cursor-pointer" asChild>
+                        <span>Choose Files</span>
                       </Button>
                     </label>
                   </div>

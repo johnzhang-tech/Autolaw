@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { generateDocumentResponse, generateChatTitle } from './openai';
 import { s3Service, S3Service } from './s3Service';
+import { queueDocumentAnalysis } from './queue';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
@@ -323,6 +324,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching documents:", error);
       res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  app.post("/api/transactions/:transactionId/documents", mockAuth, upload.single('file'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.transactionId);
+      const { category = 'general' } = req.body;
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      // Validate transaction exists and belongs to user
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+
+      // Upload file to S3-compatible storage
+      const uploadResult = await s3Service.uploadFile(
+        req.file.buffer,
+        userId,
+        req.file.originalname,
+        req.file.mimetype
+      );
+
+      // Create document record in database
+      const documentData = {
+        transactionId,
+        userId,
+        fileName: uploadResult.s3Key.split('/').pop() || req.file.originalname, // Use S3 key as filename
+        originalFileName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        category,
+        uploaderId: userId,
+        uploadStatus: 'completed' as const,
+        analysisStatus: 'pending' as const,
+        s3Key: uploadResult.s3Key,
+        s3Bucket: uploadResult.s3Bucket,
+        s3Region: uploadResult.s3Region,
+        s3Url: uploadResult.s3Url,
+        etag: uploadResult.etag
+      };
+
+      const document = await storage.createDocument(documentData);
+
+      // TODO: Queue document for analysis later
+      // await queueDocumentAnalysis(document.id, userId, uploadResult.s3Key, req.file.mimetype);
+
+      res.status(201).json(document);
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ message: "Failed to upload document" });
     }
   });
 
