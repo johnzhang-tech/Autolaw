@@ -5,7 +5,7 @@ import { insertTransactionSchema, insertChatSessionSchema, insertChatMessageSche
 import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
-import { s3Service } from './s3Service';
+import { localStorageService } from './localStorageService';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
@@ -114,20 +114,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             analysisStatus: 'pending'
           });
 
-          // Upload to HomeDocsInterfaces Object Storage
-          const uploadResult = await s3Service.uploadFile(
+          // Upload to HomeDocsInterfaces Local Storage
+          const uploadResult = await localStorageService.saveFile(
             file.buffer,
-            s3Key,
-            file.mimetype,
-            file.originalname
+            transaction.name,
+            transaction.id,
+            file.originalname,
+            file.mimetype
           );
 
           // Update document with successful upload details
           const updatedDocument = await storage.updateDocument(document.id, userId, {
             uploadStatus: 'completed',
-            s3Url: uploadResult.s3Url,
-            etag: uploadResult.etag,
-            fileSize: uploadResult.fileSize
+            filePath: uploadResult.filePath,
+            fileSize: uploadResult.fileSize,
+            fileHash: uploadResult.hash
           });
 
           // Mock AI analysis for now (will integrate with Ragflow later)
@@ -161,10 +162,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               riskScore: mockAnalysis.riskScore
             },
             upload: {
-              s3Key: uploadResult.s3Key,
-              s3Url: uploadResult.s3Url,
+              filePath: uploadResult.filePath,
+              fileName: uploadResult.fileName,
               fileSize: uploadResult.fileSize,
-              etag: uploadResult.etag,
+              hash: uploadResult.hash,
               transactionFolder
             }
           });
