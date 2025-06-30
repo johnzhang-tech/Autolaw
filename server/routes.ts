@@ -46,33 +46,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Emergency bypass route to test Express routing
+  // Emergency bypass route to test Express routing with cache busting
   app.get('/emergency', (req, res) => {
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>DocuAI Emergency Page</title>
-        <style>
-          body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-          .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
-          .working { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-          .button { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 5px; }
-        </style>
-      </head>
-      <body>
-        <h1>DocuAI System Status</h1>
-        <div class="status working">✅ Express Server: Working</div>
-        <div class="status working">✅ Routing: Working</div>
-        <div class="status working">✅ API Endpoints: Working</div>
-        <p><strong>Issue:</strong> Vite development server plugins are preventing React from loading.</p>
-        <p><strong>Solution:</strong> The Express server works perfectly. We need to bypass the Vite plugin conflicts.</p>
-        <a href="/test.html" class="button">Static Test Page</a>
-        <a href="/api/auth/user" class="button">API Test</a>
-        <a href="/" class="button">Try Main App</a>
-      </body>
-      </html>
-    `);
+    // Add cache busting headers
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY'
+    });
+    
+    const timestamp = new Date().toISOString();
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <title>DocuAI Browser Diagnostic</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 800px; 
+      margin: 20px auto; 
+      padding: 20px; 
+      background: white;
+      color: black;
+    }
+    .header { background: #007bff; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
+    .status { padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .working { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+    .warning { background: #fff3cd; color: #856404; border: 2px solid #ffeaa7; }
+    .button { 
+      background: #007bff; 
+      color: white; 
+      padding: 12px 20px; 
+      text-decoration: none; 
+      border-radius: 5px; 
+      display: inline-block; 
+      margin: 8px; 
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover { background: #0056b3; }
+    .diagnostic { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .code { background: #e9ecef; padding: 5px 10px; border-radius: 3px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔧 DocuAI Browser Diagnostic</h1>
+    <p>Server Response Time: ${timestamp}</p>
+  </div>
+
+  <div class="status working">✅ Express Server: Responding</div>
+  <div class="status working">✅ HTML Generation: Working</div>
+  <div class="status working">✅ HTTP Headers: Sent</div>
+  
+  <div class="diagnostic">
+    <h3>🔍 Issue Analysis</h3>
+    <p>If you can see this page, the server is working perfectly. The blank screen issue is likely:</p>
+    <ul>
+      <li><strong>Browser Cache:</strong> Corrupted cached data preventing display</li>
+      <li><strong>Vite Plugins:</strong> Development plugins interfering with rendering</li>
+      <li><strong>Service Workers:</strong> Cached service worker blocking content</li>
+      <li><strong>Browser Extensions:</strong> Ad blockers or security extensions</li>
+    </ul>
+  </div>
+
+  <div class="diagnostic">
+    <h3>🛠️ Troubleshooting Steps</h3>
+    <ol>
+      <li>Clear browser cache and cookies for this site</li>
+      <li>Try an incognito/private browsing window</li>
+      <li>Disable browser extensions temporarily</li>
+      <li>Check browser console for JavaScript errors</li>
+    </ol>
+  </div>
+
+  <div>
+    <h3>📱 Quick Actions</h3>
+    <a href="/clear-cache" class="button">Clear Server Cache</a>
+    <a href="/api/auth/user" class="button">Test API Direct</a>
+    <button onclick="location.reload(true)" class="button">Hard Refresh</button>
+    <button onclick="clearBrowserData()" class="button">Clear Browser Cache</button>
+  </div>
+
+  <script>
+    console.log('🟢 Diagnostic page loaded successfully at ${timestamp}');
+    
+    function clearBrowserData() {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name));
+        });
+      }
+      
+      // Clear localStorage and sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      alert('Browser cache cleared. Please refresh the page.');
+    }
+    
+    // Auto-refresh every 30 seconds to show server is alive
+    setTimeout(() => {
+      const indicator = document.createElement('div');
+      indicator.innerHTML = '🔄 Auto-refreshing to verify server...';
+      indicator.style.cssText = 'position: fixed; top: 10px; right: 10px; background: orange; color: white; padding: 10px; border-radius: 5px; z-index: 9999;';
+      document.body.appendChild(indicator);
+      
+      setTimeout(() => location.reload(), 2000);
+    }, 30000);
+  </script>
+</body>
+</html>`);
   });
 
   // Auth routes
