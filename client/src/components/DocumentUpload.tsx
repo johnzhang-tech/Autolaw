@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, CheckCircle, AlertCircle, Download, MessageSquare } from 'lucide-react';
+import { Upload, File, CheckCircle, AlertCircle, Download, MessageSquare, X } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -49,7 +49,7 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
       return response.json();
     },
     onSuccess: (data) => {
-      const { successful, failed, storageLocation, transaction } = data.summary;
+      const { successful, failed, storageLocation } = data.summary;
       
       toast({
         title: "Upload Complete",
@@ -94,46 +94,67 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
     
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      handleFileSelect(files[0]);
+      handleFilesSelect(files);
     }
   }, []);
 
-  const handleFileSelect = (file: File) => {
-    // Validate file type
+  const handleFilesSelect = (files: File[]) => {
+    // Validate file types
     const allowedTypes = [
       'application/pdf',
       'application/msword', 
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
+
+    files.forEach(file => {
+      if (!allowedTypes.includes(file.type)) {
+        invalidFiles.push(file.name);
+        return;
+      }
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        invalidFiles.push(`${file.name} (too large)`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (invalidFiles.length > 0) {
       toast({
-        title: "Invalid File Type",
-        description: "Please upload PDF, DOC, DOCX, or TXT files only.",
+        title: "Invalid Files",
+        description: `${invalidFiles.length} files rejected: ${invalidFiles.join(', ')}`,
         variant: "destructive",
       });
-      return;
     }
 
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        title: "File Too Large", 
-        description: "Please upload files smaller than 10MB.",
-        variant: "destructive",
-      });
-      return;
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
     }
+  };
 
-    setSelectedFile(file);
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = () => {
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
 
     const formData = new FormData();
-    formData.append('document', selectedFile);
+    
+    // Append all files
+    selectedFiles.forEach(file => {
+      formData.append('documents', file);
+    });
+    
     formData.append('transactionId', transactionId.toString());
     formData.append('category', 'hoa'); // Default to HOA category
 
@@ -161,309 +182,222 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Upload Area */}
-      <Card className={`transition-all duration-200 ${isDragging ? 'border-primary bg-primary/5' : 'border-dashed'}`}>
-        <CardContent className="p-8">
-          <div
-            className="text-center space-y-4"
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+      <Card 
+        className={`border-2 border-dashed transition-colors ${
+          isDragging 
+            ? 'border-blue-500 bg-blue-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <CardContent className="p-8 text-center">
+          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Upload Multiple Documents
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Drag and drop files here, or click to browse
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            Supports PDF, DOC, DOCX, TXT, and image files (up to 10MB each)
+          </p>
+          <Button 
+            onClick={() => fileInputRef.current?.click()}
+            variant="outline"
           >
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <Upload className="w-8 h-8 text-primary" />
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Upload HOA Documents</h3>
-              <p className="text-muted-foreground">
-                Drag and drop your PDF, DOC, or TXT files here, or click to browse
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full sm:w-auto"
-                disabled={uploadMutation.isPending}
-              >
-                Choose File
-              </Button>
-              
-              <input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileSelect(file);
-                }}
-              />
-              
-              <p className="text-sm text-muted-foreground">
-                Maximum file size: 10MB | Supported: PDF, DOC, DOCX, TXT
-              </p>
-            </div>
-          </div>
+            Choose Files
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              if (files.length > 0) {
+                handleFilesSelect(files);
+              }
+            }}
+            className="hidden"
+          />
         </CardContent>
       </Card>
 
-      {/* Selected File */}
-      {selectedFile && (
+      {/* Selected Files List */}
+      {selectedFiles.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <File className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="font-medium">{selectedFile.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatFileSize(selectedFile.size)}
-                  </p>
+            <h4 className="font-medium mb-3">Selected Files ({selectedFiles.length})</h4>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div className="flex items-center space-x-2">
+                    <File className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700 truncate max-w-xs">
+                      {file.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatFileSize(file.size)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
                 </div>
-              </div>
-              
-              <div className="space-x-2">
-                <Button
-                  onClick={() => setSelectedFile(null)}
-                  variant="outline"
-                  size="sm"
-                  disabled={uploadMutation.isPending}
-                >
-                  Remove
-                </Button>
-                <Button
-                  onClick={handleUpload}
-                  size="sm"
-                  disabled={uploadMutation.isPending}
-                >
-                  {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
-                </Button>
-              </div>
+              ))}
             </div>
-            
-            {uploadMutation.isPending && (
-              <div className="mt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Uploading...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} className="w-full" />
-              </div>
-            )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Upload Button and Progress */}
+      {selectedFiles.length > 0 && (
+        <div className="space-y-3">
+          <Button 
+            onClick={handleUpload}
+            disabled={uploadMutation.isPending}
+            className="w-full"
+          >
+            {uploadMutation.isPending ? 'Uploading...' : `Upload ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''} to HomeDocsInterfaces`}
+          </Button>
+          
+          {uploadMutation.isPending && (
+            <div className="space-y-2">
+              <Progress value={uploadProgress} className="w-full" />
+              <p className="text-sm text-gray-600 text-center">
+                Uploading to HomeDocsInterfaces Object Storage...
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
 }
 
+// Document List Component with updated interface
 interface DocumentListProps {
   transactionId: number;
 }
 
 export function DocumentList({ transactionId }: DocumentListProps) {
   const { toast } = useToast();
-  
-  // Fetch documents for transaction
-  const { data: documents, isLoading } = useQuery({
+
+  const { data: documents = [], isLoading } = useQuery({
     queryKey: ['/api/transactions', transactionId, 'documents'],
-    enabled: !!transactionId,
   });
 
-  // Generate summary PDF mutation
-  const generateSummaryMutation = useMutation({
+  const downloadMutation = useMutation({
     mutationFn: async (documentId: number) => {
-      return await apiRequest(`/api/documents/${documentId}/generate-summary`, {
-        method: 'POST',
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "PDF Generation Started",
-        description: "Your summary PDF is being generated.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Generation Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Chat mutation
-  const [chatMessage, setChatMessage] = useState('');
-  const [chatResponse, setChatResponse] = useState('');
-  const [selectedDocumentForChat, setSelectedDocumentForChat] = useState<number | null>(null);
-
-  const chatMutation = useMutation({
-    mutationFn: async ({ documentId, message }: { documentId: number; message: string }) => {
-      return await apiRequest(`/api/documents/${documentId}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-      });
+      return await apiRequest('GET', `/api/documents/${documentId}/download`);
     },
     onSuccess: (data) => {
-      setChatResponse(data.response);
-      setChatMessage('');
+      // Open download URL in new tab
+      window.open(data.downloadUrl, '_blank');
     },
     onError: (error: Error) => {
       toast({
-        title: "Chat Failed",
+        title: "Download Failed",
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4" />;
-      case 'failed': return <AlertCircle className="w-4 h-4" />;
-      default: return <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />;
-    }
-  };
-
   if (isLoading) {
-    return <div className="text-center py-8">Loading documents...</div>;
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="animate-pulse">
+            <div className="h-16 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!Array.isArray(documents) || documents.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <File className="mx-auto h-12 w-12 mb-2" />
+        <p>No documents uploaded yet</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      {documents && documents.length > 0 ? (
-        documents.map((doc: Document) => (
-          <Card key={doc.id}>
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                {/* Document Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <File className="w-8 h-8 text-primary" />
-                    <div>
-                      <h4 className="font-medium">{doc.originalFileName}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {formatFileSize(doc.fileSize)} • Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(doc.analysisStatus)}>
-                      {getStatusIcon(doc.analysisStatus)}
-                      <span className="ml-1 capitalize">{doc.analysisStatus}</span>
-                    </Badge>
-                  </div>
+    <div className="space-y-3">
+      {documents.map((doc: Document) => (
+        <Card key={doc.id}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <File className="h-8 w-8 text-blue-500" />
+                <div>
+                  <h4 className="font-medium text-gray-900">{doc.originalFileName}</h4>
+                  <p className="text-sm text-gray-500">
+                    {formatFileSize(doc.fileSize)} • {doc.category}
+                  </p>
                 </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                {/* Analysis Status */}
+                {doc.analysisStatus === 'completed' && (
+                  <Badge variant="default" className="bg-green-100 text-green-800">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Analyzed
+                  </Badge>
+                )}
+                
+                {doc.analysisStatus === 'processing' && (
+                  <Badge variant="secondary">
+                    Processing...
+                  </Badge>
+                )}
+                
+                {doc.analysisStatus === 'failed' && (
+                  <Badge variant="destructive">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Failed
+                  </Badge>
+                )}
 
-                {/* Analysis Results */}
-                {doc.analysisStatus === 'completed' && doc.analysisResult && (
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h5 className="font-medium">Analysis Summary</h5>
-                      {doc.riskScore && (
-                        <Badge variant={doc.riskScore > 70 ? 'destructive' : doc.riskScore > 40 ? 'default' : 'secondary'}>
-                          Risk Score: {doc.riskScore}/100
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground">
-                      {doc.analysisResult.summary}
-                    </p>
-
-                    {doc.analysisResult.complianceIssues && doc.analysisResult.complianceIssues.length > 0 && (
-                      <div>
-                        <h6 className="text-sm font-medium mb-2">Compliance Issues:</h6>
-                        <ul className="text-sm text-muted-foreground space-y-1">
-                          {doc.analysisResult.complianceIssues.map((issue: string, index: number) => (
-                            <li key={index} className="flex items-start space-x-2">
-                              <span className="text-orange-500">•</span>
-                              <span>{issue}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                {/* Risk Score */}
+                {doc.riskScore !== undefined && (
+                  <Badge 
+                    variant={doc.riskScore > 70 ? "destructive" : doc.riskScore > 40 ? "secondary" : "default"}
+                    className={doc.riskScore > 70 ? "bg-red-100 text-red-800" : doc.riskScore > 40 ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}
+                  >
+                    Risk: {doc.riskScore}
+                  </Badge>
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  {doc.analysisStatus === 'completed' && (
-                    <>
-                      <Button
-                        onClick={() => generateSummaryMutation.mutate(doc.id)}
-                        variant="outline"
-                        size="sm"
-                        disabled={generateSummaryMutation.isPending}
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        {generateSummaryMutation.isPending ? 'Generating...' : 'Download Summary'}
-                      </Button>
-                      
-                      <Button
-                        onClick={() => setSelectedDocumentForChat(selectedDocumentForChat === doc.id ? null : doc.id)}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Ask AI
-                      </Button>
-                    </>
-                  )}
+                <div className="flex space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => downloadMutation.mutate(doc.id)}
+                    disabled={downloadMutation.isPending}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
                 </div>
-
-                {/* Chat Interface */}
-                {selectedDocumentForChat === doc.id && (
-                  <div className="border-t pt-4 space-y-3">
-                    <div className="space-y-2">
-                      <textarea
-                        value={chatMessage}
-                        onChange={(e) => setChatMessage(e.target.value)}
-                        placeholder="Ask a question about this document..."
-                        className="w-full p-3 border rounded-md resize-none"
-                        rows={3}
-                      />
-                      <Button
-                        onClick={() => chatMutation.mutate({ documentId: doc.id, message: chatMessage })}
-                        disabled={!chatMessage.trim() || chatMutation.isPending}
-                        size="sm"
-                      >
-                        {chatMutation.isPending ? 'Asking...' : 'Send'}
-                      </Button>
-                    </div>
-                    
-                    {chatResponse && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                        <p className="text-sm text-blue-900">{chatResponse}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
-            </CardContent>
-          </Card>
-        ))
-      ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          No documents uploaded yet.
-        </div>
-      )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
