@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Settings, 
@@ -20,7 +22,13 @@ import {
   User,
   FileText,
   Archive,
-  RefreshCw
+  RefreshCw,
+  CreditCard,
+  Calendar,
+  Check,
+  Clock,
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -161,9 +169,18 @@ export default function Manage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-slate-900">Settings & Management</h1>
             <p className="text-lg text-slate-600 mt-2">
-              Manage your transactions, preferences, and account settings
+              Manage your transactions, preferences, payments, and account settings
             </p>
           </div>
+
+          <Tabs defaultValue="account" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="account">Account & Transactions</TabsTrigger>
+              <TabsTrigger value="payment">Payment & Billing</TabsTrigger>
+              <TabsTrigger value="preferences">Preferences</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="account" className="space-y-8 mt-8">
 
           {/* Account Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -389,6 +406,150 @@ export default function Manage() {
               </form>
             </DialogContent>
           </Dialog>
+            </TabsContent>
+
+            <TabsContent value="payment" className="space-y-8 mt-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Payment Tier: Reporting ($20) */}
+                <Card className="relative">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Reporting</CardTitle>
+                      <Badge variant="secondary">Basic</Badge>
+                    </div>
+                    <div className="flex items-baseline">
+                      <span className="text-3xl font-bold">$20</span>
+                      <span className="text-muted-foreground ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Basic document analysis</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Risk assessment reports</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">25 documents/month</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full mt-6">Subscribe</Button>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Tier: Reporting + Q&A ($30) */}
+                <Card className="relative border-2 border-primary">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+                  </div>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Reporting + Q&A</CardTitle>
+                      <Badge>Professional</Badge>
+                    </div>
+                    <div className="flex items-baseline">
+                      <span className="text-3xl font-bold">$30</span>
+                      <span className="text-muted-foreground ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Everything in Reporting</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">AI-powered Q&A chat</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">100 documents/month</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Priority support</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full mt-6">Subscribe</Button>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Tier: Advanced ($99) */}
+                <Card className="relative">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Advanced</CardTitle>
+                      <Badge variant="outline">Enterprise</Badge>
+                    </div>
+                    <div className="flex items-baseline">
+                      <span className="text-3xl font-bold">$99</span>
+                      <span className="text-muted-foreground ml-1">/month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Everything in Professional</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Unlimited documents</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Advanced analytics</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">API access</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Phone support</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full mt-6">Subscribe</Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Payment History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CreditCard className="h-5 w-5 mr-2" />
+                    Payment History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No payment history</h3>
+                    <p className="text-muted-foreground">
+                      Your payment history will appear here after your first purchase.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="preferences" className="space-y-8 mt-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Application Preferences</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Preferences settings coming soon...</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

@@ -71,14 +71,14 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     {
       icon: CreditCard,
       label: "Payment",
-      href: "/payment",
+      href: "/manage",
       description: "Billing & subscriptions",
     },
     {
       icon: Settings,
       label: "Manage",
       href: "/manage",
-      description: "Settings",
+      description: "Settings & Payment",
     },
   ];
 
