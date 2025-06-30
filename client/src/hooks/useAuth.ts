@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import type { User } from "@shared/schema";
 
 export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -10,7 +11,7 @@ export function useAuth() {
     setIsLoggedOut(loggedOut === 'true');
   }, []);
 
-  const { data: user, isLoading, refetch } = useQuery({
+  const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     retry: false,
     enabled: !isLoggedOut,
