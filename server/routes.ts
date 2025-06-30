@@ -9,8 +9,13 @@ import fs from 'fs/promises';
 import { generateDocumentResponse, generateChatTitle } from './openai';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Simple mock auth for development
+  // Simple mock auth for development with session support
   const mockAuth = (req: any, res: any, next: any) => {
+    // Check if user has been logged out
+    if (req.session && req.session.loggedOut) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
     req.user = {
       claims: {
         sub: "mock-user-1",
@@ -53,11 +58,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout endpoint
   app.get('/api/logout', (req: any, res) => {
+    if (req.session) {
+      req.session.loggedOut = true;
+    }
     res.redirect('/');
   });
 
   app.post('/api/logout', (req: any, res) => {
+    if (req.session) {
+      req.session.loggedOut = true;
+    }
     res.json({ success: true, message: "Logged out successfully" });
+  });
+
+  // Login endpoint to clear logout flag
+  app.post('/api/login', (req: any, res) => {
+    if (req.session) {
+      req.session.loggedOut = false;
+    }
+    res.json({ success: true, message: "Logged in successfully" });
   });
 
   // Configure multer for file uploads

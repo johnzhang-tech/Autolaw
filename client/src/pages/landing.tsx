@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AuthModal } from "@/components/AuthModal";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   FileText, 
   AlertTriangle, 
@@ -18,6 +19,7 @@ export default function Landing() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { login } = useAuth();
 
   const openSignInModal = () => {
     setAuthMode("signin");

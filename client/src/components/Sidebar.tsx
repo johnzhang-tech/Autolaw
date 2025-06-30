@@ -24,16 +24,10 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      // Clear auth and redirect to landing
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Logout error:", error);
-      window.location.href = "/";
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
