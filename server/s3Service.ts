@@ -242,4 +242,5 @@ class S3Service {
 }
 
 export const s3Service = new S3Service();
+export { S3Service };
 export default s3Service;

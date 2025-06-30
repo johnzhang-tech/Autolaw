@@ -7,8 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import { generateDocumentResponse, generateChatTitle } from './openai';
-import { s3Service } from './s3Service';
-import S3Service from './s3Service';
+import { s3Service, S3Service } from './s3Service';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Simple mock auth for development with session support
@@ -112,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate file
       try {
-        s3Service.constructor.validateFile(req.file.buffer, req.file.mimetype);
+        (S3Service as any).validateFile(req.file.buffer, req.file.mimetype);
       } catch (validationError: unknown) {
         const errorMessage = validationError instanceof Error ? validationError.message : 'File validation failed';
         return res.status(400).json({ message: errorMessage });
@@ -176,8 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateDocument(document.id, userId, {
           analysisResult: mockAnalysis,
           analysisStatus: 'completed',
-          riskScore: mockAnalysis.riskScore,
-          analyzedAt: new Date()
+          riskScore: mockAnalysis.riskScore
         });
 
         res.json({
@@ -197,24 +195,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
 
-      } catch (uploadError) {
+      } catch (uploadError: unknown) {
+        const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unknown upload error';
         console.error('S3 upload failed:', uploadError);
         
         // Update document status to failed
         await storage.updateDocument(document.id, userId, {
           uploadStatus: 'failed',
-          lastError: uploadError.message
+          lastError: errorMessage
         });
 
         res.status(500).json({ 
           message: 'File upload to storage failed', 
-          error: uploadError.message 
+          error: errorMessage 
         });
       }
 
     } catch (error: any) {
       console.error('Upload error:', error);
       res.status(500).json({ message: 'Upload failed', error: error.message });
+    }
+  });
+
+  // Document download endpoint with S3 presigned URL
+  app.get('/api/documents/:id/download', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const documentId = parseInt(req.params.id);
+
+      // Get document from database
+      const document = await storage.getDocument(documentId, userId);
+      if (!document) {
+        return res.status(404).json({ message: 'Document not found' });
+      }
+
+      // Check if document was successfully uploaded to S3
+      if (document.uploadStatus !== 'completed' || !document.s3Key) {
+        return res.status(400).json({ message: 'Document not available for download' });
+      }
+
+      try {
+        // Generate presigned download URL (valid for 1 hour)
+        const downloadUrl = await s3Service.generateDownloadUrl(document.s3Key, 3600);
+        
+        res.json({
+          success: true,
+          downloadUrl,
+          filename: document.originalFileName,
+          fileSize: document.fileSize,
+          mimeType: document.mimeType,
+          expiresIn: 3600
+        });
+      } catch (s3Error: unknown) {
+        const errorMessage = s3Error instanceof Error ? s3Error.message : 'S3 download error';
+        console.error('S3 download URL generation failed:', s3Error);
+        res.status(500).json({ 
+          message: 'Failed to generate download URL', 
+          error: errorMessage 
+        });
+      }
+    } catch (error: any) {
+      console.error('Download error:', error);
+      res.status(500).json({ message: 'Download failed', error: error.message });
+    }
+  });
+
+  // S3 service status endpoint
+  app.get('/api/storage/status', mockAuth, async (req: any, res) => {
+    try {
+      const isConfigured = s3Service.isConfigured();
+      const isConnected = isConfigured ? await s3Service.testConnection() : false;
+      
+      res.json({
+        configured: isConfigured,
+        connected: isConnected,
+        bucket: process.env.S3_BUCKET || 'docuai-documents',
+        region: process.env.AWS_REGION || 'us-east-1',
+        endpoint: process.env.S3_ENDPOINT || 'default'
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: 'Storage status check failed', 
+        error: error.message 
+      });
     }
   });
 
