@@ -307,7 +307,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         configured: isConfigured,
         connected: connectionTest,
         bucketName: 'HomeDocsInterfaces',
-        location: 'Replit Object Storage (Cloud)'
+        location: 'Replit Object Storage (Cloud)',
+        debug: {
+          bucketName: 'HomeDocsInterfaces',
+          replitDomains: !!process.env.REPLIT_DOMAINS,
+          baseUrl: `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/storage`
+        }
       });
     } catch (error: any) {
       res.status(500).json({ 

@@ -199,7 +199,7 @@ class ReplitObjectStorageService {
    * Check if service is properly configured
    */
   isConfigured(): boolean {
-    return !!(process.env.REPLIT_OBJECT_STORAGE_TOKEN && this.bucketName);
+    return !!(this.bucketName && process.env.REPLIT_DOMAINS && this.baseUrl);
   }
 
   /**
@@ -207,11 +207,7 @@ class ReplitObjectStorageService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/buckets/${this.bucketName}`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.REPLIT_OBJECT_STORAGE_TOKEN || ''}`,
-        },
-      });
+      const response = await fetch(`${this.baseUrl}/buckets/${this.bucketName}`);
       return response.ok;
     } catch {
       return false;
