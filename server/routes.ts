@@ -506,24 +506,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize admin user for testing (make mock-user-1 an admin)
   app.post('/api/admin/init', async (req: any, res) => {
     try {
-      // Check if user exists, if not create them, then make them admin
-      let user = await storage.getUser("mock-user-1");
-      if (!user) {
-        user = await storage.upsertUser({
-          id: "mock-user-1",
-          email: "demo@docuai.com",
-          firstName: "Demo",
-          lastName: "User",
-          role: "admin"
-        });
-      } else if (user.role !== 'admin') {
-        user = await storage.updateUserRole("mock-user-1", "admin");
-      }
-      
+      // Always set mock-user-1 as admin for testing
+      const user = await storage.updateUserRole("mock-user-1", "admin");
       res.json({ message: "Admin user initialized", user });
     } catch (error: any) {
       console.error("Error initializing admin:", error);
       res.status(500).json({ message: "Failed to initialize admin user" });
+    }
+  });
+
+  // Test endpoint to demonstrate user isolation
+  app.get('/api/test/user-isolation', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Get transactions and user info for current user
+      const transactions = await storage.getTransactions(userId);
+      const chatSessions = await storage.getChatSessions(userId);
+      
+      res.json({
+        currentUser: {
+          id: user?.id,
+          email: user?.email,
+          role: user?.role
+        },
+        dataAccess: {
+          transactionCount: transactions.length,
+          transactions: transactions.map(t => ({ id: t.id, name: t.name, userId: t.userId })),
+          chatSessionCount: chatSessions.length,
+          isAdmin: user?.role === 'admin'
+        },
+        explanation: user?.role === 'admin' 
+          ? "As an admin, you can see all transactions and data from all users"
+          : "As a regular user, you only see your own transactions and data"
+      });
+    } catch (error: any) {
+      console.error("Error in user isolation test:", error);
+      res.status(500).json({ message: "Failed to test user isolation" });
     }
   });
 
