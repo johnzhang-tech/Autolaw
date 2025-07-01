@@ -478,6 +478,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoints - only for admin users
+  app.post('/api/admin/users/:userId/role', mockAuth, async (req: any, res) => {
+    try {
+      const adminUserId = req.user.claims.sub;
+      const adminUser = await storage.getUser(adminUserId);
+      
+      if (adminUser?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const { role } = req.body;
+
+      if (!role || !['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: "Valid role (user or admin) required" });
+      }
+
+      const updatedUser = await storage.updateUserRole(userId, role);
+      res.json({ message: `User role updated to ${role}`, user: updatedUser });
+    } catch (error: any) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  // Initialize admin user for testing (make mock-user-1 an admin)
+  app.post('/api/admin/init', async (req: any, res) => {
+    try {
+      // Check if user exists, if not create them, then make them admin
+      let user = await storage.getUser("mock-user-1");
+      if (!user) {
+        user = await storage.upsertUser({
+          id: "mock-user-1",
+          email: "demo@docuai.com",
+          firstName: "Demo",
+          lastName: "User",
+          role: "admin"
+        });
+      } else if (user.role !== 'admin') {
+        user = await storage.updateUserRole("mock-user-1", "admin");
+      }
+      
+      res.json({ message: "Admin user initialized", user });
+    } catch (error: any) {
+      console.error("Error initializing admin:", error);
+      res.status(500).json({ message: "Failed to initialize admin user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

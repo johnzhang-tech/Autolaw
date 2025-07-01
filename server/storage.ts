@@ -29,6 +29,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(userData: { email: string; firstName?: string; lastName?: string; passwordHash: string }): Promise<User>;
+  updateUserRole(userId: string, role: 'user' | 'admin'): Promise<User>;
 
   // Transaction operations
   getTransactions(userId: string): Promise<Transaction[]>;
@@ -99,6 +100,15 @@ export class DatabaseStorage implements IStorage {
         passwordHash: userData.passwordHash,
         provider: 'local',
       })
+      .returning();
+    return user;
+  }
+
+  async updateUserRole(userId: string, role: 'user' | 'admin'): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }
@@ -251,11 +261,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatSession(id: number, userId: string): Promise<ChatSession | undefined> {
-    const [session] = await db
-      .select()
-      .from(chatSessions)
-      .where(and(eq(chatSessions.id, id), eq(chatSessions.userId, userId)));
-    return session;
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see any chat session
+      const [session] = await db
+        .select()
+        .from(chatSessions)
+        .where(eq(chatSessions.id, id));
+      return session;
+    } else {
+      // Regular users only see their own chat sessions
+      const [session] = await db
+        .select()
+        .from(chatSessions)
+        .where(and(eq(chatSessions.id, id), eq(chatSessions.userId, userId)));
+      return session;
+    }
   }
 
   async createChatSession(session: InsertChatSession): Promise<ChatSession> {
