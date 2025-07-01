@@ -147,13 +147,19 @@ export default function QA() {
     e.preventDefault();
     if (!message.trim()) return;
 
+    let sessionId: number;
+
     // If no session selected, create new one
     if (!selectedSession) {
       const title = message.slice(0, 30) + (message.length > 30 ? "..." : "");
-      await createSessionMutation.mutateAsync(title);
+      const newSession = await createSessionMutation.mutateAsync(title);
+      sessionId = newSession.id;
+      setSelectedSession(sessionId);
+    } else {
+      sessionId = selectedSession;
     }
 
-    sendMessageMutation.mutate({ message, sessionId: selectedSession || undefined });
+    sendMessageMutation.mutate({ message, sessionId });
   };
 
   const handleNewChat = () => {
