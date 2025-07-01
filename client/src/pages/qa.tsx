@@ -36,50 +36,48 @@ export default function QA() {
   const { user } = useAuth();
 
   // Fetch chat sessions
-  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
+  const { data: sessions = [], isLoading: sessionsLoading, error: sessionsError } = useQuery<ChatSession[]>({
     queryKey: ["/api/chat-sessions"],
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
 
   // Fetch messages for selected session
-  const { data: messages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ["/api/chat-sessions", selectedSession, "messages"],
+  const { data: messages = [], isLoading: messagesLoading, error: messagesError } = useQuery<ChatMessage[]>({
+    queryKey: [`/api/chat-sessions/${selectedSession}/messages`],
     enabled: !!selectedSession,
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
+
+  // Handle errors with useEffect
+  useEffect(() => {
+    if (sessionsError && isUnauthorizedError(sessionsError as Error)) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    }
+  }, [sessionsError, toast]);
+
+  useEffect(() => {
+    if (messagesError && isUnauthorizedError(messagesError as Error)) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+    }
+  }, [messagesError, toast]);
 
   // Create new chat session
   const createSessionMutation = useMutation({
     mutationFn: async (title: string) => {
-      return await apiRequest('/api/chat-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
-      });
+      const response = await apiRequest('POST', '/api/chat-sessions', { title });
+      return await response.json();
     },
     onSuccess: (newSession) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat-sessions"] });
@@ -107,20 +105,20 @@ export default function QA() {
 
   // Send message with OpenAI
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ message, sessionId }: { message: string; sessionId?: number }) => {
+    mutationFn: async ({ message, sessionId }: { message: string; sessionId: number }) => {
       setIsTyping(true);
-      return await apiRequest('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, sessionId })
+      const response = await apiRequest('POST', `/api/chat-sessions/${sessionId}/messages`, { 
+        content: message, 
+        role: 'user' 
       });
+      return await response.json();
     },
     onSuccess: () => {
       setMessage("");
       setIsTyping(false);
       if (selectedSession) {
         queryClient.invalidateQueries({ 
-          queryKey: ["/api/chat-sessions", selectedSession, "messages"] 
+          queryKey: [`/api/chat-sessions/${selectedSession}/messages`] 
         });
       }
     },
