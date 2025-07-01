@@ -187,9 +187,9 @@ export default function QA() {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
       
-      <div className={`flex-1 flex transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <div className="flex-1 flex">
         {/* Chat Sessions Sidebar */}
-        <div className="w-80 border-r border-gray-200 bg-gray-50 hidden md:flex flex-col">
+        <div className="w-80 bg-gray-50 hidden md:flex flex-col border-r border-gray-200">
           <div className="px-2 py-3 border-b border-gray-200">
             <Button 
               onClick={handleNewChat}
