@@ -6,27 +6,13 @@ import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
 import { replitObjectStorage } from './replitObjectStorage';
+import { setupAuth, isAuthenticated } from './replitAuth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Simple mock auth for development with session support
-  const mockAuth = (req: any, res: any, next: any) => {
-    // Check if user has been logged out
-    if (req.session && req.session.loggedOut) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    
-    req.user = {
-      claims: {
-        sub: "mock-user-1",
-        email: "demo@docuai.com",
-        first_name: "Demo",
-        last_name: "User"
-      }
-    };
-    next();
-  };
+  // Setup authentication (includes Google OAuth)
+  await setupAuth(app);
 
-  // Ensure mock user exists in database
+  // Ensure mock user exists in database for development
   app.use(async (req: any, res: any, next: any) => {
     try {
       const mockUser = {
@@ -42,6 +28,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   });
+
+  // Mock auth middleware for development (when not using OAuth)
+  const mockAuth = (req: any, res: any, next: any) => {
+    // If user is already authenticated via OAuth, skip mock auth
+    if (req.user && req.user.claims) {
+      return next();
+    }
+    
+    // Check if user has been logged out
+    if (req.session && req.session.loggedOut) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    req.user = {
+      claims: {
+        sub: "mock-user-1",
+        email: "demo@docuai.com",
+        first_name: "Demo",
+        last_name: "User"
+      }
+    };
+    next();
+  };
 
   // Configure multer for multiple file uploads with memory storage for S3
   const upload = multer({
