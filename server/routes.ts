@@ -317,58 +317,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // HomeDocsInterfaces browser endpoint
+  // Replit Object Storage browser endpoint
   app.get('/api/storage/browse', mockAuth, async (req: any, res) => {
     try {
-      const fs = require('fs');
-      const path = require('path');
+      // List all objects in the HomeDocsInterfaces bucket
+      const objects = await replitObjectStorage.listObjects();
       
-      const baseDir = path.join(process.cwd(), 'uploads', 'HomeDocsInterfaces');
+      // Group objects by transaction folder
+      const folders = new Map();
       
-      if (!fs.existsSync(baseDir)) {
-        return res.json({ folders: [], files: [] });
-      }
-      
-      const folders = [];
-      const files = [];
-      
-      // Get transaction folders
-      const items = fs.readdirSync(baseDir);
-      
-      for (const item of items) {
-        const itemPath = path.join(baseDir, item);
-        const stat = fs.statSync(itemPath);
+      objects.forEach((object: any) => {
+        const key = object.key || object.name;
+        if (!key) return;
         
-        if (stat.isDirectory()) {
-          // Get files in transaction folder
-          const transactionFiles = fs.readdirSync(itemPath);
-          const folderInfo = {
-            name: item,
-            path: `HomeDocsInterfaces/${item}`,
-            fileCount: transactionFiles.length,
-            totalSize: transactionFiles.reduce((total, file) => {
-              const filePath = path.join(itemPath, file);
-              return total + fs.statSync(filePath).size;
-            }, 0),
-            files: transactionFiles.map(file => {
-              const filePath = path.join(itemPath, file);
-              const fileStat = fs.statSync(filePath);
-              return {
-                name: file,
-                size: fileStat.size,
-                modified: fileStat.mtime,
-                path: `HomeDocsInterfaces/${item}/${file}`
-              };
-            })
-          };
-          folders.push(folderInfo);
+        const pathParts = key.split('/');
+        if (pathParts.length >= 2) {
+          const folderName = pathParts[0];
+          const fileName = pathParts.slice(1).join('/');
+          
+          if (!folders.has(folderName)) {
+            folders.set(folderName, {
+              name: folderName,
+              path: folderName,
+              fileCount: 0,
+              totalSize: 0,
+              files: []
+            });
+          }
+          
+          const folder = folders.get(folderName);
+          folder.fileCount++;
+          folder.totalSize += object.size || 0;
+          folder.files.push({
+            name: fileName,
+            size: object.size || 0,
+            modified: object.lastModified || new Date(),
+            key: key,
+            path: key
+          });
         }
-      }
+      });
       
-      res.json({ folders, files, totalFolders: folders.length });
+      const folderArray = Array.from(folders.values());
+      
+      res.json({ 
+        folders: folderArray, 
+        files: [], 
+        totalFolders: folderArray.length,
+        totalObjects: objects.length 
+      });
     } catch (error: any) {
       res.status(500).json({ 
-        message: 'Failed to browse HomeDocsInterfaces storage', 
+        message: 'Failed to browse Replit Object Storage', 
         error: error.message 
       });
     }

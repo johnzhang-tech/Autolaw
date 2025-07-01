@@ -20,8 +20,8 @@ class ReplitObjectStorageService {
 
   constructor(config?: ReplitObjectStorageConfig) {
     this.bucketName = config?.bucketName || 'HomeDocsInterfaces';
-    // Replit Object Storage typically uses the replit.app domain
-    this.baseUrl = config?.baseUrl || 'https://storage.replit.com';
+    // Replit Object Storage uses automatic authentication in the workspace
+    this.baseUrl = config?.baseUrl || `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/storage`;
   }
 
   /**
@@ -62,16 +62,14 @@ class ReplitObjectStorageService {
       // Generate unique object key with transaction organization
       const objectKey = this.generateObjectKey(transactionName, transactionId, originalFilename);
       
-      // For now, we'll use a simple PUT request approach
-      // In production, you might want to use signed URLs or proper SDK
-      const uploadUrl = `${this.baseUrl}/api/v1/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      // Use Replit's automatic authentication for Object Storage
+      const uploadUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
       
       const response = await fetch(uploadUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': mimeType,
           'Content-Length': buffer.length.toString(),
-          'Authorization': `Bearer ${process.env.REPLIT_OBJECT_STORAGE_TOKEN || ''}`,
         },
         body: buffer,
       });
@@ -101,14 +99,10 @@ class ReplitObjectStorageService {
    */
   async generateDownloadUrl(objectKey: string, expiresIn: number = 3600): Promise<string> {
     try {
-      // For Replit Object Storage, generate a signed URL
-      const downloadUrl = `${this.baseUrl}/api/v1/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}/download`;
+      // For Replit Object Storage with automatic authentication
+      const downloadUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
       
-      // Add expiration and signature parameters
-      const expiry = Math.floor(Date.now() / 1000) + expiresIn;
-      const signature = this.generateSignature(objectKey, expiry);
-      
-      return `${downloadUrl}?expires=${expiry}&signature=${signature}`;
+      return downloadUrl;
     } catch (error) {
       throw new Error(`Failed to generate download URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -119,13 +113,10 @@ class ReplitObjectStorageService {
    */
   async deleteFile(objectKey: string): Promise<void> {
     try {
-      const deleteUrl = `${this.baseUrl}/api/v1/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      const deleteUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
       
       const response = await fetch(deleteUrl, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${process.env.REPLIT_OBJECT_STORAGE_TOKEN || ''}`,
-        },
       });
 
       if (!response.ok) {
@@ -142,16 +133,12 @@ class ReplitObjectStorageService {
    */
   async listObjects(prefix?: string): Promise<any[]> {
     try {
-      let listUrl = `${this.baseUrl}/api/v1/buckets/${this.bucketName}/objects`;
+      let listUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects`;
       if (prefix) {
         listUrl += `?prefix=${encodeURIComponent(prefix)}`;
       }
       
-      const response = await fetch(listUrl, {
-        headers: {
-          'Authorization': `Bearer ${process.env.REPLIT_OBJECT_STORAGE_TOKEN || ''}`,
-        },
-      });
+      const response = await fetch(listUrl);
 
       if (!response.ok) {
         throw new Error(`List objects failed: ${response.status}`);
