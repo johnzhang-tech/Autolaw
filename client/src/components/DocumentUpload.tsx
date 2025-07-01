@@ -185,31 +185,38 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
     <div className="space-y-4">
       {/* Upload Area */}
       <Card 
-        className={`border-2 border-dashed transition-colors ${
+        className={`border-2 border-dashed transition-all duration-200 ${
           isDragging 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-200 hover:border-gray-300'
+            ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
+            : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <CardContent className="p-8 text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Upload Multiple Documents
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Drag and drop files here, or click to browse
-          </p>
-          <p className="text-sm text-gray-500 mb-4">
-            Supports PDF, DOC, DOCX, TXT, and image files (up to 10MB each)
-          </p>
+          <div className="mb-6">
+            <div className="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <Upload className="h-8 w-8 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Upload Your Documents
+            </h3>
+            <p className="text-gray-600 mb-2">
+              Drag and drop files here, or click the button below
+            </p>
+            <p className="text-sm text-gray-500">
+              PDF, DOC, DOCX, TXT, and images • Max 10MB per file
+            </p>
+          </div>
+          
           <Button 
             onClick={() => fileInputRef.current?.click()}
-            variant="outline"
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium shadow-sm transition-all duration-200 hover:shadow-md"
           >
-            Choose Files
+            <Upload className="mr-2 h-5 w-5" />
+            Select Files to Upload
           </Button>
           <input
             ref={fileInputRef}
@@ -265,9 +272,20 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
           <Button 
             onClick={handleUpload}
             disabled={uploadMutation.isPending}
-            className="w-full"
+            size="lg"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50"
           >
-            {uploadMutation.isPending ? 'Uploading...' : `Upload ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''} to HomeDocsInterfaces`}
+            {uploadMutation.isPending ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Uploading to Storage...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <CheckCircle className="mr-2 h-5 w-5" />
+                Upload {selectedFiles.length} File{selectedFiles.length > 1 ? 's' : ''} to DocuAI
+              </div>
+            )}
           </Button>
           
           {uploadMutation.isPending && (

@@ -4,20 +4,24 @@ import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Folder, 
   File, 
   HardDrive,
   Download,
-  FolderOpen
+  FolderOpen,
+  ExternalLink,
+  FileText
 } from "lucide-react";
 
 export default function StorageBrowser() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { toast } = useToast();
 
-  // Get HomeDocsInterfaces storage data
-  const { data: storageData, isLoading } = useQuery({
-    queryKey: ["/api/storage/browse"],
+  // Get all transactions with their documents
+  const { data: transactions, isLoading } = useQuery({
+    queryKey: ["/api/transactions"],
   });
 
   const { data: statusData } = useQuery({
@@ -31,22 +35,27 @@ export default function StorageBrowser() {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const downloadFile = async (filePath: string, fileName: string) => {
+  const downloadFile = async (documentId: number, fileName: string) => {
     try {
-      const response = await fetch(`/uploads/${filePath}`);
+      const response = await fetch(`/api/documents/${documentId}/download`);
       if (!response.ok) throw new Error('Download failed');
       
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const data = await response.json();
+      
+      // Open the download URL in a new tab
+      window.open(data.downloadUrl, '_blank');
+      
+      toast({
+        title: "Download Started",
+        description: `${fileName} download initiated`,
+      });
     } catch (error) {
       console.error('Download failed:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download the file",
+        variant: "destructive",
+      });
     }
   };
 
