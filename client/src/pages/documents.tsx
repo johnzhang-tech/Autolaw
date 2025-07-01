@@ -60,24 +60,29 @@ export default function Documents() {
       const response = await fetch(`/api/documents/${documentId}/download`);
       if (!response.ok) throw new Error('Download failed');
       
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const result = await response.json();
       
-      toast({
-        title: "Download Started",
-        description: `${fileName} is being downloaded from HomeDocsInterfaces`,
-      });
+      if (result.success && result.downloadUrl) {
+        // Create a link element to trigger download
+        const link = document.createElement('a');
+        link.href = result.downloadUrl;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        toast({
+          title: "Download Started",
+          description: `${fileName} is being downloaded from Replit Object Storage`,
+        });
+      } else {
+        throw new Error('Invalid download response');
+      }
     } catch (error) {
       toast({
         title: "Download Failed",
-        description: "Could not download file from HomeDocsInterfaces storage",
+        description: "Could not download file from Replit Object Storage",
         variant: "destructive",
       });
     }
@@ -92,7 +97,7 @@ export default function Documents() {
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
-              <p className="text-slate-600">Manage your HOA documents stored in HomeDocsInterfaces</p>
+              <p className="text-slate-600">Manage your HOA documents stored in Replit Object Storage</p>
             </div>
 
             {/* Statistics Cards */}
