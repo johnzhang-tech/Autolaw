@@ -105,19 +105,42 @@ export class DatabaseStorage implements IStorage {
 
   // Transaction operations
   async getTransactions(userId: string): Promise<Transaction[]> {
-    return await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.userId, userId))
-      .orderBy(desc(transactions.createdAt));
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see all transactions
+      return await db
+        .select()
+        .from(transactions)
+        .orderBy(desc(transactions.createdAt));
+    } else {
+      // Regular users only see their own transactions
+      return await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.createdAt));
+    }
   }
 
   async getTransaction(id: number, userId: string): Promise<Transaction | undefined> {
-    const [transaction] = await db
-      .select()
-      .from(transactions)
-      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
-    return transaction;
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see any transaction
+      const [transaction] = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.id, id));
+      return transaction;
+    } else {
+      // Regular users only see their own transactions
+      const [transaction] = await db
+        .select()
+        .from(transactions)
+        .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+      return transaction;
+    }
   }
 
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
@@ -145,19 +168,43 @@ export class DatabaseStorage implements IStorage {
 
   // Document operations
   async getDocuments(transactionId: number, userId: string): Promise<Document[]> {
-    return await db
-      .select()
-      .from(documents)
-      .where(and(eq(documents.transactionId, transactionId), eq(documents.userId, userId)))
-      .orderBy(desc(documents.uploadedAt));
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see all documents for any transaction
+      return await db
+        .select()
+        .from(documents)
+        .where(eq(documents.transactionId, transactionId))
+        .orderBy(desc(documents.uploadedAt));
+    } else {
+      // Regular users only see their own documents
+      return await db
+        .select()
+        .from(documents)
+        .where(and(eq(documents.transactionId, transactionId), eq(documents.userId, userId)))
+        .orderBy(desc(documents.uploadedAt));
+    }
   }
 
   async getDocument(id: number, userId: string): Promise<Document | undefined> {
-    const [document] = await db
-      .select()
-      .from(documents)
-      .where(and(eq(documents.id, id), eq(documents.userId, userId)));
-    return document;
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see any document
+      const [document] = await db
+        .select()
+        .from(documents)
+        .where(eq(documents.id, id));
+      return document;
+    } else {
+      // Regular users only see their own documents
+      const [document] = await db
+        .select()
+        .from(documents)
+        .where(and(eq(documents.id, id), eq(documents.userId, userId)));
+      return document;
+    }
   }
 
   async createDocument(document: InsertDocument): Promise<Document> {
@@ -185,11 +232,22 @@ export class DatabaseStorage implements IStorage {
 
   // Chat operations
   async getChatSessions(userId: string): Promise<ChatSession[]> {
-    return await db
-      .select()
-      .from(chatSessions)
-      .where(eq(chatSessions.userId, userId))
-      .orderBy(desc(chatSessions.updatedAt));
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see all chat sessions
+      return await db
+        .select()
+        .from(chatSessions)
+        .orderBy(desc(chatSessions.updatedAt));
+    } else {
+      // Regular users only see their own chat sessions
+      return await db
+        .select()
+        .from(chatSessions)
+        .where(eq(chatSessions.userId, userId))
+        .orderBy(desc(chatSessions.updatedAt));
+    }
   }
 
   async getChatSession(id: number, userId: string): Promise<ChatSession | undefined> {

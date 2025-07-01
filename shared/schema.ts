@@ -34,6 +34,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   provider: varchar("provider").default("replit"), // 'replit', 'google', 'microsoft', 'local'
   passwordHash: varchar("password_hash"), // For local auth
+  role: varchar("role").default("user"), // 'user', 'admin'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
