@@ -69,6 +69,7 @@ export default function StorageBrowser() {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">HomeDocsInterfaces Storage Browser</h1>
               <p className="text-slate-600">Browse files stored in Replit Object Storage by transaction</p>
+              <p className="text-sm text-blue-600 mt-2">💡 Click on transaction folders below to expand and view uploaded documents</p>
             </div>
 
             {/* Storage Status */}
@@ -154,13 +155,15 @@ function TransactionFolder({ transaction, onDownload, formatFileSize }: {
   const [isExpanded, setIsExpanded] = useState(false);
   
   // Get documents for this transaction
-  const { data: documents } = useQuery({
+  const { data: documents } = useQuery<any[]>({
     queryKey: ['/api/transactions', transaction.id, 'documents'],
     enabled: isExpanded,
   });
 
-  const totalFiles = documents?.length || 0;
-  const totalSize = documents?.reduce((acc: number, doc: any) => acc + (doc.fileSize || 0), 0) || 0;
+  // Filter to only show documents with Replit Object Storage keys
+  const storageDocuments = documents?.filter((doc: any) => doc.s3Key) || [];
+  const totalFiles = storageDocuments.length;
+  const totalSize = storageDocuments.reduce((acc: number, doc: any) => acc + (doc.fileSize || 0), 0);
 
   return (
     <div className="border rounded-lg p-4">
@@ -178,12 +181,20 @@ function TransactionFolder({ transaction, onDownload, formatFileSize }: {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <Badge variant="secondary">
-            {totalFiles} files
-          </Badge>
-          <Badge variant="outline">
-            {formatFileSize(totalSize)}
-          </Badge>
+          {totalFiles > 0 ? (
+            <>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                {totalFiles} files in storage
+              </Badge>
+              <Badge variant="outline">
+                {formatFileSize(totalSize)}
+              </Badge>
+            </>
+          ) : (
+            <Badge variant="secondary">
+              No storage files
+            </Badge>
+          )}
           <Button variant="ghost" size="sm">
             {isExpanded ? 'Collapse' : 'Expand'}
           </Button>
@@ -193,13 +204,14 @@ function TransactionFolder({ transaction, onDownload, formatFileSize }: {
       {/* Documents in transaction */}
       {isExpanded && (
         <div className="space-y-2 ml-9 mt-4">
-          {!documents?.length ? (
+          {!storageDocuments?.length ? (
             <div className="text-center py-4 text-slate-500">
               <FileText className="mx-auto h-8 w-8 mb-2" />
-              <p className="text-sm">No documents uploaded yet</p>
+              <p className="text-sm">No documents in Replit Object Storage yet</p>
+              <p className="text-xs text-slate-400 mt-1">Only files stored in HomeDocsInterfaces bucket are displayed</p>
             </div>
           ) : (
-            documents.map((doc: any) => (
+            storageDocuments.map((doc: any) => (
               <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <File className="h-4 w-4 text-slate-500" />
