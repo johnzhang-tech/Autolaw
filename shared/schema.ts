@@ -214,6 +214,14 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   updatedAt: true,
 });
 
+// Schema for frontend form (without userId which is added by server)
+export const createTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
+  userId: true, // Server will add this from auth
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertDocumentSchema = createInsertSchema(documents).omit({
   id: true,
   uploadedAt: true,
@@ -238,6 +246,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type CreateTransaction = z.infer<typeof createTransactionSchema>;
 
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTransactionSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
@@ -236,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/transactions', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const validatedData = insertTransactionSchema.parse(req.body);
+      const validatedData = createTransactionSchema.parse(req.body);
       const transaction = await storage.createTransaction({
         ...validatedData,
         userId
