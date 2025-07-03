@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // HomeDocsInterfaces Object Storage - Multiple file upload with transaction-based folder organization
-  app.post('/api/upload', mockAuth, upload.array('documents', 20), async (req: any, res) => {
+  app.post('/api/upload', mockAuth, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
