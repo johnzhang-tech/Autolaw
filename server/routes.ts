@@ -270,6 +270,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/transactions/:id - Get single transaction details
+  app.get('/api/transactions/:id', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      res.json(transaction);
+    } catch (error: any) {
+      console.error("Error fetching transaction:", error);
+      res.status(500).json({ message: "Failed to fetch transaction" });
+    }
+  });
+
+  // PUT /api/transactions/:id - Update transaction fields (excluding num_documents)
+  app.put('/api/transactions/:id', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Check if transaction exists and belongs to user
+      const existingTransaction = await storage.getTransaction(transactionId, userId);
+      if (!existingTransaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      // Validate the update data using createTransactionSchema (excludes numDocuments)
+      const validatedData = createTransactionSchema.parse(req.body);
+      
+      // Update the transaction
+      const updatedTransaction = await storage.updateTransaction(transactionId, userId, validatedData);
+      
+      res.json(updatedTransaction);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid transaction data", errors: error.errors });
+      } else {
+        console.error("Error updating transaction:", error);
+        res.status(500).json({ message: "Failed to update transaction" });
+      }
+    }
+  });
+
   app.delete('/api/transactions/:id', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -296,6 +351,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error deleting transaction:", error);
       res.status(500).json({ 
         message: "Failed to delete transaction", 
+        error: error.message 
+      });
+    }
+  });
+
+  // POST /api/transactions/:id/upload - Upload documents to a transaction
+  app.post('/api/transactions/:id/upload', mockAuth, upload.array('documents', 60), async (req: any, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      const { category } = req.body;
+
+      // Validate transaction ID
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Verify transaction exists and belongs to user
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+
+      const uploadResults: any[] = [];
+      const failedUploads: any[] = [];
+
+      // Upload each file to Replit Object Storage and create document records
+      for (const file of files) {
+        try {
+          // Upload to Replit Object Storage using base64 workaround
+          const uploadResult = await replitObjectStorage.uploadFile(
+            file.buffer,
+            transaction.name,
+            transaction.id,
+            file.originalname,
+            file.mimetype
+          );
+
+          // Create document record in database
+          const document = await storage.createDocument({
+            transactionId: transaction.id,
+            userId,
+            fileName: uploadResult.objectKey.split('/').pop() || file.originalname,
+            originalFileName: file.originalname,
+            fileSize: file.size,
+            mimeType: file.mimetype,
+            uploaderId: userId, // Required field in schema
+            category: category || 'hoa',
+            uploadStatus: 'completed',
+            s3Key: uploadResult.objectKey,
+            s3Bucket: uploadResult.bucketName,
+            s3Region: 'default',
+            s3Url: uploadResult.objectUrl,
+            etag: uploadResult.etag || ''
+          });
+
+          uploadResults.push({
+            documentId: document.id,
+            filename: file.originalname,
+            objectKey: uploadResult.objectKey,
+            fileSize: uploadResult.fileSize,
+            category: document.category,
+            uploadedAt: document.uploadedAt
+          });
+
+        } catch (fileError: unknown) {
+          const errorMessage = fileError instanceof Error ? fileError.message : 'File upload failed';
+          console.error(`Upload failed for ${file.originalname}:`, fileError);
+          
+          failedUploads.push({
+            filename: file.originalname,
+            error: errorMessage
+          });
+        }
+      }
+
+      // Get updated transaction with current document count
+      const updatedTransaction = await storage.getTransaction(transactionId, userId);
+
+      res.status(200).json({
+        success: uploadResults.length > 0,
+        message: `Uploaded ${uploadResults.length} of ${files.length} files successfully`,
+        uploadResults,
+        failedUploads,
+        transaction: {
+          id: updatedTransaction?.id,
+          name: updatedTransaction?.name,
+          numDocuments: updatedTransaction?.numDocuments, // Shows updated count
+          address: updatedTransaction?.address,
+          type: updatedTransaction?.transactionType
+        },
+        summary: {
+          totalFiles: files.length,
+          successful: uploadResults.length,
+          failed: failedUploads.length,
+          documentsInTransaction: updatedTransaction?.numDocuments || 0
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Transaction document upload error:', error);
+      res.status(500).json({ 
+        message: 'Upload failed', 
         error: error.message 
       });
     }
