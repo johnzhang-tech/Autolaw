@@ -162,7 +162,10 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **File Cleanup Completed**: Removed all orphaned files from storage after transaction deletions
   - **Error Handling Improved**: Better error serialization and logging for storage operations
   - **Admin Cleanup Tools**: Created storage cleanup functionality for removing orphaned files
-  - **Current Status**: Clean system with 0 orphaned files, working transaction creation, and functional downloads
+  - **CRITICAL SDK BUG WORKAROUND**: Discovered and fixed Replit Object Storage SDK v1.0.0 bug where uploadFromBytes/downloadAsBytes only handles 1 byte
+  - **Base64 Workaround Implemented**: Files now upload as base64 text using uploadFromText/downloadAsText methods, then decode back to original buffers
+  - **Complete File Upload/Download Fixed**: All file types now upload and download correctly with full data integrity
+  - **Current Status**: Clean system with 0 orphaned files, working transaction creation, and fully functional file uploads/downloads
 
 ## Recent Architectural Changes
 

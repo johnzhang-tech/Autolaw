@@ -102,6 +102,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process each file
       for (const file of files) {
         try {
+          console.log(`Processing file: ${file.originalname}, size: ${file.size}, buffer length: ${file.buffer?.length}`);
+          
+          // Validate file buffer exists and has content
+          if (!file.buffer || file.buffer.length === 0) {
+            console.error(`File ${file.originalname} has no buffer or empty buffer`);
+            failedUploads.push({
+              filename: file.originalname,
+              error: 'File buffer is empty'
+            });
+            continue;
+          }
+          
           // Generate transaction-based S3 key: HomeDocsInterfaces/{transaction-name}/{file}
           const transactionFolder = `${transaction.name.replace(/[^a-zA-Z0-9-]/g, '_')}_${transaction.id}`;
           const s3Key = `HomeDocsInterfaces/${transactionFolder}/${Date.now()}_${file.originalname}`;
@@ -121,6 +133,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             s3Key: s3Key // Add the s3Key that we'll use for Replit Object Storage
           });
 
+          console.log(`About to upload buffer of ${file.buffer.length} bytes to Replit Object Storage`);
+
           // Upload to Replit Object Storage (HomeDocsInterfaces bucket)
           const uploadResult = await replitObjectStorage.uploadFile(
             file.buffer,
@@ -129,6 +143,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             file.originalname,
             file.mimetype
           );
+          
+          console.log(`Upload result: objectKey=${uploadResult.objectKey}, fileSize=${uploadResult.fileSize}`);
 
           // Update document with successful upload details
           const updatedDocument = await storage.updateDocument(document.id, userId, {
@@ -346,20 +362,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const objectKey = decodeURIComponent(req.params.objectKey);
       console.log(`Direct download request for object key: ${objectKey}`);
       
-      // Download file from Replit Object Storage
-      const result = await replitObjectStorage.client.downloadAsBytes(objectKey);
+      // WORKAROUND: Download as text since we stored as base64 due to SDK bug
+      console.log('Calling client.downloadAsText (base64 workaround)...');
+      const result = await replitObjectStorage.client.downloadAsText(objectKey);
+      console.log('downloadAsText result:', { ok: result.ok, hasValue: !!result.value });
       
       if (!result.ok) {
         console.error('Failed to download file from storage:', result.error);
         return res.status(404).json({ message: 'File not found in storage' });
       }
       
+      // Decode base64 back to original buffer
+      console.log(`Downloaded base64 content length: ${result.value.length}`);
+      const buffer = Buffer.from(result.value, 'base64');
+      console.log(`Decoded buffer length: ${buffer.length} bytes`);
+      
+      if (buffer.length === 0) {
+        console.error('Decoded file is empty!');
+        return res.status(500).json({ message: 'File is empty' });
+      }
+      
       // Set appropriate headers and serve the file
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${objectKey.split('/').pop()}"`);
+      res.setHeader('Content-Length', buffer.length.toString());
       
-      // Send the file data - result.value is Uint8Array from SDK
-      res.end(Buffer.from(result.value));
+      // Send the file data as Buffer
+      console.log(`Sending buffer of ${buffer.length} bytes`);
+      res.end(buffer);
     } catch (error: any) {
       console.error('Direct download error:', error);
       res.status(500).json({ message: 'Download failed', error: error.message });

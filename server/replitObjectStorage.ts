@@ -47,6 +47,8 @@ class ReplitObjectStorageService {
 
   /**
    * Upload file to Replit Object Storage
+   * WORKAROUND: SDK v1.0.0 has a bug where uploadFromBytes/downloadAsBytes only stores/returns 1 byte
+   * Using uploadFromText with base64 encoding as a workaround
    */
   async uploadFile(
     buffer: Buffer,
@@ -56,14 +58,21 @@ class ReplitObjectStorageService {
     mimeType: string
   ): Promise<UploadResult> {
     try {
+      console.log(`ReplitObjectStorage.uploadFile called with buffer.length=${buffer.length}, filename=${originalFilename}`);
+      
       // Validate file
       this.validateFile(buffer, mimeType);
+      console.log(`File validation passed`);
       
       // Generate unique object key with transaction organization
       const objectKey = this.generateObjectKey(transactionName, transactionId, originalFilename);
+      console.log(`Generated objectKey: ${objectKey}`);
       
-      // Use official Replit Object Storage SDK with automatic authentication
-      const result = await this.client.uploadFromBytes(objectKey, buffer);
+      // WORKAROUND: Use uploadFromText with base64 encoding due to SDK bug
+      console.log(`Encoding buffer as base64 to work around SDK bug...`);
+      const base64Content = buffer.toString('base64');
+      const result = await this.client.uploadFromText(objectKey, base64Content);
+      console.log(`client.uploadFromText result: ok=${result.ok}, error=${result.error}`);
       
       if (!result.ok) {
         throw new Error(`Upload failed: ${result.error}`);
