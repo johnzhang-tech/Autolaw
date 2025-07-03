@@ -118,6 +118,72 @@ export default function TestApi() {
     return apiCall('PATCH', '/api/users/profile', profileData);
   };
 
+  // Document API Tests
+  const testDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) {
+      toast({ title: "Error", description: "Please select files to upload", variant: "destructive" });
+      return;
+    }
+    
+    if (!transactionId) {
+      toast({ title: "Error", description: "Please enter a transaction ID", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      
+      for (let i = 0; i < files.length; i++) {
+        formData.append('documents', files[i]);
+      }
+
+      const response = await fetch(`/api/transactions/${transactionId}/upload`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      
+      addTestResult('POST', `/api/transactions/${transactionId}/upload`, response.status, data);
+
+      if (response.ok) {
+        toast({ 
+          title: "Success", 
+          description: `Uploaded ${files.length} document(s) successfully`,
+        });
+        // Clear the file input
+        event.target.value = '';
+      } else {
+        toast({ 
+          title: "Upload Failed", 
+          description: data.message || "Failed to upload documents", 
+          variant: "destructive" 
+        });
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      addTestResult('POST', `/api/transactions/${transactionId}/upload`, 0, { error: errorMsg });
+      toast({ 
+        title: "Error", 
+        description: errorMsg, 
+        variant: "destructive" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const testGetDocuments = () => {
+    if (!transactionId) {
+      toast({ title: "Error", description: "Please enter a transaction ID", variant: "destructive" });
+      return;
+    }
+    return apiCall('GET', `/api/transactions/${transactionId}/documents`);
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
@@ -126,8 +192,9 @@ export default function TestApi() {
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="transactions">Transactions API</TabsTrigger>
+          <TabsTrigger value="documents">Documents API</TabsTrigger>
           <TabsTrigger value="users">Users API</TabsTrigger>
           <TabsTrigger value="results">Test Results</TabsTrigger>
         </TabsList>
@@ -253,6 +320,70 @@ export default function TestApi() {
                   className="w-full"
                 >
                   DELETE /api/transactions/:id
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Documents API Tab */}
+        <TabsContent value="documents" className="space-y-6">
+          <div className="grid md:grid-cols-1 gap-6">
+            {/* Document Upload */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Badge variant="outline">POST</Badge>
+                  Document Upload Testing
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="uploadTransactionId">Transaction ID for Upload</Label>
+                  <Input
+                    id="uploadTransactionId"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    placeholder="Enter transaction ID (e.g., 13)"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fileUpload">Select Documents (PDF, DOC, DOCX, TXT)</Label>
+                  <input
+                    id="fileUpload"
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.txt"
+                    onChange={testDocumentUpload}
+                    className="w-full p-2 border border-gray-300 rounded"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">
+                  Select multiple documents to test bulk upload. Files will be uploaded to the specified transaction.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Document List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Badge variant="outline">GET</Badge>
+                  List Documents
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="listTransactionId">Transaction ID</Label>
+                  <Input
+                    id="listTransactionId"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    placeholder="Enter transaction ID (e.g., 13)"
+                  />
+                </div>
+                <Button onClick={testGetDocuments} disabled={loading} className="w-full">
+                  GET /api/transactions/:id/documents
                 </Button>
               </CardContent>
             </Card>
