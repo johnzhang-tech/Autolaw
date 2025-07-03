@@ -113,14 +113,21 @@ class ReplitObjectStorageService {
    */
   async deleteFile(objectKey: string): Promise<void> {
     try {
+      console.log(`Deleting file from storage: ${objectKey}`);
+      
       // Use official Replit Object Storage SDK
       const result = await this.client.delete(objectKey);
       
       if (!result.ok) {
-        throw new Error(`Delete failed: ${result.error}`);
+        console.error('Delete operation failed:', result.error);
+        throw new Error(`Delete failed: ${JSON.stringify(result.error)}`);
       }
+      
+      console.log(`Successfully deleted file: ${objectKey}`);
     } catch (error) {
-      throw new Error(`Failed to delete from Replit Object Storage: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error in deleteFile:', error);
+      const errorMessage = error instanceof Error ? error.message : `Unknown error: ${JSON.stringify(error)}`;
+      throw new Error(`Failed to delete from Replit Object Storage: ${errorMessage}`);
     }
   }
 

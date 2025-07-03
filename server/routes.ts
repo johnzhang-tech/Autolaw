@@ -358,12 +358,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${objectKey.split('/').pop()}"`);
       
-      // Convert to Buffer if needed and send
-      const buffer = Buffer.isBuffer(result.value) ? result.value : Buffer.from(result.value);
-      res.send(buffer);
+      // Send the file data - result.value is Uint8Array from SDK
+      res.end(Buffer.from(result.value));
     } catch (error: any) {
       console.error('Direct download error:', error);
       res.status(500).json({ message: 'Download failed', error: error.message });
+    }
+  });
+
+  // Clear all files from Replit Object Storage (admin only)
+  app.delete('/api/storage/clear', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Only allow admins to clear all storage
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      console.log('Admin clearing all files from Replit Object Storage...');
+      
+      // List all objects in storage
+      const objects = await replitObjectStorage.listObjects();
+      console.log(`Found ${objects.length} objects to delete`);
+      
+      let deletedCount = 0;
+      let errorCount = 0;
+      const errors: string[] = [];
+      
+      // Delete each object
+      for (const obj of objects) {
+        try {
+          await replitObjectStorage.deleteFile(obj.key);
+          deletedCount++;
+          console.log(`Deleted: ${obj.key}`);
+        } catch (error) {
+          errorCount++;
+          const errorMsg = `Failed to delete ${obj.key}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+          errors.push(errorMsg);
+          console.error(errorMsg);
+        }
+      }
+      
+      res.json({
+        message: 'Storage cleanup completed',
+        totalObjects: objects.length,
+        deletedCount,
+        errorCount,
+        errors: errors.slice(0, 10) // Only show first 10 errors
+      });
+    } catch (error: any) {
+      console.error('Storage clear error:', error);
+      res.status(500).json({ message: 'Failed to clear storage', error: error.message });
     }
   });
 
