@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { Client } from '@replit/object-storage';
 
 interface UploadResult {
   objectKey: string;
@@ -11,17 +12,16 @@ interface UploadResult {
 
 interface ReplitObjectStorageConfig {
   bucketName: string;
-  baseUrl?: string;
 }
 
 class ReplitObjectStorageService {
   private bucketName: string;
-  private baseUrl: string;
+  private client: Client;
 
   constructor(config?: ReplitObjectStorageConfig) {
-    this.bucketName = config?.bucketName || 'HomeDocsInterfaces';
-    // Replit Object Storage uses automatic authentication in the workspace
-    this.baseUrl = config?.baseUrl || `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/storage`;
+    this.bucketName = config?.bucketName || 'default';
+    // Official Replit Object Storage client with default bucket
+    this.client = new Client();
   }
 
   /**
@@ -62,31 +62,19 @@ class ReplitObjectStorageService {
       // Generate unique object key with transaction organization
       const objectKey = this.generateObjectKey(transactionName, transactionId, originalFilename);
       
-      // Use Replit's automatic authentication for Object Storage
-      const uploadUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      // Use official Replit Object Storage SDK with automatic authentication
+      const result = await this.client.uploadFromBytes(objectKey, buffer);
       
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': mimeType,
-          'Content-Length': buffer.length.toString(),
-        },
-        body: buffer,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Replit Object Storage upload failed: ${response.status} ${errorText}`);
+      if (!result.ok) {
+        throw new Error(`Upload failed: ${result.error}`);
       }
-
-      const responseData = await response.json().catch(() => ({}));
       
       return {
         objectKey,
         bucketName: this.bucketName,
-        objectUrl: `${this.baseUrl}/api/v1/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`,
+        objectUrl: `https://replit.com/object-storage/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`,
         fileSize: buffer.length,
-        etag: responseData.etag || this.generateFileHash(buffer),
+        etag: this.generateFileHash(buffer),
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -99,10 +87,15 @@ class ReplitObjectStorageService {
    */
   async generateDownloadUrl(objectKey: string, expiresIn: number = 3600): Promise<string> {
     try {
-      // For Replit Object Storage with automatic authentication
-      const downloadUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      // Use official Replit Object Storage SDK for downloading
+      const result = await this.client.downloadAsBytes(objectKey);
       
-      return downloadUrl;
+      if (!result.ok) {
+        throw new Error(`Failed to generate download URL: ${result.error}`);
+      }
+      
+      // For now, return a direct URL since we have access to the file
+      return `https://replit.com/object-storage/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
     } catch (error) {
       throw new Error(`Failed to generate download URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -113,15 +106,11 @@ class ReplitObjectStorageService {
    */
   async deleteFile(objectKey: string): Promise<void> {
     try {
-      const deleteUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      // Use official Replit Object Storage SDK
+      const result = await this.client.delete(objectKey);
       
-      const response = await fetch(deleteUrl, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Delete failed: ${response.status} ${errorText}`);
+      if (!result.ok) {
+        throw new Error(`Delete failed: ${result.error}`);
       }
     } catch (error) {
       throw new Error(`Failed to delete from Replit Object Storage: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -133,19 +122,20 @@ class ReplitObjectStorageService {
    */
   async listObjects(prefix?: string): Promise<any[]> {
     try {
-      let listUrl = `${this.baseUrl}/buckets/${this.bucketName}/objects`;
-      if (prefix) {
-        listUrl += `?prefix=${encodeURIComponent(prefix)}`;
+      // Use official Replit Object Storage SDK
+      const result = await this.client.list({ prefix });
+      
+      if (!result.ok) {
+        console.error('Failed to list objects:', result.error);
+        return [];
       }
       
-      const response = await fetch(listUrl);
-
-      if (!response.ok) {
-        throw new Error(`List objects failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.objects || [];
+      return result.value.map(obj => ({
+        name: obj.name,
+        key: obj.name,
+        size: 0, // Size not provided by SDK
+        lastModified: new Date()
+      }));
     } catch (error) {
       console.error('Failed to list objects:', error);
       return [];
@@ -199,7 +189,7 @@ class ReplitObjectStorageService {
    * Check if service is properly configured
    */
   isConfigured(): boolean {
-    return !!(this.bucketName && process.env.REPLIT_DOMAINS && this.baseUrl);
+    return !!(this.bucketName && this.client);
   }
 
   /**
@@ -207,8 +197,9 @@ class ReplitObjectStorageService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/buckets/${this.bucketName}`);
-      return response.ok;
+      // Test connection by trying to list objects (should work even if empty)
+      const result = await this.client.list({ maxResults: 1 });
+      return result.ok;
     } catch {
       return false;
     }
@@ -216,5 +207,5 @@ class ReplitObjectStorageService {
 }
 
 export const replitObjectStorage = new ReplitObjectStorageService({
-  bucketName: 'HomeDocsInterfaces'
+  bucketName: 'default'
 });
