@@ -179,6 +179,13 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Role-Based Access Control**: Admin-only endpoints for user creation/deletion, self-service profile updates for users
   - **Comprehensive Validation**: Input validation for all enum fields, date parsing, PostgreSQL constraint handling
   - **Production-Ready Error Handling**: Proper HTTP status codes, detailed error messages, conflict detection
+  - **COMPLETED: Extended Transactions Table with Document Count**
+    - Added `numDocuments` integer field to transactions table with default value 0
+    - Implemented backend auto-maintenance logic to keep document counts accurate
+    - Document count automatically updated on document upload/deletion operations
+    - Created migration helper to recalculate counts for existing transactions
+    - Added admin endpoint `/api/admin/recalculate-document-counts` for data synchronization
+    - Transactions API now returns real-time document counts for each transaction
 
 ## Recent Architectural Changes
 

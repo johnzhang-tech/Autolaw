@@ -1199,6 +1199,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Utility endpoint to recalculate document counts (Admin only)
+  app.post('/api/admin/recalculate-document-counts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentUser = await storage.getUser(userId);
+      
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      await storage.recalculateAllDocumentCounts();
+      
+      res.json({ 
+        message: 'Document counts recalculated successfully for all transactions',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error recalculating document counts:', error);
+      res.status(500).json({ message: 'Failed to recalculate document counts' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -19,7 +19,7 @@ import {
   type InsertPaymentTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -308,11 +308,45 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Helper method to update num_documents count for a transaction
+  private async updateTransactionDocumentCount(transactionId: number): Promise<void> {
+    // Count the documents for this transaction
+    const [{ count }] = await db
+      .select({ count: sql`count(*)`.as('count') })
+      .from(documents)
+      .where(eq(documents.transactionId, transactionId));
+    
+    // Update the transaction with the new count
+    await db
+      .update(transactions)
+      .set({ 
+        numDocuments: parseInt(count as string),
+        updatedAt: new Date()
+      })
+      .where(eq(transactions.id, transactionId));
+  }
+
+  // Method to recalculate document counts for all transactions (migration helper)
+  async recalculateAllDocumentCounts(): Promise<void> {
+    // Get all transactions
+    const allTransactions = await db.select({ id: transactions.id }).from(transactions);
+    
+    // Update document count for each transaction
+    for (const transaction of allTransactions) {
+      await this.updateTransactionDocumentCount(transaction.id);
+    }
+  }
+
   async createDocument(document: InsertDocument): Promise<Document> {
+    // Insert the new document
     const [newDocument] = await db
       .insert(documents)
       .values(document)
       .returning();
+    
+    // Update the document count for the transaction
+    await this.updateTransactionDocumentCount(document.transactionId);
+    
     return newDocument;
   }
 
@@ -326,9 +360,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDocument(id: number, userId: string): Promise<void> {
+    // First get the document to know which transaction to update
+    const document = await this.getDocument(id, userId);
+    if (!document) {
+      throw new Error('Document not found');
+    }
+    
+    // Delete the document
     await db
       .delete(documents)
       .where(and(eq(documents.id, id), eq(documents.userId, userId)));
+    
+    // Update the document count for the transaction
+    await this.updateTransactionDocumentCount(document.transactionId);
   }
 
   // Chat operations

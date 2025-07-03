@@ -59,6 +59,7 @@ export const transactions = pgTable("transactions", {
   address: text("address"),
   transactionType: varchar("transaction_type").notNull(), // "purchase", "sale", "refinance", etc.
   status: varchar("status").notNull().default("active"), // "active", "closed", "cancelled"
+  numDocuments: integer("num_documents").notNull().default(0), // Auto-maintained count of uploaded documents
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
