@@ -136,8 +136,20 @@ export default function Manage() {
       return apiRequest("DELETE", `/api/transactions/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/document-counts"] }); // Invalidate document counts
+      // Aggressively clear all related cache entries
+      queryClient.removeQueries({ queryKey: ["/api/transactions"] });
+      queryClient.removeQueries({ queryKey: ["/api/document-counts"] });
+      queryClient.removeQueries({ queryKey: ["/api/all-user-documents"] });
+      
+      // Also clear any transaction-specific document queries
+      if (deletingTransaction) {
+        queryClient.removeQueries({ 
+          queryKey: [`/api/transactions/${deletingTransaction.id}/documents`] 
+        });
+      }
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
       toast({
         title: "Success",
         description: "Transaction and all documents deleted successfully!",

@@ -120,8 +120,21 @@ export default function Create() {
       return await apiRequest("DELETE", `/api/transactions/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/document-counts"] });
+      // Aggressively clear all related cache entries
+      queryClient.removeQueries({ queryKey: ["/api/transactions"] });
+      queryClient.removeQueries({ queryKey: ["/api/document-counts"] });
+      queryClient.removeQueries({ queryKey: ["/api/all-user-documents"] });
+      
+      // Also clear any transaction-specific document queries
+      if (deletingTransaction) {
+        queryClient.removeQueries({ 
+          queryKey: [`/api/transactions/${deletingTransaction.id}/documents`] 
+        });
+      }
+      
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ["/api/transactions"] });
+      
       toast({
         title: "Success",
         description: "Transaction and all documents deleted successfully!",
@@ -436,15 +449,17 @@ export default function Create() {
               <AlertCircle className="h-5 w-5 text-red-500" />
               Delete Transaction
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{deletingTransaction?.name}"? This will permanently remove:
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>The transaction record</li>
-                <li>{documentCounts[deletingTransaction?.id || 0] || 0} uploaded documents</li>
-                <li>All chat sessions and messages</li>
-                <li>All files from storage</li>
-              </ul>
-              <span className="font-semibold text-red-600 block mt-2">This action cannot be undone.</span>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>Are you sure you want to delete "{deletingTransaction?.name}"? This will permanently remove:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>The transaction record</li>
+                  <li>{documentCounts[deletingTransaction?.id || 0] || 0} uploaded documents</li>
+                  <li>All chat sessions and messages</li>
+                  <li>All files from storage</li>
+                </ul>
+                <p className="font-semibold text-red-600 mt-2">This action cannot be undone.</p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
