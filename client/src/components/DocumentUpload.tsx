@@ -66,7 +66,9 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
         });
       }
       
+      // Invalidate both documents and transactions cache to update UI counters
       queryClient.invalidateQueries({ queryKey: ['/api/transactions', transactionId, 'documents'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
     },
     onError: (error: Error) => {
       toast({
