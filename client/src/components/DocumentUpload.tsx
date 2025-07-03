@@ -206,7 +206,7 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
               Drag and drop files here, or click the button below
             </p>
             <p className="text-sm text-gray-500">
-              PDF, DOC, DOCX, TXT, and images • Max 10MB per file
+              PDF, DOC, DOCX, TXT, and images • Max 10MB per file • Up to 20 files
             </p>
           </div>
           
