@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema, users } from "@shared/schema";
+import { db } from "./db";
 import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
@@ -683,6 +684,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error in user isolation test:", error);
       res.status(500).json({ message: "Failed to test user isolation" });
+    }
+  });
+
+  // User Management API Endpoints
+  
+  // Get user profile (including new fields)
+  app.get('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Return user profile without sensitive data
+      const { passwordHash, ...userProfile } = user;
+      res.json(userProfile);
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Failed to fetch user profile' });
+    }
+  });
+
+  // Update user profile (region, userType, userStatus, expirationDate)
+  app.patch('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { region, userType, userStatus, expirationDate } = req.body;
+      
+      // Validate enum values
+      if (userType && !['One time', 'Recurring'].includes(userType)) {
+        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
+      }
+      
+      // Parse expiration date if provided
+      let parsedExpirationDate = undefined;
+      if (expirationDate !== undefined) {
+        if (expirationDate === null) {
+          parsedExpirationDate = null;
+        } else {
+          parsedExpirationDate = new Date(expirationDate);
+          if (isNaN(parsedExpirationDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
+          }
+        }
+      }
+      
+      const updates: any = {};
+      if (region !== undefined) updates.region = region;
+      if (userType !== undefined) updates.userType = userType;
+      if (userStatus !== undefined) updates.userStatus = userStatus;
+      if (expirationDate !== undefined) updates.expirationDate = parsedExpirationDate;
+      
+      const updatedUser = await storage.updateUserProfile(userId, updates);
+      
+      // Return updated profile without sensitive data
+      const { passwordHash, ...userProfile } = updatedUser;
+      res.json(userProfile);
+    } catch (error: any) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ message: 'Failed to update user profile' });
+    }
+  });
+
+  // Admin endpoint: Get all users with extended information
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentUser = await storage.getUser(userId);
+      
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      // Get all users for admin view
+      const allUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        provider: users.provider,
+        role: users.role,
+        region: users.region,
+        userType: users.userType,
+        userStatus: users.userStatus,
+        expirationDate: users.expirationDate,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      }).from(users);
+      
+      res.json(allUsers);
+    } catch (error: any) {
+      console.error('Error fetching users for admin:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  // Admin endpoint: Update any user's profile
+  app.patch('/api/admin/users/:targetUserId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { targetUserId } = req.params;
+      const currentUser = await storage.getUser(userId);
+      
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      const { region, userType, userStatus, expirationDate, role } = req.body;
+      
+      // Validate enum values
+      if (userType && !['One time', 'Recurring'].includes(userType)) {
+        return res.status(400).json({ message: 'Invalid userType' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+        return res.status(400).json({ message: 'Invalid userStatus' });
+      }
+      
+      if (role && !['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
+      }
+      
+      // Parse expiration date if provided
+      let parsedExpirationDate = undefined;
+      if (expirationDate !== undefined) {
+        if (expirationDate === null) {
+          parsedExpirationDate = null;
+        } else {
+          parsedExpirationDate = new Date(expirationDate);
+          if (isNaN(parsedExpirationDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid expirationDate format' });
+          }
+        }
+      }
+      
+      // Update user profile
+      const updates: any = {};
+      if (region !== undefined) updates.region = region;
+      if (userType !== undefined) updates.userType = userType;
+      if (userStatus !== undefined) updates.userStatus = userStatus;
+      if (expirationDate !== undefined) updates.expirationDate = parsedExpirationDate;
+      
+      let updatedUser;
+      if (Object.keys(updates).length > 0) {
+        updatedUser = await storage.updateUserProfile(targetUserId, updates);
+      }
+      
+      // Update role if provided
+      if (role !== undefined) {
+        updatedUser = await storage.updateUserRole(targetUserId, role);
+      }
+      
+      if (!updatedUser) {
+        updatedUser = await storage.getUser(targetUserId);
+      }
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Return updated profile without sensitive data
+      const { passwordHash, ...userProfile } = updatedUser;
+      res.json(userProfile);
+    } catch (error: any) {
+      console.error('Error updating user profile (admin):', error);
+      res.status(500).json({ message: 'Failed to update user profile' });
     }
   });
 

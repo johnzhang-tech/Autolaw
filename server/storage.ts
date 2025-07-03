@@ -30,6 +30,12 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(userData: { email: string; firstName?: string; lastName?: string; passwordHash: string }): Promise<User>;
   updateUserRole(userId: string, role: 'user' | 'admin'): Promise<User>;
+  updateUserProfile(userId: string, updates: { 
+    region?: string; 
+    userType?: 'One time' | 'Recurring';
+    userStatus?: 'Locked' | 'Active' | 'Expired';
+    expirationDate?: Date | null;
+  }): Promise<User>;
 
   // Transaction operations
   getTransactions(userId: string): Promise<Transaction[]>;
@@ -108,6 +114,23 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ role, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(userId: string, updates: { 
+    region?: string; 
+    userType?: 'One time' | 'Recurring';
+    userStatus?: 'Locked' | 'Active' | 'Expired';
+    expirationDate?: Date | null;
+  }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        ...updates,
+        updatedAt: new Date() 
+      })
       .where(eq(users.id, userId))
       .returning();
     return user;

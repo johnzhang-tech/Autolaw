@@ -166,6 +166,14 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Base64 Workaround Implemented**: Files now upload as base64 text using uploadFromText/downloadAsText methods, then decode back to original buffers
   - **Complete File Upload/Download Fixed**: All file types now upload and download correctly with full data integrity
   - **Current Status**: Clean system with 0 orphaned files, working transaction creation, and fully functional file uploads/downloads
+- July 3, 2025. **USER MANAGEMENT API EXPANSION: Enhanced User Model with Advanced Fields**
+  - **Database Schema Enhanced**: Added region, userType, userStatus, and expirationDate fields to users table
+  - **PostgreSQL Enums Created**: Proper enum types for userType ('One time', 'Recurring') and userStatus ('Locked', 'Active', 'Expired')
+  - **RESTful API Endpoints**: Complete user management API with GET/PATCH /api/users/profile for user self-management
+  - **Admin Management Interface**: Admin-only endpoints at /api/admin/users for managing all users with role updates
+  - **Type Safety**: Full TypeScript coverage with Drizzle ORM schema validation and Zod validation
+  - **Database Migration Applied**: Schema changes pushed successfully with default values for existing users
+  - **Documentation Created**: Comprehensive API documentation with usage examples and schema definitions
 
 ## Recent Architectural Changes
 

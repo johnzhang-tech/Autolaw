@@ -7,10 +7,15 @@ import {
   index,
   serial,
   integer,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
+
+// User management enums
+export const userTypeEnum = pgEnum("user_type", ["One time", "Recurring"]);
+export const userStatusEnum = pgEnum("user_status", ["Locked", "Active", "Expired"]);
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -35,6 +40,13 @@ export const users = pgTable("users", {
   provider: varchar("provider").default("replit"), // 'replit', 'google', 'microsoft', 'local'
   passwordHash: varchar("password_hash"), // For local auth
   role: varchar("role").default("user"), // 'user', 'admin'
+  
+  // New user management fields
+  region: varchar("region"), // User's geographic region
+  userType: userTypeEnum("user_type").notNull().default("One time"), // 'One time', 'Recurring'
+  userStatus: userStatusEnum("user_status").notNull().default("Active"), // 'Locked', 'Active', 'Expired'
+  expirationDate: timestamp("expiration_date"), // ISO date for user account expiration
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
