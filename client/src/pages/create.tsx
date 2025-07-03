@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/Sidebar";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { apiRequest } from "@/lib/queryClient";
+import { useDocumentCounts } from "@/hooks/useDocumentCounts";
 import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
@@ -63,9 +64,14 @@ export default function Create() {
   });
 
   // Fetch transactions
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery<Transaction[]>({
+  const { data: transactionsData = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/transactions"],
   });
+  const transactions = transactionsData as Transaction[];
+
+  // Get document counts for all transactions
+  const transactionIds = transactions.map((t) => t.id);
+  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
 
   // Create transaction mutation
   const createTransactionMutation = useMutation({
@@ -212,7 +218,7 @@ export default function Create() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {transactions.map((transaction: Transaction) => (
+                    {transactions.map((transaction) => (
                       <div
                         key={transaction.id}
                         className={`p-4 border rounded-lg cursor-pointer transition-colors ${
@@ -231,6 +237,9 @@ export default function Create() {
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
                                 {transaction.transactionType}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {documentCounts[transaction.id] || 0} documents
                               </span>
                             </div>
                           </div>

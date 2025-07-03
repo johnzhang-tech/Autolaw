@@ -33,6 +33,8 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
   name: z.string().min(1, "Transaction name is required"),
@@ -62,13 +64,18 @@ export default function Manage() {
   });
 
   // Queries
-  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+  const { data: transactionsData = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/transactions"],
   });
+  const transactions = transactionsData as Transaction[];
 
   const { data: chatSessions = [] } = useQuery({
     queryKey: ["/api/chat/sessions"],
   });
+
+  // Get document counts for all transactions
+  const transactionIds = transactions.map((t) => t.id);
+  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
 
   // Mutations
   const createTransactionMutation = useMutation({
@@ -223,7 +230,7 @@ export default function Manage() {
                       
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{(transactions as any[]).length}</p>
+                          <p className="text-sm font-medium text-slate-900">{transactions.length}</p>
                           <p className="text-xs text-slate-500">Transactions</p>
                         </div>
                         <div>
@@ -298,7 +305,7 @@ export default function Manage() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {(transactions as any[]).map((transaction: any) => (
+                      {transactions.map((transaction) => (
                         <div key={transaction.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                           <div className="flex-1">
                             <div className="flex items-center space-x-4">
@@ -313,6 +320,9 @@ export default function Manage() {
                                 {transaction.address && (
                                   <p className="text-sm text-slate-400 mt-1">{transaction.address}</p>
                                 )}
+                                <p className="text-xs text-slate-400 mt-1">
+                                  {documentCounts[transaction.id] || 0} documents
+                                </p>
                               </div>
                             </div>
                           </div>

@@ -4,18 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle } from "lucide-react";
+import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+import type { Transaction } from "@shared/schema";
 
 export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user } = useAuth();
 
-  const { data: transactions = [] } = useQuery({
+  const { data: transactionsData = [] } = useQuery({
     queryKey: ["/api/transactions"],
   });
+  const transactions = transactionsData as Transaction[];
 
-  const totalDocuments = transactions.reduce((acc: number, transaction: any) => {
-    return acc + (transaction.documents?.length || 0);
-  }, 0);
+  // Get document counts for all transactions
+  const transactionIds = transactions.map((t) => t.id);
+  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
+
+  const totalDocuments = Object.values(documentCounts).reduce((acc: number, count: number) => acc + count, 0);
 
   return (
     <div className="flex h-screen bg-white">
@@ -109,7 +114,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {transactions.slice(0, 5).map((transaction: any) => (
+                      {transactions.slice(0, 5).map((transaction) => (
                         <div key={transaction.id} className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg">
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                             <FileText className="h-5 w-5 text-primary" />
@@ -117,6 +122,9 @@ export default function Home() {
                           <div className="flex-1">
                             <h4 className="font-medium text-slate-900">{transaction.name}</h4>
                             <p className="text-sm text-slate-500">{transaction.transactionType}</p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {documentCounts[transaction.id] || 0} documents
+                            </p>
                           </div>
                           <div className="text-right">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
