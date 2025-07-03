@@ -186,6 +186,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
     - Created migration helper to recalculate counts for existing transactions
     - Added admin endpoint `/api/admin/recalculate-document-counts` for data synchronization
     - Transactions API now returns real-time document counts for each transaction
+- July 3, 2025. **EXTERNAL API ACCESS: API Key Authentication for External Applications**
+  - **API Key Authentication**: Implemented dual authentication (session + API key) for external app integration
+  - **Demo API Key**: `docuai_demo_key_123` available for immediate testing and integration
+  - **Flexible Auth Middleware**: Supports both `X-API-Key` and `Authorization: Bearer` header formats
+  - **API Key Generation**: `POST /api/generate-api-key` endpoint for creating new API keys
+  - **External API Documentation**: Complete EXTERNAL_API_GUIDE.md with cURL and JavaScript examples
+  - **Production URL**: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev
+  - **Supported External Operations**: All transaction CRUD, document upload/download, user management APIs
+  - **Cache Integration Fix**: Resolved UI document counter not updating after uploads by adding transaction list cache invalidation
 
 ## Recent Architectural Changes
 

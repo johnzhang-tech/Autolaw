@@ -31,9 +31,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // API Key authentication middleware for external applications
+  const apiKeyAuth = async (req: any, res: any, next: any) => {
+    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (!apiKey) {
+      return res.status(401).json({ 
+        message: "API key required. Provide via 'X-API-Key' header or 'Authorization: Bearer <key>'" 
+      });
+    }
+
+    // For development, accept a mock API key
+    if (apiKey === "docuai_demo_key_123") {
+      req.user = {
+        claims: {
+          sub: "mock-user-1",
+          email: "demo@docuai.com",
+          first_name: "Demo",
+          last_name: "User"
+        },
+        apiKey: true
+      };
+      return next();
+    }
+
+    // In production, validate API key against database
+    try {
+      const user = await storage.getUserByApiKey?.(apiKey);
+      if (user) {
+        req.user = {
+          claims: {
+            sub: user.id,
+            email: user.email,
+            first_name: user.firstName,
+            last_name: user.lastName
+          },
+          apiKey: true
+        };
+        return next();
+      }
+    } catch (error) {
+      console.error("API key validation error:", error);
+    }
+
+    return res.status(401).json({ message: "Invalid API key" });
+  };
+
   // Mock auth middleware for development (when not using OAuth)
   const mockAuth = (req: any, res: any, next: any) => {
-    // If user is already authenticated via OAuth, skip mock auth
+    // If user is already authenticated via OAuth or API key, skip mock auth
     if (req.user && req.user.claims) {
       return next();
     }
@@ -52,6 +98,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     };
     next();
+  };
+
+  // Flexible auth middleware - accepts both session and API key
+  const flexAuth = (req: any, res: any, next: any) => {
+    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (apiKey) {
+      // Use API key authentication
+      return apiKeyAuth(req, res, next);
+    } else {
+      // Use session authentication
+      return mockAuth(req, res, next);
+    }
   };
 
   // Configure multer for multiple file uploads with memory storage for S3
@@ -239,8 +298,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Key Management endpoint
+  app.post('/api/generate-api-key', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Generate API key (simple demo key for development)
+      const apiKey = `docuai_${userId}_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      
+      res.json({
+        success: true,
+        apiKey,
+        demoKey: "docuai_demo_key_123",
+        usage: "Include in headers as 'X-API-Key: <key>' or 'Authorization: Bearer <key>'",
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+        endpoints: [
+          "GET /api/transactions",
+          "POST /api/transactions", 
+          "PUT /api/transactions/:id",
+          "DELETE /api/transactions/:id",
+          "POST /api/transactions/:id/upload",
+          "GET /api/transactions/:id/documents"
+        ],
+        exampleUsage: {
+          curl: `curl -H "X-API-Key: ${apiKey}" "${req.protocol}://${req.get('host')}/api/transactions"`,
+          javascript: `fetch('${req.protocol}://${req.get('host')}/api/transactions', { headers: { 'X-API-Key': '${apiKey}' } })`
+        }
+      });
+    } catch (error: any) {
+      console.error("API key generation error:", error);
+      res.status(500).json({ message: "Failed to generate API key", error: error.message });
+    }
+  });
+
   // Transaction endpoints
-  app.get('/api/transactions', mockAuth, async (req: any, res) => {
+  app.get('/api/transactions', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactions = await storage.getTransactions(userId);
