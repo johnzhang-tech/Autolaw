@@ -194,7 +194,7 @@ export default function TestApi() {
       <Tabs defaultValue="transactions" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="transactions">Transactions API</TabsTrigger>
-          <TabsTrigger value="documents">Documents API</TabsTrigger>
+          <TabsTrigger value="documents">Document Upload</TabsTrigger>
           <TabsTrigger value="users">Users API</TabsTrigger>
           <TabsTrigger value="results">Test Results</TabsTrigger>
         </TabsList>
@@ -326,18 +326,26 @@ export default function TestApi() {
           </div>
         </TabsContent>
 
-        {/* Documents API Tab */}
+        {/* Document Upload Tab (Part of Transactions API) */}
         <TabsContent value="documents" className="space-y-6">
-          <div className="grid md:grid-cols-1 gap-6">
-            {/* Document Upload */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Badge variant="outline">POST</Badge>
-                  Document Upload Testing
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="font-semibold text-blue-900">Document Management - Part of Transactions API</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                Documents belong to transactions. Use the endpoints below to upload and manage documents within specific transactions.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-1 gap-6">
+              {/* Document Upload */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Badge variant="outline">POST</Badge>
+                    Upload Documents to Transaction
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="uploadTransactionId">Transaction ID for Upload</Label>
                   <Input
@@ -387,6 +395,7 @@ export default function TestApi() {
                 </Button>
               </CardContent>
             </Card>
+            </div>
           </div>
         </TabsContent>
 
