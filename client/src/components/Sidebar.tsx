@@ -16,6 +16,7 @@ import {
   ChevronRight,
   LogOut,
   CreditCard,
+  Code,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -74,6 +75,12 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       label: "Manage",
       href: "/manage",
       description: "Settings & Payment",
+    },
+    {
+      icon: Code,
+      label: "Test API",
+      href: "/test-api",
+      description: "API testing",
     },
   ];
 
