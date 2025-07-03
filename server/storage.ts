@@ -173,6 +173,9 @@ export class DatabaseStorage implements IStorage {
   async deleteTransaction(id: number, userId: string): Promise<void> {
     // Start a transaction for data consistency
     try {
+      // Check if user is admin
+      const user = await this.getUser(userId);
+      
       // First, get all documents for this transaction to delete from storage
       const documentsToDelete = await this.getDocuments(id, userId);
       
@@ -217,9 +220,17 @@ export class DatabaseStorage implements IStorage {
         .where(eq(chatSessions.transactionId, id));
       
       // Finally, delete the transaction
-      await db
-        .delete(transactions)
-        .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+      if (user?.role === 'admin') {
+        // Admin can delete any transaction
+        await db
+          .delete(transactions)
+          .where(eq(transactions.id, id));
+      } else {
+        // Regular users can only delete their own transactions
+        await db
+          .delete(transactions)
+          .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+      }
         
     } catch (error) {
       console.error('Error during transaction deletion:', error);
