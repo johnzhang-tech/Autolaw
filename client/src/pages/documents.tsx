@@ -18,7 +18,7 @@ import {
   Eye,
   AlertTriangle
 } from "lucide-react";
-import type { Document } from "@shared/schema";
+import type { Document, Transaction } from "@shared/schema";
 
 export default function Documents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -26,13 +26,39 @@ export default function Documents() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const { toast } = useToast();
 
-  // Get documents from HomeDocsInterfaces storage (transaction 7 has the uploaded files)
-  const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["/api/transactions/7/documents"],
+  // Get all transactions first
+  const { data: transactionsData = [] } = useQuery({
+    queryKey: ["/api/transactions"],
+  });
+  const transactions = transactionsData as Transaction[];
+
+  // Get all documents from all transactions
+  const { data: allDocuments = [], isLoading } = useQuery({
+    queryKey: ["/api/all-user-documents"],
+    queryFn: async () => {
+      if (!transactions.length) return [];
+      
+      // Fetch documents from all user transactions
+      const documentPromises = transactions.map(async (transaction) => {
+        const response = await fetch(`/api/transactions/${transaction.id}/documents`);
+        if (response.ok) {
+          const docs = await response.json();
+          return docs.map((doc: any) => ({
+            ...doc,
+            transactionName: transaction.name
+          }));
+        }
+        return [];
+      });
+      
+      const allDocArrays = await Promise.all(documentPromises);
+      return allDocArrays.flat();
+    },
+    enabled: transactions.length > 0,
   });
 
   // Ensure documents is an array and cast properly
-  const documentsArray = Array.isArray(documents) ? documents as Document[] : [];
+  const documentsArray = Array.isArray(allDocuments) ? allDocuments as Document[] : [];
 
   // Filter documents based on search and filters
   const filteredDocuments = documentsArray.filter((doc) => {
@@ -48,8 +74,8 @@ export default function Documents() {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const getRiskBadgeColor = (riskScore?: number) => {
-    if (!riskScore) return "bg-gray-100 text-gray-800";
+  const getRiskBadgeColor = (riskScore?: number | null) => {
+    if (!riskScore || riskScore === null) return "bg-gray-100 text-gray-800";
     if (riskScore >= 70) return "bg-red-100 text-red-800";
     if (riskScore >= 40) return "bg-yellow-100 text-yellow-800";
     return "bg-green-100 text-green-800";
@@ -225,7 +251,7 @@ export default function Documents() {
                               <div className="flex items-center space-x-4 mt-1 text-sm text-slate-500">
                                 <span>{getFileSize(doc.fileSize)}</span>
                                 <span className="capitalize">{doc.category}</span>
-                                <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                                <span>{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'Unknown date'}</span>
                               </div>
                             </div>
                           </div>
@@ -251,7 +277,7 @@ export default function Documents() {
                             )}
 
                             {/* Risk Score */}
-                            {doc.riskScore !== undefined && (
+                            {doc.riskScore !== undefined && doc.riskScore !== null && (
                               <Badge className={getRiskBadgeColor(doc.riskScore)}>
                                 Risk: {doc.riskScore}
                               </Badge>

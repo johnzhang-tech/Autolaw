@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Folder, Upload, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, Folder, Upload, FileText, MoreHorizontal, Trash, Edit, AlertCircle, Loader2 } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,22 @@ import { Sidebar } from "@/components/Sidebar";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { apiRequest } from "@/lib/queryClient";
 import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
@@ -51,6 +67,8 @@ export default function Create() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<number | null>(null);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -95,6 +113,47 @@ export default function Create() {
       });
     },
   });
+
+  // Delete transaction mutation
+  const deleteTransactionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/transactions/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/document-counts"] });
+      toast({
+        title: "Success",
+        description: "Transaction and all documents deleted successfully!",
+      });
+      setIsDeleteDialogOpen(false);
+      setDeletingTransaction(null);
+      // Clear selection if deleted transaction was selected
+      if (deletingTransaction && selectedTransaction === deletingTransaction.id) {
+        setSelectedTransaction(null);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsDeleteDialogOpen(false);
+      setDeletingTransaction(null);
+    },
+  });
+
+  const openDeleteDialog = (transaction: Transaction) => {
+    setDeletingTransaction(transaction);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingTransaction) {
+      deleteTransactionMutation.mutate(deletingTransaction.id);
+    }
+  };
 
   const onSubmit = (data: TransactionForm) => {
     createTransactionMutation.mutate(data);
@@ -243,9 +302,28 @@ export default function Create() {
                               </span>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => setSelectedTransaction(transaction.id)}
+                              >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openDeleteDialog(transaction)}
+                                className="text-red-600"
+                              >
+                                <Trash className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     ))}
@@ -277,6 +355,111 @@ export default function Create() {
           </div>
         </div>
       </main>
+
+      {/* Create Transaction Dialog */}
+      <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Transaction</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transaction Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter transaction name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Property Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter property address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="transactionType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transaction Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select transaction type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="purchase">Purchase</SelectItem>
+                      <SelectItem value="sale">Sale</SelectItem>
+                      <SelectItem value="refinance">Refinance</SelectItem>
+                      <SelectItem value="lease">Lease</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsTransactionDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createTransactionMutation.isPending}>
+                {createTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Create Transaction
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Delete Transaction
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deletingTransaction?.name}"? This will permanently remove:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>The transaction record</li>
+                <li>{documentCounts[deletingTransaction?.id || 0] || 0} uploaded documents</li>
+                <li>All chat sessions and messages</li>
+                <li>All files from storage</li>
+              </ul>
+              <span className="font-semibold text-red-600 block mt-2">This action cannot be undone.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteTransactionMutation.isPending}
+            >
+              {deleteTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Delete Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
