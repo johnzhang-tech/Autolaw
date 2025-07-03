@@ -49,6 +49,8 @@ export default function Manage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -135,10 +137,13 @@ export default function Manage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/document-counts"] }); // Invalidate document counts
       toast({
         title: "Success",
-        description: "Transaction deleted successfully!",
+        description: "Transaction and all documents deleted successfully!",
       });
+      setIsDeleteDialogOpen(false);
+      setDeletingTransaction(null);
     },
     onError: (error: Error) => {
       console.error("Delete transaction error:", error);
@@ -147,8 +152,21 @@ export default function Manage() {
         description: "Failed to delete transaction. Please try again.",
         variant: "destructive",
       });
+      setIsDeleteDialogOpen(false);
+      setDeletingTransaction(null);
     },
   });
+
+  const openDeleteDialog = (transaction: Transaction) => {
+    setDeletingTransaction(transaction);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (deletingTransaction) {
+      deleteTransactionMutation.mutate(deletingTransaction.id);
+    }
+  };
 
   const onSubmit = (data: TransactionForm) => {
     if (editingTransaction) {
@@ -338,10 +356,14 @@ export default function Manage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => deleteTransactionMutation.mutate(transaction.id)}
+                              onClick={() => openDeleteDialog(transaction)}
                               disabled={deleteTransactionMutation.isPending}
                             >
-                              <Trash className="h-4 w-4" />
+                              {deleteTransactionMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash className="h-4 w-4" />
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -572,6 +594,60 @@ export default function Manage() {
           </Tabs>
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Delete Transaction
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-slate-600">
+              Are you sure you want to delete <strong>{deletingTransaction?.name}</strong>?
+            </p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h4 className="font-medium text-red-800 mb-2">This action cannot be undone</h4>
+              <ul className="text-sm text-red-700 space-y-1">
+                <li>• All documents will be permanently deleted from storage</li>
+                <li>• All chat sessions and Q&A history will be removed</li>
+                <li>• Transaction data will be completely erased</li>
+                {documentCounts[deletingTransaction?.id || 0] > 0 && (
+                  <li>• <strong>{documentCounts[deletingTransaction?.id || 0]} documents</strong> will be deleted</li>
+                )}
+              </ul>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={deleteTransactionMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deleteTransactionMutation.isPending}
+            >
+              {deleteTransactionMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash className="h-4 w-4 mr-2" />
+                  Delete Transaction
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

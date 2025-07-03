@@ -252,6 +252,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/transactions/:id', mockAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Check if transaction exists and belongs to user
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      // Perform cascade deletion (transaction, documents, chat sessions/messages, files from storage)
+      await storage.deleteTransaction(transactionId, userId);
+
+      res.json({ 
+        message: "Transaction and all related data deleted successfully",
+        deletedTransactionId: transactionId 
+      });
+    } catch (error: any) {
+      console.error("Error deleting transaction:", error);
+      res.status(500).json({ 
+        message: "Failed to delete transaction", 
+        error: error.message 
+      });
+    }
+  });
+
   // Document endpoints
   app.get('/api/transactions/:id/documents', mockAuth, async (req: any, res) => {
     try {

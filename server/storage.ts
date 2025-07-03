@@ -19,7 +19,7 @@ import {
   type InsertPaymentTransaction,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -171,9 +171,60 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTransaction(id: number, userId: string): Promise<void> {
-    await db
-      .delete(transactions)
-      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+    // Start a transaction for data consistency
+    try {
+      // First, get all documents for this transaction to delete from storage
+      const documentsToDelete = await this.getDocuments(id, userId);
+      
+      // Delete all documents from Replit Object Storage
+      const { replitObjectStorage } = await import('./replitObjectStorage');
+      for (const doc of documentsToDelete) {
+        if (doc.s3Key) {
+          try {
+            await replitObjectStorage.deleteFile(doc.s3Key);
+          } catch (error) {
+            console.error(`Failed to delete file ${doc.s3Key} from storage:`, error);
+            // Continue with deletion even if storage deletion fails
+          }
+        }
+      }
+      
+      // Delete all documents from database first (due to foreign key constraints)
+      await db
+        .delete(documents)
+        .where(eq(documents.transactionId, id));
+      
+      // Delete all chat messages for sessions related to this transaction
+      const sessionIds = await db
+        .select({ id: chatSessions.id })
+        .from(chatSessions)
+        .where(eq(chatSessions.transactionId, id));
+      
+      if (sessionIds.length > 0) {
+        await db
+          .delete(chatMessages)
+          .where(
+            inArray(
+              chatMessages.sessionId,
+              sessionIds.map(s => s.id)
+            )
+          );
+      }
+      
+      // Delete all chat sessions for this transaction
+      await db
+        .delete(chatSessions)
+        .where(eq(chatSessions.transactionId, id));
+      
+      // Finally, delete the transaction
+      await db
+        .delete(transactions)
+        .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
+        
+    } catch (error) {
+      console.error('Error during transaction deletion:', error);
+      throw new Error('Failed to delete transaction and related data');
+    }
   }
 
   // Document operations
