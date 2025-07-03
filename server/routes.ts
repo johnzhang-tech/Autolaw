@@ -264,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document download endpoint with S3 presigned URL
+  // Document download endpoint - Replit Object Storage only
   app.get('/api/documents/:id/download', mockAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -275,15 +275,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Document not found' });
       }
 
-      if (document.uploadStatus !== 'completed' || !document.s3Key) {
-        return res.status(400).json({ message: 'Document not available for download from Replit Object Storage' });
+      if (document.uploadStatus !== 'completed') {
+        return res.status(400).json({ message: 'Document not available for download' });
+      }
+
+      if (!document.s3Key) {
+        return res.status(400).json({ message: 'Document not stored in Replit Object Storage' });
       }
 
       try {
-        // Generate presigned URL for Replit Object Storage download
         const downloadUrl = await replitObjectStorage.generateDownloadUrl(document.s3Key, 3600);
         
-        res.json({
+        return res.json({
           success: true,
           downloadUrl,
           filename: document.originalFileName,
@@ -294,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (downloadError: unknown) {
         const errorMessage = downloadError instanceof Error ? downloadError.message : 'Download error';
         console.error('Replit Object Storage download failed:', downloadError);
-        res.status(500).json({ 
+        return res.status(500).json({ 
           message: 'Failed to generate download URL from Replit Object Storage', 
           error: errorMessage 
         });

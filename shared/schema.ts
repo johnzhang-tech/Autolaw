@@ -64,14 +64,12 @@ export const documents = pgTable("documents", {
   mimeType: varchar("mime_type").notNull(),
   category: varchar("category"), // "contract", "hoa", "inspection", "financial", etc.
   
-  // Storage fields (supports both S3 and local storage)
-  s3Key: varchar("s3_key"), // S3 object key/path (optional for S3)
-  s3Bucket: varchar("s3_bucket"), // S3 bucket name (optional for S3)
-  s3Region: varchar("s3_region").default("us-east-1"), // S3 region
-  s3Url: varchar("s3_url"), // Full S3 URL for access
-  etag: varchar("etag"), // S3 ETag for integrity verification
-  filePath: varchar("file_path"), // Local file path (for local storage)
-  fileHash: varchar("file_hash"), // File hash for integrity verification
+  // Replit Object Storage fields only
+  s3Key: varchar("s3_key"), // Replit Object Storage key/path - set after upload
+  s3Bucket: varchar("s3_bucket").default("HomeDocsInterfaces"), // Replit Object Storage bucket name
+  s3Region: varchar("s3_region").default("us-east-1"), // Not used for Replit Object Storage but kept for compatibility
+  s3Url: varchar("s3_url"), // Full Replit Object Storage URL for access
+  etag: varchar("etag"), // Object ETag for integrity verification
   
   // Upload tracking
   uploadedAt: timestamp("uploaded_at").defaultNow(),
