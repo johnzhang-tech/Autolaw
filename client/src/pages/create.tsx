@@ -375,69 +375,71 @@ export default function Create() {
           <DialogHeader>
             <DialogTitle>Create New Transaction</DialogTitle>
           </DialogHeader>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Transaction Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter transaction name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Property Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter property address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="transactionType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Transaction Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Name</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select transaction type" />
-                      </SelectTrigger>
+                      <Input placeholder="Enter transaction name" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="purchase">Purchase</SelectItem>
-                      <SelectItem value="sale">Sale</SelectItem>
-                      <SelectItem value="refinance">Refinance</SelectItem>
-                      <SelectItem value="lease">Lease</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsTransactionDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createTransactionMutation.isPending}>
-                {createTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Create Transaction
-              </Button>
-            </div>
-          </form>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Property Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter property address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="transactionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select transaction type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="purchase">Purchase</SelectItem>
+                        <SelectItem value="sale">Sale</SelectItem>
+                        <SelectItem value="refinance">Refinance</SelectItem>
+                        <SelectItem value="lease">Lease</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsTransactionDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createTransactionMutation.isPending}>
+                  {createTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Create Transaction
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
