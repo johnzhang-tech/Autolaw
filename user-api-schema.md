@@ -1,4 +1,149 @@
-# User Management API Schema - DocuAI
+# Complete RESTful Users API - DocuAI
+
+## Overview
+A comprehensive RESTful Users API built with Node.js/Express and PostgreSQL that provides full CRUD operations for user management. The API includes authentication, validation, filtering, pagination, and role-based access control.
+
+## Standard RESTful Endpoints
+
+### 1. POST /api/users - Create a new user
+**Authentication**: Required (Admin only)
+**Description**: Create a new user with all fields including region, user_type, user_status, and expiration_date
+**HTTP Status Codes**: 201 (Created), 400 (Bad Request), 403 (Forbidden), 409 (Conflict), 500 (Server Error)
+
+**Request Body**:
+```json
+{
+  "id": "user-12345",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "provider": "replit",
+  "role": "user",
+  "region": "US-West",
+  "userType": "Recurring",
+  "userStatus": "Active",
+  "expirationDate": "2025-12-31T23:59:59.000Z"
+}
+```
+
+**Response (201 Created)**:
+```json
+{
+  "id": "user-12345",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "provider": "replit",
+  "role": "user",
+  "region": "US-West",
+  "userType": "Recurring",
+  "userStatus": "Active",
+  "expirationDate": "2025-12-31T23:59:59.000Z",
+  "createdAt": "2025-07-03T03:15:00.000Z",
+  "updatedAt": "2025-07-03T03:15:00.000Z"
+}
+```
+
+### 2. GET /api/users/:id - Read user info by ID
+**Authentication**: Required (Own profile or Admin)
+**Description**: Retrieve user information by ID. Users can only view their own profile unless they're admin
+**HTTP Status Codes**: 200 (OK), 403 (Forbidden), 404 (Not Found), 500 (Server Error)
+
+**Response (200 OK)**:
+```json
+{
+  "id": "user-12345",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "provider": "replit",
+  "role": "user",
+  "region": "US-West",
+  "userType": "Recurring",
+  "userStatus": "Active",
+  "expirationDate": "2025-12-31T23:59:59.000Z",
+  "createdAt": "2025-07-03T03:15:00.000Z",
+  "updatedAt": "2025-07-03T03:15:00.000Z"
+}
+```
+
+### 3. PUT /api/users/:id - Update any user field
+**Authentication**: Required (Own profile or Admin)
+**Description**: Update any user field including new attributes. Non-admin users cannot change roles
+**HTTP Status Codes**: 200 (OK), 400 (Bad Request), 403 (Forbidden), 404 (Not Found), 409 (Conflict), 500 (Server Error)
+
+**Request Body** (all fields optional):
+```json
+{
+  "email": "john.updated@example.com",
+  "firstName": "John",
+  "lastName": "Updated",
+  "provider": "google",
+  "role": "admin",
+  "region": "EU-Central",
+  "userType": "One time",
+  "userStatus": "Locked",
+  "expirationDate": "2024-06-30T23:59:59.000Z"
+}
+```
+
+### 4. DELETE /api/users/:id - Delete a user
+**Authentication**: Required (Admin only)
+**Description**: Delete a user account. Admins cannot delete their own account
+**HTTP Status Codes**: 200 (OK), 400 (Bad Request), 403 (Forbidden), 404 (Not Found), 500 (Server Error)
+
+**Response (200 OK)**:
+```json
+{
+  "message": "User deleted successfully",
+  "deletedUserId": "user-12345"
+}
+```
+
+### 5. GET /api/users - List all users with filtering
+**Authentication**: Required (Admin only)
+**Description**: List all users with optional filtering by region, status, or user_type. Includes pagination
+**HTTP Status Codes**: 200 (OK), 400 (Bad Request), 403 (Forbidden), 500 (Server Error)
+
+**Query Parameters**:
+- `region` (string, optional): Filter by geographic region
+- `userStatus` (enum, optional): "Locked" | "Active" | "Expired"
+- `userType` (enum, optional): "One time" | "Recurring"
+- `limit` (number, optional): Number of users per page (max 100, default 50)
+- `offset` (number, optional): Pagination offset (default 0)
+
+**Response (200 OK)**:
+```json
+{
+  "users": [
+    {
+      "id": "user-12345",
+      "email": "john.doe@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "provider": "replit",
+      "role": "user",
+      "region": "US-West",
+      "userType": "Recurring",
+      "userStatus": "Active",
+      "expirationDate": "2025-12-31T23:59:59.000Z",
+      "createdAt": "2025-07-03T03:15:00.000Z",
+      "updatedAt": "2025-07-03T03:15:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "limit": 50,
+    "offset": 0,
+    "hasMore": false
+  },
+  "filters": {
+    "region": null,
+    "userStatus": null,
+    "userType": null
+  }
+}
+```
 
 ## Database Schema (PostgreSQL with Drizzle ORM)
 
@@ -142,6 +287,146 @@ curl -X PATCH /api/admin/users/user-123 \
 curl -X PATCH /api/admin/users/user-123 \
   -H "Content-Type: application/json" \
   -d '{"userStatus": "Locked"}'
+```
+
+## Express.js Route Implementation Sample
+
+Here's a sample of how the validation middleware and route handlers are implemented:
+
+```javascript
+// Input Validation Middleware
+const validateUserInput = (req, res, next) => {
+  const { userType, userStatus, role, provider } = req.body;
+  
+  // Validate enum fields
+  if (userType && !['One time', 'Recurring'].includes(userType)) {
+    return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
+  }
+  
+  if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+    return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
+  }
+  
+  if (role && !['user', 'admin'].includes(role)) {
+    return res.status(400).json({ message: 'Invalid role. Must be "user" or "admin"' });
+  }
+  
+  if (provider && !['replit', 'google', 'microsoft', 'local'].includes(provider)) {
+    return res.status(400).json({ message: 'Invalid provider' });
+  }
+  
+  next();
+};
+
+// CREATE User Route
+app.post('/api/users', isAuthenticated, validateUserInput, async (req, res) => {
+  try {
+    // Admin access control
+    const currentUser = await storage.getUser(req.user.claims.sub);
+    if (currentUser?.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    
+    // Parse and validate expiration date
+    let parsedExpirationDate = null;
+    if (req.body.expirationDate) {
+      parsedExpirationDate = new Date(req.body.expirationDate);
+      if (isNaN(parsedExpirationDate.getTime())) {
+        return res.status(400).json({ message: 'Invalid expirationDate format' });
+      }
+    }
+    
+    // Create user with PostgreSQL/Drizzle
+    const newUser = await storage.upsertUser({
+      ...req.body,
+      expirationDate: parsedExpirationDate,
+    });
+    
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Failed to create user' });
+  }
+});
+```
+
+## cURL Examples for Testing
+
+### Create a new user (Admin only)
+```bash
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "id": "user-67890",
+    "email": "jane.smith@example.com",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "region": "EU-Central",
+    "userType": "One time",
+    "userStatus": "Active",
+    "expirationDate": "2025-06-30T23:59:59.000Z"
+  }'
+```
+
+### Get user by ID
+```bash
+curl -X GET http://localhost:5000/api/users/user-67890 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Update user profile
+```bash
+curl -X PUT http://localhost:5000/api/users/user-67890 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "region": "US-East",
+    "userStatus": "Expired",
+    "expirationDate": "2024-12-31T23:59:59.000Z"
+  }'
+```
+
+### List users with filters (Admin only)
+```bash
+curl -X GET "http://localhost:5000/api/users?userStatus=Active&region=US-West&limit=10&offset=0" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Delete user (Admin only)
+```bash
+curl -X DELETE http://localhost:5000/api/users/user-67890 \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Error Handling Examples
+
+### Validation Error Response (400)
+```json
+{
+  "message": "Invalid userType. Must be \"One time\" or \"Recurring\""
+}
+```
+
+### Unauthorized Access (403)
+```json
+{
+  "message": "Admin access required to create users"
+}
+```
+
+### User Not Found (404)
+```json
+{
+  "message": "User not found"
+}
+```
+
+### Duplicate Email (409)
+```json
+{
+  "message": "User with this email already exists"
+}
 ```
 
 This implementation provides a complete RESTful Users API with the requested fields, proper validation, and both user and admin management capabilities.

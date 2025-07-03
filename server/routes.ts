@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema, users } from "@shared/schema";
 import { db } from "./db";
+import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
@@ -687,7 +688,346 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User Management API Endpoints
+  // RESTful Users API Endpoints
+  
+  // POST /api/users - Create a new user with all fields
+  app.post('/api/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      // Only admins can create users through this endpoint
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required to create users' });
+      }
+      
+      const { 
+        id, 
+        email, 
+        firstName, 
+        lastName, 
+        provider, 
+        role, 
+        region, 
+        userType, 
+        userStatus, 
+        expirationDate 
+      } = req.body;
+      
+      // Validate required fields
+      if (!id || !email) {
+        return res.status(400).json({ message: 'id and email are required fields' });
+      }
+      
+      // Validate enum values
+      if (userType && !['One time', 'Recurring'].includes(userType)) {
+        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
+      }
+      
+      if (role && !['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role. Must be "user" or "admin"' });
+      }
+      
+      if (provider && !['replit', 'google', 'microsoft', 'local'].includes(provider)) {
+        return res.status(400).json({ message: 'Invalid provider. Must be "replit", "google", "microsoft", or "local"' });
+      }
+      
+      // Parse expiration date if provided
+      let parsedExpirationDate = null;
+      if (expirationDate) {
+        parsedExpirationDate = new Date(expirationDate);
+        if (isNaN(parsedExpirationDate.getTime())) {
+          return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
+        }
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUser(id);
+      if (existingUser) {
+        return res.status(409).json({ message: 'User with this ID already exists' });
+      }
+      
+      // Create user data object
+      const userData = {
+        id,
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        provider: provider || 'replit',
+        role: role || 'user',
+        region: region || null,
+        userType: userType || 'One time',
+        userStatus: userStatus || 'Active',
+        expirationDate: parsedExpirationDate,
+      };
+      
+      const newUser = await storage.upsertUser(userData);
+      
+      // Return created user without sensitive data
+      const { passwordHash, ...userResponse } = newUser;
+      res.status(201).json(userResponse);
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      if (error.code === '23505') { // PostgreSQL unique constraint violation
+        res.status(409).json({ message: 'User with this email already exists' });
+      } else {
+        res.status(500).json({ message: 'Failed to create user' });
+      }
+    }
+  });
+
+  // GET /api/users/:id - Read user info by ID
+  app.get('/api/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      const { id } = req.params;
+      
+      // Users can only view their own profile unless they're admin
+      if (currentUser?.role !== 'admin' && currentUserId !== id) {
+        return res.status(403).json({ message: 'Access denied. You can only view your own profile' });
+      }
+      
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Return user without sensitive data
+      const { passwordHash, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error: any) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ message: 'Failed to fetch user' });
+    }
+  });
+
+  // PUT /api/users/:id - Update any user field, including new attributes
+  app.put('/api/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      const { id } = req.params;
+      
+      // Users can only update their own profile unless they're admin
+      if (currentUser?.role !== 'admin' && currentUserId !== id) {
+        return res.status(403).json({ message: 'Access denied. You can only update your own profile' });
+      }
+      
+      // Check if target user exists
+      const targetUser = await storage.getUser(id);
+      if (!targetUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const { 
+        email, 
+        firstName, 
+        lastName, 
+        provider, 
+        role, 
+        region, 
+        userType, 
+        userStatus, 
+        expirationDate 
+      } = req.body;
+      
+      // Validate enum values
+      if (userType && !['One time', 'Recurring'].includes(userType)) {
+        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
+      }
+      
+      if (role && !['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role. Must be "user" or "admin"' });
+      }
+      
+      if (provider && !['replit', 'google', 'microsoft', 'local'].includes(provider)) {
+        return res.status(400).json({ message: 'Invalid provider. Must be "replit", "google", "microsoft", or "local"' });
+      }
+      
+      // Non-admin users cannot change their role
+      if (currentUser?.role !== 'admin' && role !== undefined) {
+        return res.status(403).json({ message: 'Only administrators can change user roles' });
+      }
+      
+      // Parse expiration date if provided
+      let parsedExpirationDate = undefined;
+      if (expirationDate !== undefined) {
+        if (expirationDate === null) {
+          parsedExpirationDate = null;
+        } else {
+          parsedExpirationDate = new Date(expirationDate);
+          if (isNaN(parsedExpirationDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
+          }
+        }
+      }
+      
+      // Build update object with all possible fields
+      const updates: any = {};
+      if (email !== undefined) updates.email = email;
+      if (firstName !== undefined) updates.firstName = firstName;
+      if (lastName !== undefined) updates.lastName = lastName;
+      if (provider !== undefined) updates.provider = provider;
+      if (region !== undefined) updates.region = region;
+      if (userType !== undefined) updates.userType = userType;
+      if (userStatus !== undefined) updates.userStatus = userStatus;
+      if (expirationDate !== undefined) updates.expirationDate = parsedExpirationDate;
+      
+      // Update profile fields
+      let updatedUser = targetUser;
+      if (Object.keys(updates).length > 0) {
+        updatedUser = await storage.updateUserProfile(id, updates);
+      }
+      
+      // Update role separately if provided and user is admin
+      if (role !== undefined && currentUser?.role === 'admin') {
+        updatedUser = await storage.updateUserRole(id, role);
+      }
+      
+      // Return updated user without sensitive data
+      const { passwordHash, ...userResponse } = updatedUser;
+      res.json(userResponse);
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      if (error.code === '23505') { // PostgreSQL unique constraint violation
+        res.status(409).json({ message: 'Email already exists' });
+      } else {
+        res.status(500).json({ message: 'Failed to update user' });
+      }
+    }
+  });
+
+  // DELETE /api/users/:id - Delete a user
+  app.delete('/api/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      const { id } = req.params;
+      
+      // Only admins can delete users, and they cannot delete themselves
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required to delete users' });
+      }
+      
+      if (currentUserId === id) {
+        return res.status(400).json({ message: 'Cannot delete your own account' });
+      }
+      
+      // Check if user exists
+      const targetUser = await storage.getUser(id);
+      if (!targetUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Delete user from database
+      await db.delete(users).where(eq(users.id, id));
+      
+      res.json({ message: 'User deleted successfully', deletedUserId: id });
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
+
+  // GET /api/users - List all users with filtering by region, status, or user_type
+  app.get('/api/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      // Only admins can list all users
+      if (currentUser?.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required to list users' });
+      }
+      
+      const { region, userStatus, userType, limit = '50', offset = '0' } = req.query;
+      
+      // Validate query parameters
+      if (userType && !['One time', 'Recurring'].includes(userType as string)) {
+        return res.status(400).json({ message: 'Invalid userType filter. Must be "One time" or "Recurring"' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus as string)) {
+        return res.status(400).json({ message: 'Invalid userStatus filter. Must be "Locked", "Active", or "Expired"' });
+      }
+      
+      // Build query with filters
+      let query = db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        provider: users.provider,
+        role: users.role,
+        region: users.region,
+        userType: users.userType,
+        userStatus: users.userStatus,
+        expirationDate: users.expirationDate,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      }).from(users);
+      
+      // Apply filters
+      const conditions = [];
+      if (region) {
+        conditions.push(eq(users.region, region as string));
+      }
+      if (userStatus) {
+        conditions.push(eq(users.userStatus, userStatus as any));
+      }
+      if (userType) {
+        conditions.push(eq(users.userType, userType as any));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      // Apply pagination
+      const limitNum = Math.min(parseInt(limit as string) || 50, 100); // Max 100 users per request
+      const offsetNum = Math.max(parseInt(offset as string) || 0, 0);
+      
+      query = query.limit(limitNum).offset(offsetNum);
+      
+      const usersList = await query;
+      
+      // Get total count for pagination metadata
+      let countQuery = db.select({ count: sql`count(*)` }).from(users);
+      if (conditions.length > 0) {
+        countQuery = countQuery.where(and(...conditions));
+      }
+      const [{ count }] = await countQuery;
+      
+      res.json({
+        users: usersList,
+        pagination: {
+          total: parseInt(count as string),
+          limit: limitNum,
+          offset: offsetNum,
+          hasMore: offsetNum + limitNum < parseInt(count as string)
+        },
+        filters: {
+          region: region || null,
+          userStatus: userStatus || null,
+          userType: userType || null
+        }
+      });
+    } catch (error: any) {
+      console.error('Error listing users:', error);
+      res.status(500).json({ message: 'Failed to list users' });
+    }
+  });
+
+  // Legacy User Management API Endpoints (kept for backwards compatibility)
   
   // Get user profile (including new fields)
   app.get('/api/users/profile', isAuthenticated, async (req: any, res) => {
