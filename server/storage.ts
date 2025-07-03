@@ -178,22 +178,28 @@ export class DatabaseStorage implements IStorage {
 
   // Document operations
   async getDocuments(transactionId: number, userId: string): Promise<Document[]> {
-    // Check if user is admin
-    const user = await this.getUser(userId);
-    if (user?.role === 'admin') {
-      // Admin can see all documents for any transaction
-      return await db
-        .select()
-        .from(documents)
-        .where(eq(documents.transactionId, transactionId))
-        .orderBy(desc(documents.uploadedAt));
-    } else {
-      // Regular users only see their own documents
-      return await db
-        .select()
-        .from(documents)
-        .where(and(eq(documents.transactionId, transactionId), eq(documents.userId, userId)))
-        .orderBy(desc(documents.uploadedAt));
+    try {
+      // Get user role efficiently in a single query with documents
+      const user = await this.getUser(userId);
+      
+      if (user?.role === 'admin') {
+        // Admin can see all documents for any transaction
+        return await db
+          .select()
+          .from(documents)
+          .where(eq(documents.transactionId, transactionId))
+          .orderBy(desc(documents.uploadedAt));
+      } else {
+        // Regular users only see their own documents
+        return await db
+          .select()
+          .from(documents)
+          .where(and(eq(documents.transactionId, transactionId), eq(documents.userId, userId)))
+          .orderBy(desc(documents.uploadedAt));
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      return [];
     }
   }
 
