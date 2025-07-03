@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema, users } from "@shared/schema";
+import { insertTransactionSchema, createTransactionSchema, insertChatSessionSchema, insertChatMessageSchema, users, documents, transactions } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -356,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // POST /api/transactions/:id/upload - Upload documents to a transaction
+  // POST /api/transactions/:id/upload - Upload documents to a transaction (ATOMIC)
   app.post('/api/transactions/:id/upload', mockAuth, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
@@ -381,80 +381,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const uploadResults: any[] = [];
       const failedUploads: any[] = [];
+      const storageUploads: string[] = []; // Track storage uploads for rollback
 
-      // Upload each file to Replit Object Storage and create document records
-      for (const file of files) {
-        try {
-          // Upload to Replit Object Storage using base64 workaround
-          const uploadResult = await replitObjectStorage.uploadFile(
-            file.buffer,
-            transaction.name,
-            transaction.id,
-            file.originalname,
-            file.mimetype
-          );
+      try {
+        // ATOMIC OPERATION: Use database transaction
+        await db.transaction(async (tx) => {
+          // Upload each file to Replit Object Storage and create document records atomically
+          for (const file of files) {
+            // Upload to Replit Object Storage using base64 workaround
+            const uploadResult = await replitObjectStorage.uploadFile(
+              file.buffer,
+              transaction.name,
+              transaction.id,
+              file.originalname,
+              file.mimetype
+            );
 
-          // Create document record in database
-          const document = await storage.createDocument({
-            transactionId: transaction.id,
-            userId,
-            fileName: uploadResult.objectKey.split('/').pop() || file.originalname,
-            originalFileName: file.originalname,
-            fileSize: file.size,
-            mimeType: file.mimetype,
-            uploaderId: userId, // Required field in schema
-            category: category || 'hoa',
-            uploadStatus: 'completed',
-            s3Key: uploadResult.objectKey,
-            s3Bucket: uploadResult.bucketName,
-            s3Region: 'default',
-            s3Url: uploadResult.objectUrl,
-            etag: uploadResult.etag || ''
-          });
+            // Track for potential rollback
+            storageUploads.push(uploadResult.objectKey);
 
-          uploadResults.push({
-            documentId: document.id,
-            filename: file.originalname,
-            objectKey: uploadResult.objectKey,
-            fileSize: uploadResult.fileSize,
-            category: document.category,
-            uploadedAt: document.uploadedAt
-          });
+            // Create document record in database within transaction
+            const [document] = await tx.insert(documents).values({
+              transactionId: transaction.id,
+              userId,
+              fileName: uploadResult.objectKey.split('/').pop() || file.originalname,
+              originalFileName: file.originalname,
+              fileSize: file.size,
+              mimeType: file.mimetype,
+              uploaderId: userId,
+              category: category || 'hoa',
+              uploadStatus: 'completed',
+              s3Key: uploadResult.objectKey,
+              s3Bucket: uploadResult.bucketName,
+              s3Region: 'default',
+              s3Url: uploadResult.objectUrl,
+              etag: uploadResult.etag || ''
+            }).returning();
 
-        } catch (fileError: unknown) {
-          const errorMessage = fileError instanceof Error ? fileError.message : 'File upload failed';
-          console.error(`Upload failed for ${file.originalname}:`, fileError);
-          
-          failedUploads.push({
-            filename: file.originalname,
-            error: errorMessage
-          });
+            // Update transaction document count atomically
+            await tx.update(transactions)
+              .set({ 
+                numDocuments: sql`${transactions.numDocuments} + 1`,
+                updatedAt: new Date()
+              })
+              .where(eq(transactions.id, transactionId));
+
+            uploadResults.push({
+              documentId: document.id,
+              filename: file.originalname,
+              objectKey: uploadResult.objectKey,
+              fileSize: uploadResult.fileSize,
+              category: document.category,
+              uploadedAt: document.uploadedAt
+            });
+          }
+        });
+
+        // Get updated transaction with current document count
+        const updatedTransaction = await storage.getTransaction(transactionId, userId);
+
+        res.status(200).json({
+          success: uploadResults.length > 0,
+          message: `Uploaded ${uploadResults.length} of ${files.length} files successfully (ATOMIC)`,
+          uploadResults,
+          failedUploads,
+          transaction: {
+            id: updatedTransaction?.id,
+            name: updatedTransaction?.name,
+            numDocuments: updatedTransaction?.numDocuments,
+            address: updatedTransaction?.address,
+            type: updatedTransaction?.transactionType
+          },
+          summary: {
+            totalFiles: files.length,
+            successful: uploadResults.length,
+            failed: failedUploads.length,
+            documentsInTransaction: updatedTransaction?.numDocuments || 0
+          }
+        });
+
+      } catch (error: any) {
+        console.error('Atomic document upload error:', error);
+        
+        // ROLLBACK: Clean up any uploaded files if database transaction failed
+        if (storageUploads.length > 0) {
+          try {
+            for (const objectKey of storageUploads) {
+              await replitObjectStorage.deleteFile(objectKey);
+            }
+            console.log(`Rolled back ${storageUploads.length} uploaded files`);
+          } catch (cleanupError) {
+            console.error('Storage cleanup error:', cleanupError);
+          }
         }
+
+        res.status(500).json({ 
+          message: 'Atomic upload failed - all changes rolled back', 
+          error: error.message 
+        });
       }
-
-      // Get updated transaction with current document count
-      const updatedTransaction = await storage.getTransaction(transactionId, userId);
-
-      res.status(200).json({
-        success: uploadResults.length > 0,
-        message: `Uploaded ${uploadResults.length} of ${files.length} files successfully`,
-        uploadResults,
-        failedUploads,
-        transaction: {
-          id: updatedTransaction?.id,
-          name: updatedTransaction?.name,
-          numDocuments: updatedTransaction?.numDocuments, // Shows updated count
-          address: updatedTransaction?.address,
-          type: updatedTransaction?.transactionType
-        },
-        summary: {
-          totalFiles: files.length,
-          successful: uploadResults.length,
-          failed: failedUploads.length,
-          documentsInTransaction: updatedTransaction?.numDocuments || 0
-        }
-      });
-
     } catch (error: any) {
       console.error('Transaction document upload error:', error);
       res.status(500).json({ 
