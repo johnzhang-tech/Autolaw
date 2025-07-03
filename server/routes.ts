@@ -340,6 +340,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct file download endpoint for Replit Object Storage
+  app.get('/api/storage/download/:objectKey(*)', async (req: any, res) => {
+    try {
+      const objectKey = decodeURIComponent(req.params.objectKey);
+      console.log(`Direct download request for object key: ${objectKey}`);
+      
+      // Download file from Replit Object Storage
+      const result = await replitObjectStorage.client.downloadAsBytes(objectKey);
+      
+      if (!result.ok) {
+        console.error('Failed to download file from storage:', result.error);
+        return res.status(404).json({ message: 'File not found in storage' });
+      }
+      
+      // Set appropriate headers and serve the file
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${objectKey.split('/').pop()}"`);
+      
+      // Convert to Buffer if needed and send
+      const buffer = Buffer.isBuffer(result.value) ? result.value : Buffer.from(result.value);
+      res.send(buffer);
+    } catch (error: any) {
+      console.error('Direct download error:', error);
+      res.status(500).json({ message: 'Download failed', error: error.message });
+    }
+  });
+
   // Replit Object Storage status endpoint
   app.get('/api/storage/status', mockAuth, async (req: any, res) => {
     try {

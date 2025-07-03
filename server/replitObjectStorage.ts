@@ -16,7 +16,7 @@ interface ReplitObjectStorageConfig {
 
 class ReplitObjectStorageService {
   private bucketName: string;
-  private client: Client;
+  public client: Client; // Make client public for direct access in routes
 
   constructor(config?: ReplitObjectStorageConfig) {
     this.bucketName = config?.bucketName || 'default';
@@ -87,17 +87,24 @@ class ReplitObjectStorageService {
    */
   async generateDownloadUrl(objectKey: string, expiresIn: number = 3600): Promise<string> {
     try {
-      // Use official Replit Object Storage SDK for downloading
+      console.log(`Generating download URL for object key: ${objectKey}`);
+      
+      // Check if file exists first by attempting to download
       const result = await this.client.downloadAsBytes(objectKey);
       
       if (!result.ok) {
-        throw new Error(`Failed to generate download URL: ${result.error}`);
+        console.error('Replit Object Storage file not found:', result.error);
+        throw new Error(`File not found in storage: ${JSON.stringify(result.error)}`);
       }
       
-      // For now, return a direct URL since we have access to the file
-      return `https://replit.com/object-storage/buckets/${this.bucketName}/objects/${encodeURIComponent(objectKey)}`;
+      // For Replit Object Storage, return a direct API endpoint that serves the file
+      // This bypasses the presigned URL requirement and serves files directly through our API
+      console.log(`File exists in storage, returning API download endpoint for ${objectKey}`);
+      return `/api/storage/download/${encodeURIComponent(objectKey)}`;
     } catch (error) {
-      throw new Error(`Failed to generate download URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error in generateDownloadUrl:', error);
+      const errorMessage = error instanceof Error ? error.message : `Unknown error: ${JSON.stringify(error)}`;
+      throw new Error(`Failed to generate download URL: ${errorMessage}`);
     }
   }
 
