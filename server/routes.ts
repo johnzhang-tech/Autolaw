@@ -581,6 +581,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
+  app.post('/api/transactions/:id/upload-single', mockAuth, upload.single('document'), async (req: any, res) => {
+    try {
+      const file = req.file as Express.Multer.File;
+      if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      const { category } = req.body;
+
+      // Validate transaction ID
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Verify transaction exists and belongs to user
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+
+      let objectKey: string | null = null;
+
+      try {
+        // ATOMIC OPERATION: Use database transaction
+        const result = await db.transaction(async (tx) => {
+          // 1. Upload to Replit Object Storage first
+          const uploadResult = await replitObjectStorage.uploadFile(
+            file.buffer,
+            file.originalname,
+            transaction.name,
+            transactionId,
+            file.mimetype
+          );
+
+          objectKey = uploadResult.objectKey; // Track for potential rollback
+
+          // 2. Create document record in database
+          const documentData = {
+            transactionId,
+            userId,
+            originalFileName: file.originalname,
+            fileName: uploadResult.objectKey.split('/').pop() || file.originalname,
+            fileSize: file.size,
+            mimeType: file.mimetype,
+            category: category || 'other',
+            uploadStatus: 'completed' as const,
+            s3Key: uploadResult.objectKey,
+            s3Bucket: uploadResult.bucketName,
+            s3Url: uploadResult.objectUrl,
+            etag: uploadResult.etag
+          };
+
+          const [document] = await tx.insert(documents).values([documentData]).returning();
+
+          // 3. Update transaction document count
+          const [updatedTransaction] = await tx
+            .update(transactions)
+            .set({ 
+              numDocuments: sql`${transactions.numDocuments} + 1`,
+              updatedAt: new Date()
+            })
+            .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)))
+            .returning();
+
+          return { document, transaction: updatedTransaction };
+        });
+
+        console.log(`Single document uploaded successfully: ${file.originalname} to transaction ${transactionId}`);
+
+        res.json({
+          success: true,
+          message: `Document "${file.originalname}" uploaded successfully to transaction ${transactionId}`,
+          document: {
+            id: result.document.id,
+            fileName: result.document.fileName,
+            originalFileName: result.document.originalFileName,
+            fileSize: result.document.fileSize,
+            mimeType: result.document.mimeType,
+            category: result.document.category,
+            uploadStatus: result.document.uploadStatus,
+            uploadedAt: result.document.uploadedAt
+          },
+          transaction: {
+            id: result.transaction.id,
+            name: result.transaction.name,
+            numDocuments: result.transaction.numDocuments
+          }
+        });
+
+      } catch (error: any) {
+        console.error('Atomic single document upload error:', error);
+        
+        // ROLLBACK: Clean up uploaded file if database transaction failed
+        if (objectKey) {
+          try {
+            await replitObjectStorage.deleteFile(objectKey);
+            console.log(`Rolled back uploaded file: ${objectKey}`);
+          } catch (cleanupError) {
+            console.error('Storage cleanup error:', cleanupError);
+          }
+        }
+
+        res.status(500).json({ 
+          message: 'Single document upload failed - all changes rolled back', 
+          error: error.message 
+        });
+      }
+    } catch (error: any) {
+      console.error('Single document upload error:', error);
+      res.status(500).json({ 
+        message: 'Upload failed', 
+        error: error.message 
+      });
+    }
+  });
+
   // Document endpoints
   app.get('/api/transactions/:id/documents', mockAuth, async (req: any, res) => {
     try {

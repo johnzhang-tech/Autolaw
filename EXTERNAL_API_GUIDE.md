@@ -220,15 +220,76 @@ Authorization: Session Cookie
 }
 ```
 
-## File Upload Specifications
+## Document Upload APIs
 
-### Supported File Types
+### Bulk Upload (Multiple Files)
+Upload up to 60 files in a single request with atomic transaction guarantees.
+
+```bash
+curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload" \
+  -H "X-API-Key: docuai_demo_key_123" \
+  -F "documents=@/path/to/file1.pdf" \
+  -F "documents=@/path/to/file2.pdf" \
+  -F "documents=@/path/to/file3.pdf" \
+  -F "category=contract"
+```
+
+### Single Document Upload (One-by-One)
+Upload documents individually with full data consistency and atomic rollback protection.
+
+```bash
+curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-single" \
+  -H "X-API-Key: docuai_demo_key_123" \
+  -F "document=@/path/to/contract.pdf" \
+  -F "category=contract"
+```
+
+**Single Upload Response:**
+```json
+{
+  "success": true,
+  "message": "Document \"contract.pdf\" uploaded successfully to transaction 17",
+  "document": {
+    "id": 145,
+    "fileName": "contract_1751648123456.pdf",
+    "originalFileName": "contract.pdf",
+    "fileSize": 248576,
+    "mimeType": "application/pdf",
+    "category": "contract",
+    "uploadStatus": "completed",
+    "uploadedAt": "2025-07-04T22:48:43.456Z"
+  },
+  "transaction": {
+    "id": 17,
+    "name": "API Test Transaction",
+    "numDocuments": 1
+  }
+}
+```
+
+### Data Consistency Guarantees
+
+Both upload endpoints provide **ACID compliance**:
+
+1. **Atomicity**: Either all operations succeed or all fail (no partial uploads)
+2. **Consistency**: Database constraints maintained throughout upload process
+3. **Isolation**: Concurrent uploads don't interfere with each other
+4. **Durability**: Successful uploads are permanently stored
+
+**Rollback Protection:**
+- If database insertion fails, uploaded files are automatically deleted from storage
+- Transaction document counts remain accurate even during failures
+- No orphaned files or inconsistent states
+
+### File Upload Specifications
+
+#### Supported File Types
 - **Documents**: PDF, DOC, DOCX, TXT
 - **Images**: JPEG, PNG, GIF
 - **Max Size**: 10MB per file
-- **Max Files**: 60 files per transaction
+- **Max Files**: 60 files per bulk upload, 1 file per single upload
 
-### Storage System
+#### Storage System
 - **Backend**: Replit Object Storage with base64 workaround
 - **Organization**: Transaction-based folders (`TransactionName_ID/`)
 - **Metadata**: PostgreSQL database with file tracking
