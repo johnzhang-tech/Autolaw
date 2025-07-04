@@ -66,13 +66,24 @@ type TransactionForm = z.infer<typeof transactionSchema>;
 export default function Create() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<number | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<TransactionForm>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      transactionType: "purchase",
+    },
+  });
+
+  const editForm = useForm<TransactionForm>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       name: "",
@@ -103,6 +114,30 @@ export default function Create() {
       });
       setIsTransactionDialogOpen(false);
       form.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update transaction mutation
+  const updateTransactionMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: TransactionForm }) => {
+      return await apiRequest("PUT", `/api/transactions/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Transaction updated successfully",
+      });
+      setIsEditDialogOpen(false);
+      setEditingTransaction(null);
+      editForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
     },
     onError: (error: any) => {
@@ -157,6 +192,17 @@ export default function Create() {
     },
   });
 
+  const openEditDialog = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    // Pre-populate the edit form with current transaction data
+    editForm.reset({
+      name: transaction.name,
+      address: transaction.address || "",
+      transactionType: transaction.transactionType as "purchase" | "sale" | "refinance" | "rental",
+    });
+    setIsEditDialogOpen(true);
+  };
+
   const openDeleteDialog = (transaction: Transaction) => {
     setDeletingTransaction(transaction);
     setIsDeleteDialogOpen(true);
@@ -170,6 +216,12 @@ export default function Create() {
 
   const onSubmit = (data: TransactionForm) => {
     createTransactionMutation.mutate(data);
+  };
+
+  const onEditSubmit = (data: TransactionForm) => {
+    if (editingTransaction) {
+      updateTransactionMutation.mutate({ id: editingTransaction.id, data });
+    }
   };
 
   return (
@@ -323,13 +375,19 @@ export default function Create() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => setSelectedTransaction(transaction.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditDialog(transaction);
+                                }}
                               >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => openDeleteDialog(transaction)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDeleteDialog(transaction);
+                                }}
                                 className="text-red-600"
                               >
                                 <Trash className="h-4 w-4 mr-2" />
@@ -477,6 +535,84 @@ export default function Create() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Transaction Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Transaction</DialogTitle>
+            <DialogDescription>
+              Update transaction details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="e.g., 123 Main St Purchase" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Property Address (Optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="123 Main St, City, State" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="transactionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select transaction type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="purchase">Purchase</SelectItem>
+                        <SelectItem value="sale">Sale</SelectItem>
+                        <SelectItem value="refinance">Refinance</SelectItem>
+                        <SelectItem value="rental">Rental</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={updateTransactionMutation.isPending}>
+                  {updateTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Update Transaction
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
