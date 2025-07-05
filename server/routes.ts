@@ -8,6 +8,7 @@ import { z } from "zod";
 import multer from 'multer';
 import { generateDocumentResponse, generateChatTitle } from './openai';
 import { replitObjectStorage } from './replitObjectStorage';
+import { webhookService } from './webhookService';
 import { setupAuth, isAuthenticated } from './replitAuth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -331,6 +332,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Webhook management endpoints
+  app.get('/api/webhook/config', flexAuth, async (req: any, res) => {
+    try {
+      const config = webhookService.getConfig();
+      res.json({
+        configured: !!config.url,
+        url: config.url ? config.url.replace(/([^/])\w*([^/])/, '$1***$2') : 'Not configured', // Mask URL for security
+        timeout: config.timeout,
+        retries: config.retries,
+        environmentVariables: {
+          N8N_WEBHOOK_URL: !!process.env.N8N_WEBHOOK_URL,
+          N8N_WEBHOOK_SECRET: !!process.env.N8N_WEBHOOK_SECRET
+        }
+      });
+    } catch (error: any) {
+      console.error("Webhook config error:", error);
+      res.status(500).json({ message: "Failed to get webhook config", error: error.message });
+    }
+  });
+
+  app.post('/api/webhook/test', flexAuth, async (req: any, res) => {
+    try {
+      const result = await webhookService.testConnection();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Webhook test error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Webhook test failed", 
+        error: error.message 
+      });
+    }
+  });
+
   // Transaction endpoints
   app.get('/api/transactions', flexAuth, async (req: any, res) => {
     try {
@@ -532,6 +567,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get updated transaction with current document count
         const updatedTransaction = await storage.getTransaction(transactionId, userId);
 
+        // WEBHOOK: Notify n8n about transaction with new documents
+        if (uploadResults.length > 0 && updatedTransaction) {
+          try {
+            const user = await storage.getUser(userId);
+            const allDocuments = await storage.getDocuments(transactionId, userId);
+            if (user) {
+              await webhookService.onTransactionCreated(updatedTransaction, user, allDocuments);
+            }
+          } catch (webhookError) {
+            console.error('Webhook notification failed (non-blocking):', webhookError);
+          }
+        }
+
         res.status(200).json({
           success: uploadResults.length > 0,
           message: `Uploaded ${uploadResults.length} of ${files.length} files successfully (ATOMIC)`,
@@ -673,6 +721,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         console.log(`Single document uploaded successfully: ${file.originalname} to transaction ${transactionId}`);
+
+        // WEBHOOK: Notify n8n about transaction with new document
+        try {
+          const user = await storage.getUser(userId);
+          const allDocuments = await storage.getDocuments(transactionId, userId);
+          if (user && result.transaction) {
+            await webhookService.onTransactionCreated(result.transaction, user, allDocuments);
+          }
+        } catch (webhookError) {
+          console.error('Webhook notification failed (non-blocking):', webhookError);
+        }
 
         res.json({
           success: true,
