@@ -195,6 +195,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Production URL**: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev
   - **Supported External Operations**: All transaction CRUD, document upload/download, user management APIs
   - **Cache Integration Fix**: Resolved UI document counter not updating after uploads by adding transaction list cache invalidation
+- July 5, 2025. **ONE-BY-ONE DOCUMENT UPLOAD: ACID-Compliant Single File Upload API**
+  - **Single Upload Endpoint**: `POST /api/transactions/{id}/upload-single` for individual document uploads
+  - **ACID Compliance**: Full atomic transaction guarantees with automatic rollback on failures
+  - **Data Consistency**: Database and storage remain perfectly synchronized during upload process
+  - **n8n Integration**: Complete configuration guide and troubleshooting for n8n automation workflows
+  - **Enhanced Error Handling**: Detailed debug information for troubleshooting upload issues
+  - **Parameter Validation**: Fixed function signature mismatches and parameter ordering bugs
+  - **Production Testing**: Successfully tested with real file uploads and verified data integrity
+  - **Rollback Protection**: Failed uploads automatically clean up storage files to prevent orphaned data
 
 ## Recent Architectural Changes
 

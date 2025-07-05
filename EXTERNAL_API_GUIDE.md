@@ -244,6 +244,70 @@ curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk
   -F "category=contract"
 ```
 
+#### **n8n HTTP Request Node Configuration:**
+
+**Method:** `POST`  
+**URL:** `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-single`
+
+**Authentication:**
+- **Type:** `Header Auth`
+- **Name:** `X-API-Key`
+- **Value:** `docuai_demo_key_123`
+
+**Body Type:** `Form-Data (multipart/form-data)`
+
+**Body Parameters:**
+- **Name:** `document`
+- **Type:** `File` (Select "Binary Data" option)
+- **Value:** `{{ $binary.data }}` (or your binary data reference)
+- **Name:** `category` 
+- **Type:** `Text`
+- **Value:** `contract` (or "hoa", "inspection", "financial", "legal")
+
+**Important n8n Settings:**
+- ✅ Enable "Send binary data" option
+- ✅ Set "Binary Property" to your file's binary property name
+- ✅ Content-Type should be automatically set to `multipart/form-data`
+
+#### **Troubleshooting n8n 400 "No file uploaded" Error:**
+
+**Common Issues & Solutions:**
+
+1. **Missing Binary Data:**
+   ```
+   Error: { "formData": { "_valueLength": 0 } }
+   ```
+   **Fix:** Ensure binary data is available from previous node (Read Binary Files, HTTP Request, etc.)
+
+2. **Incorrect Form Field Name:**
+   ```
+   Error: "No file uploaded"
+   ```
+   **Fix:** Field name must be exactly `document` (not `file` or `attachment`)
+
+3. **n8n Configuration Steps:**
+   - Add HTTP Request node
+   - Set Method to `POST`
+   - Set URL with correct `transaction_id`
+   - **Body → Send:** Select "Form-Data Multipart"
+   - **Parameters:**
+     - Name: `document`, Type: `File`, Value: `{{ $binary.data }}`
+     - Name: `category`, Type: `Text`, Value: `contract`
+   - **Headers:**
+     - Name: `X-API-Key`, Value: `docuai_demo_key_123`
+
+4. **Testing n8n Setup:**
+   ```bash
+   # Test endpoint directly first:
+   curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/24/upload-single" \
+     -H "X-API-Key: docuai_demo_key_123" \
+     -F "document=@test.txt" \
+     -F "category=test"
+   ```
+
+5. **Binary Data Preparation:**
+   Use "Read Binary Files" node before HTTP Request to load file into `$binary.data`
+
 **Single Upload Response:**
 ```json
 {

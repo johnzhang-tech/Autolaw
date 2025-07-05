@@ -585,8 +585,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/transactions/:id/upload-single', mockAuth, upload.single('document'), async (req: any, res) => {
     try {
       const file = req.file as Express.Multer.File;
+      
+      // Enhanced debugging for n8n integration
+      console.log('Single upload request details:');
+      console.log('- Headers:', JSON.stringify(req.headers, null, 2));
+      console.log('- Body keys:', Object.keys(req.body || {}));
+      console.log('- File object:', file ? {
+        fieldname: file.fieldname,
+        originalname: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype
+      } : 'No file received');
+      
       if (!file) {
-        return res.status(400).json({ message: 'No file uploaded' });
+        return res.status(400).json({ 
+          message: 'No file uploaded',
+          debug: {
+            receivedFields: Object.keys(req.body || {}),
+            expectedField: 'document',
+            contentType: req.headers['content-type'],
+            hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false
+          }
+        });
       }
 
       const userId = req.user.claims.sub;
@@ -612,9 +632,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // 1. Upload to Replit Object Storage first
           const uploadResult = await replitObjectStorage.uploadFile(
             file.buffer,
-            file.originalname,
             transaction.name,
             transactionId,
+            file.originalname,
             file.mimetype
           );
 
@@ -624,6 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const documentData = {
             transactionId,
             userId,
+            uploaderId: userId,
             originalFileName: file.originalname,
             fileName: uploadResult.objectKey.split('/').pop() || file.originalname,
             fileSize: file.size,
