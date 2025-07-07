@@ -66,6 +66,11 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       });
 
       if (response.ok) {
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+        
         // Clear the logged out flag and refresh authentication
         localStorage.removeItem('docuai_logged_out');
         

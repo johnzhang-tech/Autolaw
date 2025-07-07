@@ -26,10 +26,19 @@ export function useAuth() {
   const checkAuth = async () => {
     if (isLoggedOut) return null;
     try {
-      return await refetch();
+      const result = await refetch();
+      if (result.data) {
+        // Successfully authenticated
+        localStorage.removeItem('docuai_logged_out');
+        setIsLoggedOut(false);
+      }
+      return result;
     } catch (error) {
-      setIsLoggedOut(true);
-      localStorage.setItem('docuai_logged_out', 'true');
+      // Only set logged out if it's actually a 401 error
+      if (error?.message?.includes('401')) {
+        setIsLoggedOut(true);
+        localStorage.setItem('docuai_logged_out', 'true');
+      }
       return null;
     }
   };
