@@ -35,17 +35,22 @@ export function useAuth() {
       // Wait a moment for cookie to be set
       setTimeout(async () => {
         try {
-          console.log('Document cookies after delay:', document.cookie);
+          const token = localStorage.getItem('docuai_token');
+          console.log('JWT token available:', token ? 'Yes' : 'No');
+          
+          if (!token) {
+            console.log('No JWT token found');
+            return;
+          }
           
           const response = await fetch('/api/auth/user', {
-            credentials: 'include',
             headers: {
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
             }
           });
           
           console.log('Manual auth test status:', response.status);
-          console.log('Response headers:', [...response.headers.entries()]);
           
           if (response.ok) {
             const userData = await response.json();
@@ -60,7 +65,7 @@ export function useAuth() {
         } catch (error) {
           console.error('Manual auth test ERROR:', error);
         }
-      }, 500); // Wait 500ms for session cookie to be set
+      }, 500);
     };
     
     window.addEventListener('login-success', handleLoginSuccess);

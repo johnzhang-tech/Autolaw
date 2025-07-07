@@ -10,10 +10,46 @@ import { generateDocumentResponse, generateChatTitle } from './openai';
 import { replitObjectStorage } from './replitObjectStorage';
 import { webhookService } from './webhookService';
 import { setupAuth, isAuthenticated } from './replitAuth';
+import { tokenAuth, generateToken, type JWTPayload } from './tokenAuth';
+import jwt from 'jsonwebtoken';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication (includes Google OAuth)
   await setupAuth(app);
+
+  // JWT-based auth endpoint (overrides session-based auth)
+  app.get('/api/auth/user', async (req: any, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    
+    console.log('JWT Auth check - token provided:', token ? 'Yes' : 'No');
+    
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    try {
+      const payload = jwt.verify(token, process.env.SESSION_SECRET!) as any;
+      console.log('JWT token verified for user:', payload.userId);
+      
+      const user = await storage.getUser(payload.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { passwordHash, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error: any) {
+      console.log('JWT verification failed:', error.message);
+      res.status(401).json({ message: "Invalid or expired token" });
+    }
+  });
+
+  // JWT logout endpoint
+  app.post('/api/auth/logout', (req: any, res) => {
+    // For JWT, logout is handled on the client side by removing the token
+    res.json({ message: "Logged out successfully" });
+  });
 
   // Ensure mock user exists in database for development
   app.use(async (req: any, res: any, next: any) => {

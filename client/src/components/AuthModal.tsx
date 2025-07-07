@@ -67,18 +67,21 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       });
 
       if (response.ok) {
+        const data = await response.json();
+        
+        // Store JWT token in localStorage
+        localStorage.setItem('docuai_token', data.token);
+        localStorage.removeItem('docuai_logged_out');
+        
         toast({
           title: "Login Successful",
           description: "Welcome back!",
         });
         
-        // Clear the logged out flag and refresh authentication
-        localStorage.removeItem('docuai_logged_out');
-        
-        console.log('Login successful, closing modal and refreshing auth state');
+        console.log('Login successful with JWT token, closing modal');
         resetAndClose();
         
-        // Trigger auth check immediately
+        // Trigger auth check with token
         window.dispatchEvent(new CustomEvent('login-success'));
       } else {
         const error = await response.json();

@@ -318,32 +318,28 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
 
-      req.logIn(user, (err) => {
-        if (err) {
-          console.error("Login error:", err);
-          return res.status(500).json({ message: "Login failed" });
+      // Generate JWT token instead of using sessions
+      const tokenPayload = {
+        userId: user.id,
+        email: user.email,
+        role: user.role
+      };
+
+      const token = jwt.sign(tokenPayload, process.env.SESSION_SECRET!, { expiresIn: '7d' });
+      
+      console.log('JWT token generated for user:', user.id, user.email);
+      
+      res.json({ 
+        message: "Login successful", 
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          role: user.role
         }
-        
-        // Store user in session for local authentication
-        req.session.user = user;
-        console.log('Session user stored:', user.id, user.email);
-        console.log('Session ID:', req.sessionID);
-        console.log('Session data:', req.session);
-        
-        // Force session save and add debugging
-        req.session.save((err: any) => {
-          if (err) {
-            console.error('Session save error:', err);
-          } else {
-            console.log('Session saved successfully');
-          }
-          
-          // Debug response headers to see if Set-Cookie is included
-          console.log('Response headers before sending:', res.getHeaders());
-          console.log('Session cookie value:', req.sessionID);
-          
-          res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
-        });
       });
     })(req, res, next);
   });
