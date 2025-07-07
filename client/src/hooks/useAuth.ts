@@ -22,10 +22,13 @@ export function useAuth() {
     setIsLoggedOut(loggedOut === 'true');
     
     // Listen for login success events
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = async () => {
       setIsLoggedOut(false);
       localStorage.removeItem('docuai_logged_out');
-      refetch(); // Refresh user data
+      // Wait a moment before fetching to ensure session cookie is properly set
+      setTimeout(() => {
+        refetch();
+      }, 200);
     };
     
     window.addEventListener('login-success', handleLoginSuccess);

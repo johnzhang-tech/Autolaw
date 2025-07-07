@@ -62,6 +62,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Include cookies in the request
         body: JSON.stringify(data),
       });
 
@@ -76,8 +77,10 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
         
         resetAndClose();
         
-        // Instead of reloading, manually trigger auth check
-        window.dispatchEvent(new CustomEvent('login-success'));
+        // Wait a moment for the session to be properly set, then trigger auth check
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('login-success'));
+        }, 100);
       } else {
         const error = await response.json();
         toast({
@@ -103,6 +106,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Include cookies in the request
         body: JSON.stringify({
           email: data.email,
           password: data.password,
