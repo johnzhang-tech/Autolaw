@@ -42,10 +42,10 @@ export function getSession() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
+      httpOnly: false, // TEMPORARILY disable httpOnly for debugging
       secure: false, // Set to false for development
       maxAge: sessionTtl,
-      sameSite: 'lax', // Add sameSite for better compatibility
+      sameSite: 'none', // Change to 'none' for cross-origin requests
       domain: undefined // Let the browser handle domain automatically
     },
   });
@@ -326,6 +326,8 @@ export async function setupAuth(app: Express) {
         // Store user in session for local authentication
         req.session.user = user;
         console.log('Session user stored:', user.id, user.email);
+        console.log('Session ID:', req.sessionID);
+        console.log('Session data:', req.session);
         
         res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
       });

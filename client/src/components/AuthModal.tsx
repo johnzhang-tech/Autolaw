@@ -75,12 +75,11 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
         // Clear the logged out flag and refresh authentication
         localStorage.removeItem('docuai_logged_out');
         
+        console.log('Login successful, closing modal and refreshing auth state');
         resetAndClose();
         
-        // Wait a moment for the session to be properly set, then trigger auth check
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('login-success'));
-        }, 100);
+        // Trigger auth check immediately
+        window.dispatchEvent(new CustomEvent('login-success'));
       } else {
         const error = await response.json();
         toast({

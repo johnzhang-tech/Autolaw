@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Content-Type: application/json; charset=utf-8
+Content-Length: 103
+ETag: W/"67-EPy0Zrc9mDVBf7cjKyRc4eNkVYc"
+Set-Cookie: connect.sid=s%3A2wZOs6Qh75AdBtRDUBYxif6Dvlm0btiz.g%2F4icjmtzU3bjQ8%2FovAFT4GEQv7m%2FNTomJEr58Z3rts; Path=/; Expires=Mon, 14 Jul 2025 18:47:12 GMT; HttpOnly; SameSite=Lax
+Date: Mon, 07 Jul 2025 18:47:12 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+

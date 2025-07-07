@@ -6,10 +6,10 @@ export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const queryClient = useQueryClient();
 
-  // Simple check without automatic retries
+  // Simple check without automatic retries - DISABLE FOR NOW TO STOP REQUEST LOOP
   const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
-    enabled: false, // Never auto-fetch
+    enabled: false, // DISABLED - stop the request spam
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -25,10 +25,35 @@ export function useAuth() {
     const handleLoginSuccess = async () => {
       setIsLoggedOut(false);
       localStorage.removeItem('docuai_logged_out');
-      // Wait a moment before fetching to ensure session cookie is properly set
-      setTimeout(() => {
-        refetch();
-      }, 200);
+      
+      // Test auth manually with session cookie
+      console.log('Login success event received, testing auth...');
+      console.log('Document cookies:', document.cookie);
+      
+      try {
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log('Manual auth test status:', response.status);
+        console.log('Manual auth test headers sent:', response.request?.headers);
+        
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('Manual auth test SUCCESS:', userData.email);
+          // Manually update the query cache
+          queryClient.setQueryData(["/api/auth/user"], userData);
+        } else {
+          console.log('Manual auth test FAILED:', response.status);
+          const errorData = await response.text();
+          console.log('Error response:', errorData);
+        }
+      } catch (error) {
+        console.error('Manual auth test ERROR:', error);
+      }
     };
     
     window.addEventListener('login-success', handleLoginSuccess);

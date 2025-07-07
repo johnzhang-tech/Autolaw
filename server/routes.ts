@@ -1027,9 +1027,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth user endpoint - handles both session and OAuth without loops
   app.get('/api/auth/user', (req: any, res) => {
+    console.log('Auth check - isAuthenticated:', req.isAuthenticated ? req.isAuthenticated() : 'undefined');
+    console.log('Auth check - req.user:', req.user ? 'exists' : 'undefined');
+    console.log('Auth check - session.user:', req.session?.user ? 'exists' : 'undefined');
+    console.log('Auth check - sessionID:', req.sessionID);
+    
     // Check if user is authenticated via passport (OAuth or local)
     if (req.isAuthenticated && req.isAuthenticated() && req.user) {
       const userId = req.user.id;
+      console.log('Using passport user:', userId);
       storage.getUser(userId).then(user => {
         if (user) {
           const { passwordHash, ...userResponse } = user;
