@@ -204,16 +204,14 @@ export async function setupAuth(app: Express) {
         return done(null, false, { message: 'Invalid credentials' });
       }
 
-      // Create session format consistent with OAuth
+      // Create session user object for local authentication
       const sessionUser = {
-        claims: {
-          sub: user.id,
-          email: user.email,
-          given_name: user.firstName,
-          family_name: user.lastName,
-          picture: user.profileImageUrl
-        },
-        expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        role: user.role
       };
 
       done(null, sessionUser);
@@ -308,8 +306,13 @@ export async function setupAuth(app: Express) {
 
       req.logIn(user, (err) => {
         if (err) {
+          console.error("Login error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
+        
+        // Store user in session for local authentication
+        req.session.user = user;
+        
         res.json({ message: "Login successful" });
       });
     })(req, res, next);
