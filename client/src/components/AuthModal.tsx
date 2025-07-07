@@ -180,30 +180,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
               Continue with Google
             </Button>
 
-            <Button
-              variant="outline"
-              className="w-full h-12 border-slate-200 hover:bg-slate-50 transition-colors"
-              onClick={() => handleOAuthLogin("microsoft")}
-              disabled={isLoading}
-            >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
-              </svg>
-              Continue with Microsoft
-            </Button>
 
-            {/* Keep Replit Auth as fallback */}
-            <Button
-              variant="outline"
-              className="w-full h-12 border-slate-200 hover:bg-slate-50 transition-colors"
-              onClick={() => handleOAuthLogin("replit")}
-              disabled={isLoading}
-            >
-              <div className="w-5 h-5 mr-3 bg-orange-500 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">R</span>
-              </div>
-              Continue with Replit
-            </Button>
           </div>
 
           <div className="relative">
