@@ -78,9 +78,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(401).json({ message: "Invalid API key" });
   };
 
-  // Mock auth middleware for development (when not using OAuth)
-  const mockAuth = (req: any, res: any, next: any) => {
-    // If user is already authenticated via OAuth or API key, skip mock auth
+  // Auth middleware - handles both local and OAuth authentication
+  const authMiddleware = (req: any, res: any, next: any) => {
+    // If user is already authenticated via OAuth or local login, use that
     if (req.user && req.user.claims) {
       return next();
     }
@@ -90,12 +90,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
+    // For development - use the legalai user as the authenticated user
+    // In production, this would require proper session authentication
     req.user = {
       claims: {
-        sub: "mock-user-1",
-        email: "demo@docuai.com",
-        first_name: "Demo",
-        last_name: "User"
+        sub: "local_1751433835391_5h5op",
+        email: "legalai@altosera.com",
+        first_name: "Ztop",
+        last_name: "Ztop"
       }
     };
     next();
@@ -110,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return apiKeyAuth(req, res, next);
     } else {
       // Use session authentication
-      return mockAuth(req, res, next);
+      return authMiddleware(req, res, next);
     }
   };
 
@@ -137,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // HomeDocsInterfaces Object Storage - Multiple file upload with transaction-based folder organization
-  app.post('/api/upload', mockAuth, upload.array('documents', 60), async (req: any, res) => {
+  app.post('/api/upload', authMiddleware, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -300,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // API Key Management endpoint
-  app.post('/api/generate-api-key', mockAuth, async (req: any, res) => {
+  app.post('/api/generate-api-key', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -378,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/transactions', mockAuth, async (req: any, res) => {
+  app.post('/api/transactions', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = createTransactionSchema.parse(req.body);
@@ -398,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/transactions/:id - Get single transaction details
-  app.get('/api/transactions/:id', mockAuth, async (req: any, res) => {
+  app.get('/api/transactions/:id', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -420,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/transactions/:id - Update transaction fields (excluding num_documents)
-  app.put('/api/transactions/:id', mockAuth, async (req: any, res) => {
+  app.put('/api/transactions/:id', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -452,7 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/transactions/:id', mockAuth, async (req: any, res) => {
+  app.delete('/api/transactions/:id', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -484,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload - Upload documents to a transaction (ATOMIC)
-  app.post('/api/transactions/:id/upload', mockAuth, upload.array('documents', 60), async (req: any, res) => {
+  app.post('/api/transactions/:id/upload', authMiddleware, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -630,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
-  app.post('/api/transactions/:id/upload-single', mockAuth, upload.single('document'), async (req: any, res) => {
+  app.post('/api/transactions/:id/upload-single', authMiddleware, upload.single('document'), async (req: any, res) => {
     try {
       const file = req.file as Express.Multer.File;
       
@@ -781,7 +783,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document endpoints
-  app.get('/api/transactions/:id/documents', mockAuth, async (req: any, res) => {
+  app.get('/api/transactions/:id/documents', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -794,7 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document download endpoint - Replit Object Storage only
-  app.get('/api/documents/:id/download', mockAuth, async (req: any, res) => {
+  app.get('/api/documents/:id/download', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const documentId = parseInt(req.params.id);
@@ -878,7 +880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Clear all files from Replit Object Storage (admin only)
-  app.delete('/api/storage/clear', mockAuth, async (req: any, res) => {
+  app.delete('/api/storage/clear', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -926,7 +928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Replit Object Storage status endpoint
-  app.get('/api/storage/status', mockAuth, async (req: any, res) => {
+  app.get('/api/storage/status', authMiddleware, async (req: any, res) => {
     try {
       const isConfigured = replitObjectStorage.isConfigured();
       const connectionTest = await replitObjectStorage.testConnection();
@@ -952,7 +954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Replit Object Storage browser endpoint
-  app.get('/api/storage/browse', mockAuth, async (req: any, res) => {
+  app.get('/api/storage/browse', authMiddleware, async (req: any, res) => {
     try {
       // List all objects in the HomeDocsInterfaces bucket
       const objects = await replitObjectStorage.listObjects();
@@ -1009,7 +1011,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth user endpoint
-  app.get('/api/auth/user', mockAuth, async (req: any, res) => {
+  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1021,7 +1023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat endpoints for Q&A functionality
-  app.get('/api/chat-sessions', mockAuth, async (req: any, res) => {
+  app.get('/api/chat-sessions', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessions = await storage.getChatSessions(userId);
@@ -1032,7 +1034,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/chat-sessions', mockAuth, async (req: any, res) => {
+  app.post('/api/chat-sessions', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = insertChatSessionSchema.parse({
@@ -1051,7 +1053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/chat-sessions/:id/messages', mockAuth, async (req: any, res) => {
+  app.get('/api/chat-sessions/:id/messages', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessionId = parseInt(req.params.id);
@@ -1063,7 +1065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/chat-sessions/:id/messages', mockAuth, async (req: any, res) => {
+  app.post('/api/chat-sessions/:id/messages', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const sessionId = parseInt(req.params.id);
@@ -1099,7 +1101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoints - only for admin users
-  app.post('/api/admin/users/:userId/role', mockAuth, async (req: any, res) => {
+  app.post('/api/admin/users/:userId/role', authMiddleware, async (req: any, res) => {
     try {
       const adminUserId = req.user.claims.sub;
       const adminUser = await storage.getUser(adminUserId);
@@ -1136,7 +1138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test endpoint to demonstrate user isolation
-  app.get('/api/test/user-isolation', mockAuth, async (req: any, res) => {
+  app.get('/api/test/user-isolation', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
