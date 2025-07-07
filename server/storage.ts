@@ -63,6 +63,9 @@ export interface IStorage {
   getPaymentTransaction(id: number, userId: string): Promise<PaymentTransaction | undefined>;
   createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
   updatePaymentTransaction(id: number, userId: string, updates: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction>;
+
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -445,11 +448,23 @@ export class DatabaseStorage implements IStorage {
 
   // Payment operations
   async getPaymentTransactions(userId: string): Promise<PaymentTransaction[]> {
-    return await db
-      .select()
-      .from(paymentTransactions)
-      .where(eq(paymentTransactions.userId, userId))
-      .orderBy(desc(paymentTransactions.createdAt));
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    
+    if (user?.role === 'admin') {
+      // Admin can see all payment transactions from all users
+      return await db
+        .select()
+        .from(paymentTransactions)
+        .orderBy(desc(paymentTransactions.createdAt));
+    } else {
+      // Regular users only see their own payment transactions
+      return await db
+        .select()
+        .from(paymentTransactions)
+        .where(eq(paymentTransactions.userId, userId))
+        .orderBy(desc(paymentTransactions.createdAt));
+    }
   }
 
   async getPaymentTransaction(id: number, userId: string): Promise<PaymentTransaction | undefined> {
@@ -475,6 +490,14 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(paymentTransactions.id, id), eq(paymentTransactions.userId, userId)))
       .returning();
     return updatedTransaction;
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt));
   }
 }
 

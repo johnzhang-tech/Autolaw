@@ -17,6 +17,7 @@ import {
   LogOut,
   CreditCard,
   Code,
+  Users,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -90,6 +91,20 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
   ];
 
+  // Add admin-only navigation items
+  const adminItems = user?.role === 'admin' ? [
+    {
+      icon: Users,
+      label: "Admin Users",
+      href: "/admin-users",
+      description: "Manage users",
+      color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50"
+    },
+  ] : [];
+
+  // Combine regular and admin navigation items
+  const allNavigationItems = [...navigationItems, ...adminItems];
+
   return (
     <div className={cn(
       "h-screen bg-slate-50 border-r border-slate-200 flex flex-col transition-all duration-300",
@@ -122,7 +137,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navigationItems.map((item) => {
+        {allNavigationItems.map((item) => {
           const isActive = location === item.href;
           const IconComponent = item.icon;
 

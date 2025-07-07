@@ -1694,9 +1694,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint: Get all users with extended information
-  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/users', tokenAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.userId;
       const currentUser = await storage.getUser(userId);
       
       if (currentUser?.role !== 'admin') {

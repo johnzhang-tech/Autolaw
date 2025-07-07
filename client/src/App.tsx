@@ -16,6 +16,7 @@ import Manage from "@/pages/manage";
 import TestApi from "@/pages/test-api";
 import StorageBrowser from "@/pages/storage-browser";
 import StripeSetup from "@/pages/stripe-setup";
+import AdminUsers from "@/pages/admin-users";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -57,6 +58,7 @@ function Router() {
           <Route path="/storage" component={StorageBrowser} />
           <Route path="/stripe-setup" component={StripeSetup} />
           <Route path="/test-api" component={TestApi} />
+          <Route path="/admin-users" component={AdminUsers} />
         </>
       )}
       <Route component={NotFound} />
