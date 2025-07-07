@@ -92,6 +92,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return next();
     }
 
+    // Also check if it's a JWT token being used as API key
+    try {
+      const payload = jwt.verify(apiKey, process.env.SESSION_SECRET!) as any;
+      const user = await storage.getUser(payload.userId);
+      
+      if (user) {
+        req.user = {
+          claims: {
+            sub: user.id,
+            email: user.email,
+            first_name: user.firstName,
+            last_name: user.lastName
+          },
+          apiKey: false // It's actually a JWT token
+        };
+        return next();
+      }
+    } catch (error) {
+      // Not a valid JWT, continue with regular API key validation
+    }
+
     // In production, validate API key against database
     try {
       const user = await storage.getUserByApiKey?.(apiKey);
@@ -114,46 +135,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(401).json({ message: "Invalid API key" });
   };
 
-  // Auth middleware - handles both local and OAuth authentication
-  const authMiddleware = (req: any, res: any, next: any) => {
-    // If user is already authenticated via OAuth, use that
-    if (req.user && req.user.claims) {
-      return next();
-    }
+  // JWT Auth middleware - replaces session-based authentication
+  const authMiddleware = async (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
     
-    // Check for local session authentication
-    if (req.session && req.session.user) {
-      const sessionUser = req.session.user;
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    try {
+      const payload = jwt.verify(token, process.env.SESSION_SECRET!) as any;
+      const user = await storage.getUser(payload.userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Set user in req for compatibility with existing code
       req.user = {
         claims: {
-          sub: sessionUser.id,
-          email: sessionUser.email,
-          first_name: sessionUser.firstName,
-          last_name: sessionUser.lastName
+          sub: user.id,
+          email: user.email,
+          first_name: user.firstName,
+          last_name: user.lastName
         }
       };
-      return next();
+      
+      next();
+    } catch (error: any) {
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
-    
-    // Check if user has been explicitly logged out
-    if (req.session && req.session.loggedOut) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    
-    return res.status(401).json({ message: "Unauthorized - please log in" });
   };
 
-  // Flexible auth middleware - accepts both session and API key
+  // Flexible auth middleware - accepts both JWT and API key
   const flexAuth = (req: any, res: any, next: any) => {
-    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
+    const apiKey = req.headers['x-api-key'];
     
+    // If there's an X-API-Key header, use API key authentication
     if (apiKey) {
-      // Use API key authentication
       return apiKeyAuth(req, res, next);
-    } else {
-      // Use session authentication
-      return authMiddleware(req, res, next);
     }
+    
+    // If authorization header doesn't start with Bearer, it might be an API key
+    if (authHeader && !authHeader.startsWith('Bearer ')) {
+      req.headers['x-api-key'] = authHeader;
+      return apiKeyAuth(req, res, next);
+    }
+    
+    // Otherwise use JWT authentication
+    return authMiddleware(req, res, next);
   };
 
   // Configure multer for multiple file uploads with memory storage for S3
