@@ -14,6 +14,7 @@ import PaymentSimple from "@/pages/payment-simple";
 import Manage from "@/pages/manage";
 import TestApi from "@/pages/test-api";
 import StorageBrowser from "@/pages/storage-browser";
+import StripeSetup from "@/pages/stripe-setup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -48,6 +49,7 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/manage" component={Manage} />
           <Route path="/storage" component={StorageBrowser} />
+          <Route path="/stripe-setup" component={StripeSetup} />
           <Route path="/test-api" component={TestApi} />
         </>
       )}
