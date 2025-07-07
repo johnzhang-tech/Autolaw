@@ -99,10 +99,16 @@ export function useAuth() {
     isAuthenticated: !!user && !isLoggedOut,
     checkAuth,
     logout: () => {
+      // JWT logout - remove token and clear state
+      localStorage.removeItem('docuai_token');
       localStorage.setItem('docuai_logged_out', 'true');
       setIsLoggedOut(true);
       queryClient.clear();
-      window.location.href = '/api/logout';
+      
+      console.log('JWT Logout: Token removed, redirecting to landing page');
+      
+      // Redirect to home page instead of /api/logout
+      window.location.href = '/';
     },
     login: async () => {
       localStorage.removeItem('docuai_logged_out');
