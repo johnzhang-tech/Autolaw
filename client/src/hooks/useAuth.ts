@@ -11,20 +11,34 @@ export function useAuth() {
     setIsLoggedOut(loggedOut === 'true');
   }, []);
 
+  // Simple check without automatic retries
   const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
+    enabled: false, // Never auto-fetch
     retry: false,
-    enabled: !isLoggedOut,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchInterval: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity,
   });
+
+  // Manual auth check function
+  const checkAuth = async () => {
+    if (isLoggedOut) return null;
+    try {
+      return await refetch();
+    } catch (error) {
+      setIsLoggedOut(true);
+      localStorage.setItem('docuai_logged_out', 'true');
+      return null;
+    }
+  };
 
   return {
     user,
     isLoading,
     isAuthenticated: !!user && !isLoggedOut,
+    checkAuth,
     logout: () => {
       localStorage.setItem('docuai_logged_out', 'true');
       setIsLoggedOut(true);
@@ -32,29 +46,10 @@ export function useAuth() {
       window.location.href = '/api/logout';
     },
     login: async () => {
-      try {
-        // Clear localStorage flag
-        localStorage.removeItem('docuai_logged_out');
-        setIsLoggedOut(false);
-        
-        // Call the login endpoint to clear session logout flag
-        await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        // Refetch user data to update authentication state
-        await refetch();
-        queryClient.invalidateQueries();
-      } catch (error) {
-        console.error('Login failed:', error);
-        // Reset logout state if login fails
-        localStorage.setItem('docuai_logged_out', 'true');
-        setIsLoggedOut(true);
-      }
+      localStorage.removeItem('docuai_logged_out');
+      setIsLoggedOut(false);
+      await checkAuth();
     },
-    refreshAuth: async () => {
-      await refetch();
-    }
+    refreshAuth: checkAuth
   };
 }
