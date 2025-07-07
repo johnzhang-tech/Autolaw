@@ -15,6 +15,10 @@ export function useAuth() {
     queryKey: ["/api/auth/user"],
     retry: false,
     enabled: !isLoggedOut,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchInterval: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   return {

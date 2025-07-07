@@ -78,23 +78,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(401).json({ message: "Invalid API key" });
   };
 
-  // Simple development authentication - always return demo user to stop 401 loop
+  // Auth middleware - handles both local and OAuth authentication
   const authMiddleware = (req: any, res: any, next: any) => {
-    // If user is already authenticated via OAuth or local login, use that
+    // If user is already authenticated via OAuth, use that
     if (req.user && req.user.claims) {
       return next();
     }
     
-    // For development - use demo user as default to stop the authentication loop
-    req.user = {
-      claims: {
-        sub: "mock-user-1",
-        email: "demo@docuai.com",
-        first_name: "Demo",
-        last_name: "User"
-      }
-    };
-    next();
+    // Check for local session authentication
+    if (req.session && req.session.user) {
+      const sessionUser = req.session.user;
+      req.user = {
+        claims: {
+          sub: sessionUser.id,
+          email: sessionUser.email,
+          first_name: sessionUser.firstName,
+          last_name: sessionUser.lastName
+        }
+      };
+      return next();
+    }
+    
+    // Check if user has been explicitly logged out
+    if (req.session && req.session.loggedOut) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    return res.status(401).json({ message: "Unauthorized - please log in" });
   };
 
   // Flexible auth middleware - accepts both session and API key
@@ -1004,16 +1014,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth user endpoint
-  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error: any) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+  // Auth user endpoint - handles both session and OAuth without loops
+  app.get('/api/auth/user', (req: any, res) => {
+    // If user is already authenticated via OAuth, use that
+    if (req.user && req.user.claims) {
+      storage.getUser(req.user.claims.sub).then(user => {
+        if (user) {
+          const { passwordHash, ...userResponse } = user;
+          return res.json(userResponse);
+        }
+        return res.status(404).json({ message: "User not found" });
+      }).catch(error => {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
+      });
+      return;
     }
+    
+    // Check for local session authentication
+    if (req.session && req.session.user) {
+      const sessionUser = req.session.user;
+      storage.getUser(sessionUser.id).then(user => {
+        if (user) {
+          const { passwordHash, ...userResponse } = user;
+          return res.json(userResponse);
+        }
+        return res.status(404).json({ message: "User not found" });
+      }).catch(error => {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
+      });
+      return;
+    }
+    
+    // Check if user has been explicitly logged out
+    if (req.session && req.session.loggedOut) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    return res.status(401).json({ message: "Unauthorized - please log in" });
   });
 
   // Chat endpoints for Q&A functionality
