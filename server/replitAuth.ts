@@ -43,10 +43,11 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: false, // TEMPORARILY disable httpOnly for debugging
-      secure: false, // Set to false for development
+      secure: false, // Force false for development
       maxAge: sessionTtl,
-      sameSite: 'none', // Change to 'none' for cross-origin requests
-      domain: undefined // Let the browser handle domain automatically
+      sameSite: 'lax', // Force 'lax' for development - compatible with HTTP
+      domain: undefined, // Let the browser handle domain automatically
+      path: '/' // Explicitly set path
     },
   });
 }
@@ -329,7 +330,20 @@ export async function setupAuth(app: Express) {
         console.log('Session ID:', req.sessionID);
         console.log('Session data:', req.session);
         
-        res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
+        // Force session save and add debugging
+        req.session.save((err: any) => {
+          if (err) {
+            console.error('Session save error:', err);
+          } else {
+            console.log('Session saved successfully');
+          }
+          
+          // Debug response headers to see if Set-Cookie is included
+          console.log('Response headers before sending:', res.getHeaders());
+          console.log('Session cookie value:', req.sessionID);
+          
+          res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
+        });
       });
     })(req, res, next);
   });

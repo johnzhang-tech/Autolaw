@@ -8,7 +8,7 @@ const app = express();
 
 // Configure CORS to allow credentials
 app.use(cors({
-  origin: true, // Allow all origins in development
+  origin: ['http://localhost:5000', 'https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev'], 
   credentials: true, // Allow cookies to be sent
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
