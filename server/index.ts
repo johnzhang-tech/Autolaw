@@ -17,13 +17,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add session middleware for logout functionality
-app.use(session({
-  secret: 'mock-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // Set to false for development
-}));
+// Remove duplicate session middleware - it's handled in replitAuth.ts
 
 app.use((req, res, next) => {
   const start = Date.now();

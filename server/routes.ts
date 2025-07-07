@@ -1014,11 +1014,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug session endpoint
+  app.get('/api/debug/session', (req: any, res) => {
+    res.json({
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      sessionID: req.sessionID,
+      sessionUser: req.session?.user,
+      passportUser: req.user,
+      cookies: req.headers.cookie
+    });
+  });
+
   // Auth user endpoint - handles both session and OAuth without loops
   app.get('/api/auth/user', (req: any, res) => {
-    // If user is already authenticated via OAuth, use that
-    if (req.user && req.user.claims) {
-      storage.getUser(req.user.claims.sub).then(user => {
+    // Check if user is authenticated via passport (OAuth or local)
+    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      const userId = req.user.id;
+      storage.getUser(userId).then(user => {
         if (user) {
           const { passwordHash, ...userResponse } = user;
           return res.json(userResponse);
@@ -1031,7 +1043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return;
     }
     
-    // Check for local session authentication
+    // Fallback: Check for local session authentication (legacy)
     if (req.session && req.session.user) {
       const sessionUser = req.session.user;
       storage.getUser(sessionUser.id).then(user => {
