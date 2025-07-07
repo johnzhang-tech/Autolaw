@@ -317,14 +317,10 @@ export default function Landing() {
               Join hundreds of real estate professionals who trust DocuAI to streamline their document analysis and reduce risk.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" onClick={openSignUpModal} className="px-8 py-4 text-lg font-medium rounded-xl bg-white text-primary hover:bg-slate-50">
-                Start Free 14-Day Trial
-              </Button>
               <Button size="lg" variant="outline" className="px-8 py-4 text-lg font-medium rounded-xl border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
-                Contact Sales
+                Contact us
               </Button>
             </div>
-            <p className="text-blue-200 text-sm mt-6">No credit card required • Full access • Cancel anytime</p>
           </div>
         </section>
 
@@ -424,8 +420,8 @@ export default function Landing() {
                       <span className="text-slate-600">Priority support</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                    Start Free Trial
+                  <Button className="w-full bg-blue-500 hover:bg-blue-600" onClick={openSignUpModal}>
+                    Get Started
                   </Button>
                 </div>
               </div>
@@ -467,7 +463,7 @@ export default function Landing() {
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Contact Sales
+                    Contact us
                   </Button>
                 </div>
               </div>
