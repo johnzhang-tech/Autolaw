@@ -90,17 +90,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ message: "Unauthorized" });
     }
     
-    // For development - use the legalai user as the authenticated user
-    // In production, this would require proper session authentication
-    req.user = {
-      claims: {
-        sub: "local_1751433835391_5h5op",
-        email: "legalai@altosera.com",
-        first_name: "Ztop",
-        last_name: "Ztop"
-      }
-    };
-    next();
+    // Check for local session authentication
+    if (req.session && req.session.user) {
+      const sessionUser = req.session.user;
+      req.user = {
+        claims: {
+          sub: sessionUser.id,
+          email: sessionUser.email,
+          first_name: sessionUser.firstName,
+          last_name: sessionUser.lastName
+        }
+      };
+      return next();
+    }
+    
+    return res.status(401).json({ message: "Unauthorized - please log in" });
   };
 
   // Flexible auth middleware - accepts both session and API key

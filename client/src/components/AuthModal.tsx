@@ -66,9 +66,13 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
       });
 
       if (response.ok) {
-        // Use the Enter Demo functionality instead of reloading
+        // Clear the logged out flag and refresh authentication
         localStorage.removeItem('docuai_logged_out');
-        window.location.href = '/';
+        
+        resetAndClose();
+        
+        // Force a page reload to ensure proper session handling
+        window.location.reload();
       } else {
         const error = await response.json();
         toast({
