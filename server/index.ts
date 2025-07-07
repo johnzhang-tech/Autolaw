@@ -6,9 +6,9 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Configure CORS to allow credentials
+// Configure CORS to allow credentials from same origin
 app.use(cors({
-  origin: ['http://localhost:5000', 'https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev'], 
+  origin: true, // Allow all origins for now - same origin should work
   credentials: true, // Allow cookies to be sent
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']

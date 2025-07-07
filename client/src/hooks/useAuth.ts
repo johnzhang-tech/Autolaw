@@ -29,31 +29,38 @@ export function useAuth() {
       // Test auth manually with session cookie
       console.log('Login success event received, testing auth...');
       console.log('Document cookies:', document.cookie);
+      console.log('Current origin:', window.location.origin);
+      console.log('Current hostname:', window.location.hostname);
       
-      try {
-        const response = await fetch('/api/auth/user', {
-          credentials: 'include',
-          headers: {
-            'Accept': 'application/json'
+      // Wait a moment for cookie to be set
+      setTimeout(async () => {
+        try {
+          console.log('Document cookies after delay:', document.cookie);
+          
+          const response = await fetch('/api/auth/user', {
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          
+          console.log('Manual auth test status:', response.status);
+          console.log('Response headers:', [...response.headers.entries()]);
+          
+          if (response.ok) {
+            const userData = await response.json();
+            console.log('Manual auth test SUCCESS:', userData.email);
+            // Manually update the query cache
+            queryClient.setQueryData(["/api/auth/user"], userData);
+          } else {
+            console.log('Manual auth test FAILED:', response.status);
+            const errorData = await response.text();
+            console.log('Error response:', errorData);
           }
-        });
-        
-        console.log('Manual auth test status:', response.status);
-        console.log('Manual auth test headers sent:', response.request?.headers);
-        
-        if (response.ok) {
-          const userData = await response.json();
-          console.log('Manual auth test SUCCESS:', userData.email);
-          // Manually update the query cache
-          queryClient.setQueryData(["/api/auth/user"], userData);
-        } else {
-          console.log('Manual auth test FAILED:', response.status);
-          const errorData = await response.text();
-          console.log('Error response:', errorData);
+        } catch (error) {
+          console.error('Manual auth test ERROR:', error);
         }
-      } catch (error) {
-        console.error('Manual auth test ERROR:', error);
-      }
+      }, 500); // Wait 500ms for session cookie to be set
     };
     
     window.addEventListener('login-success', handleLoginSuccess);
