@@ -6,11 +6,6 @@ export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const loggedOut = localStorage.getItem('docuai_logged_out');
-    setIsLoggedOut(loggedOut === 'true');
-  }, []);
-
   // Simple check without automatic retries
   const { data: user, isLoading, refetch } = useQuery<User>({
     queryKey: ["/api/auth/user"],
@@ -21,6 +16,21 @@ export function useAuth() {
     refetchInterval: false,
     staleTime: Infinity,
   });
+
+  useEffect(() => {
+    const loggedOut = localStorage.getItem('docuai_logged_out');
+    setIsLoggedOut(loggedOut === 'true');
+    
+    // Listen for login success events
+    const handleLoginSuccess = () => {
+      setIsLoggedOut(false);
+      localStorage.removeItem('docuai_logged_out');
+      refetch(); // Refresh user data
+    };
+    
+    window.addEventListener('login-success', handleLoginSuccess);
+    return () => window.removeEventListener('login-success', handleLoginSuccess);
+  }, [refetch]);
 
   // Manual auth check function
   const checkAuth = async () => {

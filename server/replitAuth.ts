@@ -194,12 +194,19 @@ export async function setupAuth(app: Express) {
     usernameField: 'email'
   }, async (email, password, done) => {
     try {
+      console.log('Local strategy: Attempting login for:', email);
       const user = await storage.getUserByEmail(email);
+      console.log('Local strategy: User found:', user ? 'Yes' : 'No');
+      
       if (!user || !user.passwordHash) {
+        console.log('Local strategy: No user or no password hash');
         return done(null, false, { message: 'Invalid credentials' });
       }
 
+      console.log('Local strategy: Comparing password...');
       const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      console.log('Local strategy: Password valid:', isValidPassword);
+      
       if (!isValidPassword) {
         return done(null, false, { message: 'Invalid credentials' });
       }
@@ -214,8 +221,10 @@ export async function setupAuth(app: Express) {
         role: user.role
       };
 
+      console.log('Local strategy: Login successful for user:', sessionUser.id);
       done(null, sessionUser);
     } catch (error) {
+      console.error('Local strategy error:', error);
       done(error);
     }
   }));
@@ -312,8 +321,9 @@ export async function setupAuth(app: Express) {
         
         // Store user in session for local authentication
         req.session.user = user;
+        console.log('Session user stored:', user.id, user.email);
         
-        res.json({ message: "Login successful" });
+        res.json({ message: "Login successful", user: { id: user.id, email: user.email } });
       });
     })(req, res, next);
   });

@@ -76,8 +76,8 @@ export function AuthModal({ isOpen, onClose, defaultMode = "signin" }: AuthModal
         
         resetAndClose();
         
-        // Force a page reload to ensure proper session handling
-        window.location.reload();
+        // Instead of reloading, manually trigger auth check
+        window.dispatchEvent(new CustomEvent('login-success'));
       } else {
         const error = await response.json();
         toast({
