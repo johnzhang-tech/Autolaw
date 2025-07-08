@@ -352,26 +352,26 @@ export default function Landing() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Starter Plan */}
+              {/* Reporting Plan */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Starter</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Reporting</h3>
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-slate-900">$0</span>
-                    <div className="text-slate-600 mt-1">Forever Free</div>
+                    <span className="text-5xl font-bold text-slate-900">$20</span>
+                    <span className="text-slate-600">/month</span>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">document analysis</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Risk assessment reports</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-slate-600">One time usage</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">50 chat sessions</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Basic analytics</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -379,12 +379,12 @@ export default function Landing() {
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Get Started Free
+                    Subscribe
                   </Button>
                 </div>
               </div>
 
-              {/* Professional Plan */}
+              {/* Reporting + Q&A Plan */}
               <div className="bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-8 relative">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
@@ -392,28 +392,23 @@ export default function Landing() {
                   </span>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Professional</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Reporting + Q&A</h3>
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-slate-900">$29</span>
-                    <span className="text-slate-600">/per month</span>
-                    <div className="text-slate-600 mt-1">Ideal for active real estate professionals and small teams handling multiple</div>
+                    <span className="text-5xl font-bold text-slate-900">$30</span>
+                    <span className="text-slate-600">/month</span>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Everything in Reporting</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">AI-powered Q&A chat</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-slate-600">One month system access</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">500 chat sessions</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Advanced analytics</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">API access</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -425,49 +420,43 @@ export default function Landing() {
                     </li>
                   </ul>
                   <Button className="w-full bg-blue-500 hover:bg-blue-600" onClick={openSignUpModal}>
-                    Get Started
+                    Subscribe
                   </Button>
                 </div>
               </div>
 
-              {/* Enterprise Plan */}
+              {/* Advanced Plan */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative">
-                <div className="absolute -top-4 right-4">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    Best Value
-                  </span>
-                </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Enterprise</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Advanced</h3>
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-slate-900">$59</span>
-                    <span className="text-slate-600">/per month</span>
-                    <div className="text-slate-600 mt-1">Comprehensive solution for real estate</div>
+                    <span className="text-slate-600">/month</span>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">Everything in Professional</span>
+                    </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-slate-600">Up to 4 Transactions</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Unlimited chat sessions</span>
+                      <span className="text-slate-600">Advanced analytics</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Full API access</span>
+                      <span className="text-slate-600">API access</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-slate-600">Platium Support</span>
                     </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Custom integrations</span>
-                    </li>
                   </ul>
                   <Button variant="outline" className="w-full">
-                    Contact us
+                    Subscribe
                   </Button>
                 </div>
               </div>
