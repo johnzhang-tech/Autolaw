@@ -79,7 +79,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
     {
       icon: CreditCard,
-      label: "Stripe Setup",
+      label: "Payment",
       href: "/stripe-setup",
       description: "Payment config",
     },

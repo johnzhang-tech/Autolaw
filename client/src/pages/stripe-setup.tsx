@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, ExternalLink, Key, Shield, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Sidebar } from "@/components/Sidebar";
 
 export default function StripeSetup() {
   const [publicKey, setPublicKey] = useState("");
@@ -67,11 +68,14 @@ export default function StripeSetup() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Stripe Payment Setup</h1>
-        <p className="text-gray-600 mt-2">Configure Stripe to enable subscription payments in DocuAI</p>
-      </div>
+    <div className="flex h-screen bg-white">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto py-8 px-4 max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Payment Setup</h1>
+            <p className="text-gray-600 mt-2">Configure Stripe to enable subscription payments in DocuAI</p>
+          </div>
 
       <div className="grid gap-6">
         {/* Setup Status */}
@@ -220,6 +224,8 @@ export default function StripeSetup() {
             It's never exposed to the client side and is only used for server-side payment processing.
           </AlertDescription>
         </Alert>
+        </div>
+        </div>
       </div>
     </div>
   );
