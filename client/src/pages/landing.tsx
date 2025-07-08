@@ -363,7 +363,7 @@ export default function Landing() {
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">25 documents/month</span>
+                      <span className="text-slate-600">One time usage</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -375,7 +375,7 @@ export default function Landing() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Email support</span>
+                      <span className="text-slate-600">Normal support is included</span>
                     </li>
                   </ul>
                   <Button variant="outline" className="w-full">
@@ -401,7 +401,7 @@ export default function Landing() {
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">250 documents/month</span>
+                      <span className="text-slate-600">One month system access</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -414,6 +414,10 @@ export default function Landing() {
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                       <span className="text-slate-600">API access</span>
+                    </li>
+                    <li className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span className="text-slate-600">For occursion users</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -436,14 +440,14 @@ export default function Landing() {
                 <div className="text-center">
                   <h3 className="text-xl font-semibold text-slate-900 mb-4">Enterprise</h3>
                   <div className="mb-6">
-                    <span className="text-5xl font-bold text-slate-900">$99</span>
+                    <span className="text-5xl font-bold text-slate-900">$59</span>
                     <span className="text-slate-600">/per month</span>
                     <div className="text-slate-600 mt-1">Comprehensive solution for real estate</div>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Unlimited documents</span>
+                      <span className="text-slate-600">Up to 4 Transactions</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -455,7 +459,7 @@ export default function Landing() {
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-600">Phone support</span>
+                      <span className="text-slate-600">Platium Support</span>
                     </li>
                     <li className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />

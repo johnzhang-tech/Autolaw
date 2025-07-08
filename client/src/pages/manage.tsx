@@ -464,96 +464,64 @@ export default function Manage() {
             <TabsContent value="payment" className="space-y-8 mt-8">
               {/* Payment Tiers */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Payment Tier: Reporting ($20) */}
+                {/* Payment Tier: Starter ($0) */}
                 <Card className="relative">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Reporting</CardTitle>
-                      <Badge variant="secondary">Basic</Badge>
+                      <CardTitle className="text-lg">Starter</CardTitle>
                     </div>
                     <div className="flex items-baseline">
-                      <span className="text-3xl font-bold">$20</span>
-                      <span className="text-muted-foreground ml-1">/month</span>
+                      <span className="text-3xl font-bold">$0</span>
+                      <span className="text-muted-foreground ml-1">Forever Free</span>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Basic document analysis</span>
+                        <span className="text-sm">One time usage</span>
                       </li>
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Risk assessment reports</span>
+                        <span className="text-sm">50 chat sessions</span>
                       </li>
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">25 documents/month</span>
+                        <span className="text-sm">Basic analytics</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Normal support is included</span>
                       </li>
                     </ul>
-                    <Button className="w-full mt-6">Subscribe</Button>
+                    <Button className="w-full mt-6">Get Started Free</Button>
                   </CardContent>
                 </Card>
 
-                {/* Payment Tier: Reporting + Q&A ($30) */}
+                {/* Payment Tier: Professional ($29) */}
                 <Card className="relative border-2 border-primary">
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
                   </div>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Reporting + Q&A</CardTitle>
-                      <Badge>Professional</Badge>
+                      <CardTitle className="text-lg">Professional</CardTitle>
+                      <Badge>Ideal for active real estate professionals</Badge>
                     </div>
                     <div className="flex items-baseline">
-                      <span className="text-3xl font-bold">$30</span>
-                      <span className="text-muted-foreground ml-1">/month</span>
+                      <span className="text-3xl font-bold">$29</span>
+                      <span className="text-muted-foreground ml-1">/per month</span>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Everything in Reporting</span>
+                        <span className="text-sm">One month system access</span>
                       </li>
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">AI-powered Q&A chat</span>
-                      </li>
-                      <li className="flex items-center">
-                        <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">100 documents/month</span>
-                      </li>
-                      <li className="flex items-center">
-                        <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Priority support</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full mt-6">Subscribe</Button>
-                  </CardContent>
-                </Card>
-
-                {/* Payment Tier: Advanced ($99) */}
-                <Card className="relative">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Advanced</CardTitle>
-                      <Badge variant="outline">Enterprise</Badge>
-                    </div>
-                    <div className="flex items-baseline">
-                      <span className="text-3xl font-bold">$99</span>
-                      <span className="text-muted-foreground ml-1">/month</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      <li className="flex items-center">
-                        <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Everything in Professional</span>
-                      </li>
-                      <li className="flex items-center">
-                        <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Unlimited documents</span>
+                        <span className="text-sm">500 chat sessions</span>
                       </li>
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
@@ -565,7 +533,50 @@ export default function Manage() {
                       </li>
                       <li className="flex items-center">
                         <Check className="h-4 w-4 text-green-500 mr-2" />
-                        <span className="text-sm">Phone support</span>
+                        <span className="text-sm">For occursion users</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Priority support</span>
+                      </li>
+                    </ul>
+                    <Button className="w-full mt-6">Subscribe</Button>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Tier: Enterprise ($59) */}
+                <Card className="relative">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">Enterprise</CardTitle>
+                      <Badge variant="outline">Comprehensive solution for real estate</Badge>
+                    </div>
+                    <div className="flex items-baseline">
+                      <span className="text-3xl font-bold">$59</span>
+                      <span className="text-muted-foreground ml-1">/per month</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Up to 4 Transactions</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Unlimited chat sessions</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Full API access</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Platium Support</span>
+                      </li>
+                      <li className="flex items-center">
+                        <Check className="h-4 w-4 text-green-500 mr-2" />
+                        <span className="text-sm">Custom integrations</span>
                       </li>
                     </ul>
                     <Button className="w-full mt-6">Subscribe</Button>

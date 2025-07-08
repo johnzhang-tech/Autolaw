@@ -235,6 +235,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Production Ready**: JWT-based system works in development, production, mobile, and cross-origin scenarios
   - **Q&A Page Restored**: All authentication errors resolved, Q&A chat functionality working perfectly again
   - **Universal Compatibility**: Authentication now works reliably across all browsers and deployment scenarios
+- July 8, 2025. **UPDATED PRICING STRUCTURE: Complete Pricing Model Redesign**
+  - **Simplified Three-Tier System**: Starter ($0), Professional ($29), Enterprise ($59) with clear feature differentiation
+  - **Starter Plan Updates**: Changed from "25 documents/month" to "One time usage" for free forever access
+  - **Professional Plan Enhancement**: Updated to "One month system access" targeting occasional users with $29 monthly pricing
+  - **Enterprise Plan Optimization**: Reduced from $99 to $59 with "Up to 4 transactions" limit for comprehensive solution
+  - **Feature Realignment**: Updated all features across landing page, settings, and Stripe setup to match new pricing model
+  - **UI Navigation Clean-up**: Removed all secondary description text from sidebar navigation for cleaner interface
+  - **Admin Access Control**: Restricted "User Management" and "Test API" sections to admin users only
+  - **Settings Page Renamed**: Changed "Manage" to "Setting" in sidebar navigation for better user experience
 
 ## Recent Architectural Changes
 
@@ -394,9 +403,9 @@ Mobile Upload Requirements: Drag-and-drop upload, network reliability with queue
 - **Public Access**: Pricing page accessible to non-authenticated users for marketing purposes
 
 ### 💰 Pricing Tiers & Features
-- **Starter Plan**: 25 docs/month, 50 chat sessions, basic analytics, email support - Forever Free
-- **Professional Plan**: 250 docs/month, 500 chat sessions, advanced analytics, API access - $29/month (Most Popular)
-- **Enterprise Plan**: Unlimited usage, custom AI models, phone support, full API - $99/month (Best Value)
+- **Starter Plan**: One time usage, 50 chat sessions, basic analytics, normal support - $0 Forever Free
+- **Professional Plan**: One month system access, 500 chat sessions, advanced analytics, API access, for occursion users - $29/month (Most Popular)
+- **Enterprise Plan**: Up to 4 transactions, unlimited chat sessions, full API access, platium support, custom integrations - $59/month (Best Value)
 - **Feature Categories**: Document Analysis, AI Chat & Q&A, Dashboard & Analytics, Support & Integration
 
 ### 🎨 UX Design Elements
