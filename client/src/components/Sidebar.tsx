@@ -68,7 +68,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
     {
       icon: Settings,
-      label: "Manage",
+      label: "Setting",
       href: "/manage",
     },
     {
