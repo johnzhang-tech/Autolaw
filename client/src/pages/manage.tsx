@@ -473,7 +473,7 @@ export default function Manage() {
                     </div>
                     <div className="flex items-baseline">
                       <span className="text-3xl font-bold">$20</span>
-                      <span className="text-muted-foreground ml-1">/month</span>
+                      <span className="text-muted-foreground ml-1">/One time</span>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -511,7 +511,7 @@ export default function Manage() {
                     </div>
                     <div className="flex items-baseline">
                       <span className="text-3xl font-bold">$30</span>
-                      <span className="text-muted-foreground ml-1">/month</span>
+                      <span className="text-muted-foreground ml-1">/One time</span>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -545,8 +545,8 @@ export default function Manage() {
                 <Card className="relative">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Advanced</CardTitle>
-                      <Badge variant="outline">Enterprise</Badge>
+                      <CardTitle className="text-lg">Subscription</CardTitle>
+                      <Badge variant="outline">Agency</Badge>
                     </div>
                     <div className="flex items-baseline">
                       <span className="text-3xl font-bold">$59</span>

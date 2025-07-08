@@ -199,16 +199,16 @@ export default function StripeSetup() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="p-4 border rounded-lg">
                 <h3 className="font-semibold">Reporting</h3>
-                <p className="text-2xl font-bold">$20/mo</p>
+                <p className="text-2xl font-bold">$20/One time</p>
                 <p className="text-sm text-gray-600">One time usage</p>
               </div>
               <div className="p-4 border rounded-lg border-blue-500">
                 <h3 className="font-semibold">Reporting + Q&A</h3>
-                <p className="text-2xl font-bold">$30/mo</p>
+                <p className="text-2xl font-bold">$30/One time</p>
                 <p className="text-sm text-gray-600">One month system access</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h3 className="font-semibold">Advanced</h3>
+                <h3 className="font-semibold">Subscription</h3>
                 <p className="text-2xl font-bold">$59/mo</p>
                 <p className="text-sm text-gray-600">Up to 4 transactions</p>
               </div>

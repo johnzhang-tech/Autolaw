@@ -358,7 +358,7 @@ export default function Landing() {
                   <h3 className="text-xl font-semibold text-slate-900 mb-4">Reporting</h3>
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-slate-900">$20</span>
-                    <span className="text-slate-600">/month</span>
+                    <span className="text-slate-600">/One time</span>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
@@ -395,7 +395,7 @@ export default function Landing() {
                   <h3 className="text-xl font-semibold text-slate-900 mb-4">Reporting + Q&A</h3>
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-slate-900">$30</span>
-                    <span className="text-slate-600">/month</span>
+                    <span className="text-slate-600">/One time</span>
                   </div>
                   <ul className="space-y-4 mb-8 text-left">
                     <li className="flex items-start">
@@ -428,7 +428,7 @@ export default function Landing() {
               {/* Advanced Plan */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 relative">
                 <div className="text-center">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Advanced</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Subscription</h3>
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-slate-900">$59</span>
                     <span className="text-slate-600">/month</span>
