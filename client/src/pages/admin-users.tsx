@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Search, Shield, UserCheck, UserX, Calendar, Mail, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Sidebar } from "@/components/Sidebar";
 import type { User } from "@shared/schema";
 
 export default function AdminUsers() {
@@ -136,8 +137,11 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="flex h-screen bg-white">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="min-h-screen bg-slate-50">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
@@ -362,6 +366,8 @@ export default function AdminUsers() {
             </div>
           </CardContent>
         </Card>
+        </div>
+      </div>
       </div>
     </div>
   );
