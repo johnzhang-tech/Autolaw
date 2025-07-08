@@ -95,7 +95,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   const adminItems = user?.role === 'admin' ? [
     {
       icon: Users,
-      label: "Admin Users",
+      label: "User Management",
       href: "/admin-users",
       description: "Manage users",
       color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50"

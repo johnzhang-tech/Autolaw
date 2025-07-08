@@ -1696,28 +1696,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin endpoint: Get all users with extended information
   app.get('/api/admin/users', tokenAuth, async (req: any, res) => {
     try {
-      const userId = req.user.userId;
-      const currentUser = await storage.getUser(userId);
-      
-      if (currentUser?.role !== 'admin') {
+      // req.user now contains the full user object with role
+      if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });
       }
       
-      // Get all users for admin view
-      const allUsers = await db.select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        provider: users.provider,
-        role: users.role,
-        region: users.region,
-        userType: users.userType,
-        userStatus: users.userStatus,
-        expirationDate: users.expirationDate,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      }).from(users);
+      // Use the storage method that includes admin check
+      const allUsers = await storage.getAllUsers();
       
       res.json(allUsers);
     } catch (error: any) {

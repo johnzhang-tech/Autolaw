@@ -37,9 +37,18 @@ export default function AdminUsers() {
   }, [currentUser, isAuthenticated, toast]);
 
   // Fetch all users (admin only)
-  const { data: users = [], isLoading } = useQuery<User[]>({
+  const { data: users = [], isLoading, error, refetch } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
     enabled: currentUser?.role === 'admin',
+    retry: false,
+  });
+
+  // Debug log for users data
+  console.log('Admin Users Debug:', { 
+    currentUser: currentUser?.role, 
+    usersLength: users.length, 
+    isLoading, 
+    error: error?.message 
   });
 
   // Role update mutation
@@ -238,6 +247,20 @@ export default function AdminUsers() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <Card className="mb-4 bg-yellow-50 border-yellow-200">
+            <CardContent className="pt-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Debug Info:</strong> Current User Role: {currentUser?.role} | 
+                Users Count: {users.length} | 
+                Loading: {isLoading ? 'Yes' : 'No'} |
+                Error: {error?.message || 'None'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Users List */}
         <Card>

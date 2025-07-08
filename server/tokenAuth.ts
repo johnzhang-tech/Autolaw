@@ -28,6 +28,12 @@ export const tokenAuth: RequestHandler = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
   
+  console.log('Token Auth Debug:', { 
+    hasToken: !!token, 
+    authHeader: authHeader?.substring(0, 20) + '...',
+    timestamp: new Date().toISOString()
+  });
+  
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
@@ -40,13 +46,17 @@ export const tokenAuth: RequestHandler = async (req, res, next) => {
   try {
     const user = await storage.getUser(payload.userId);
     if (!user) {
+      console.log('User not found for ID:', payload.userId);
       return res.status(401).json({ message: "User not found" });
     }
     
-    // Attach user to request
-    req.user = user;
+    console.log('Token verified for user:', user.id, 'role:', user.role);
+    
+    // Attach both payload and user to request for backward compatibility
+    req.user = { ...payload, ...user };
     next();
   } catch (error) {
+    console.error('Token auth error:', error);
     return res.status(500).json({ message: "Authentication error" });
   }
 };
