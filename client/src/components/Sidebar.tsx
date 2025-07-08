@@ -43,7 +43,6 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Plus,
       label: "Create",
       href: "/create",
-      description: "Upload documents",
       color: "bg-emerald-500 hover:bg-emerald-600 text-white",
       special: true,
     },
@@ -51,43 +50,31 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Home,
       label: "Home",
       href: "/",
-      description: "Dashboard home",
     },
     {
       icon: FileText,
       label: "Documents",
       href: "/documents",
-      description: "All documents",
     },
     {
       icon: BarChart3,
       label: "Dashboard",
       href: "/dashboard",
-      description: "Analytics",
     },
     {
       icon: MessageCircleQuestion,
       label: "Q&A",
       href: "/qa",
-      description: "Ask questions",
     },
     {
       icon: Settings,
       label: "Manage",
       href: "/manage",
-      description: "Settings & Payment",
     },
     {
       icon: CreditCard,
       label: "Payment",
       href: "/stripe-setup",
-      description: "Payment config",
-    },
-    {
-      icon: Code,
-      label: "Test API",
-      href: "/test-api",
-      description: "API testing",
     },
   ];
 
@@ -97,8 +84,13 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Users,
       label: "User Management",
       href: "/admin-users",
-      description: "Manage users",
       color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50"
+    },
+    {
+      icon: Code,
+      label: "Test API",
+      href: "/test-api",
+      color: "text-orange-600 hover:text-orange-900 hover:bg-orange-50"
     },
   ] : [];
 
@@ -155,10 +147,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
                     collapsed ? "mx-auto" : "mr-3"
                   )} />
                   {!collapsed && (
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{item.label}</span>
-                      <span className="text-xs opacity-90">{item.description}</span>
-                    </div>
+                    <span className="font-medium">{item.label}</span>
                   )}
                 </Button>
               </Link>
@@ -181,10 +170,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
                   collapsed ? "mx-auto" : "mr-3"
                 )} />
                 {!collapsed && (
-                  <div className="flex flex-col items-start">
-                    <span>{item.label}</span>
-                    <span className="text-xs opacity-70">{item.description}</span>
-                  </div>
+                  <span>{item.label}</span>
                 )}
               </Button>
             </Link>
