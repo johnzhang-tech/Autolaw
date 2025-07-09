@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function TestApi() {
   const [name, setName] = useState("");
@@ -33,32 +34,24 @@ export default function TestApi() {
   const apiCall = async (method: string, endpoint: string, body?: any) => {
     try {
       setLoading(true);
-      const options: RequestInit = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      };
       
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
+      // Use apiRequest for proper JWT authentication
+      const data = await apiRequest(method as any, endpoint, body);
       
-      const response = await fetch(endpoint, options);
-      const data = await response.json();
+      addTestResult(method, endpoint, 200, data);
       
-      addTestResult(method, endpoint, response.status, data);
-      
-      if (response.ok) {
-        toast({
-          title: "API Success",
-          description: `${method} ${endpoint} completed successfully`,
-        });
-        return data;
-      } else {
-        throw new Error(data.message || `HTTP ${response.status}`);
-      }
+      toast({
+        title: "API Success",
+        description: `${method} ${endpoint} completed successfully`,
+      });
+      return data;
     } catch (error: any) {
-      addTestResult(method, endpoint, 0, { error: error.message });
+      // Parse error message from apiRequest
+      const errorData = error.message.includes('401') ? 
+        { error: 'Authentication failed - please log in again' } : 
+        { error: error.message };
+      
+      addTestResult(method, endpoint, 0, errorData);
       toast({
         title: "API Error",
         description: error.message,
@@ -139,10 +132,14 @@ export default function TestApi() {
         formData.append('documents', files[i]);
       }
 
+      // Get JWT token from localStorage for file upload
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/transactions/${transactionId}/upload`, {
         method: 'POST',
         body: formData,
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
       });
 
       const data = await response.json();
@@ -183,6 +180,9 @@ export default function TestApi() {
     }
     return apiCall('GET', `/api/transactions/${transactionId}/documents`);
   };
+
+  // Auth test
+  const testAuthToken = () => apiCall('GET', '/api/auth/test');
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -406,10 +406,13 @@ export default function TestApi() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Badge variant="outline">GET</Badge>
-                  User Operations
+                  Authentication & Users
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <Button onClick={testAuthToken} disabled={loading} className="w-full bg-green-600 hover:bg-green-700">
+                  🔐 Test Authentication Token
+                </Button>
                 <Button onClick={testGetUsers} disabled={loading} className="w-full">
                   GET /api/users (All Users - Admin Only)
                 </Button>
