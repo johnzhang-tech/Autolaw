@@ -134,6 +134,11 @@ export default function TestApi() {
 
       // Get JWT token from localStorage for file upload
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+      
       const response = await fetch(`/api/transactions/${transactionId}/upload`, {
         method: 'POST',
         body: formData,

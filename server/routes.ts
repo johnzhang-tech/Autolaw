@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // HomeDocsInterfaces Object Storage - Multiple file upload with transaction-based folder organization
-  app.post('/api/upload', authMiddleware, upload.array('documents', 60), async (req: any, res) => {
+  app.post('/api/upload', flexAuth, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -656,7 +656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload - Upload documents to a transaction (ATOMIC)
-  app.post('/api/transactions/:id/upload', authMiddleware, upload.array('documents', 60), async (req: any, res) => {
+  app.post('/api/transactions/:id/upload', flexAuth, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -802,7 +802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
-  app.post('/api/transactions/:id/upload-single', authMiddleware, upload.single('document'), async (req: any, res) => {
+  app.post('/api/transactions/:id/upload-single', flexAuth, upload.single('document'), async (req: any, res) => {
     try {
       const file = req.file as Express.Multer.File;
       
