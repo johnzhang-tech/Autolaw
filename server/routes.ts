@@ -440,6 +440,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API Authentication Test endpoint
+  app.get('/api/auth/test', flexAuth, async (req: any, res) => {
+    try {
+      const user = req.user;
+      res.json({
+        success: true,
+        message: "Authentication successful",
+        user: {
+          id: user.claims.sub,
+          email: user.claims.email,
+          authMethod: user.apiKey ? "API Key" : "JWT Token"
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Auth test error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Authentication test failed", 
+        error: error.message 
+      });
+    }
+  });
+
   // Generate Report endpoint - triggers n8n workflow
   app.post('/api/transactions/:id/generate-report', authMiddleware, async (req: any, res) => {
     try {
