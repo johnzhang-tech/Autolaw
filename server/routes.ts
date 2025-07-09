@@ -1478,8 +1478,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user profile (including new fields) - MUST come before /:id route
+  app.get('/api/users/profile', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Return user profile without sensitive data
+      const { passwordHash, ...userProfile } = user;
+      res.json(userProfile);
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Failed to fetch user profile' });
+    }
+  });
+
+  // Update user profile (region, userType, userStatus, expirationDate) - MUST come before /:id route
+  app.patch('/api/users/profile', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { region, userType, userStatus, expirationDate } = req.body;
+      
+      // Validate enum values
+      if (userType && !['One time', 'Recurring'].includes(userType)) {
+        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
+      }
+      
+      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
+        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
+      }
+      
+      // Parse expiration date if provided
+      let parsedExpirationDate = undefined;
+      if (expirationDate !== undefined) {
+        if (expirationDate === null) {
+          parsedExpirationDate = null;
+        } else {
+          parsedExpirationDate = new Date(expirationDate);
+          if (isNaN(parsedExpirationDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
+          }
+        }
+      }
+      
+      const updates: any = {};
+      if (region !== undefined) updates.region = region;
+      if (userType !== undefined) updates.userType = userType;
+      if (userStatus !== undefined) updates.userStatus = userStatus;
+      if (expirationDate !== undefined) updates.expirationDate = parsedExpirationDate;
+      
+      const updatedUser = await storage.updateUserProfile(userId, updates);
+      
+      // Return updated profile without sensitive data
+      const { passwordHash, ...userProfile } = updatedUser;
+      res.json(userProfile);
+    } catch (error: any) {
+      console.error('Error updating user profile:', error);
+      res.status(500).json({ message: 'Failed to update user profile' });
+    }
+  });
+
   // GET /api/users/:id - Read user info by ID
-  app.get('/api/users/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/:id', flexAuth, async (req: any, res) => {
     try {
       const currentUserId = req.user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
@@ -1505,7 +1569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/users/:id - Update any user field, including new attributes
-  app.put('/api/users/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/users/:id', flexAuth, async (req: any, res) => {
     try {
       const currentUserId = req.user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
@@ -1605,7 +1669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DELETE /api/users/:id - Delete a user
-  app.delete('/api/users/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/users/:id', flexAuth, async (req: any, res) => {
     try {
       const currentUserId = req.user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
@@ -1637,7 +1701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/users - List all users with filtering by region, status, or user_type
-  app.get('/api/users', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users', flexAuth, async (req: any, res) => {
     try {
       const currentUserId = req.user.claims.sub;
       const currentUser = await storage.getUser(currentUserId);
@@ -1725,71 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Legacy User Management API Endpoints (kept for backwards compatibility)
-  
-  // Get user profile (including new fields)
-  app.get('/api/users/profile', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      
-      // Return user profile without sensitive data
-      const { passwordHash, ...userProfile } = user;
-      res.json(userProfile);
-    } catch (error: any) {
-      console.error('Error fetching user profile:', error);
-      res.status(500).json({ message: 'Failed to fetch user profile' });
-    }
-  });
 
-  // Update user profile (region, userType, userStatus, expirationDate)
-  app.patch('/api/users/profile', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { region, userType, userStatus, expirationDate } = req.body;
-      
-      // Validate enum values
-      if (userType && !['One time', 'Recurring'].includes(userType)) {
-        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
-      }
-      
-      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
-        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
-      }
-      
-      // Parse expiration date if provided
-      let parsedExpirationDate = undefined;
-      if (expirationDate !== undefined) {
-        if (expirationDate === null) {
-          parsedExpirationDate = null;
-        } else {
-          parsedExpirationDate = new Date(expirationDate);
-          if (isNaN(parsedExpirationDate.getTime())) {
-            return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
-          }
-        }
-      }
-      
-      const updates: any = {};
-      if (region !== undefined) updates.region = region;
-      if (userType !== undefined) updates.userType = userType;
-      if (userStatus !== undefined) updates.userStatus = userStatus;
-      if (expirationDate !== undefined) updates.expirationDate = parsedExpirationDate;
-      
-      const updatedUser = await storage.updateUserProfile(userId, updates);
-      
-      // Return updated profile without sensitive data
-      const { passwordHash, ...userProfile } = updatedUser;
-      res.json(userProfile);
-    } catch (error: any) {
-      console.error('Error updating user profile:', error);
-      res.status(500).json({ message: 'Failed to update user profile' });
-    }
-  });
 
   // Admin endpoint: Get all users with extended information
   app.get('/api/admin/users', tokenAuth, async (req: any, res) => {
