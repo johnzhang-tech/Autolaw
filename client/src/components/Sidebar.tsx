@@ -18,6 +18,7 @@ import {
   CreditCard,
   Code,
   Users,
+  Bot,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -65,6 +66,11 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: MessageCircleQuestion,
       label: "Q&A",
       href: "/qa",
+    },
+    {
+      icon: Bot,
+      label: "Agent Q&A",
+      href: "/agent-qa",
     },
     {
       icon: Settings,
@@ -223,3 +229,5 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     </div>
   );
 }
+
+export default Sidebar;
