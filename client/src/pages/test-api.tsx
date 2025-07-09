@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { LogIn, User, Key } from "lucide-react";
 
 export default function TestApi() {
   const [name, setName] = useState("");
@@ -17,8 +18,18 @@ export default function TestApi() {
   const [updateData, setUpdateData] = useState("");
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<any[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("demo@docuai.com");
+  const [loginPassword, setLoginPassword] = useState("Ztop123!");
+  const [loginLoading, setLoginLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check authentication status on load
+  useEffect(() => {
+    const token = localStorage.getItem('docuai_token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const addTestResult = (method: string, endpoint: string, status: number, data: any) => {
     const result = {
@@ -31,9 +42,68 @@ export default function TestApi() {
     setTestResults(prev => [result, ...prev.slice(0, 9)]); // Keep last 10 results
   };
 
+  const handleLogin = async () => {
+    setLoginLoading(true);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('docuai_token', data.token);
+        setIsLoggedIn(true);
+        
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${data.user.firstName}!`,
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Login Failed",
+          description: error.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login",
+        variant: "destructive",
+      });
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('docuai_token');
+    setIsLoggedIn(false);
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully",
+    });
+  };
+
   const apiCall = async (method: string, endpoint: string, body?: any) => {
     try {
       setLoading(true);
+      
+      // Debug token before making API call
+      const token = localStorage.getItem('docuai_token');
+      console.log('API Call Debug:', { 
+        method, 
+        endpoint, 
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenPreview: token?.substring(0, 20) + '...'
+      });
       
       // Use apiRequest for proper JWT authentication
       const data = await apiRequest(method as any, endpoint, body);
@@ -133,7 +203,13 @@ export default function TestApi() {
       }
 
       // Get JWT token from localStorage for file upload
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('docuai_token');
+      
+      console.log('File upload token check:', { 
+        hasToken: !!token, 
+        tokenLength: token?.length,
+        tokenPreview: token?.substring(0, 20) + '...'
+      });
       
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
@@ -195,6 +271,78 @@ export default function TestApi() {
         <h1 className="text-3xl font-bold">API Testing Interface</h1>
         <p className="text-gray-600 mt-2">Test both Users API and Transactions API endpoints</p>
       </div>
+
+      {/* Authentication Status & Login */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Authentication Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Badge variant={isLoggedIn ? "default" : "destructive"}>
+                {isLoggedIn ? "Authenticated" : "Not Authenticated"}
+              </Badge>
+              {isLoggedIn && (
+                <span className="text-sm text-gray-600">
+                  JWT Token Active
+                </span>
+              )}
+            </div>
+            
+            {!isLoggedIn ? (
+              <div className="flex items-center gap-3">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-48"
+                />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="w-32"
+                />
+                <Button onClick={handleLogin} disabled={loginLoading} variant="outline">
+                  {loginLoading ? "Logging in..." : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Login
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button onClick={testAuthToken} variant="outline" size="sm">
+                  <Key className="h-4 w-4 mr-2" />
+                  Test Auth
+                </Button>
+                <Button onClick={handleLogout} variant="outline" size="sm">
+                  Logout
+                </Button>
+              </div>
+            )}
+          </div>
+          
+          {!isLoggedIn && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Quick Login:</strong> Use demo@docuai.com (admin) or legalai@altosera.com (user) with password "Ztop123!" 
+              </p>
+              <p className="text-sm text-blue-600 mt-1">
+                Authentication is required for all API endpoints. Log in to access the test interface.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="transactions" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
