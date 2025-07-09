@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate Report endpoint - triggers n8n workflow
-  app.post('/api/transactions/:id/generate-report', authMiddleware, async (req: any, res) => {
+  app.post('/api/transactions/:id/generate-report', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -550,7 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/transactions', authMiddleware, async (req: any, res) => {
+  app.post('/api/transactions', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = createTransactionSchema.parse(req.body);
@@ -570,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/transactions/:id - Get single transaction details
-  app.get('/api/transactions/:id', authMiddleware, async (req: any, res) => {
+  app.get('/api/transactions/:id', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -592,7 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PUT /api/transactions/:id - Update transaction fields (excluding num_documents)
-  app.put('/api/transactions/:id', authMiddleware, async (req: any, res) => {
+  app.put('/api/transactions/:id', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
@@ -624,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/transactions/:id', authMiddleware, async (req: any, res) => {
+  app.delete('/api/transactions/:id', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);
