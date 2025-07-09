@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle, FileCheck } from "lucide-react";
-import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+
 import { apiRequest } from "@/lib/queryClient";
 import type { Transaction } from "@shared/schema";
 
@@ -20,11 +20,13 @@ export default function Home() {
   });
   const transactions = transactionsData as Transaction[];
 
-  // Get document counts for all transactions
-  const transactionIds = transactions.map((t) => t.id);
-  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
+  // Calculate document counts from transaction data (numDocuments field)
+  const documentCounts = transactions.reduce((acc, t) => {
+    acc[t.id] = t.numDocuments || 0;
+    return acc;
+  }, {} as Record<number, number>);
 
-  const totalDocuments = Object.values(documentCounts).reduce((acc: number, count: number) => acc + count, 0);
+  const totalDocuments = transactions.reduce((acc, t) => acc + (t.numDocuments || 0), 0);
 
   // Generate Report mutation
   const generateReportMutation = useMutation({

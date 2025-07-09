@@ -36,7 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/Sidebar";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { apiRequest } from "@/lib/queryClient";
-import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,9 +98,11 @@ export default function Create() {
   });
   const transactions = transactionsData as Transaction[];
 
-  // Get document counts for all transactions
-  const transactionIds = transactions.map((t) => t.id);
-  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
+  // Calculate document counts from transaction data (numDocuments field)
+  const documentCounts = transactions.reduce((acc, t) => {
+    acc[t.id] = t.numDocuments || 0;
+    return acc;
+  }, {} as Record<number, number>);
 
   // Create transaction mutation
   const createTransactionMutation = useMutation({

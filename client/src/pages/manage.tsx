@@ -33,7 +33,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+
 import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
@@ -75,9 +75,11 @@ export default function Manage() {
     queryKey: ["/api/chat/sessions"],
   });
 
-  // Get document counts for all transactions
-  const transactionIds = transactions.map((t) => t.id);
-  const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
+  // Calculate document counts from transaction data (numDocuments field)
+  const documentCounts = transactions.reduce((acc, t) => {
+    acc[t.id] = t.numDocuments || 0;
+    return acc;
+  }, {} as Record<number, number>);
 
   // Mutations
   const createTransactionMutation = useMutation({
