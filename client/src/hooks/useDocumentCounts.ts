@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface DocumentCount {
   transactionId: number;
@@ -17,14 +18,10 @@ export function useDocumentCounts(transactionIds: number[]) {
       await Promise.all(
         transactionIds.map(async (id) => {
           try {
-            const response = await fetch(`/api/transactions/${id}/documents`);
-            if (response.ok) {
-              const documents = await response.json();
-              counts[id] = Array.isArray(documents) ? documents.length : 0;
-            } else {
-              counts[id] = 0;
-            }
+            const documents = await apiRequest("GET", `/api/transactions/${id}/documents`);
+            counts[id] = Array.isArray(documents) ? documents.length : 0;
           } catch (error) {
+            console.error(`Failed to fetch documents for transaction ${id}:`, error);
             counts[id] = 0;
           }
         })

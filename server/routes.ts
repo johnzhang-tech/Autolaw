@@ -440,6 +440,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate Report endpoint - triggers n8n workflow
+  app.post('/api/transactions/:id/generate-report', authMiddleware, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Get transaction details
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      // Check if transaction has documents
+      const documents = await storage.getDocuments(transactionId, userId);
+      if (documents.length === 0) {
+        return res.status(400).json({ message: "Please upload your documents first" });
+      }
+
+      // Get user details for webhook payload
+      const user = await storage.getUser(userId);
+
+      // Trigger webhook to n8n with report generation request
+      const webhookPayload = {
+        eventType: 'report_generation_requested',
+        transaction: {
+          id: transaction.id,
+          name: transaction.name,
+          address: transaction.address,
+          transactionType: transaction.transactionType,
+          status: transaction.status,
+          createdAt: transaction.createdAt,
+          documentCount: documents.length
+        },
+        user: {
+          id: user?.id,
+          email: user?.email,
+          firstName: user?.firstName,
+          lastName: user?.lastName
+        },
+        documents: documents.map(doc => ({
+          id: doc.id,
+          fileName: doc.fileName,
+          category: doc.category,
+          uploadStatus: doc.uploadStatus,
+          analysisStatus: doc.analysisStatus,
+          riskScore: doc.riskScore
+        })),
+        requestedAt: new Date().toISOString(),
+        reportType: 'comprehensive_analysis'
+      };
+
+      // Send webhook notification asynchronously
+      webhookService.sendWebhook(webhookPayload).catch(error => {
+        console.error('Failed to send report generation webhook:', error);
+      });
+
+      res.json({
+        success: true,
+        message: "Report generation started",
+        transactionId: transaction.id,
+        documentCount: documents.length,
+        status: "processing"
+      });
+
+    } catch (error: any) {
+      console.error("Error generating report:", error);
+      res.status(500).json({ message: "Failed to generate report", error: error.message });
+    }
+  });
+
   // Transaction endpoints
   app.get('/api/transactions', flexAuth, async (req: any, res) => {
     try {
@@ -855,7 +929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document endpoints
-  app.get('/api/transactions/:id/documents', authMiddleware, async (req: any, res) => {
+  app.get('/api/transactions/:id/documents', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const transactionId = parseInt(req.params.id);

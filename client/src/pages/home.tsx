@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle, FileCheck } from "lucide-react";
 import { useDocumentCounts } from "@/hooks/useDocumentCounts";
+import { apiRequest } from "@/lib/queryClient";
 import type { Transaction } from "@shared/schema";
 
 export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: transactionsData = [] } = useQuery({
     queryKey: ["/api/transactions"],
@@ -21,6 +25,33 @@ export default function Home() {
   const { data: documentCounts = {} } = useDocumentCounts(transactionIds);
 
   const totalDocuments = Object.values(documentCounts).reduce((acc: number, count: number) => acc + count, 0);
+
+  // Generate Report mutation
+  const generateReportMutation = useMutation({
+    mutationFn: async (transactionId: number) => {
+      const documentCount = documentCounts[transactionId] || 0;
+      
+      if (documentCount === 0) {
+        throw new Error("Please upload your documents first");
+      }
+
+      // Trigger n8n workflow
+      return await apiRequest("POST", `/api/transactions/${transactionId}/generate-report`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Report Generation Started",
+        description: "Your report is being generated and will be available shortly.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Cannot Generate Report",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="flex h-screen bg-white">
@@ -103,7 +134,7 @@ export default function Home() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
+                  <CardTitle>Recent Transaction</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {transactions.length === 0 ? (
@@ -126,10 +157,21 @@ export default function Home() {
                               {documentCounts[transaction.id] || 0} documents
                             </p>
                           </div>
-                          <div className="text-right">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              {transaction.status}
-                            </span>
+                          <div className="flex items-center space-x-3">
+                            <Button
+                              onClick={() => generateReportMutation.mutate(transaction.id)}
+                              disabled={generateReportMutation.isPending}
+                              size="sm"
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              <FileCheck className="h-4 w-4 mr-1" />
+                              {generateReportMutation.isPending ? "Generating..." : "Generate Report"}
+                            </Button>
+                            <div className="text-right">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {transaction.status}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
