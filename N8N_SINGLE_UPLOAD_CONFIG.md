@@ -25,10 +25,10 @@ X-API-Key: docuai_demo_key_123
 **Parameter 1: attachment (File)**
 - **Parameter Type**: `n8n Binary File` ✓ 
 - **Name**: `attachment`
-- **Input Data Field Name**: Use the exact binary property name from your previous node
-  - If from Merge node: `attachment_1` or `attachment_8` (whatever shows in your data)
-  - If from HTTP Request: `data` 
-  - **Important**: Don't use the full expression like `{{ $('Merge').first().binary.attachment_8 }}` in the field name, just use `attachment_8`
+- **Input Data Field Name**: **CRITICAL** - Must match exactly what's in your binary data
+  - Looking at your screenshot, you have `attachment_1` (ArticlesOfIncorporation.pdf)
+  - So use: `attachment_1` (NOT `attachment_0`)
+  - **How to find the correct name**: Look at your previous node's output and see what binary properties exist
 
 **Parameter 2: category (Optional)**
 - **Parameter Type**: `String`
@@ -36,16 +36,25 @@ X-API-Key: docuai_demo_key_123
 - **Value**: `hoa`
 
 ## 🐛 What Was Wrong
-Your screenshot shows `{{ $('Merge').first().binary.attachment_8 }}` in the Input Data Field Name. This is incorrect.
+1. First issue: You were using expressions `{{ $('Merge').first().binary.attachment_8 }}` instead of just the property name
+2. **Current issue**: You're using `attachment_0` but your data shows `attachment_1`
 
-**Correct Setup:**
+**Correct Setup Based on Your Screenshot:**
 - **Name**: `attachment`
-- **Input Data Field Name**: `attachment_8` (just the property name, no brackets or expressions)
+- **Input Data Field Name**: `attachment_1` (this matches the binary data in your screenshot)
 
 ## 🧪 Test Steps
-1. Fix the Input Data Field Name as described above
+1. **Change Input Data Field Name from `attachment_0` to `attachment_1`** (based on your screenshot)
 2. Run your n8n workflow
 3. Check our server logs - they'll show if the file is now being received correctly
 4. You should see `totalFilesReceived: 1` in the debug output instead of `0`
 
-The API endpoint is fully ready and working - it's just a matter of n8n sending the binary data correctly!
+## 🔍 How to Find the Correct Field Name
+1. Look at your previous node's output (the one before HTTP Request)
+2. Click on the "Binary" tab 
+3. See what properties are listed (like `attachment_1`, `attachment_2`, etc.)
+4. Use that exact name in your Input Data Field Name
+
+**From your screenshot, use: `attachment_1`**
+
+The API endpoint is fully ready and working - it's just a matter of using the correct binary property name!
