@@ -802,9 +802,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
-  app.post('/api/transactions/:id/upload-single', flexAuth, upload.single('document'), async (req: any, res) => {
+  // Flexible endpoint that accepts both 'document' and 'attachment' field names for n8n compatibility
+  app.post('/api/transactions/:id/upload-single', flexAuth, upload.fields([
+    { name: 'document', maxCount: 1 },
+    { name: 'attachment', maxCount: 1 }
+  ]), async (req: any, res) => {
     try {
-      const file = req.file as Express.Multer.File;
+      // Support both 'document' and 'attachment' field names for n8n compatibility
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const file = files?.document?.[0] || files?.attachment?.[0];
       
       // Enhanced debugging for n8n integration
       console.log('Single upload request details:');
@@ -816,13 +822,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         size: file.size,
         mimetype: file.mimetype
       } : 'No file received');
+      console.log('- Available files fields:', files ? Object.keys(files) : 'None');
       
       if (!file) {
         return res.status(400).json({ 
           message: 'No file uploaded',
           debug: {
             receivedFields: Object.keys(req.body || {}),
-            expectedField: 'document',
+            expectedFields: 'document OR attachment',
+            availableFileFields: files ? Object.keys(files) : 'None',
             contentType: req.headers['content-type'],
             hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false
           }

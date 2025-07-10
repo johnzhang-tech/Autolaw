@@ -252,6 +252,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **API Endpoint Validation**: Comprehensive testing confirmed all 25+ API endpoints are operational with proper authentication
   - **External API Access**: Validated API key authentication working correctly for n8n and other external integrations
   - **Production Ready**: All CRUD operations, file uploads, chat systems, webhooks, and admin functions fully validated and working
+- July 10, 2025. **UI DOCUMENT COUNT DISPLAY FIX & N8N UPLOAD COMPATIBILITY**
+  - **UI Document Count Fix**: Resolved document count display issue where transactions showed "0 documents" instead of actual count
+  - **Root Cause**: Frontend was using separate document counting API calls instead of `numDocuments` field from transaction data
+  - **Solution Applied**: Updated home.tsx, create.tsx, and manage.tsx to use `numDocuments` field directly from transaction data
+  - **Immediate Result**: All pages now display accurate document counts without additional API calls
+  - **N8N Upload Field Compatibility**: Enhanced single upload endpoint to accept both `document` and `attachment` field names
+  - **API-Side Solution**: Modified `/api/transactions/:id/upload-single` endpoint to support n8n's `attachment` field naming
+  - **Backward Compatibility**: Original `document` field name still works, ensuring no breaking changes
+  - **N8N Integration Complete**: External workflows can now upload files using either field name without configuration changes
 
 ## Recent Architectural Changes
 
