@@ -49,12 +49,24 @@ X-API-Key: docuai_demo_key_123
 3. Check our server logs - they'll show if the file is now being received correctly
 4. You should see `totalFilesReceived: 1` in the debug output instead of `0`
 
-## 🔍 How to Find the Correct Field Name
-1. Look at your previous node's output (the one before HTTP Request)
-2. Click on the "Binary" tab 
-3. See what properties are listed (like `attachment_1`, `attachment_2`, etc.)
-4. Use that exact name in your Input Data Field Name
+## 🔍 The Real Problem (New Screenshot Analysis)
+Your new screenshot shows:
+- **Item 0**: Has `attachment_0` (Jan Meeting Minutes Revised.pdf)
+- **Item 1**: Has `attachment_1` (ArticlesOfIncorporation.pdf)
 
-**From your screenshot, use: `attachment_1`**
+The error says "attachment_1 not found in Item 0" because n8n is processing Item 0 but looking for `attachment_1` which only exists in Item 1.
 
-The API endpoint is fully ready and working - it's just a matter of using the correct binary property name!
+## 🛠️ Two Solutions
+
+### Option 1: Use attachment_0 (Recommended)
+- **Input Data Field Name**: `attachment_0` 
+- This will use the first file from the first item
+
+### Option 2: Process Item 1 specifically
+- Add a filter/switch node before HTTP Request to only process Item 1
+- Then use `attachment_1`
+
+## 🎯 Quick Fix
+Change your **Input Data Field Name** to `attachment_0` since that's what exists in Item 0 that n8n is processing.
+
+The API endpoint is fully ready and working - it's just a matter of using the binary property that exists in the item being processed!

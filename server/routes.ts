@@ -810,17 +810,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const file = allFiles?.find(f => f.fieldname === 'document' || f.fieldname === 'attachment');
       
       // Enhanced debugging for n8n integration
-      console.log('Single upload request details:');
+      console.log('=== N8N SINGLE UPLOAD DEBUG ===');
       console.log('- Headers:', JSON.stringify(req.headers, null, 2));
       console.log('- Body keys:', Object.keys(req.body || {}));
       console.log('- Body values:', req.body);
-      console.log('- All files:', allFiles?.map(f => ({ fieldname: f.fieldname, originalname: f.originalname, size: f.size })));
+      console.log('- All files received:', allFiles?.map(f => ({ 
+        fieldname: f.fieldname, 
+        originalname: f.originalname, 
+        size: f.size,
+        mimetype: f.mimetype,
+        hasBuffer: !!f.buffer
+      })));
       console.log('- Selected file:', file ? {
         fieldname: file.fieldname,
         originalname: file.originalname,
         size: file.size,
-        mimetype: file.mimetype
+        mimetype: file.mimetype,
+        hasBuffer: !!file.buffer
       } : 'No file received');
+      console.log('- Content-Type:', req.headers['content-type']);
+      console.log('- Is multipart:', req.headers['content-type']?.includes('multipart/form-data'));
+      console.log('=== END DEBUG ===');
       
       if (!file) {
         return res.status(400).json({ 
