@@ -38,9 +38,20 @@ export default function Documents() {
     queryFn: async () => {
       if (!transactions.length) return [];
       
+      // Get JWT token for authenticated requests
+      const token = localStorage.getItem('docuai_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       // Fetch documents from all user transactions
       const documentPromises = transactions.map(async (transaction) => {
-        const response = await fetch(`/api/transactions/${transaction.id}/documents`);
+        const response = await fetch(`/api/transactions/${transaction.id}/documents`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const docs = await response.json();
           return docs.map((doc: any) => ({
@@ -83,7 +94,18 @@ export default function Documents() {
 
   const downloadDocument = async (documentId: number, fileName: string) => {
     try {
-      const response = await fetch(`/api/documents/${documentId}/download`);
+      // Get JWT token for authenticated requests
+      const token = localStorage.getItem('docuai_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`/api/documents/${documentId}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) throw new Error('Download failed');
       
       const result = await response.json();
@@ -174,7 +196,7 @@ export default function Documents() {
                     <FolderOpen className="h-8 w-8 text-purple-600" />
                     <div className="ml-4">
                       <p className="text-sm font-medium text-slate-600">Storage</p>
-                      <p className="text-2xl font-bold text-slate-900">HomeDocsInterfaces</p>
+                      <p className="text-2xl font-bold text-slate-900">Replit Object Storage</p>
                     </div>
                   </div>
                 </CardContent>
@@ -218,7 +240,7 @@ export default function Documents() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Documents in HomeDocsInterfaces Storage ({filteredDocuments.length})
+                  Documents in Replit Object Storage ({filteredDocuments.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -33,7 +33,7 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Multiple file upload mutation for HomeDocsInterfaces Object Storage
+  // Multiple file upload mutation for Replit Object Storage
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const response = await fetch('/api/upload', {
@@ -49,11 +49,11 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
       return response.json();
     },
     onSuccess: (data) => {
-      const { successful, failed, storageLocation } = data.summary;
+      const { successful, failed } = data.summary;
       
       toast({
         title: "Upload Complete",
-        description: `${successful} files uploaded to ${storageLocation}. ${failed > 0 ? `${failed} files failed.` : 'All files processed successfully.'}`,
+        description: `${successful} files uploaded to Replit Object Storage. ${failed > 0 ? `${failed} files failed.` : 'All files processed successfully.'}`,
       });
       
       setSelectedFiles([]);
@@ -294,7 +294,7 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
             <div className="space-y-2">
               <Progress value={uploadProgress} className="w-full" />
               <p className="text-sm text-gray-600 text-center">
-                Uploading to HomeDocsInterfaces Object Storage...
+                Uploading to Replit Object Storage...
               </p>
             </div>
           )}
@@ -318,7 +318,7 @@ export function DocumentList({ transactionId }: DocumentListProps) {
 
   const downloadMutation = useMutation({
     mutationFn: async (documentId: number) => {
-      // For HomeDocsInterfaces, download directly as blob
+      // For Replit Object Storage, download directly as blob
       const response = await fetch(`/api/documents/${documentId}/download`);
       if (!response.ok) {
         throw new Error('Download failed');
@@ -331,7 +331,7 @@ export function DocumentList({ transactionId }: DocumentListProps) {
       return { blob, filename };
     },
     onSuccess: (data) => {
-      // Create download link for HomeDocsInterfaces file
+      // Create download link for Replit Object Storage file
       const url = window.URL.createObjectURL(data.blob);
       const link = document.createElement('a');
       link.href = url;

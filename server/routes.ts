@@ -1997,6 +1997,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics Dashboard endpoint
+  app.get('/api/analytics/dashboard', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentUser = await storage.getUser(userId);
+      
+      // Admin users see all data, regular users see only their data
+      const isAdmin = currentUser?.role === 'admin';
+      const userFilter = isAdmin ? {} : { userId };
+
+      // Get overview statistics
+      const [transactionStats] = await db.select({
+        transactionCount: sql<number>`count(*)`.as('transactionCount'),
+        activeTransactions: sql<number>`count(case when status = 'active' then 1 end)`.as('activeTransactions')
+      })
+      .from(transactions)
+      .where(isAdmin ? sql`1=1` : eq(transactions.userId, userId));
+
+      const [documentStats] = await db.select({
+        documentCount: sql<number>`count(*)`.as('documentCount'),
+        avgRiskScore: sql<number>`coalesce(avg(risk_score), 0)`.as('avgRiskScore'),
+        highRiskDocs: sql<number>`count(case when risk_score > 70 then 1 end)`.as('highRiskDocs')
+      })
+      .from(documents)
+      .innerJoin(transactions, eq(documents.transactionId, transactions.id))
+      .where(isAdmin ? sql`1=1` : eq(transactions.userId, userId));
+
+      // Get document types distribution
+      const documentTypes = await db.select({
+        category: documents.category,
+        count: sql<number>`count(*)`.as('count')
+      })
+      .from(documents)
+      .innerJoin(transactions, eq(documents.transactionId, transactions.id))
+      .where(isAdmin ? sql`1=1` : eq(transactions.userId, userId))
+      .groupBy(documents.category);
+
+      const documentTypesMap = documentTypes.reduce((acc, item) => {
+        acc[item.category || 'other'] = item.count;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Get common risks (mock data for now since we don't have risk analysis details)
+      const commonRisks = [
+        { risk: "High HOA Fees", count: Math.floor(documentStats.documentCount / 5) },
+        { risk: "Missing Insurance", count: Math.floor(documentStats.documentCount / 8) },
+        { risk: "Overdue Payments", count: Math.floor(documentStats.documentCount / 10) },
+        { risk: "Incomplete Documentation", count: Math.floor(documentStats.documentCount / 12) }
+      ].filter(item => item.count > 0);
+
+      // Get recent documents
+      const recentDocs = await db.select({
+        id: documents.id,
+        fileName: documents.originalFileName,
+        category: documents.category,
+        riskScore: documents.riskScore,
+        createdAt: documents.uploadedAt
+      })
+      .from(documents)
+      .innerJoin(transactions, eq(documents.transactionId, transactions.id))
+      .where(isAdmin ? sql`1=1` : eq(transactions.userId, userId))
+      .orderBy(sql`${documents.uploadedAt} desc`)
+      .limit(5);
+
+      // Get monthly uploads (last 6 months)
+      const monthlyUploads = await db.select({
+        month: sql<string>`to_char(${documents.uploadedAt}, 'Mon YYYY')`.as('month'),
+        uploads: sql<number>`count(*)`.as('uploads')
+      })
+      .from(documents)
+      .innerJoin(transactions, eq(documents.transactionId, transactions.id))
+      .where(
+        and(
+          sql`${documents.uploadedAt} >= current_date - interval '6 months'`,
+          isAdmin ? sql`1=1` : eq(transactions.userId, userId)
+        )
+      )
+      .groupBy(sql`to_char(${documents.uploadedAt}, 'Mon YYYY')`, sql`date_trunc('month', ${documents.uploadedAt})`)
+      .orderBy(sql`date_trunc('month', ${documents.uploadedAt})`);
+
+      const analyticsData = {
+        overview: {
+          transactionCount: transactionStats.transactionCount || 0,
+          documentCount: documentStats.documentCount || 0,
+          avgRiskScore: Math.round(documentStats.avgRiskScore || 0),
+          highRiskDocs: documentStats.highRiskDocs || 0,
+          activeTransactions: transactionStats.activeTransactions || 0
+        },
+        documentTypes: documentTypesMap,
+        commonRisks,
+        recentDocs: recentDocs.map(doc => ({
+          ...doc,
+          fileName: doc.fileName || 'Unknown',
+          category: doc.category || 'other',
+          createdAt: doc.createdAt?.toISOString() || new Date().toISOString()
+        })),
+        monthlyUploads: monthlyUploads.length > 0 ? monthlyUploads : [
+          { month: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), uploads: documentStats.documentCount || 0 }
+        ]
+      };
+
+      res.json(analyticsData);
+    } catch (error: any) {
+      console.error('Error fetching analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics data' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

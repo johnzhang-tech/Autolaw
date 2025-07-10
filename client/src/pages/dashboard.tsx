@@ -64,22 +64,22 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   // Fetch analytics data from backend
-  const { data: analytics, isLoading } = useQuery<AnalyticsData>({
+  const { data: analytics, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ["/api/analytics/dashboard"],
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
+    retry: false,
   });
+
+  // Handle authentication errors
+  if (error && isUnauthorizedError(error)) {
+    toast({
+      title: "Unauthorized", 
+      description: "You are logged out. Logging in again...",
+      variant: "destructive",
+    });
+    setTimeout(() => {
+      window.location.href = "/api/login";
+    }, 500);
+  }
 
   if (isLoading) {
     return (
