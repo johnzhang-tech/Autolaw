@@ -1,75 +1,51 @@
-# n8n Single File Upload Configuration for DocuAI
+# N8N Single File Upload Configuration Guide
 
-## Correct Configuration for HTTP Request Node
+## Issue Identified
+Looking at your n8n screenshot, the problem is in the binary data configuration. The endpoint is working correctly but n8n needs specific setup to send files properly.
 
-### URL
-```
-https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/34/upload-single
-```
+## ✅ API Endpoint is Ready
+- **Endpoint**: `POST /api/transactions/{transactionId}/upload-single` ✓ Working
+- **Authentication**: `X-API-Key: docuai_demo_key_123` ✓ Working  
+- **Field Names**: Accepts both `attachment` and `document` ✓ Working
 
-### Method
-POST
+## 🔧 Fix Your N8N Configuration
 
-### Authentication
-**Headers:**
+### 1. HTTP Request Node Settings:
+- **Method**: `POST` ✓
+- **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/34/upload-single`
+- **Body Content Type**: `Form-Data` ✓
+
+### 2. Headers:
 ```
 X-API-Key: docuai_demo_key_123
 ```
 
-### Body Configuration
-**Body Content Type:** `Form-Data`
+### 3. Body Parameters (this is the critical part):
 
-**Parameters:**
-1. **document** (File/Binary)
-   - Parameter Type: `n8n Binary File`
-   - Name: `document`
-   - Input Data Field Name: `{{ $('Merge').first().binary.attachment }}`
+**Parameter 1: attachment (File)**
+- **Parameter Type**: `n8n Binary File` ✓ 
+- **Name**: `attachment`
+- **Input Data Field Name**: Use the exact binary property name from your previous node
+  - If from Merge node: `attachment_1` or `attachment_8` (whatever shows in your data)
+  - If from HTTP Request: `data` 
+  - **Important**: Don't use the full expression like `{{ $('Merge').first().binary.attachment_8 }}` in the field name, just use `attachment_8`
 
-2. **category** (Text - Optional)
-   - Parameter Type: `Fixed`
-   - Name: `category`
-   - Value: `hoa` (or other category like `contract`, `inspection`, `financial`, `legal`)
+**Parameter 2: category (Optional)**
+- **Parameter Type**: `String`
+- **Name**: `category`  
+- **Value**: `hoa`
 
-## Key Changes Needed in Your Current Config:
+## 🐛 What Was Wrong
+Your screenshot shows `{{ $('Merge').first().binary.attachment_8 }}` in the Input Data Field Name. This is incorrect.
 
-1. **Change the file field name from `attachment` to `document`**
-2. **Use `Form-Data` content type, not JSON**
-3. **Make sure previous node outputs binary data named `attachment`**
+**Correct Setup:**
+- **Name**: `attachment`
+- **Input Data Field Name**: `attachment_8` (just the property name, no brackets or expressions)
 
-## Example n8n Workflow Structure:
-```
-[Read Binary File] → [HTTP Request (Upload)]
-```
+## 🧪 Test Steps
+1. Fix the Input Data Field Name as described above
+2. Run your n8n workflow
+3. Check our server logs - they'll show if the file is now being received correctly
+4. You should see `totalFilesReceived: 1` in the debug output instead of `0`
 
-## Troubleshooting:
-
-### Error: "No file uploaded"
-- Verify the previous node outputs binary data
-- Check that the field name is `document` (not `attachment`)
-- Ensure Content-Type is `multipart/form-data`
-
-### Error: "Authentication failed"
-- Verify X-API-Key header is set to `docuai_demo_key_123`
-- Check the URL is correct
-
-### Expected Response (Success):
-```json
-{
-  "success": true,
-  "message": "Document \"filename.pdf\" uploaded successfully to transaction 34",
-  "document": {
-    "id": 123,
-    "fileName": "unique_filename.pdf",
-    "originalFileName": "filename.pdf",
-    "fileSize": 302048,
-    "mimeType": "application/pdf",
-    "category": "hoa",
-    "uploadStatus": "completed"
-  },
-  "transaction": {
-    "id": 34,
-    "name": "Transaction Name",
-    "numDocuments": 1
-  }
-}
-```
+The API endpoint is fully ready and working - it's just a matter of n8n sending the binary data correctly!

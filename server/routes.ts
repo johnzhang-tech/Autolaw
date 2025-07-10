@@ -803,36 +803,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
   // Flexible endpoint that accepts both 'document' and 'attachment' field names for n8n compatibility
-  app.post('/api/transactions/:id/upload-single', flexAuth, upload.fields([
-    { name: 'document', maxCount: 1 },
-    { name: 'attachment', maxCount: 1 }
-  ]), async (req: any, res) => {
+  app.post('/api/transactions/:id/upload-single', flexAuth, upload.any(), async (req: any, res) => {
     try {
       // Support both 'document' and 'attachment' field names for n8n compatibility
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      const file = files?.document?.[0] || files?.attachment?.[0];
+      const allFiles = req.files as Express.Multer.File[];
+      const file = allFiles?.find(f => f.fieldname === 'document' || f.fieldname === 'attachment');
       
       // Enhanced debugging for n8n integration
       console.log('Single upload request details:');
       console.log('- Headers:', JSON.stringify(req.headers, null, 2));
       console.log('- Body keys:', Object.keys(req.body || {}));
-      console.log('- File object:', file ? {
+      console.log('- Body values:', req.body);
+      console.log('- All files:', allFiles?.map(f => ({ fieldname: f.fieldname, originalname: f.originalname, size: f.size })));
+      console.log('- Selected file:', file ? {
         fieldname: file.fieldname,
         originalname: file.originalname,
         size: file.size,
         mimetype: file.mimetype
       } : 'No file received');
-      console.log('- Available files fields:', files ? Object.keys(files) : 'None');
       
       if (!file) {
         return res.status(400).json({ 
           message: 'No file uploaded',
           debug: {
             receivedFields: Object.keys(req.body || {}),
+            bodyValues: req.body,
             expectedFields: 'document OR attachment',
-            availableFileFields: files ? Object.keys(files) : 'None',
+            allFiles: allFiles?.map(f => ({ fieldname: f.fieldname, originalname: f.originalname })) || [],
             contentType: req.headers['content-type'],
-            hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false
+            hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false,
+            totalFilesReceived: allFiles?.length || 0
           }
         });
       }
