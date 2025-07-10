@@ -261,6 +261,11 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **API-Side Solution**: Modified `/api/transactions/:id/upload-single` endpoint to support n8n's `attachment` field naming
   - **Backward Compatibility**: Original `document` field name still works, ensuring no breaking changes
   - **N8N Integration Complete**: External workflows can now upload files using either field name without configuration changes
+  - **CRITICAL N8N BINARY UPLOAD FIX**: Completely redesigned upload endpoint to properly handle n8n's binary data transmission
+  - **Binary Data Processing**: Implemented express.raw() middleware with proper content-type detection for both multipart and binary uploads
+  - **Endpoint Verification**: Confirmed working with test uploads - binary data properly received, processed, and stored in Replit Object Storage
+  - **Alternative Solution**: Provided HTTP Request node configuration as reliable alternative to Write Binary File node in n8n workflows
+  - **Production Ready**: Upload endpoint now handles both traditional form uploads and n8n binary uploads with comprehensive error handling
 
 ## Recent Architectural Changes
 
