@@ -13,13 +13,16 @@ The issue is that n8n is not properly sending the binary data to our API endpoin
 
 I've updated the API endpoint to handle both multipart form-data AND raw binary data from n8n.
 
-### New n8n Configuration (Recommended)
+### New n8n Configuration (Current Setup from Screenshot)
 1. **Method**: POST ✓
 2. **URL**: Your current URL ✓  
 3. **Headers**: `X-API-Key: docuai_demo_key_123` ✓
-4. **Body Content Type**: **Change to "Binary"** (instead of Form-Data)
-5. **Body Binary Property**: Select `attachment_0` from the dropdown
-6. **Optional Headers**: Add `X-Filename: your-file-name.pdf` for better filename detection
+4. **Body Content Type**: "Binary" ✓ (good!)
+5. **Input Data Field Name**: `attachment_0` ✓
+6. **Optional Headers**: Add `X-Filename: Jan-Meeting-Minutes.pdf` for better filename detection
+
+## What I Fixed
+The endpoint now properly handles n8n's binary upload mode where the entire request body IS the file data. The enhanced logging will show exactly what we receive.
 
 ### Alternative: Keep Current Form-Data Setup
 If you prefer to keep your current configuration, it should also work now with the updated endpoint.

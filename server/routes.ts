@@ -807,11 +807,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Check if this is raw binary data (n8n binary upload) or multipart form-data
     const contentType = req.headers['content-type'] || '';
     
+    console.log('=== MIDDLEWARE DEBUG ===');
+    console.log('- Content-Type:', contentType);
+    console.log('- User-Agent:', req.headers['user-agent']);
+    console.log('- Is multipart:', contentType.includes('multipart/form-data'));
+    console.log('- All headers:', JSON.stringify(req.headers, null, 2));
+    
     if (contentType.includes('multipart/form-data')) {
       // Use multer for multipart form-data
+      console.log('- Using multer for multipart');
       upload.any()(req, res, next);
     } else {
-      // Skip multer for raw binary data
+      // Skip multer for raw binary data - set up raw body parsing
+      console.log('- Setting up raw binary parsing');
+      req.setEncoding(null);
       next();
     }
   }, async (req: any, res) => {
@@ -854,34 +863,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle raw binary data (n8n binary upload)
         console.log('- Raw binary upload detected');
         
-        // Collect raw body data
-        const chunks: Buffer[] = [];
+        // For raw binary, the entire request body IS the file
+        let bodyBuffer: Buffer;
         
-        req.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
-        });
-        
-        await new Promise((resolve, reject) => {
-          req.on('end', resolve);
-          req.on('error', reject);
-        });
-        
-        const buffer = Buffer.concat(chunks);
-        console.log('- Raw buffer size:', buffer.length);
-        
-        if (buffer.length > 0) {
-          // Get filename from header or use default
-          const filename = req.headers['x-filename'] || req.body?.filename || originalFileName;
-          const detectedMimeType = req.headers['content-type'] || mimeType;
+        if (req.body && Buffer.isBuffer(req.body)) {
+          // Body already parsed as buffer
+          bodyBuffer = req.body;
+          console.log('- Using pre-parsed buffer, size:', bodyBuffer.length);
+        } else {
+          // Need to collect raw chunks
+          console.log('- Collecting raw chunks...');
+          const chunks: Buffer[] = [];
           
-          // Create a fake multer file object
+          // Set up data collection if not already done
+          if (!req.readable || req.readableEnded) {
+            console.log('- Stream already ended, checking for body');
+            if (req.body) {
+              bodyBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+            } else {
+              bodyBuffer = Buffer.alloc(0);
+            }
+          } else {
+            req.on('data', (chunk: Buffer) => {
+              console.log('- Received chunk:', chunk.length, 'bytes');
+              chunks.push(chunk);
+            });
+            
+            await new Promise((resolve, reject) => {
+              req.on('end', () => {
+                console.log('- Stream ended');
+                resolve(void 0);
+              });
+              req.on('error', reject);
+            });
+            
+            bodyBuffer = Buffer.concat(chunks);
+          }
+        }
+        
+        console.log('- Final buffer size:', bodyBuffer.length);
+        
+        if (bodyBuffer.length > 0) {
+          // Get filename from headers or query params
+          const filename = req.headers['x-filename'] || 
+                           req.query.filename || 
+                           req.headers['x-original-filename'] ||
+                           'attachment_0.pdf';
+          
+          // Determine mime type from headers or filename
+          let detectedMimeType = req.headers['content-type'] || 'application/octet-stream';
+          if (detectedMimeType === 'application/octet-stream' && filename.includes('.')) {
+            const ext = filename.split('.').pop()?.toLowerCase();
+            if (ext === 'pdf') detectedMimeType = 'application/pdf';
+            else if (ext === 'doc') detectedMimeType = 'application/msword';
+            else if (ext === 'docx') detectedMimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          }
+          
+          // Create a multer-compatible file object
           file = {
             fieldname: 'attachment',
             originalname: filename,
             encoding: '7bit',
             mimetype: detectedMimeType,
-            buffer: buffer,
-            size: buffer.length
+            buffer: bodyBuffer,
+            size: bodyBuffer.length
           } as Express.Multer.File;
           
           console.log('- Created file object:', {
