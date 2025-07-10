@@ -802,34 +802,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
-  // Flexible endpoint that accepts both 'document' and 'attachment' field names for n8n compatibility
-  app.post('/api/transactions/:id/upload-single', flexAuth, upload.any(), async (req: any, res) => {
+  // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
+  app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {
+    // Check if this is raw binary data (n8n binary upload) or multipart form-data
+    const contentType = req.headers['content-type'] || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+      // Use multer for multipart form-data
+      upload.any()(req, res, next);
+    } else {
+      // Skip multer for raw binary data
+      next();
+    }
+  }, async (req: any, res) => {
     try {
-      // Support both 'document' and 'attachment' field names for n8n compatibility
-      const allFiles = req.files as Express.Multer.File[];
-      const file = allFiles?.find(f => f.fieldname === 'document' || f.fieldname === 'attachment');
+      const contentType = req.headers['content-type'] || '';
+      let file: Express.Multer.File | null = null;
+      let originalFileName = 'uploaded_file';
+      let mimeType = 'application/octet-stream';
       
       // Enhanced debugging for n8n integration
       console.log('=== N8N SINGLE UPLOAD DEBUG ===');
       console.log('- Headers:', JSON.stringify(req.headers, null, 2));
+      console.log('- Content-Type:', contentType);
+      console.log('- Is multipart:', contentType.includes('multipart/form-data'));
+      console.log('- Is binary:', !contentType.includes('multipart/form-data'));
       console.log('- Body keys:', Object.keys(req.body || {}));
       console.log('- Body values:', req.body);
-      console.log('- All files received:', allFiles?.map(f => ({ 
-        fieldname: f.fieldname, 
-        originalname: f.originalname, 
-        size: f.size,
-        mimetype: f.mimetype,
-        hasBuffer: !!f.buffer
-      })));
-      console.log('- Selected file:', file ? {
-        fieldname: file.fieldname,
-        originalname: file.originalname,
-        size: file.size,
-        mimetype: file.mimetype,
-        hasBuffer: !!file.buffer
-      } : 'No file received');
-      console.log('- Content-Type:', req.headers['content-type']);
-      console.log('- Is multipart:', req.headers['content-type']?.includes('multipart/form-data'));
+      
+      if (contentType.includes('multipart/form-data')) {
+        // Handle multipart form-data (traditional file upload)
+        const allFiles = req.files as Express.Multer.File[];
+        file = allFiles?.find(f => f.fieldname === 'document' || f.fieldname === 'attachment');
+        
+        console.log('- All files received:', allFiles?.map(f => ({ 
+          fieldname: f.fieldname, 
+          originalname: f.originalname, 
+          size: f.size,
+          mimetype: f.mimetype,
+          hasBuffer: !!f.buffer
+        })));
+        console.log('- Selected file:', file ? {
+          fieldname: file.fieldname,
+          originalname: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          hasBuffer: !!file.buffer
+        } : 'No file received');
+        
+      } else {
+        // Handle raw binary data (n8n binary upload)
+        console.log('- Raw binary upload detected');
+        
+        // Collect raw body data
+        const chunks: Buffer[] = [];
+        
+        req.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+        
+        await new Promise((resolve, reject) => {
+          req.on('end', resolve);
+          req.on('error', reject);
+        });
+        
+        const buffer = Buffer.concat(chunks);
+        console.log('- Raw buffer size:', buffer.length);
+        
+        if (buffer.length > 0) {
+          // Get filename from header or use default
+          const filename = req.headers['x-filename'] || req.body?.filename || originalFileName;
+          const detectedMimeType = req.headers['content-type'] || mimeType;
+          
+          // Create a fake multer file object
+          file = {
+            fieldname: 'attachment',
+            originalname: filename,
+            encoding: '7bit',
+            mimetype: detectedMimeType,
+            buffer: buffer,
+            size: buffer.length
+          } as Express.Multer.File;
+          
+          console.log('- Created file object:', {
+            originalname: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype,
+            hasBuffer: !!file.buffer
+          });
+        }
+      }
+      
       console.log('=== END DEBUG ===');
       
       if (!file) {
