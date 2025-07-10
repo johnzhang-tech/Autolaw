@@ -816,9 +816,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('- Using multer for multipart');
       upload.any()(req, res, next);
     } else {
-      // Use express.raw for binary data
-      console.log('- Using express.raw for binary');
-      express.raw({type: '*/*', limit: '50mb'})(req, res, next);
+      // Use raw body parsing for binary data
+      console.log('- Using raw body parsing for binary');
+      // Set up to collect raw binary data
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+      req.on('end', () => {
+        req.body = Buffer.concat(chunks);
+        next();
+      });
+      req.on('error', next);
     }
   }, async (req: any, res) => {
     try {
