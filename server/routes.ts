@@ -898,6 +898,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mimetype: f.mimetype,
           hasBuffer: !!f.buffer
         })));
+        console.log('- Total files count:', allFiles?.length || 0);
+        console.log('- All field names:', allFiles?.map(f => f.fieldname) || []);
+        console.log('- Looking for fields matching: document, attachment, attachment_*');
         console.log('- Selected file:', file ? {
           fieldname: file.fieldname,
           originalname: file.originalname,
@@ -917,7 +920,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'No file uploaded',
           debug: {
             receivedFields: Object.keys(req.body || {}),
-            bodyValues: req.body,
+            filesReceived: req.files ? (req.files as Express.Multer.File[]).map(f => f.fieldname) : [],
+            fileCount: req.files ? (req.files as Express.Multer.File[]).length : 0,
             expectedFields: 'document OR attachment OR attachment_0',
             contentType: req.headers['content-type'],
             hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false,
@@ -2000,6 +2004,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error recalculating document counts:', error);
       res.status(500).json({ message: 'Failed to recalculate document counts' });
     }
+  });
+
+  // Debug endpoint for testing n8n uploads
+  app.post('/api/debug/upload', flexAuth, upload.any(), async (req: any, res) => {
+    console.log('=== DEBUG UPLOAD ENDPOINT ===');
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body keys:', Object.keys(req.body || {}));
+    console.log('Body values:', req.body);
+    console.log('Files received:', req.files ? (req.files as Express.Multer.File[]).map(f => ({
+      fieldname: f.fieldname,
+      originalname: f.originalname,
+      size: f.size,
+      mimetype: f.mimetype
+    })) : 'No files');
+    
+    res.json({
+      success: true,
+      debug: {
+        headers: req.headers,
+        bodyKeys: Object.keys(req.body || {}),
+        bodyValues: req.body,
+        filesReceived: req.files ? (req.files as Express.Multer.File[]).map(f => ({
+          fieldname: f.fieldname,
+          originalname: f.originalname,
+          size: f.size,
+          mimetype: f.mimetype
+        })) : [],
+        fileCount: req.files ? (req.files as Express.Multer.File[]).length : 0
+      }
+    });
   });
 
   // Analytics Dashboard endpoint
