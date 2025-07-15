@@ -545,11 +545,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transactions = await storage.getTransactions(userId);
       
       // Transform response to use Tranx_id instead of id to avoid downstream conflicts
-      const transformedTransactions = transactions.map(transaction => ({
-        ...transaction,
-        Tranx_id: transaction.id,
-        id: undefined
-      }));
+      const transformedTransactions = transactions.map(transaction => {
+        const { id, ...rest } = transaction;
+        return {
+          ...rest,
+          Tranx_id: id
+        };
+      });
       
       res.json(transformedTransactions);
     } catch (error: any) {
@@ -568,10 +570,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Transform response to use Tranx_id instead of id to avoid downstream conflicts
+      const { id, ...rest } = transaction;
       const transformedTransaction = {
-        ...transaction,
-        Tranx_id: transaction.id,
-        id: undefined
+        ...rest,
+        Tranx_id: id
       };
       
       res.status(201).json(transformedTransaction);
@@ -601,10 +603,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Transform response to use Tranx_id instead of id to avoid downstream conflicts
+      const { id, ...rest } = transaction;
       const transformedTransaction = {
-        ...transaction,
-        Tranx_id: transaction.id,
-        id: undefined
+        ...rest,
+        Tranx_id: id
       };
 
       res.json(transformedTransaction);
