@@ -1376,24 +1376,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const allFiles = req.files as Express.Multer.File[];
         
         console.log('- Files from multer.any():', typeof req.files, Array.isArray(req.files));
-        console.log('- Direct files array length:', allFiles?.length || 0);
+        console.log('- Direct files array length:', Array.isArray(allFiles) ? allFiles.length : 0);
         
-        console.log('- All files received:', allFiles?.map(f => ({ 
-          fieldname: f.fieldname, 
-          originalname: f.originalname, 
-          size: f.size,
-          mimetype: f.mimetype,
-          hasBuffer: !!f.buffer
-        })));
-        console.log('- Total files count:', allFiles?.length || 0);
-        console.log('- All field names:', allFiles?.map(f => f.fieldname) || []);
+        if (Array.isArray(allFiles)) {
+          console.log('- All files received:', allFiles.map(f => ({ 
+            fieldname: f.fieldname, 
+            originalname: f.originalname, 
+            size: f.size,
+            mimetype: f.mimetype,
+            hasBuffer: !!f.buffer
+          })));
+          console.log('- All field names:', allFiles.map(f => f.fieldname));
+        } else {
+          console.log('- req.files is not an array:', req.files);
+        }
+        console.log('- Total files count:', Array.isArray(allFiles) ? allFiles.length : 0);
         
         // Check if files exist and handle accordingly
         console.log('- Pre-condition debug: allFiles exists:', !!allFiles);
-        console.log('- Pre-condition debug: allFiles length:', allFiles?.length);
-        console.log('- Pre-condition debug: condition result:', !!(allFiles && allFiles.length > 0));
+        console.log('- Pre-condition debug: allFiles is array:', Array.isArray(allFiles));
+        console.log('- Pre-condition debug: allFiles length:', Array.isArray(allFiles) ? allFiles.length : 'not array');
+        console.log('- Pre-condition debug: condition result:', !!(Array.isArray(allFiles) && allFiles.length > 0));
         
-        if (allFiles && allFiles.length > 0) {
+        if (Array.isArray(allFiles) && allFiles.length > 0) {
           console.log('- ENTERED main files condition');
           if (allFiles.length > 1) {
             console.log('- Multiple files detected, switching to multi-upload mode');
