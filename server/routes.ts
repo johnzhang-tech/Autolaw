@@ -1077,12 +1077,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           console.log(`Processing file: ${file.originalname} (${file.size} bytes)`);
           
-          // Extract filename from form body if available
+          // ALWAYS use the original filename from binary data - NO OVERRIDES
           let filename = file.originalname;
-          const filenameKey = file.fieldname.replace('file', 'filename');
-          if (req.body[filenameKey]) {
-            filename = req.body[filenameKey];
-          }
+          
+          console.log('- Original filename from binary:', file.originalname);
+          console.log('- Using filename:', filename);
+          
+          // DO NOT override with form body data - preserve original filenames
           
           // Ensure proper file extension for Google Docs
           if (file.mimetype.includes('google-apps') && filename && !filename.includes('.')) {

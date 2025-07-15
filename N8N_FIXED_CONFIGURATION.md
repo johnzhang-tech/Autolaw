@@ -68,10 +68,52 @@ Make sure each binary attachment contains a different file:
 - attachment_4: Assessment.pdf
 - attachment_5: Minutes.pdf
 
-### 🔍 How to Verify
-1. **Check your INPUT tab** - Make sure you have 6 different files in attachments
-2. **Check field names** - Each parameter should have a non-empty "Name" field
-3. **Test upload** - You should see different filenames in the response
+### 🔍 How to Verify Your N8N Setup
+
+#### 1. Check INPUT Tab - Verify Different Files
+Make sure you have 6 DIFFERENT files in your attachments:
+```
+attachment_0: Contains HOA-Declaration.pdf (NOT Jan Meeting Minutes.pdf)
+attachment_1: Contains HOA-BY-LAWS.pdf (NOT Jan Meeting Minutes.pdf)  
+attachment_2: Contains ArticlesOfIncorporation.pdf (NOT Jan Meeting Minutes.pdf)
+attachment_3: Contains Contract.pdf (NOT Jan Meeting Minutes.pdf)
+attachment_4: Contains Assessment.pdf (NOT Jan Meeting Minutes.pdf)
+attachment_5: Contains Minutes.pdf (NOT Jan Meeting Minutes.pdf)
+```
+
+#### 2. Check Field Names
+Each parameter should have a non-empty "Name" field:
+- file1, file2, file3, file4, file5, file6
+
+#### 3. Expected Response - ORIGINAL FILENAMES PRESERVED
+```json
+{
+  "uploaded": [
+    {"fileName": "HOA-Declaration.pdf"},      ← ORIGINAL NAME
+    {"fileName": "HOA-BY-LAWS.pdf"},          ← ORIGINAL NAME  
+    {"fileName": "ArticlesOfIncorporation.pdf"}, ← ORIGINAL NAME
+    {"fileName": "Contract.pdf"},             ← ORIGINAL NAME
+    {"fileName": "Assessment.pdf"},           ← ORIGINAL NAME
+    {"fileName": "Minutes.pdf"}               ← ORIGINAL NAME
+  ]
+}
+```
+
+#### 🚨 If You See This (WRONG):
+```json
+{
+  "uploaded": [
+    {"fileName": "Jan Meeting Minutes Revised.pdf"},
+    {"fileName": "Jan Meeting Minutes Revised.pdf"},
+    {"fileName": "Jan Meeting Minutes Revised.pdf"},
+    {"fileName": "Jan Meeting Minutes Revised.pdf"},
+    {"fileName": "Jan Meeting Minutes Revised.pdf"},
+    {"fileName": "Jan Meeting Minutes Revised.pdf"}
+  ]
+}
+```
+**Problem**: Your n8n workflow has the same file in all 6 attachments!
+**Solution**: Load 6 DIFFERENT files into attachment_0 through attachment_5
 
 ### 🎯 Expected Success Response
 ```json
