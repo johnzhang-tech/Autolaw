@@ -855,11 +855,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (Buffer.isBuffer(req.body) && req.body.length > 0) {
         console.log('- Processing raw binary body, size:', req.body.length);
         
-        // Get filename from headers or query params
-        const filename = req.headers['x-filename'] || 
-                         req.query.filename || 
-                         req.headers['x-original-filename'] ||
-                         'n8n-upload.pdf';
+        // Get filename from headers, query params, or Content-Disposition
+        let filename = req.headers['x-filename'] || 
+                       req.query.filename || 
+                       req.headers['x-original-filename'] ||
+                       req.headers['content-disposition'];
+        
+        // Parse Content-Disposition header if present
+        if (filename && typeof filename === 'string' && filename.includes('filename=')) {
+          const match = filename.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (match && match[1]) {
+            filename = match[1].replace(/['"]/g, '');
+          }
+        }
+        
+        // Default to a generic name if no filename provided
+        if (!filename || typeof filename !== 'string') {
+          filename = 'n8n-upload.pdf';
+        }
         
         // Determine mime type from headers or filename
         let detectedMimeType = req.headers['content-type'] || 'application/octet-stream';

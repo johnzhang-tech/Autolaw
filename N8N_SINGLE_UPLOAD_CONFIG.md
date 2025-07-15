@@ -53,12 +53,19 @@ return [
 **Headers**:
 - `X-API-Key`: `docuai_demo_key_123`
 - `Content-Type`: `application/octet-stream`
+- `X-Filename`: `{{$binary.data.fileName}}` (or custom filename like `my-document.pdf`)
 
 **Body**:
 - **Body Content Type**: `Raw/Custom`
 - **Input Data Field Name**: `attachment_0`
 - **Specify Content Type**: `On`
 - **Content Type**: `application/octet-stream`
+
+### Step 4a: Setting Custom Filename
+To preserve the original document name, add the `X-Filename` header:
+- **Header Name**: `X-Filename`
+- **Header Value**: `{{$binary.data.fileName}}` (uses n8n's binary filename)
+- **Alternative**: Use a custom name like `contract.pdf`, `hoa-docs.pdf`, etc.
 
 ### Step 5: Alternative Direct ID Approach
 If the dynamic ID continues to cause issues, use a static transaction ID for testing:
