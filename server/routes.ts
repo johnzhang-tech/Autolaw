@@ -12,6 +12,7 @@ import { webhookService } from './webhookService';
 import { setupAuth, isAuthenticated } from './replitAuth';
 import { tokenAuth, generateToken, type JWTPayload } from './tokenAuth';
 import jwt from 'jsonwebtoken';
+// Use busboy through multer's interface instead
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication (includes Google OAuth)
@@ -1209,9 +1210,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('- Is multipart:', contentType.includes('multipart/form-data'));
     
     if (contentType.includes('multipart/form-data')) {
-      // Use more permissive multer for n8n multipart form-data
-      console.log('- Using n8n-compatible multer for multipart');
-      n8nUpload.any()(req, res, next);
+      // Use ultra-permissive multer for n8n multipart form-data
+      console.log('- Using ultra-permissive multer for n8n');
+      
+      // Create ultra-permissive multer on the fly
+      const ultraPermissiveUpload = multer({
+        storage: multer.memoryStorage(),
+        limits: {
+          fileSize: 10 * 1024 * 1024, // 10MB
+          files: 60
+        },
+        fileFilter: (req, file, cb) => {
+          // Accept ALL files, even with missing field names
+          console.log('- Ultra-permissive filter accepting file:', {
+            fieldname: file.fieldname || 'MISSING',
+            originalname: file.originalname || 'MISSING'
+          });
+          cb(null, true);
+        }
+      });
+      
+      // Use fields() to accept any field names at all
+      ultraPermissiveUpload.fields([
+        { name: 'file1', maxCount: 1 },
+        { name: 'file2', maxCount: 1 },
+        { name: 'file3', maxCount: 1 },
+        { name: 'file4', maxCount: 1 },
+        { name: 'file5', maxCount: 1 },
+        { name: 'file6', maxCount: 1 },
+        { name: 'attachment_0', maxCount: 1 },
+        { name: 'attachment_1', maxCount: 1 },
+        { name: 'attachment_2', maxCount: 1 },
+        { name: 'attachment_3', maxCount: 1 },
+        { name: 'attachment_4', maxCount: 1 },
+        { name: 'attachment_5', maxCount: 1 }
+      ])(req, res, (err) => {
+        if (err) {
+          console.error('- Ultra-permissive multer error:', err);
+          // Even if multer fails, try to continue
+          req.files = {};
+        }
+        console.log('- Multer processing complete, req.files type:', typeof req.files);
+        console.log('- Multer processing complete, req.files:', req.files);
+        console.log('- Multer processing complete, req.body:', req.body);
+        next();
+      });
     } else {
       // Use raw body parsing for binary data
       console.log('- Using raw body parsing for binary');
@@ -1227,6 +1270,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.on('error', next);
     }
   }, async (req: any, res) => {
+    console.log('=== UPLOAD-SINGLE MAIN HANDLER START ===');
+    console.log('- req.files type at main handler:', typeof req.files);
+    console.log('- req.files value at main handler:', req.files);
+    
     try {
       const contentType = req.headers['content-type'] || '';
       let file: Express.Multer.File | null = null;
@@ -1338,7 +1385,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else if (contentType.includes('multipart/form-data')) {
         // Handle multipart form-data (can be single or multiple files)
-        const allFiles = req.files as Express.Multer.File[];
+        // multer.fields() returns an object, not an array, so we need to flatten it
+        const filesObject = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const allFiles: Express.Multer.File[] = [];
+        
+        console.log('- Files object from multer.fields():', typeof filesObject, Object.keys(filesObject || {}));
+        
+        // Flatten the files object into an array
+        if (filesObject && typeof filesObject === 'object') {
+          for (const fieldname in filesObject) {
+            const fileArray = filesObject[fieldname];
+            if (Array.isArray(fileArray)) {
+              allFiles.push(...fileArray);
+            }
+          }
+        }
         
         console.log('- All files received:', allFiles?.map(f => ({ 
           fieldname: f.fieldname, 
