@@ -31,7 +31,7 @@ files.forEach((file, index) => {
 console.log('Testing N8N endpoint with 6 different files...');
 console.log('Endpoint: /api/transactions/56/upload-n8n');
 
-fetch('https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/56/upload-n8n', {
+fetch('https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/53/upload-n8n', {
   method: 'POST',
   headers: {
     'X-API-Key': 'docuai_demo_key_123',

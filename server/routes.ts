@@ -12,6 +12,7 @@ import { webhookService } from './webhookService';
 import { setupAuth, isAuthenticated } from './replitAuth';
 import { tokenAuth, generateToken, type JWTPayload } from './tokenAuth';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 // Use busboy through multer's interface instead
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -82,6 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // For development, accept a mock API key
     if (apiKey === "docuai_demo_key_123") {
       req.user = {
+        id: "mock-user-1",
+        role: "admin",
         claims: {
           sub: "mock-user-1",
           email: "demo@docuai.com",
@@ -100,6 +103,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (user) {
         req.user = {
+          id: user.id,
+          role: user.role || "user",
           claims: {
             sub: user.id,
             email: user.email,
@@ -119,6 +124,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserByApiKey?.(apiKey);
       if (user) {
         req.user = {
+          id: user.id,
+          role: user.role || "user",
           claims: {
             sub: user.id,
             email: user.email,
@@ -155,6 +162,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Set user in req for compatibility with existing code
       req.user = {
+        id: user.id,
+        role: user.role || "user",
         claims: {
           sub: user.id,
           email: user.email,
@@ -1199,52 +1208,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('\n=== N8N DYNAMIC UPLOAD ENDPOINT ===');
     console.log('Request for transaction:', req.params.id);
     console.log('Content-Type:', req.get('Content-Type'));
+    console.log('User:', req.user?.id);
+    
+    // Set JSON response headers early
+    res.setHeader('Content-Type', 'application/json');
     
     try {
       const transactionId = parseInt(req.params.id);
       const userId = req.user.id;
       
+      console.log('Looking for transaction:', transactionId, 'for user:', userId);
+      console.log('User role:', req.user.role);
+      
       // Check transaction access
-      const transaction = await storage.getTransaction(transactionId);
+      const transaction = await storage.getTransaction(transactionId, userId);
+      console.log('Transaction found:', !!transaction);
+      
+      // Transaction access validated above
+      
       if (!transaction) {
+        console.log('Transaction not found, returning 404');
         return res.status(404).json({ success: false, error: 'Transaction not found' });
       }
       
+      console.log('Transaction user:', transaction.userId, 'Request user:', userId);
+      
       if (transaction.userId !== userId && req.user.role !== 'admin') {
+        console.log('Access denied, returning 403');
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
       
-      // Ultra-permissive multer for n8n
-      const upload = multer({
-        storage: multer.memoryStorage(),
-        limits: { 
-          fileSize: 10 * 1024 * 1024, // 10MB
-          files: 100 
-        },
-        fileFilter: (req, file, cb) => {
-          const allowedMimes = [
-            'application/pdf',
-            'application/msword', 
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'text/plain',
-            'image/jpeg',
-            'image/png',
-            'image/gif'
-          ];
-          
-          if (allowedMimes.includes(file.mimetype)) {
-            cb(null, true);
-          } else {
-            cb(new Error(`File type ${file.mimetype} not allowed`));
-          }
-        }
-      }).any(); // Accept ALL field names
-      
-      // Wrap multer in promise
+      // Use the proven working multer configuration
       await new Promise((resolve, reject) => {
-        upload(req, res, (err) => {
-          if (err) reject(err);
-          else resolve(true);
+        upload.any()(req, res, (err) => {
+          if (err) {
+            console.log('Multer error:', err);
+            reject(err);
+          } else {
+            console.log('Multer success - files received:', req.files ? req.files.length : 0);
+            resolve(true);
+          }
         });
       });
       
@@ -1266,7 +1269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const seenHashes = new Set();
       
       for (const file of allFiles) {
-        const hash = require('crypto').createHash('md5').update(file.buffer).digest('hex');
+        const hash = crypto.createHash('md5').update(file.buffer).digest('hex');
         if (!seenHashes.has(hash)) {
           seenHashes.add(hash);
           uniqueFiles.push(file);
@@ -1285,8 +1288,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Processing ${uniqueFiles.length} unique files (${allFiles.length - uniqueFiles.length} duplicates removed)`);
       
-      // Use existing upload handler with unique files only
-      await handleMultipleFileUpload(req, res, uniqueFiles, transaction);
+      // Process files and return clean JSON response
+      const uploadResults = [];
+      const failedUploads = [];
+      
+      for (const file of uniqueFiles) {
+        try {
+          console.log(`Uploading: ${file.originalname}`);
+          
+          // Fallback MIME type detection for n8n compatibility
+          let mimeType = file.mimetype;
+          console.log(`Original MIME type for ${file.originalname}: "${mimeType}" (type: ${typeof mimeType})`);
+          if (!mimeType || mimeType === 'undefined' || mimeType === undefined) {
+            const ext = file.originalname.toLowerCase().split('.').pop();
+            const mimeMap = {
+              'pdf': 'application/pdf',
+              'doc': 'application/msword',
+              'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'txt': 'text/plain',
+              'rtf': 'application/rtf',
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'png': 'image/png',
+              'gif': 'image/gif'
+            };
+            mimeType = mimeMap[ext] || 'application/octet-stream';
+            console.log(`Detected MIME type from extension .${ext}: ${mimeType}`);
+          }
+
+          // Upload to Replit Object Storage with correct parameter order
+          const uploadResult = await replitObjectStorage.uploadFile(
+            file.buffer,
+            transaction.name,
+            transaction.id,
+            file.originalname,
+            mimeType
+          );
+          
+          // Save to database
+          const document = await storage.createDocument({
+            transactionId: transaction.id,
+            userId: userId, // Required user_id field
+            fileName: file.originalname,
+            originalFileName: file.originalname,
+            fileSize: file.size,
+            mimeType: mimeType, // Use corrected MIME type
+            uploaderId: userId, // Separate uploader_id field  
+            uploadStatus: 'completed',
+            s3Key: uploadResult.objectKey,
+            s3Bucket: uploadResult.bucketName
+          });
+          
+          uploadResults.push({
+            fieldName: file.fieldname,
+            fileName: file.originalname,
+            documentId: document.id
+          });
+          
+        } catch (error) {
+          console.error(`Failed to upload ${file.originalname}:`, error);
+          failedUploads.push({
+            fieldName: file.fieldname,
+            fileName: file.originalname,
+            error: error.message
+          });
+        }
+      }
+      
+      // Update transaction document count
+      await storage.updateTransactionDocumentCount(transaction.id);
+      
+      // Send webhook notification
+      try {
+        await webhookService.onTransactionCreated(transaction.id);
+      } catch (webhookError) {
+        console.error('Webhook notification failed:', webhookError);
+      }
+      
+      // Return clean JSON response
+      res.json({
+        success: true,
+        message: `${uploadResults.length} unique files uploaded successfully`,
+        uploaded: uploadResults,
+        failed: failedUploads,
+        duplicatesRemoved: allFiles.length - uniqueFiles.length,
+        transactionId: transaction.id
+      });
       
     } catch (error) {
       console.error('N8N upload error:', error);
