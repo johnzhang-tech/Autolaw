@@ -1,68 +1,74 @@
-# N8N Quick Fix: Send Multiple Files in One Request
+# N8N Quick Fix Guide - Empty Output Issue
 
-## Current Problem
-Your N8N workflow has multiple attachments (attachment_0, attachment_1, etc.) but only sends one file.
+## Problem
+Code node shows empty output - this means JavaScript execution is failing silently.
 
-## Solution: Configure HTTP Request Node with Multiple Parameters
+## Solution 1: Basic Debug Version
+Replace your code with this minimal debug version:
 
-### Step 1: Remove the Loop Over Items Node
-Since you have individual attachment items, you don't need the loop.
-
-### Step 2: Configure HTTP Request Node Body Parameters
-
-Add multiple parameters to your HTTP Request node:
-
-**Parameter 1:**
-- Name: `attachment_0`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_0`
-
-**Parameter 2:**
-- Name: `attachment_1`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_1`
-
-**Parameter 3:**
-- Name: `attachment_2`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_2`
-
-**Parameter 4:**
-- Name: `attachment_3`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_3`
-
-**Parameter 5:**
-- Name: `attachment_4`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_4`
-
-**Parameter 6:**
-- Name: `attachment_5`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `attachment_5`
-
-### Step 3: Test Configuration
-
-After adding all parameters, your HTTP Request should send all 6 files in one request.
-
-## Alternative: Use Expression for Dynamic Field Names
-
-Instead of hardcoding field names, you can use expressions:
-
-**For each parameter:**
-- Name: `{{ Object.keys($json).filter(key => key.startsWith('attachment_'))[0] }}`
-- Parameter Type: `n8n Binary File`
-- Input Data Field Name: `{{ Object.keys($json).filter(key => key.startsWith('attachment_'))[0] }}`
-
-## Expected Result
-
-After this configuration, you should see in the logs:
-```
-Field names: [ 'attachment_0', 'attachment_1', 'attachment_2', 'attachment_3', 'attachment_4', 'attachment_5' ]
-Filenames: [ 'Jan Meeting Minutes Revised.pdf', 'HOA Assessment Delinquency Policy.pdf', 'File3.pdf', 'File4.pdf', 'File5.pdf', 'File6.pdf' ]
+```javascript
+return [{"test": "working"}];
 ```
 
-## Why This Works
+If this works, you'll see `{"test": "working"}` in the output. This confirms the code node execution works.
 
-The DocuAI endpoint is designed to handle multiple files with different field names. By adding multiple parameters, you're telling N8N to include all available attachments in the multipart form data.
+## Solution 2: Step-by-Step Data Access
+If the basic test works, try this step-by-step approach:
+
+```javascript
+const input = $input.all()[0];
+return [input];
+```
+
+This will show you the exact structure of your input data.
+
+## Solution 3: Manual Data Construction
+Based on your input structure, try this manual approach:
+
+```javascript
+const input = $input.all()[0].json;
+
+return [{
+  attachment_0: {
+    filename: "Jan Meeting Minutes Revised.pdf",
+    data: input.attachment_0.data,
+    mimeType: "application/pdf"
+  },
+  attachment_1: {
+    filename: "HOA Assessment Delinquency Policy.pdf", 
+    data: input.attachment_1.data,
+    mimeType: "application/pdf"
+  }
+}];
+```
+
+## Solution 4: Alternative Data Access
+Try accessing the data differently:
+
+```javascript
+const data = $input.all()[0];
+
+return [{
+  attachment_0: {
+    filename: data.json.attachment_0.fileName,
+    data: data.json.attachment_0.data,
+    mimeType: "application/pdf"
+  },
+  attachment_1: {
+    filename: data.json.attachment_1.fileName,
+    data: data.json.attachment_1.data,
+    mimeType: "application/pdf"
+  }
+}];
+```
+
+## Test Steps
+1. Start with Solution 1 (basic test)
+2. If it works, try Solution 2 (see input structure)
+3. Based on what you see, try Solution 3 or 4
+4. Check the OUTPUT section after each test
+
+## Expected Success
+You should see JSON output with your attachment data structured for the API endpoint.
+
+Try these in order and let me know what happens with each one!
