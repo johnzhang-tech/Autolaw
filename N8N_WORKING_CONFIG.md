@@ -1,102 +1,87 @@
 # N8N Working Configuration - Final Solution
 
-## ✅ Issue Resolved
-The API now properly handles both numeric and hex string transaction IDs from n8n.
+## Debug Results Analysis
+From your debug output, I can see:
+- Binary data is available in `input.binary.attachment_X`
+- Each attachment has a `data` field containing the file content
+- Global `$binary` is available with the same structure
 
-## Complete N8N Workflow Configuration
+## Correct Code Node Configuration
 
-### Step 1: Transaction Creation
-Use HTTP Request node to create a transaction first:
+Replace your code node with this version:
 
-**Method**: `POST`  
-**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions`
+```javascript
+const input = $input.all()[0];
+const payload = {};
 
-**Headers**:
-- `X-API-Key`: `docuai_demo_key_123`
-- `Content-Type`: `application/json`
+// Access binary data directly from input.binary
+Object.keys(input.binary || {}).forEach(key => {
+  if (key.startsWith('attachment_')) {
+    const binaryData = input.binary[key];
+    
+    // Check if we have the required data
+    if (binaryData && binaryData.data) {
+      payload[key] = {
+        filename: binaryData.fileName,
+        data: binaryData.data,
+        mimeType: binaryData.mimeType || 'application/pdf'
+      };
+    }
+  }
+});
 
-**Body**:
-```json
-{
-  "name": "N8N Test Property",
-  "address": "123 Automation St", 
-  "transactionType": "Purchase"
-}
+return [payload];
 ```
 
-### Step 2: File Upload
-Use HTTP Request node for file upload:
+## Alternative Using Global $binary
 
-**Method**: `POST`  
-**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.id}}/upload-single`
+If the above doesn't work, try this version using the global `$binary`:
 
-**Headers**:
-- `X-API-Key`: `docuai_demo_key_123`
-- `Content-Type`: `application/octet-stream`
+```javascript
+const payload = {};
 
-**Body Configuration**:
-- **Body Content Type**: `Raw/Custom`
-- **Input Data Field Name**: `attachment_0`
-- **Specify Content Type**: `On`
-- **Content Type**: `application/octet-stream`
+// Use global $binary object
+Object.keys($binary || {}).forEach(key => {
+  if (key.startsWith('attachment_')) {
+    const binaryData = $binary[key];
+    
+    // Check if we have the required data
+    if (binaryData && binaryData.data) {
+      payload[key] = {
+        filename: binaryData.fileName,
+        data: binaryData.data,
+        mimeType: binaryData.mimeType || 'application/pdf'
+      };
+    }
+  }
+});
 
-### Step 3: Success Response
-You should get a response like:
+return [payload];
+```
+
+## Expected Success Output
+
+You should now see JSON output like:
 ```json
 {
-  "success": true,
-  "message": "Document uploaded successfully",
-  "document": {
-    "id": 123,
-    "fileName": "document.pdf",
-    "category": "other",
-    "transactionId": 46
+  "attachment_0": {
+    "filename": "Jan Meeting Minutes Revised.pdf",
+    "data": "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNTk1IDg0Ml0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+PQo+PgovTWVkaWFCb3ggWzAgMCA1OTUgODQyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCi9GMSA5IFRmCjUwIDc4MCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZgowMDAwMDAwMDA5IDAwMDAwIG4KMDAwMDAwMDA1OCAwMDAwMCBuCjAwMDAwMDAxMTUgMDAwMDAgbgowMDAwMDAwMjQ1IDAwMDAwIG4KMDAwMDAwMDMxNiAwMDAwMCBuCnRyYWlsZXIKPDwKL1NpemUgNgovUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDA3CiUlRU9G",
+    "mimeType": "application/pdf"
+  },
+  "attachment_1": {
+    "filename": "HOA Assessment Delinquency Policy  (Approved Aug 2006).pdf",
+    "data": "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNTk1IDg0Ml0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+PQo+PgovTWVkaWFCb3ggWzAgMCA1OTUgODQyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCi9GMSA5IFRmCjUwIDc4MCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZgowMDAwMDAwMDA5IDAwMDAwIG4KMDAwMDAwMDA1OCAwMDAwMCBuCjAwMDAwMDAxMTUgMDAwMDAgbgowMDAwMDAwMjQ1IDAwMDAwIG4KMDAwMDAwMDMxNiAwMDAwMCBuCnRyYWlsZXIKPDwKL1NpemUgNgovUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDA3CiUlRU9G",
+    "mimeType": "application/pdf"
   }
 }
 ```
 
-## Key Fixes Applied
+## Next Steps
 
-### 1. Transaction ID Parsing
-The API now handles both:
-- **Numeric IDs**: `46`, `123`, etc.
-- **Hex String IDs**: `1980cc059ff2d981`, `abc123def456`, etc.
+1. Replace your code node with the first configuration above
+2. Run the code node to verify it produces the `data` field with base64 content
+3. Run the full workflow with the HTTP Request node
+4. You should get a successful upload response
 
-### 2. Binary Data Processing
-- Raw binary uploads work correctly
-- File size detection and validation
-- Proper MIME type handling
-
-### 3. Field Name Support
-API accepts files with these field names:
-- `document`
-- `attachment`
-- `attachment_0`, `attachment_1`, etc.
-
-## Testing Commands
-
-### Test Transaction Creation
-```bash
-curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions" \
-  -H "X-API-Key: docuai_demo_key_123" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"N8N Test","address":"123 Test St","transactionType":"Purchase"}'
-```
-
-### Test File Upload
-```bash
-curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/[ID]/upload-single" \
-  -H "X-API-Key: docuai_demo_key_123" \
-  -H "Content-Type: application/octet-stream" \
-  --data-binary @/path/to/file.pdf
-```
-
-## Current Status
-- ✅ Transaction ID parsing fixed (handles hex strings)
-- ✅ Binary file upload working
-- ✅ API authentication working
-- ✅ File storage to Replit Object Storage working
-- ✅ Database record creation working
-- ⚠️ Webhook notifications failing (404 error) - but file upload succeeds
-
-Your n8n workflow should now work correctly with the Raw/Custom body type configuration!
+This should fix both the missing data issue and preserve the original filenames without suffixes.
