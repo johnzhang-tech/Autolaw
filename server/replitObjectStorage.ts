@@ -29,10 +29,10 @@ class ReplitObjectStorageService {
    */
   generateObjectKey(transactionName: string, transactionId: number, originalFilename: string): string {
     const transactionFolder = `${transactionName.replace(/[^a-zA-Z0-9-]/g, '_')}_${transactionId}`;
-    const uniqueId = uuidv4().slice(0, 8);
     
-    // Keep original filename without timestamp prefix
-    return `${transactionFolder}/${originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')}_${uniqueId}`;
+    // Keep original filename without any suffixes - just clean special characters
+    const cleanFilename = originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_');
+    return `${transactionFolder}/${cleanFilename}`;
   }
 
   /**
