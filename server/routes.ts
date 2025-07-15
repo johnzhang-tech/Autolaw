@@ -932,12 +932,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.claims.sub;
-      const transactionId = parseInt(req.params.id);
+      const transactionIdParam = req.params.id;
+      let transactionId: number;
+      
+      // Handle both numeric and hex string transaction IDs from n8n
+      if (transactionIdParam.match(/^[0-9a-f]+$/i) && transactionIdParam.length > 10) {
+        // If it's a hex string, convert to number
+        transactionId = parseInt(transactionIdParam, 16);
+      } else {
+        // Otherwise parse as regular number
+        transactionId = parseInt(transactionIdParam);
+      }
+      
       const { category } = req.body;
+
+      console.log('Transaction ID processing:', {
+        original: transactionIdParam,
+        converted: transactionId,
+        isValid: !isNaN(transactionId)
+      });
 
       // Validate transaction ID
       if (isNaN(transactionId)) {
-        return res.status(400).json({ message: "Invalid transaction ID" });
+        return res.status(400).json({ 
+          message: "Invalid transaction ID",
+          debug: {
+            received: transactionIdParam,
+            converted: transactionId
+          }
+        });
       }
 
       // Verify transaction exists and belongs to user
