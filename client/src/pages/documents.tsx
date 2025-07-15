@@ -18,7 +18,7 @@ import {
   Eye,
   AlertTriangle
 } from "lucide-react";
-import type { Document, Transaction } from "@shared/schema";
+import type { Document, TransactionResponse } from "@shared/schema";
 
 export default function Documents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -30,7 +30,7 @@ export default function Documents() {
   const { data: transactionsData = [] } = useQuery({
     queryKey: ["/api/transactions"],
   });
-  const transactions = transactionsData as Transaction[];
+  const transactions = transactionsData as TransactionResponse[];
 
   // Get all documents from all transactions
   const { data: allDocuments = [], isLoading } = useQuery({
@@ -46,7 +46,7 @@ export default function Documents() {
       
       // Fetch documents from all user transactions
       const documentPromises = transactions.map(async (transaction) => {
-        const response = await fetch(`/api/transactions/${transaction.id}/documents`, {
+        const response = await fetch(`/api/transactions/${transaction.Tranx_id}/documents`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

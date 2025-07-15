@@ -261,6 +261,11 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type CreateTransaction = z.infer<typeof createTransactionSchema>;
 
+// API Response type with Tranx_id field (used by frontend)
+export type TransactionResponse = Omit<Transaction, 'id'> & {
+  Tranx_id: number;
+};
+
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 

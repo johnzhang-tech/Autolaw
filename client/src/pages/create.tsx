@@ -53,7 +53,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Transaction } from "@shared/schema";
+import type { TransactionResponse } from "@shared/schema";
 
 const transactionSchema = z.object({
   name: z.string().min(1, "Transaction name is required"),
@@ -68,8 +68,8 @@ export default function Create() {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<number | null>(null);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<TransactionResponse | null>(null);
+  const [deletingTransaction, setDeletingTransaction] = useState<TransactionResponse | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -96,11 +96,11 @@ export default function Create() {
   const { data: transactionsData = [], isLoading: transactionsLoading } = useQuery({
     queryKey: ["/api/transactions"],
   });
-  const transactions = transactionsData as Transaction[];
+  const transactions = transactionsData as TransactionResponse[];
 
   // Calculate document counts from transaction data (numDocuments field)
   const documentCounts = transactions.reduce((acc, t) => {
-    acc[t.id] = t.numDocuments || 0;
+    acc[t.Tranx_id] = t.numDocuments || 0;
     return acc;
   }, {} as Record<number, number>);
 
@@ -179,7 +179,7 @@ export default function Create() {
       setIsDeleteDialogOpen(false);
       setDeletingTransaction(null);
       // Clear selection if deleted transaction was selected
-      if (deletingTransaction && selectedTransaction === deletingTransaction.id) {
+      if (deletingTransaction && selectedTransaction === deletingTransaction.Tranx_id) {
         setSelectedTransaction(null);
       }
     },
@@ -194,7 +194,7 @@ export default function Create() {
     },
   });
 
-  const openEditDialog = (transaction: Transaction) => {
+  const openEditDialog = (transaction: TransactionResponse) => {
     setEditingTransaction(transaction);
     // Pre-populate the edit form with current transaction data
     editForm.reset({
@@ -205,14 +205,14 @@ export default function Create() {
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (transaction: Transaction) => {
+  const openDeleteDialog = (transaction: TransactionResponse) => {
     setDeletingTransaction(transaction);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
     if (deletingTransaction) {
-      deleteTransactionMutation.mutate(deletingTransaction.id);
+      deleteTransactionMutation.mutate(deletingTransaction.Tranx_id);
     }
   };
 
@@ -222,7 +222,7 @@ export default function Create() {
 
   const onEditSubmit = (data: TransactionForm) => {
     if (editingTransaction) {
-      updateTransactionMutation.mutate({ id: editingTransaction.id, data });
+      updateTransactionMutation.mutate({ id: editingTransaction.Tranx_id, data });
     }
   };
 
@@ -346,13 +346,13 @@ export default function Create() {
                   <div className="space-y-4">
                     {transactions.map((transaction) => (
                       <div
-                        key={transaction.id}
+                        key={transaction.Tranx_id}
                         className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                          selectedTransaction === transaction.id
+                          selectedTransaction === transaction.Tranx_id
                             ? "border-primary bg-primary/5"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
-                        onClick={() => setSelectedTransaction(transaction.id)}
+                        onClick={() => setSelectedTransaction(transaction.Tranx_id)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -365,7 +365,7 @@ export default function Create() {
                                 {transaction.transactionType}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {documentCounts[transaction.id] || 0} documents
+                                {documentCounts[transaction.Tranx_id] || 0} documents
                               </span>
                             </div>
                           </div>

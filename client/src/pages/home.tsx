@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle, FileCheck } from "lucide-react";
 
 import { apiRequest } from "@/lib/queryClient";
-import type { Transaction } from "@shared/schema";
+import type { TransactionResponse } from "@shared/schema";
 
 export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -18,11 +18,11 @@ export default function Home() {
   const { data: transactionsData = [] } = useQuery({
     queryKey: ["/api/transactions"],
   });
-  const transactions = transactionsData as Transaction[];
+  const transactions = transactionsData as TransactionResponse[];
 
   // Calculate document counts from transaction data (numDocuments field)
   const documentCounts = transactions.reduce((acc, t) => {
-    acc[t.id] = t.numDocuments || 0;
+    acc[t.Tranx_id] = t.numDocuments || 0;
     return acc;
   }, {} as Record<number, number>);
 
