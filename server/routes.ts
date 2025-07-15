@@ -1054,13 +1054,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('=== MULTIPLE FILE UPLOAD MODE ===');
     console.log('- Files to process:', allFiles.length);
     
-    // Filter files for upload
-    const fileFields = allFiles.filter(f => 
-      f.fieldname.startsWith('file') || 
-      f.fieldname.startsWith('attachment_') || 
-      f.fieldname === 'attachment' || 
-      f.fieldname === 'document'
-    );
+    // Process all files (accept any field names)
+    const fileFields = allFiles;
     
     const storageUploads: string[] = [];
     const uploadResults: any[] = [];
@@ -1336,24 +1331,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('- Total files count:', allFiles?.length || 0);
         console.log('- All field names:', allFiles?.map(f => f.fieldname) || []);
         
-        // Check if multiple files (file1, file2, etc.) are present
-        const multipleFiles = allFiles?.filter(f => 
-          f.fieldname.startsWith('file') || 
-          f.fieldname.startsWith('attachment_')
-        );
-        
-        if (multipleFiles && multipleFiles.length > 1) {
+        // Check if multiple files are present (any field names)
+        if (allFiles && allFiles.length > 1) {
           console.log('- Multiple files detected, switching to multi-upload mode');
           // Handle multiple files in one request
           return await handleMultipleFileUpload(req, res, allFiles, transaction);
         } else {
-          // Single file upload (existing logic)
-          file = allFiles?.find(f => 
-            f.fieldname === 'document' || 
-            f.fieldname === 'attachment' ||
-            f.fieldname.startsWith('attachment_') ||
-            f.fieldname.startsWith('file')
-          );
+          // Single file upload - accept any field name
+          file = allFiles?.[0]; // Take the first (and only) file
           
           console.log('- Single file mode, selected file:', file ? {
             fieldname: file.fieldname,

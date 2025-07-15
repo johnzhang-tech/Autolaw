@@ -21,61 +21,45 @@ X-API-Key: docuai_demo_key_123
 
 > **Note**: The existing `/upload-single` endpoint now automatically detects multiple files and switches to multi-upload mode. No need for a separate endpoint!
 
-### Form-Data Fields (Method 1: Static Configuration)
-Add these fields to your form-data:
+### Form-Data Fields - Flexible Field Names ✅
+The endpoint now accepts **ANY field names** for maximum flexibility:
 
-1. **Field Name**: `file1`
-   - **Value**: `{{$binary.attachment_0}}`
-   - **Type**: Binary
+#### Method 1: Standard Field Names
+```
+file1: {{$binary.attachment_0}}
+file2: {{$binary.attachment_1}}
+file3: {{$binary.attachment_2}}
+file4: {{$binary.attachment_3}}
+```
 
-2. **Field Name**: `file2`
-   - **Value**: `{{$binary.attachment_1}}`
-   - **Type**: Binary
+#### Method 2: Custom Field Names (Like Your Screenshot)
+```
+HOA-Declaration.pdf: {{$binary.attachment_0}}
+HOA-BY-LAWS.pdf: {{$binary.attachment_1}}
+ArticlesOfIncorporation.pdf: {{$binary.attachment_2}}
+Contract.pdf: {{$binary.attachment_3}}
+```
 
-3. **Field Name**: `file3`
-   - **Value**: `{{$binary.attachment_2}}`
-   - **Type**: Binary
+#### Method 3: Descriptive Field Names
+```
+meeting-minutes: {{$binary.attachment_0}}
+bylaws-document: {{$binary.attachment_1}}
+assessment-report: {{$binary.attachment_2}}
+financial-statement: {{$binary.attachment_3}}
+```
 
-4. **Field Name**: `file4`
-   - **Value**: `{{$binary.attachment_3}}`
-   - **Type**: Binary
+### 🔧 How It Works
+- **Single File**: Any field name works (e.g., `HOA-Declaration.pdf`)
+- **Multiple Files**: Any combination of field names works
+- **Automatic Detection**: System detects single vs multiple files automatically
+- **Filename Extraction**: Uses original filename from binary data
 
-5. **Field Name**: `filename1`
-   - **Value**: `{{$binary.attachment_0.fileName}}`
-   - **Type**: Text
-
-6. **Field Name**: `filename2`
-   - **Value**: `{{$binary.attachment_1.fileName}}`
-   - **Type**: Text
-
-7. **Field Name**: `filename3`
-   - **Value**: `{{$binary.attachment_2.fileName}}`
-   - **Type**: Text
-
-8. **Field Name**: `filename4`
-   - **Value**: `{{$binary.attachment_3.fileName}}`
-   - **Type**: Text
-
-### Form-Data Fields (Method 2: Simplified)
-If you want to use original filenames, just use the binary fields:
-
-1. **Field Name**: `file1`
-   - **Value**: `{{$binary.attachment_0}}`
-   - **Type**: Binary
-
-2. **Field Name**: `file2`
-   - **Value**: `{{$binary.attachment_1}}`
-   - **Type**: Binary
-
-3. **Field Name**: `file3`
-   - **Value**: `{{$binary.attachment_2}}`
-   - **Type**: Binary
-
-4. **Field Name**: `file4`
-   - **Value**: `{{$binary.attachment_3}}`
-   - **Type**: Binary
-
-The backend will automatically use the original filenames from the binary data.
+### 💡 Pro Tip
+The field name can be **anything** you want - the system will:
+1. Take the first file if only one is uploaded
+2. Process all files if multiple are uploaded
+3. Use the original filename from the binary data
+4. Ignore the field name completely for processing
 
 ## ✅ TESTING RESULTS
 From the server logs, I can confirm that the form-data endpoint is working perfectly:
