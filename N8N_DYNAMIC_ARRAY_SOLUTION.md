@@ -1,120 +1,85 @@
-# N8N Dynamic Array Solution for Variable Attachments
+# N8N Dynamic Array Solution - Handle Any Number of Files
 
 ## Problem
-Your attachment array size is dynamic (could be 1, 6, 10, or any number), so you can't hardcode parameters in the HTTP Request node.
+Dynamic number of attachments cannot be hardcoded in HTTP Request node parameters.
 
-## Solution: Use N8N Code Node + HTTP Request
+## Solution: Use N8N's Split In Batches + HTTP Request Loop
 
-### Step 1: Add a Code Node Before HTTP Request
-
-Create a Code node with this JavaScript:
+### Step 1: Convert Binary to Items (Code Node)
+Replace your current code node with this dynamic version:
 
 ```javascript
-// Process dynamic attachments array
-const inputData = $input.all()[0].json;
-const attachments = [];
+const input = $input.all()[0];
+const items = [];
 
-// Find all attachment fields dynamically
-Object.keys(inputData).forEach(key => {
+// Convert each binary attachment to a separate item
+Object.keys(input.binary || {}).forEach(key => {
   if (key.startsWith('attachment_')) {
-    attachments.push({
-      fieldName: key,
-      filename: inputData[key].filename || key,
-      data: inputData[key]
-    });
+    const binaryData = input.binary[key];
+    if (binaryData) {
+      items.push({
+        fieldName: key,
+        filename: binaryData.fileName,
+        binaryData: binaryData, // Pass the entire binary object
+        mimeType: binaryData.mimeType || 'application/pdf'
+      });
+    }
   }
 });
 
-console.log(`Found ${attachments.length} attachments`);
-
-// Return array of attachments for processing
-return attachments.map((attachment, index) => ({
-  attachment: attachment.data,
-  fieldName: attachment.fieldName,
-  filename: attachment.filename,
-  index: index
-}));
+return items;
 ```
 
 ### Step 2: Add Split In Batches Node
-
-After the Code node, add "Split In Batches":
-- **Options**: Keep default settings
-- **Batch Size**: 1
-
-This will process each attachment individually.
+After the code node, add a **Split In Batches** node:
+- **Batch Size**: 1 (process one file at a time)
+- This will create separate executions for each file
 
 ### Step 3: Configure HTTP Request Node
+**Method:** POST
+**URL:** `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/81/upload-single`
 
-Configure the HTTP Request node:
-- **Method**: POST
-- **URL**: `https://your-app.replit.dev/api/transactions/{{$json.transactionId}}/upload-n8n`
-- **Headers**:
-  - `X-API-Key`: `docuai_demo_key_123`
-- **Body**: Form-Data
-- **Parameters**:
-  - **Name**: `{{ $json.fieldName }}`
-  - **Parameter Type**: `n8n Binary File`
-  - **Input Data Field Name**: `attachment`
+**Headers:**
+- `X-API-Key`: `docuai_demo_key_123`
 
-### Step 4: Merge Results (Optional)
+**Body Content Type:** Form-Data Multipart
+**Body Parameters:**
+- Field Name: `document`
+- Value: `{{ $json.binaryData }}`
 
-Add a Merge node after HTTP Request to combine all upload results.
+### Alternative: Single Request with All Files
+If you want to send all files in one request, use this approach:
 
-## Alternative: Single Request with All Files
-
-If you prefer to send all files in one request, use this Code node instead:
-
+#### Code Node (Dynamic Form Data Builder)
 ```javascript
-const inputData = $input.all()[0].json;
-const result = {
-  transactionId: inputData.transactionId,
-  files: {}
-};
+const input = $input.all()[0];
+const formData = {};
 
-// Collect all attachments
-Object.keys(inputData).forEach(key => {
+// Build form data object dynamically
+Object.keys(input.binary || {}).forEach(key => {
   if (key.startsWith('attachment_')) {
-    result.files[key] = inputData[key];
+    const binaryData = input.binary[key];
+    if (binaryData) {
+      formData[key] = binaryData;
+    }
   }
 });
 
-console.log(`Preparing ${Object.keys(result.files).length} files for upload`);
-return [result];
+return [{ formData }];
 ```
 
-Then in HTTP Request, use dynamic parameters:
-```javascript
-// In Body Parameters, use an expression to create dynamic fields
-{{ Object.keys($json.files).map(key => ({ name: key, type: 'n8n-binary-file', value: $json.files[key] })) }}
-```
+#### HTTP Request Node
+**Method:** POST
+**URL:** `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/81/upload-multiple`
 
-## Expected Flow
+**Headers:**
+- `X-API-Key`: `docuai_demo_key_123`
 
-1. **Code Node** processes dynamic attachments
-2. **Split In Batches** creates one execution per file
-3. **HTTP Request** uploads each file individually
-4. **Merge** combines all results
+**Body Content Type:** Form-Data Multipart
+**Body:** Use expression `{{ $json.formData }}` to send all files at once
 
-## Expected Server Logs
+### Expected Results
+Both approaches should work with any number of files dynamically without hardcoding parameters.
 
-You should see:
-```
-Field names: [ 'attachment_0' ]
-Filenames: [ 'Jan Meeting Minutes Revised.pdf' ]
-```
-
-Then another request:
-```
-Field names: [ 'attachment_1' ]
-Filenames: [ 'HOA Assessment Delinquency Policy.pdf' ]
-```
-
-And so on for each file.
-
-## Benefits
-
-- Works with any number of attachments
-- Maintains original filenames
-- No hardcoded field names
-- Handles dynamic arrays properly
+### Recommendation
+Try the **Split In Batches** approach first - it's more reliable with N8N's binary data handling and gives you better error handling per file.
