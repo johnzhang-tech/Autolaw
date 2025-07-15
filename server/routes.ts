@@ -1256,8 +1256,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           if (attachment.data) {
-            // Convert base64 to buffer
-            const buffer = Buffer.from(attachment.data, 'base64');
+            // Convert base64 to buffer with proper error handling
+            let buffer;
+            try {
+              // Clean the base64 string - remove any whitespace or invalid characters
+              const cleanBase64 = attachment.data.replace(/[^A-Za-z0-9+/=]/g, '');
+              console.log(`Base64 length after cleaning: ${cleanBase64.length}`);
+              
+              buffer = Buffer.from(cleanBase64, 'base64');
+              console.log(`Buffer created successfully: ${buffer.length} bytes`);
+              
+              // Verify the buffer is not empty or too small
+              if (buffer.length < 10) {
+                console.error(`Warning: Buffer too small (${buffer.length} bytes) for ${attachment.filename}`);
+                console.error(`Original base64 length: ${attachment.data.length}`);
+                console.error(`Cleaned base64 length: ${cleanBase64.length}`);
+                console.error(`First 100 chars of base64: ${attachment.data.substring(0, 100)}`);
+              }
+            } catch (error) {
+              console.error(`Failed to decode base64 for ${attachment.filename}:`, error);
+              continue; // Skip this attachment if base64 decoding fails
+            }
+            
             attachmentFiles.push({
               fieldname: key,
               originalname: attachment.filename || key,

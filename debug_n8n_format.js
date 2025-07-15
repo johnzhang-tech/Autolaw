@@ -3,16 +3,16 @@
 async function debugN8NFormat() {
   console.log('Testing what N8N should send to JSON endpoint...\n');
   
-  // Test with the exact same structure as your N8N code
+  // Test with larger, more realistic PDF content
   const testPayload = {
     attachment_0: {
       filename: "Jan Meeting Minutes Revised.pdf",
-      data: Buffer.from("Sample PDF content for Jan Meeting Minutes").toString('base64'),
+      data: Buffer.from("Sample PDF content for Jan Meeting Minutes".repeat(100)).toString('base64'),
       mimeType: "application/pdf"
     },
     attachment_1: {
       filename: "HOA Assessment Delinquency Policy.pdf", 
-      data: Buffer.from("Sample PDF content for HOA Assessment").toString('base64'),
+      data: Buffer.from("Sample PDF content for HOA Assessment".repeat(100)).toString('base64'),
       mimeType: "application/pdf"
     }
   };
