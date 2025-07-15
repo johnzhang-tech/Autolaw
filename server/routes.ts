@@ -884,7 +884,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (contentType.includes('multipart/form-data')) {
         // Handle multipart form-data (traditional file upload)
         const allFiles = req.files as Express.Multer.File[];
-        file = allFiles?.find(f => f.fieldname === 'document' || f.fieldname === 'attachment');
+        // Support n8n field naming: attachment_0, attachment_1, etc.
+        file = allFiles?.find(f => 
+          f.fieldname === 'document' || 
+          f.fieldname === 'attachment' ||
+          f.fieldname.startsWith('attachment_')
+        );
         
         console.log('- All files received:', allFiles?.map(f => ({ 
           fieldname: f.fieldname, 
@@ -913,7 +918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           debug: {
             receivedFields: Object.keys(req.body || {}),
             bodyValues: req.body,
-            expectedFields: 'document OR attachment',
+            expectedFields: 'document OR attachment OR attachment_0',
             contentType: req.headers['content-type'],
             hasMultipart: req.headers['content-type']?.includes('multipart/form-data') || false,
             bodyIsBuffer: Buffer.isBuffer(req.body),
