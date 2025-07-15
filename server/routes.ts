@@ -553,8 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
-      // Log sample transaction data for debugging
-      console.log('Sample transaction response:', JSON.stringify(transformedTransactions[0], null, 2));
+
       
       // Add cache-busting headers to ensure fresh data
       res.set({

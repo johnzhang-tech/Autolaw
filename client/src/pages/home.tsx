@@ -16,24 +16,19 @@ export default function Home() {
   const { toast } = useToast();
 
   const { data: transactionsData = [] } = useQuery({
-    queryKey: ["/api/transactions", Date.now()], // Add timestamp to force fresh fetch
+    queryKey: ["/api/transactions"],
     staleTime: 0, // Don't use stale data
-    cacheTime: 0, // Don't cache the response
+    refetchOnMount: true, // Refetch when component mounts
   });
   const transactions = transactionsData as TransactionResponse[];
-
-  // Calculate document counts from transaction data (numDocuments field)
-  const documentCounts = transactions.reduce((acc, t) => {
-    acc[t.Tranx_id] = t.numDocuments || 0;
-    return acc;
-  }, {} as Record<number, number>);
 
   const totalDocuments = transactions.reduce((acc, t) => acc + (t.numDocuments || 0), 0);
 
   // Generate Report mutation
   const generateReportMutation = useMutation({
     mutationFn: async (transactionId: number) => {
-      const documentCount = documentCounts[transactionId] || 0;
+      const transaction = transactions.find(t => t.Tranx_id === transactionId);
+      const documentCount = transaction?.numDocuments || 0;
       
       if (documentCount === 0) {
         throw new Error("Please upload your documents first");
@@ -150,7 +145,7 @@ export default function Home() {
                   ) : (
                     <div className="space-y-4">
                       {transactions.slice(0, 5).map((transaction) => (
-                        <div key={transaction.id} className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg">
+                        <div key={transaction.Tranx_id} className="flex items-center space-x-4 p-4 bg-slate-50 rounded-lg">
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                             <FileText className="h-5 w-5 text-primary" />
                           </div>
@@ -158,12 +153,12 @@ export default function Home() {
                             <h4 className="font-medium text-slate-900">{transaction.name}</h4>
                             <p className="text-sm text-slate-500">{transaction.transactionType}</p>
                             <p className="text-xs text-slate-400 mt-1">
-                              {documentCounts[transaction.id] || 0} documents
+                              {transaction.numDocuments || 0} documents
                             </p>
                           </div>
                           <div className="flex items-center space-x-3">
                             <Button
-                              onClick={() => generateReportMutation.mutate(transaction.id)}
+                              onClick={() => generateReportMutation.mutate(transaction.Tranx_id)}
                               disabled={generateReportMutation.isPending}
                               size="sm"
                               className="bg-blue-600 hover:bg-blue-700 text-white"
