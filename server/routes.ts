@@ -193,20 +193,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
     fileFilter: (req, file, cb) => {
-      const allowed = [
-        'application/pdf', 
-        'application/msword', 
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain',
-        'image/jpeg',
-        'image/png',
-        'image/gif'
-      ];
-      if (allowed.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Only PDF, DOC, DOCX, TXT, and image files allowed'));
+      // Accept all files for n8n compatibility - we'll validate later
+      console.log('- Multer fileFilter - fieldname:', file.fieldname || 'MISSING', 'originalname:', file.originalname || 'MISSING');
+      cb(null, true);
+    }
+  });
+
+  // More permissive multer configuration for n8n integration
+  const n8nUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { 
+      fileSize: 10 * 1024 * 1024, // 10MB per file
+      files: 60 // Allow up to 60 files
+    },
+    fileFilter: (req, file, cb) => {
+      // Accept ALL files regardless of field name or mime type for n8n
+      console.log('- N8N Multer - fieldname:', file.fieldname || 'UNNAMED', 'originalname:', file.originalname || 'UNNAMED');
+      
+      // If field name is missing, assign a default one
+      if (!file.fieldname || file.fieldname.trim() === '') {
+        file.fieldname = `attachment_${Date.now()}`;
+        console.log('- Assigned default fieldname:', file.fieldname);
       }
+      
+      cb(null, true);
     }
   });
 
@@ -1198,9 +1208,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('- Is multipart:', contentType.includes('multipart/form-data'));
     
     if (contentType.includes('multipart/form-data')) {
-      // Use multer for multipart form-data
-      console.log('- Using multer for multipart');
-      upload.any()(req, res, next);
+      // Use more permissive multer for n8n multipart form-data
+      console.log('- Using n8n-compatible multer for multipart');
+      n8nUpload.any()(req, res, next);
     } else {
       // Use raw body parsing for binary data
       console.log('- Using raw body parsing for binary');
