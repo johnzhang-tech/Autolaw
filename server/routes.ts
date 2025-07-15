@@ -1331,22 +1331,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('- Total files count:', allFiles?.length || 0);
         console.log('- All field names:', allFiles?.map(f => f.fieldname) || []);
         
-        // Check if multiple files are present (any field names)
-        if (allFiles && allFiles.length > 1) {
-          console.log('- Multiple files detected, switching to multi-upload mode');
-          // Handle multiple files in one request
-          return await handleMultipleFileUpload(req, res, allFiles, transaction);
+        // Check if files exist and handle accordingly
+        console.log('- Pre-condition debug: allFiles exists:', !!allFiles);
+        console.log('- Pre-condition debug: allFiles length:', allFiles?.length);
+        console.log('- Pre-condition debug: condition result:', !!(allFiles && allFiles.length > 0));
+        
+        if (allFiles && allFiles.length > 0) {
+          console.log('- ENTERED main files condition');
+          if (allFiles.length > 1) {
+            console.log('- Multiple files detected, switching to multi-upload mode');
+            // Handle multiple files in one request
+            return await handleMultipleFileUpload(req, res, allFiles, transaction);
+          } else {
+            console.log('- ENTERED single file branch');
+            // Single file upload - accept any field name
+            const selectedFile = allFiles[0]; // Take the first (and only) file
+            file = selectedFile;
+            
+            console.log('- Debug: allFiles exists:', !!allFiles);
+            console.log('- Debug: allFiles is array:', Array.isArray(allFiles));
+            console.log('- Debug: allFiles length:', allFiles?.length);
+            console.log('- Debug: allFiles[0] exists:', !!allFiles?.[0]);
+            console.log('- Debug: allFiles[0] details:', allFiles?.[0]);
+            console.log('- Debug: file variable after assignment:', file);
+            console.log('- Debug: file is truthy:', !!file);
+            
+            console.log('- Single file mode, selected file:', file ? {
+              fieldname: file.fieldname,
+              originalname: file.originalname,
+              size: file.size,
+              mimetype: file.mimetype,
+              hasBuffer: !!file.buffer
+            } : 'No file received');
+          }
         } else {
-          // Single file upload - accept any field name
-          file = allFiles?.[0]; // Take the first (and only) file
-          
-          console.log('- Single file mode, selected file:', file ? {
-            fieldname: file.fieldname,
-            originalname: file.originalname,
-            size: file.size,
-            mimetype: file.mimetype,
-            hasBuffer: !!file.buffer
-          } : 'No file received');
+          console.log('- DID NOT ENTER main files condition');
+          console.log('- No files found in multipart data');
         }
       } else {
         console.log('- No binary data received or body is not a buffer');

@@ -288,6 +288,14 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Multiple Filename Sources**: API now supports filename extraction from query parameters, custom headers, and Content-Disposition
   - **N8N Configuration Guide**: Created comprehensive guide for preserving filenames in n8n HTTP Request node uploads
   - **Production Ready**: All transaction display issues resolved, document counts accurate, and n8n integration supports original filenames
+- July 15, 2025. **CRITICAL N8N FLEXIBLE FIELD NAME SUPPORT COMPLETED**
+  - **Universal Field Name Support**: `/upload-single` endpoint now accepts ANY field names (no restrictions)
+  - **Custom Field Names Working**: n8n can use field names like `HOA-Declaration.pdf`, `test-file`, `attachment_0`, etc.
+  - **Automatic Detection**: System automatically detects single vs multiple files regardless of field names
+  - **Conditional Logic Fixed**: Resolved file assignment issues with proper conditional structure
+  - **Comprehensive Debugging**: Added detailed logging to verify file processing at each step
+  - **Production Verified**: Successfully tested with custom field names and confirmed working
+  - **N8N Integration Complete**: Full compatibility with any n8n field name configuration
 
 ## Recent Architectural Changes
 
