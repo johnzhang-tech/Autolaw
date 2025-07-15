@@ -1,0 +1,112 @@
+{
+  "name": "Multiple Files Upload to DocuAI",
+  "description": "Example N8N workflow to upload multiple files to DocuAI transaction",
+  "nodes": [
+    {
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "position": [240, 300],
+      "parameters": {}
+    },
+    {
+      "name": "Prepare Transaction",
+      "type": "n8n-nodes-base.set",
+      "position": [420, 300],
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "transactionId",
+              "value": "={{ $json.transactionId || 74 }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Split Files",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [600, 300],
+      "parameters": {
+        "batchSize": 1,
+        "inputData": "={{ $json.attachments }}"
+      }
+    },
+    {
+      "name": "Upload Each File",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [800, 300],
+      "parameters": {
+        "url": "=https://your-app.replit.dev/api/transactions/{{ $json.transactionId }}/upload-n8n",
+        "method": "POST",
+        "headers": {
+          "X-API-Key": "docuai_demo_key_123"
+        },
+        "body": {
+          "contentType": "multipart/form-data",
+          "values": [
+            {
+              "name": "={{ $json.filename || 'attachment' }}",
+              "type": "n8n-binary-file",
+              "inputDataFieldName": "attachment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "position": [1000, 300],
+      "parameters": {
+        "mode": "append"
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Prepare Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Transaction": {
+      "main": [
+        [
+          {
+            "node": "Split Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Files": {
+      "main": [
+        [
+          {
+            "node": "Upload Each File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Each File": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
