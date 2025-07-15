@@ -835,6 +835,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/transactions/:id/upload-n8n - Upload ALL documents from n8n in one request (ATOMIC)
+  app.post('/api/transactions/:id/upload-n8n', flexAuth, upload.any(), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      const allFiles = req.files as Express.Multer.File[];
+      
+      console.log('=== N8N MULTI UPLOAD DEBUG ===');
+      console.log('- Transaction ID:', transactionId);
+      console.log('- Total files received:', allFiles?.length || 0);
+      console.log('- Files:', allFiles?.map(f => ({ 
+        fieldname: f.fieldname, 
+        originalname: f.originalname, 
+        size: f.size,
+        mimetype: f.mimetype
+      })));
+      
+      if (!allFiles || allFiles.length === 0) {
+        return res.status(400).json({ 
+          message: 'No files uploaded',
+          debug: {
+            filesReceived: allFiles?.length || 0,
+            contentType: req.headers['content-type']
+          }
+        });
+      }
+
+      // Filter n8n attachment files (attachment_0, attachment_1, etc.)
+      const n8nFiles = allFiles.filter(f => 
+        f.fieldname.startsWith('attachment_') || 
+        f.fieldname === 'attachment' || 
+        f.fieldname === 'document'
+      );
+
+      console.log('- Filtered n8n files:', n8nFiles.length);
+
+      if (n8nFiles.length === 0) {
+        return res.status(400).json({ 
+          message: 'No valid attachment files found',
+          debug: {
+            receivedFields: allFiles.map(f => f.fieldname),
+            expectedFields: 'attachment_0, attachment_1, attachment_2, etc.'
+          }
+        });
+      }
+
+      // Use the same atomic upload logic as bulk upload
+      const storageUploads: string[] = [];
+      const uploadResults: any[] = [];
+      const failedUploads: any[] = [];
+
+      try {
+        // Validate transaction exists and user owns it
+        const transaction = await storage.getTransaction(transactionId, userId);
+        if (!transaction) {
+          return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        // Process all files atomically
+        for (const file of n8nFiles) {
+          try {
+            console.log(`Processing file: ${file.originalname} (${file.size} bytes)`);
+            
+            // Extract filename from headers if available
+            let filename = file.originalname;
+            const filenameHeader = req.headers['x-filename'] || req.headers[`x-filename-${file.fieldname}`];
+            if (filenameHeader && typeof filenameHeader === 'string') {
+              filename = filenameHeader;
+            }
+
+            // Upload to Replit Object Storage
+            const uploadResult = await replitObjectStorage.uploadFile(
+              file.buffer,
+              filename,
+              file.mimetype,
+              transaction.name,
+              transactionId
+            );
+
+            storageUploads.push(uploadResult.objectKey);
+
+            // Save document metadata to database
+            const documentData = {
+              transactionId: transactionId,
+              userId: userId,
+              fileName: uploadResult.objectKey.split('/')[1], // Remove folder prefix
+              originalFileName: filename,
+              mimeType: file.mimetype,
+              fileSize: file.size,
+              replitStorageKey: uploadResult.objectKey,
+              uploadStatus: 'completed' as const,
+              uploadedAt: new Date(),
+            };
+
+            const savedDocument = await storage.createDocument(documentData);
+            uploadResults.push({
+              document: savedDocument,
+              storage: uploadResult
+            });
+
+            console.log(`✓ Successfully uploaded: ${filename}`);
+          } catch (error: any) {
+            console.error(`✗ Failed to upload ${file.originalname}:`, error);
+            failedUploads.push({
+              filename: file.originalname,
+              error: error.message
+            });
+          }
+        }
+
+        // Update transaction document count
+        const updatedTransaction = await storage.updateTransactionDocumentCount(transactionId);
+
+        // WEBHOOK: Notify n8n about transaction with new documents
+        if (uploadResults.length > 0 && updatedTransaction) {
+          try {
+            const user = await storage.getUser(userId);
+            const allDocuments = await storage.getDocuments(transactionId, userId);
+            if (user) {
+              await webhookService.onTransactionCreated(updatedTransaction, user, allDocuments);
+            }
+          } catch (webhookError) {
+            console.error('Webhook notification failed (non-blocking):', webhookError);
+          }
+        }
+
+        res.status(200).json({
+          success: uploadResults.length > 0,
+          message: `Uploaded ${uploadResults.length} of ${n8nFiles.length} files successfully (ATOMIC)`,
+          uploadResults,
+          failedUploads,
+          transaction: {
+            id: updatedTransaction?.id,
+            name: updatedTransaction?.name,
+            numDocuments: updatedTransaction?.numDocuments,
+            address: updatedTransaction?.address,
+            type: updatedTransaction?.transactionType
+          },
+          summary: {
+            totalFiles: n8nFiles.length,
+            successful: uploadResults.length,
+            failed: failedUploads.length,
+            documentsInTransaction: updatedTransaction?.numDocuments || 0
+          }
+        });
+
+      } catch (error: any) {
+        console.error('Atomic n8n upload error:', error);
+        
+        // ROLLBACK: Clean up any uploaded files if database transaction failed
+        if (storageUploads.length > 0) {
+          try {
+            for (const objectKey of storageUploads) {
+              await replitObjectStorage.deleteFile(objectKey);
+            }
+            console.log(`Rolled back ${storageUploads.length} uploaded files`);
+          } catch (cleanupError) {
+            console.error('Storage cleanup error:', cleanupError);
+          }
+        }
+
+        res.status(500).json({ 
+          message: 'Atomic upload failed - all changes rolled back', 
+          error: error.message 
+        });
+      }
+
+    } catch (error: any) {
+      console.error('N8N multi-upload error:', error);
+      res.status(500).json({ 
+        message: 'Upload failed', 
+        error: error.message 
+      });
+    }
+  });
+
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
   // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
   app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {
