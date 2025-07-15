@@ -1194,6 +1194,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  // N8N-specific endpoint for dynamic attachment uploads with duplicate detection
+  app.post('/api/transactions/:id/upload-n8n', flexAuth, async (req, res) => {
+    console.log('\n=== N8N DYNAMIC UPLOAD ENDPOINT ===');
+    console.log('Request for transaction:', req.params.id);
+    console.log('Content-Type:', req.get('Content-Type'));
+    
+    try {
+      const transactionId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Check transaction access
+      const transaction = await storage.getTransaction(transactionId);
+      if (!transaction) {
+        return res.status(404).json({ success: false, error: 'Transaction not found' });
+      }
+      
+      if (transaction.userId !== userId && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Access denied' });
+      }
+      
+      // Ultra-permissive multer for n8n
+      const upload = multer({
+        storage: multer.memoryStorage(),
+        limits: { 
+          fileSize: 10 * 1024 * 1024, // 10MB
+          files: 100 
+        },
+        fileFilter: (req, file, cb) => {
+          const allowedMimes = [
+            'application/pdf',
+            'application/msword', 
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+          ];
+          
+          if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+          } else {
+            cb(new Error(`File type ${file.mimetype} not allowed`));
+          }
+        }
+      }).any(); // Accept ALL field names
+      
+      // Wrap multer in promise
+      await new Promise((resolve, reject) => {
+        upload(req, res, (err) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+      
+      const allFiles = req.files as Express.Multer.File[];
+      
+      console.log('N8N Files received:', allFiles ? allFiles.length : 0);
+      console.log('Field names:', allFiles ? allFiles.map(f => f.fieldname) : []);
+      console.log('Filenames:', allFiles ? allFiles.map(f => f.originalname) : []);
+      
+      if (!allFiles || allFiles.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'No files received from n8n workflow' 
+        });
+      }
+      
+      // Remove duplicate files based on content hash
+      const uniqueFiles = [];
+      const seenHashes = new Set();
+      
+      for (const file of allFiles) {
+        const hash = require('crypto').createHash('md5').update(file.buffer).digest('hex');
+        if (!seenHashes.has(hash)) {
+          seenHashes.add(hash);
+          uniqueFiles.push(file);
+          console.log(`✓ Unique: ${file.originalname} (${hash.substring(0, 8)})`);
+        } else {
+          console.log(`✗ Duplicate skipped: ${file.originalname} (${hash.substring(0, 8)})`);
+        }
+      }
+      
+      if (uniqueFiles.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'All files are duplicates - check n8n workflow configuration' 
+        });
+      }
+      
+      console.log(`Processing ${uniqueFiles.length} unique files (${allFiles.length - uniqueFiles.length} duplicates removed)`);
+      
+      // Use existing upload handler with unique files only
+      await handleMultipleFileUpload(req, res, uniqueFiles, transaction);
+      
+    } catch (error) {
+      console.error('N8N upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'N8N upload failed: ' + error.message 
+      });
+    }
+  });
+
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
   // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
   app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {

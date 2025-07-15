@@ -1,13 +1,27 @@
 # N8N Working Configuration - Final Solution
 
-## ✅ CONFIRMED WORKING Setup
+## 🎯 DYNAMIC ATTACHMENT SOLUTION
+
+### NEW: N8N Dynamic Upload Endpoint
+
+**Perfect for Dynamic Attachments - Use This URL:**
+```
+Method: POST
+URL: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-n8n
+```
+
+**Key Features:**
+- ✅ Accepts ANY number of files with ANY field names
+- ✅ Automatically removes duplicate files (same content)
+- ✅ Perfect for dynamic n8n workflows
+- ✅ No need to configure fixed parameters
 
 ### HTTP Request Node Configuration
 
 **1. Method & URL:**
 ```
 Method: POST
-URL: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-single
+URL: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-n8n
 ```
 
 **2. Authentication:**
@@ -16,23 +30,17 @@ Header Name: X-API-Key
 Header Value: docuai_demo_key_123
 ```
 
-**3. Body Parameters (Form-Data):**
+**3. Body Parameters (Form-Data) - DYNAMIC SOLUTION:**
 
-**Option A: Simple Field Names (RECOMMENDED)**
+**For Dynamic Attachments (ANY number of files):**
 ```
-Parameter Type: nBn Binary File
-Name: attachment_0
-Input Data Field Name: attachment_0
-```
-
-**Option B: Dynamic Field Names**
-```
-Parameter Type: nBn Binary File  
-Name: file1
-Input Data Field Name: attachment_0
+For each attachment in your dynamic list:
+  Parameter Type: nBn Binary File
+  Name: {{ $json.attachments.filename }} (or any dynamic expression)
+  Input Data Field Name: {{ $item.attachment_field_name }}
 ```
 
-**Option C: Multiple Files**
+**Simple Example:**
 ```
 Parameter 1:
   Type: nBn Binary File
@@ -41,14 +49,22 @@ Parameter 1:
 
 Parameter 2:
   Type: nBn Binary File
-  Name: file2  
+  Name: file2
   Input Data Field Name: attachment_1
 
 Parameter 3:
   Type: nBn Binary File
   Name: file3
   Input Data Field Name: attachment_2
+
+(Continue for as many files as needed)
 ```
+
+**The NEW endpoint automatically:**
+- ✅ Accepts files with ANY field names
+- ✅ Detects and removes duplicate files
+- ✅ Handles dynamic number of attachments
+- ✅ Works with your existing n8n setup
 
 ## ⚠️ Common Issues & Solutions
 
