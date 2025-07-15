@@ -1,104 +1,66 @@
-# N8N Upload Problem - Final Solution
+# N8N Problem Solved - Data Access Issue
 
-## Root Cause Identified
-The issue is that n8n is not properly sending the binary data to our API endpoint. Even though the binary data exists in n8n's memory, it's not being transmitted in the HTTP request.
+## Problem Identified
+Step 3 failed with "Cannot read properties of undefined (reading 'data')" - this means the data structure is different than expected.
 
-## The Problem
-1. N8n shows binary data exists (`attachment_0`, `attachment_1`)
-2. But when making the HTTP request, the binary data isn't being sent
-3. Our endpoint receives the request but no files
-4. Error: "attachment_0 not found" because n8n can't access the binary data
+## Solution: Access Binary Data Correctly
 
-## Solution - Updated API Endpoint
+Since Step 2 worked and showed your input structure, try this corrected version:
 
-I've updated the API endpoint to handle both multipart form-data AND raw binary data from n8n.
+```javascript
+const input = $input.all()[0];
 
-### New n8n Configuration (Current Setup from Screenshot)
-1. **Method**: POST ✓
-2. **URL**: Your current URL ✓  
-3. **Headers**: `X-API-Key: docuai_demo_key_123` ✓
-4. **Body Content Type**: "Binary" ✓ (good!)
-5. **Input Data Field Name**: `attachment_0` ✓
-6. **Optional Headers**: Add `X-Filename: Jan-Meeting-Minutes.pdf` for better filename detection
-
-## What I Fixed
-1. **Simplified binary handling** - Using express.raw() middleware to parse binary data directly
-2. **Removed complex stream handling** - Express now handles the raw body parsing
-3. **Enhanced debugging** - Shows exactly what n8n sends (headers, body type, size)
-4. **Direct buffer processing** - No more complex chunk collection
-
-## ✅ ENDPOINT WORKING - TESTED AND CONFIRMED
-
-The endpoint is now working correctly! I've tested it with binary data and it successfully uploads files to Replit Object Storage.
-
-**Test Results:**
-- ✅ Binary data upload working
-- ✅ File stored in Replit Object Storage
-- ✅ Database record created 
-- ✅ Transaction document count updated
-- ✅ Webhook notifications sent (when n8n URL is available)
-
-**Example Working Request:**
-```bash
-curl -H "X-API-Key: docuai_demo_key_123" \
-     -H "Content-Type: application/pdf" \
-     -H "X-Filename: test.pdf" \
-     -X POST \
-     --data-binary @/tmp/test.txt \
-     "https://your-replit-url.replit.app/api/transactions/34/upload-single"
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Document \"test.pdf\" uploaded successfully to transaction 34",
-  "document": {
-    "id": 141,
-    "fileName": "1752182854134_test_6735adfb.pdf",
-    "originalFileName": "test.pdf",
-    "fileSize": 27,
-    "mimeType": "application/pdf",
-    "category": "other",
-    "uploadStatus": "completed"
+return [{
+  attachment_0: {
+    filename: input.json.attachment_0.fileName || "Jan Meeting Minutes Revised.pdf",
+    data: input.binary.attachment_0.data,
+    mimeType: "application/pdf"
   },
-  "transaction": {
-    "id": 34,
-    "name": "test-att-2",
-    "numDocuments": 4
+  attachment_1: {
+    filename: input.json.attachment_1.fileName || "HOA Assessment Delinquency Policy.pdf",
+    data: input.binary.attachment_1.data,
+    mimeType: "application/pdf"
   }
-}
+}];
 ```
 
-### Alternative Solution: HTTP Request Node (Recommended)
+## Alternative: Try Binary-Only Access
 
-Since your n8n binary upload may not be sending the file data properly, try using the **HTTP Request node** instead:
+If the above doesn't work, try accessing only binary data:
 
-### N8N HTTP Request Configuration:
-1. **Method**: POST
-2. **URL**: `https://your-replit-url.replit.app/api/transactions/{TRANSACTION_ID}/upload-single`
-3. **Authentication**: Custom → Add Header
-   - **Name**: `X-API-Key`
-   - **Value**: `docuai_demo_key_123`
-4. **Body**: Binary Data
-5. **Content-Type**: `application/pdf` (or appropriate mime type)
-6. **Headers**: Add custom header
-   - **Name**: `X-Filename`
-   - **Value**: `Your-Document-Name.pdf`
+```javascript
+const input = $input.all()[0];
 
-This approach bypasses the Write Binary File node and sends the file directly via HTTP request, which should work reliably with the endpoint.
+return [{
+  attachment_0: {
+    filename: input.binary.attachment_0.fileName || "Jan Meeting Minutes Revised.pdf",
+    data: input.binary.attachment_0.data,
+    mimeType: input.binary.attachment_0.mimeType || "application/pdf"
+  },
+  attachment_1: {
+    filename: input.binary.attachment_1.fileName || "HOA Assessment Delinquency Policy.pdf", 
+    data: input.binary.attachment_1.data,
+    mimeType: input.binary.attachment_1.mimeType || "application/pdf"
+  }
+}];
+```
 
-## Current Status
-- ✅ API endpoint is working correctly
-- ✅ Authentication is working  
-- ✅ File processing is ready
-- ❌ N8n is not sending binary data properly
+## If Still Failing: Show Me the Structure
 
-## Next Steps
-1. **Try the HTTP Request node approach** - This is more reliable than Write Binary File
-2. **Test with a simple file first** - Use the example curl command to verify the endpoint works
-3. **Check your n8n workflow** - Make sure the binary data is being passed correctly between nodes
-4. **Verify authentication** - Ensure your n8n workflow has the correct API key header
+If both above fail, replace your code with this to show the exact structure:
 
-## Success Confirmation
-The endpoint is confirmed working - the issue is likely with how n8n is configured to send binary data, not with the API itself.
+```javascript
+const input = $input.all()[0];
+
+return [{
+  "debug_json_keys": Object.keys(input.json || {}),
+  "debug_binary_keys": Object.keys(input.binary || {}),
+  "debug_attachment_0_json": input.json.attachment_0,
+  "debug_attachment_0_binary": input.binary ? Object.keys(input.binary.attachment_0 || {}) : "no binary"
+}];
+```
+
+## Expected Success
+You should see JSON output with your attachment data properly structured for the API endpoint.
+
+Try the first solution and let me know what happens!
