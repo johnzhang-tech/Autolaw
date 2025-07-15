@@ -1,72 +1,120 @@
-# N8N Single File Upload Configuration Guide
+# N8N Single Upload Configuration - Complete Fix
 
-## Issue Identified
-Looking at your n8n screenshot, the problem is in the binary data configuration. The endpoint is working correctly but n8n needs specific setup to send files properly.
+## Issue Analysis
+The logs show that n8n is sending requests with hex string transaction IDs (`1980cc059ff2d981`) that are getting 404 errors, while numeric IDs work correctly. This indicates a routing or URL construction issue.
 
-## ✅ API Endpoint is Ready
-- **Endpoint**: `POST /api/transactions/{transactionId}/upload-single` ✓ Working
-- **Authentication**: `X-API-Key: docuai_demo_key_123` ✓ Working  
-- **Field Names**: Accepts both `attachment` and `document` ✓ Working
+## Root Cause
+N8N is likely using a variable that contains a hex string instead of the actual transaction ID. The `{{$json.id}}` in the URL might be referencing the wrong field.
 
-## 🔧 Fix Your N8N Configuration
+## Complete Solution
 
-### 1. HTTP Request Node Settings:
-- **Method**: `POST` ✓
-- **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/34/upload-single`
-- **Body Content Type**: `Form-Data` ✓
+### Step 1: Verify Transaction ID Source
+In your n8n workflow, ensure the transaction creation response contains a numeric ID:
 
-### 2. Headers:
+**Expected Response from Transaction Creation:**
+```json
+{
+  "id": 46,
+  "userId": "mock-user-1",
+  "name": "N8N Test Property",
+  "address": "123 Automation St",
+  "transactionType": "Purchase"
+}
 ```
-X-API-Key: docuai_demo_key_123
+
+### Step 2: Correct N8N URL Configuration
+Use this exact URL pattern in your HTTP Request node:
+
+**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.id}}/upload-single`
+
+**Critical**: Make sure `{{$json.id}}` references the numeric transaction ID from the previous node's response.
+
+### Step 3: Debug the Transaction ID
+Add a debug node after transaction creation to verify the ID:
+
+1. **Add Code Node** after transaction creation:
+```javascript
+return [
+  {
+    json: {
+      transactionId: $input.all()[0].json.id,
+      transactionIdType: typeof $input.all()[0].json.id,
+      fullResponse: $input.all()[0].json
+    }
+  }
+];
 ```
 
-### 3. Body Parameters (this is the critical part):
+2. **Check the Output** - The transaction ID should be a number, not a hex string.
 
-**Parameter 1: attachment (File)**
-- **Parameter Type**: `n8n Binary File` ✓ 
-- **Name**: `attachment`
-- **Input Data Field Name**: **CRITICAL** - Must match exactly what's in your binary data
-  - Looking at your screenshot, you have `attachment_1` (ArticlesOfIncorporation.pdf)
-  - So use: `attachment_1` (NOT `attachment_0`)
-  - **How to find the correct name**: Look at your previous node's output and see what binary properties exist
+### Step 4: HTTP Request Configuration
+**Method**: `POST`
+**URL**: Use the transaction ID from Step 3
+**Headers**:
+- `X-API-Key`: `docuai_demo_key_123`
+- `Content-Type`: `application/octet-stream`
 
-**Parameter 2: category (Optional)**
-- **Parameter Type**: `String`
-- **Name**: `category`  
-- **Value**: `hoa`
+**Body**:
+- **Body Content Type**: `Raw/Custom`
+- **Input Data Field Name**: `attachment_0`
+- **Specify Content Type**: `On`
+- **Content Type**: `application/octet-stream`
 
-## 🐛 What Was Wrong
-1. First issue: You were using expressions `{{ $('Merge').first().binary.attachment_8 }}` instead of just the property name
-2. **Current issue**: You're using `attachment_0` but your data shows `attachment_1`
+### Step 5: Alternative Direct ID Approach
+If the dynamic ID continues to cause issues, use a static transaction ID for testing:
 
-**Correct Setup Based on Your Screenshot:**
-- **Name**: `attachment`
-- **Input Data Field Name**: `attachment_1` (this matches the binary data in your screenshot)
+**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/46/upload-single`
 
-## 🧪 Test Steps
-1. **Change Input Data Field Name from `attachment_0` to `attachment_1`** (based on your screenshot)
-2. Run your n8n workflow
-3. Check our server logs - they'll show if the file is now being received correctly
-4. You should see `totalFilesReceived: 1` in the debug output instead of `0`
+Replace `46` with an actual transaction ID from your database.
 
-## 🔍 The Real Problem (New Screenshot Analysis)
-Your new screenshot shows:
-- **Item 0**: Has `attachment_0` (Jan Meeting Minutes Revised.pdf)
-- **Item 1**: Has `attachment_1` (ArticlesOfIncorporation.pdf)
+## Testing the Fix
 
-The error says "attachment_1 not found in Item 0" because n8n is processing Item 0 but looking for `attachment_1` which only exists in Item 1.
+### Create a Test Transaction
+```bash
+curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions" \
+  -H "X-API-Key: docuai_demo_key_123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "N8N Test Property",
+    "address": "123 Automation St",
+    "transactionType": "Purchase"
+  }'
+```
 
-## 🛠️ Two Solutions
+### Test Upload with Returned ID
+```bash
+curl -X POST "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/[RETURNED_ID]/upload-single" \
+  -H "X-API-Key: docuai_demo_key_123" \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @test-file.pdf
+```
 
-### Option 1: Use attachment_0 (Recommended)
-- **Input Data Field Name**: `attachment_0` 
-- This will use the first file from the first item
+## Common Issues and Solutions
 
-### Option 2: Process Item 1 specifically
-- Add a filter/switch node before HTTP Request to only process Item 1
-- Then use `attachment_1`
+### Issue 1: Hex String IDs
+**Problem**: URL contains `1980cc059ff2d981` instead of numeric ID
+**Solution**: Check transaction creation response, ensure you're using the correct field
 
-## 🎯 Quick Fix
-Change your **Input Data Field Name** to `attachment_0` since that's what exists in Item 0 that n8n is processing.
+### Issue 2: 404 Errors
+**Problem**: Route not found
+**Solution**: Verify the transaction ID is numeric and exists in the database
 
-The API endpoint is fully ready and working - it's just a matter of using the binary property that exists in the item being processed!
+### Issue 3: Binary Data Issues
+**Problem**: File not uploaded properly
+**Solution**: Use Raw/Custom body type with correct Content-Type header
+
+## Expected Success Response
+```json
+{
+  "success": true,
+  "message": "Document uploaded successfully",
+  "document": {
+    "id": 123,
+    "fileName": "document.pdf",
+    "category": "other",
+    "transactionId": 46
+  }
+}
+```
+
+The key is ensuring the transaction ID in the URL is the numeric ID returned from transaction creation, not any hex string or other identifier.

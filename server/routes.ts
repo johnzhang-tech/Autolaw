@@ -804,6 +804,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
   // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
   app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {
+    console.log('=== ROUTE MATCHED ===');
+    console.log('- Route matched: /api/transactions/:id/upload-single');
+    console.log('- Transaction ID param:', req.params.id);
+    console.log('- Request path:', req.path);
+    console.log('- Request URL:', req.url);
     const contentType = req.headers['content-type'] || '';
     
     console.log('=== MIDDLEWARE DEBUG ===');
