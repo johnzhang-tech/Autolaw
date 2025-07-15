@@ -835,6 +835,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/debug/n8n-upload - Debug endpoint to see what n8n is sending
+  app.post('/api/debug/n8n-upload', flexAuth, upload.any(), async (req: any, res) => {
+    const allFiles = req.files as Express.Multer.File[];
+    
+    const debug = {
+      headers: req.headers,
+      query: req.query,
+      body: typeof req.body === 'object' ? Object.keys(req.body) : 'Not an object',
+      files: {
+        total: allFiles?.length || 0,
+        details: allFiles?.map(f => ({
+          fieldname: f.fieldname,
+          originalname: f.originalname,
+          size: f.size,
+          mimetype: f.mimetype,
+          encoding: f.encoding
+        })) || []
+      },
+      attachmentFields: allFiles?.filter(f => f.fieldname.startsWith('attachment_'))?.length || 0
+    };
+    
+    console.log('=== N8N DEBUG INFO ===');
+    console.log(JSON.stringify(debug, null, 2));
+    
+    res.json(debug);
+  });
+
   // POST /api/transactions/:id/upload-n8n - Upload ALL documents from n8n in one request (ATOMIC)
   app.post('/api/transactions/:id/upload-n8n', flexAuth, upload.any(), async (req: any, res) => {
     try {
