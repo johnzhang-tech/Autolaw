@@ -1429,6 +1429,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Transaction not found' });
       }
 
+      // Check for duplicate files (same name, size, and mime type in same transaction)
+      const existingFile = await db.select()
+        .from(documents)
+        .where(and(
+          eq(documents.transactionId, transactionId),
+          eq(documents.originalFileName, file.originalname),
+          eq(documents.fileSize, file.size),
+          eq(documents.mimeType, file.mimetype)
+        ))
+        .limit(1);
+
+      if (existingFile.length > 0) {
+        console.log(`Duplicate file detected: ${file.originalname} already exists in transaction ${transactionId}`);
+        return res.status(409).json({ 
+          message: `File "${file.originalname}" already exists in this transaction`,
+          existing: {
+            id: existingFile[0].id,
+            fileName: existingFile[0].fileName,
+            uploadedAt: existingFile[0].uploadedAt
+          }
+        });
+      }
+
       let objectKey: string | null = null;
 
       try {
