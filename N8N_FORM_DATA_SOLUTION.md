@@ -24,7 +24,7 @@ X-API-Key: docuai_demo_key_123
 ### Form-Data Fields - Multiple File Upload ✅
 The endpoint now supports **multiple different files** in a single request:
 
-#### Method 1: Multiple Files with Standard Names
+#### Method 1: Multiple Files with Standard Names (CORRECT WAY)
 ```
 file1: {{$binary.attachment_0}}
 file2: {{$binary.attachment_1}}
@@ -33,6 +33,14 @@ file4: {{$binary.attachment_3}}
 file5: {{$binary.attachment_4}}
 file6: {{$binary.attachment_5}}
 ```
+
+🚨 **IMPORTANT**: Do NOT add filename parameters like this (WRONG):
+```
+filename1: {{$json.attachments_0[filename]}}  ❌ DON'T DO THIS
+filename2: {{$json.attachments_1[filename]}}  ❌ DON'T DO THIS
+```
+
+The system automatically extracts filenames from the binary data!
 
 #### Method 2: Multiple Files with Custom Names
 ```
