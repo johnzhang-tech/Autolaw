@@ -279,6 +279,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Document Count Display Restored**: Fixed frontend document count calculations to use `Tranx_id` for proper display
   - **N8N Integration Updated**: All external API documentation updated to use `{{$json.Tranx_id}}` format
   - **Production Status**: All transaction operations, document uploads, and external integrations working with new field format
+- July 15, 2025. **RECENT TRANSACTION DISPLAY FIX & N8N FILENAME PRESERVATION**
+  - **Recent Transaction Section Fixed**: Resolved "No Transaction Yet" display issue by fixing infinite query loops and field reference errors
+  - **Query Optimization**: Removed constant re-fetching caused by `Date.now()` timestamps in React Query keys
+  - **Field Reference Corrections**: Updated all frontend components to use `Tranx_id` instead of `id` and `numDocuments` directly from API data
+  - **Document Count Display**: Fixed transaction cards to show correct document counts using `transaction.numDocuments` field
+  - **N8N Filename Preservation Enhancement**: Enhanced single upload API to extract original filenames from multiple sources
+  - **Multiple Filename Sources**: API now supports filename extraction from query parameters, custom headers, and Content-Disposition
+  - **N8N Configuration Guide**: Created comprehensive guide for preserving filenames in n8n HTTP Request node uploads
+  - **Production Ready**: All transaction display issues resolved, document counts accurate, and n8n integration supports original filenames
 
 ## Recent Architectural Changes
 

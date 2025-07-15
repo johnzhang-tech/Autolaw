@@ -889,10 +889,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (Buffer.isBuffer(req.body) && req.body.length > 0) {
         console.log('- Processing raw binary body, size:', req.body.length);
         
-        // Get filename from headers, query params, or Content-Disposition
+        // Get filename from multiple sources that n8n might use
         let filename = req.headers['x-filename'] || 
-                       req.query.filename || 
                        req.headers['x-original-filename'] ||
+                       req.headers['x-file-name'] ||
+                       req.headers['original-filename'] ||
+                       req.query.filename || 
+                       req.query.originalFilename ||
+                       req.query['original-filename'] ||
                        req.headers['content-disposition'];
         
         // Parse Content-Disposition header if present
@@ -903,9 +907,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
+        console.log('- Filename detection attempt:', {
+          'x-filename': req.headers['x-filename'],
+          'x-original-filename': req.headers['x-original-filename'],
+          'x-file-name': req.headers['x-file-name'],
+          'query.filename': req.query.filename,
+          'query.originalFilename': req.query.originalFilename,
+          'content-disposition': req.headers['content-disposition'],
+          'final-filename': filename
+        });
+        
         // Default to a generic name if no filename provided
         if (!filename || typeof filename !== 'string') {
-          filename = 'n8n-upload.pdf';
+          filename = `n8n-upload-${Date.now()}.pdf`;
         }
         
         // Determine mime type from headers or filename
