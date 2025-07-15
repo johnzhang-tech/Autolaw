@@ -493,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const webhookPayload = {
         eventType: 'report_generation_requested',
         transaction: {
-          id: transaction.id,
+          Tranx_id: transaction.id,
           name: transaction.name,
           address: transaction.address,
           transactionType: transaction.transactionType,
@@ -527,7 +527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: "Report generation started",
-        transactionId: transaction.id,
+        Tranx_id: transaction.id,
         documentCount: documents.length,
         status: "processing"
       });
@@ -543,7 +543,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const transactions = await storage.getTransactions(userId);
-      res.json(transactions);
+      
+      // Transform response to use Tranx_id instead of id to avoid downstream conflicts
+      const transformedTransactions = transactions.map(transaction => ({
+        ...transaction,
+        Tranx_id: transaction.id,
+        id: undefined
+      }));
+      
+      res.json(transformedTransactions);
     } catch (error: any) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
@@ -558,7 +566,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...validatedData,
         userId
       });
-      res.status(201).json(transaction);
+      
+      // Transform response to use Tranx_id instead of id to avoid downstream conflicts
+      const transformedTransaction = {
+        ...transaction,
+        Tranx_id: transaction.id,
+        id: undefined
+      };
+      
+      res.status(201).json(transformedTransaction);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid transaction data", errors: error.errors });
@@ -584,7 +600,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Transaction not found" });
       }
 
-      res.json(transaction);
+      // Transform response to use Tranx_id instead of id to avoid downstream conflicts
+      const transformedTransaction = {
+        ...transaction,
+        Tranx_id: transaction.id,
+        id: undefined
+      };
+
+      res.json(transformedTransaction);
     } catch (error: any) {
       console.error("Error fetching transaction:", error);
       res.status(500).json({ message: "Failed to fetch transaction" });
@@ -1062,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             uploadedAt: result.document.uploadedAt
           },
           transaction: {
-            id: result.transaction.id,
+            Tranx_id: result.transaction.id,
             name: result.transaction.name,
             numDocuments: result.transaction.numDocuments
           }

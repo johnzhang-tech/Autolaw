@@ -14,7 +14,7 @@ In your n8n workflow, ensure the transaction creation response contains a numeri
 **Expected Response from Transaction Creation:**
 ```json
 {
-  "id": 46,
+  "Tranx_id": 46,
   "userId": "mock-user-1",
   "name": "N8N Test Property",
   "address": "123 Automation St",
@@ -25,9 +25,9 @@ In your n8n workflow, ensure the transaction creation response contains a numeri
 ### Step 2: Correct N8N URL Configuration
 Use this exact URL pattern in your HTTP Request node:
 
-**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.id}}/upload-single`
+**URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single`
 
-**Critical**: Make sure `{{$json.id}}` references the numeric transaction ID from the previous node's response.
+**Critical**: Make sure `{{$json.Tranx_id}}` references the numeric transaction ID from the previous node's response.
 
 ### Step 3: Debug the Transaction ID
 Add a debug node after transaction creation to verify the ID:
@@ -37,8 +37,8 @@ Add a debug node after transaction creation to verify the ID:
 return [
   {
     json: {
-      transactionId: $input.all()[0].json.id,
-      transactionIdType: typeof $input.all()[0].json.id,
+      transactionId: $input.all()[0].json.Tranx_id,
+      transactionIdType: typeof $input.all()[0].json.Tranx_id,
       fullResponse: $input.all()[0].json
     }
   }
