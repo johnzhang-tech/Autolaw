@@ -270,6 +270,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **Server Restart Fix**: Application restart cleared cached errors and endpoint now processes n8n requests successfully  
   - **Production Testing Confirmed**: Binary upload from cURL working perfectly with 200 response and proper file storage
   - **N8N Ready**: HTTP Request node configuration confirmed working for external automation workflows
+- July 15, 2025. **TRANX_ID FIELD MIGRATION COMPLETED: API Response Format Standardized**
+  - **API Response Transformation**: Successfully changed all transaction endpoints to return `Tranx_id` instead of `id` to avoid downstream conflicts
+  - **Frontend Compatibility Fix**: Updated all React components (home.tsx, create.tsx, documents.tsx) to use `Tranx_id` field
+  - **Type Safety Enhancement**: Added `TransactionResponse` type in shared schema for proper API response typing
+  - **Field Transformation Fix**: Properly removed `id` field from responses using destructuring instead of setting undefined
+  - **Database Connection Stability**: Resolved Neon PostgreSQL timeout issues causing "Bad gateway" errors
+  - **Document Count Display Restored**: Fixed frontend document count calculations to use `Tranx_id` for proper display
+  - **N8N Integration Updated**: All external API documentation updated to use `{{$json.Tranx_id}}` format
+  - **Production Status**: All transaction operations, document uploads, and external integrations working with new field format
 
 ## Recent Architectural Changes
 
