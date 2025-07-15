@@ -1,101 +1,101 @@
-# N8N Multiple Files Upload Configuration Guide
+# N8N Multiple Files Configuration - Final Solution
 
-## Problem Analysis
-Your N8N workflow has an array of attachments but is only sending one file (`attachment_0`) instead of all files in the array.
+## Problem
+The code node produces objects without the `data` field, causing "No attachments found in JSON body" error.
 
-## Solution: Configure N8N to Send All Files in Array
+## Solution: Dynamic Multiple Files Handler
 
-### Method 1: Use HTTP Request Node with Loop (Recommended)
-
-1. **Add a "Split In Batches" node** before your HTTP Request node:
-   - Input: `{{ $json.attachments }}`
-   - Batch Size: 1
-   - This will process each attachment individually
-
-2. **Configure HTTP Request node**:
-   - Method: POST
-   - URL: `https://your-app.replit.dev/api/transactions/{{$json.transactionId}}/upload-n8n`
-   - Headers:
-     - `X-API-Key`: `docuai_demo_key_123`
-     - `Content-Type`: `multipart/form-data`
-   - Body: Form-Data
-   - Parameters:
-     - Name: `{{ $json.filename }}` (use the actual filename as field name)
-     - Parameter Type: `n8n Binary File`
-     - Input Data Field Name: `attachment` (or whatever your attachment field is called)
-
-### Method 2: Single HTTP Request with Multiple Files
-
-If you want to send ALL files in one request, configure the HTTP Request node as follows:
-
-1. **Body Type**: Form-Data
-2. **Parameters** (add one for each file):
-   - Parameter 1:
-     - Name: `attachment_0`
-     - Parameter Type: `n8n Binary File`
-     - Input Data Field Name: `{{ $json.attachments[0].fieldName }}`
-   - Parameter 2:
-     - Name: `attachment_1`
-     - Parameter Type: `n8n Binary File`
-     - Input Data Field Name: `{{ $json.attachments[1].fieldName }}`
-   - Continue for all files...
-
-### Method 3: Dynamic Field Names (Most Flexible)
-
-Use this configuration for dynamic field names:
+Replace your current code node with this version that handles any number of files:
 
 ```javascript
-// In a Code node before HTTP Request:
-const attachments = $input.all()[0].json.attachments;
-const formData = {};
+const input = $input.all()[0];
+const payload = {};
 
-for (let i = 0; i < attachments.length; i++) {
-  formData[`file_${i}`] = attachments[i];
+// Handle both binary and json data
+const binaryData = input.binary || {};
+const jsonData = input.json || {};
+
+// Process all items that start with 'attachment_'
+Object.keys(jsonData).forEach(key => {
+  if (key.startsWith('attachment_')) {
+    const attachment = jsonData[key];
+    
+    // Try to get binary data from multiple sources
+    let data = null;
+    
+    if (binaryData[key]) {
+      // Try to get data from binary
+      data = binaryData[key].data;
+    }
+    
+    // If we have valid data, add to payload
+    if (data && data !== 'filesystem-v2') {
+      payload[key] = {
+        filename: attachment.filename || attachment.fileName,
+        data: data,
+        mimeType: attachment.mimeType || 'application/pdf'
+      };
+    }
+  }
+});
+
+return [payload];
+```
+
+## Alternative: Force Binary Data Access
+
+If the above doesn't work, try this approach that forces binary data access:
+
+```javascript
+const payload = {};
+
+// Use global $binary object
+if (typeof $binary !== 'undefined') {
+  Object.keys($binary).forEach(key => {
+    if (key.startsWith('attachment_')) {
+      const binaryData = $binary[key];
+      if (binaryData && binaryData.data) {
+        payload[key] = {
+          filename: binaryData.fileName,
+          data: binaryData.data,
+          mimeType: binaryData.mimeType || 'application/pdf'
+        };
+      }
+    }
+  });
 }
 
-return { formData };
+return [payload];
 ```
 
-Then in HTTP Request:
-- Use the processed formData object
-- Each file will have a unique field name (`file_0`, `file_1`, etc.)
+## Debug Version
 
-## Current Issue in Your Setup
+If both fail, use this to see what's actually available:
 
-Looking at your logs, you're only sending:
-```
-Field names: [ 'Jan Meeting Minutes Revised.pdf' ]
-Filenames: [ 'Jan Meeting Minutes Revised.pdf' ]
-```
+```javascript
+const input = $input.all()[0];
 
-This indicates N8N is only sending one file with the filename as the field name.
-
-## Recommended Configuration
-
-1. **Use Method 1 (Split In Batches)** for simplicity
-2. **Configure field names** to be unique for each file
-3. **Test with a small array** first (2-3 files) before scaling to 6
-
-## Testing Your Configuration
-
-After implementing, you should see logs like:
-```
-Field names: [ 'file_0', 'file_1', 'file_2', 'file_3', 'file_4', 'file_5' ]
-Filenames: [ 'Document1.pdf', 'Document2.pdf', 'Document3.pdf', 'Document4.pdf', 'Document5.pdf', 'Document6.pdf' ]
+return [{
+  "input_binary_keys": Object.keys(input.binary || {}),
+  "input_json_keys": Object.keys(input.json || {}),
+  "global_binary_available": typeof $binary !== 'undefined',
+  "global_binary_keys": typeof $binary !== 'undefined' ? Object.keys($binary) : 'undefined',
+  "sample_binary_data": input.binary.attachment_0 ? Object.keys(input.binary.attachment_0) : 'no attachment_0',
+  "sample_global_binary": typeof $binary !== 'undefined' && $binary.attachment_0 ? Object.keys($binary.attachment_0) : 'no global attachment_0'
+}];
 ```
 
-## Common N8N Mistakes to Avoid
+## Expected Success
 
-1. **Using same field name for all files** - Each file needs a unique field name
-2. **Not looping through array** - N8N needs explicit configuration to process arrays
-3. **Wrong Parameter Type** - Must use "n8n Binary File" for file uploads
-4. **Missing Content-Type** - Should be `multipart/form-data`
+You should see JSON output like:
+```json
+{
+  "attachment_0": {
+    "filename": "Jan Meeting Minutes Revised.pdf",
+    "data": "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNTk1IDg0Ml0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+PQo+PgovTWVkaWFCb3ggWzAgMCA1OTUgODQyXQovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCi9GMSA5IFRmCjUwIDc4MCBUZAooSGVsbG8gV29ybGQhKSBUagpFVApzdHJlYW0KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZgowMDAwMDAwMDA5IDAwMDAwIG4KMDAwMDAwMDA1OCAwMDAwMCBuCjAwMDAwMDAxMTUgMDAwMDAgbgowMDAwMDAwMjQ1IDAwMDAwIG4KMDAwMDAwMDMxNiAwMDAwMCBuCnRyYWlsZXIKPDwKL1NpemUgNgovUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDA3CiUlRU9G",
+    "mimeType": "application/pdf"
+  }
+}
+```
 
-## Debugging Steps
-
-1. Check your N8N workflow input - ensure all 6 files are present
-2. Verify Split In Batches node is processing all items
-3. Check HTTP Request node configuration for each file
-4. Monitor the endpoint logs to see what's actually received
-
-The endpoint is working correctly - it can handle multiple files as demonstrated in the test. The issue is in the N8N configuration not sending all files from the array.
+Try the first solution and let me know what the output shows!
