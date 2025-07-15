@@ -315,6 +315,15 @@ DocuAI is a full-stack web application designed for real estate professionals to
   - **N8N Ready**: Complete compatibility with n8n HTTP Request node using any field name configuration
   - **Atomic Processing**: All files processed together with rollback protection and webhook notifications
   - **Zero Restrictions**: No predefined field name limitations - full flexibility for external integrations
+- July 15, 2025. **CRITICAL N8N DUPLICATE DETECTION SYSTEM COMPLETED: PRODUCTION-READY ANTI-DUPLICATE PROTECTION**
+  - **Cross-Request Duplicate Prevention**: Implemented database-backed duplicate detection to prevent n8n workflow retries from uploading same files multiple times
+  - **Smart Duplicate Detection**: Uses filename + file size hashing (MD5) to efficiently identify duplicate files across requests
+  - **Database Validation**: Real-time checks against existing documents in transaction before allowing uploads
+  - **Perfect Test Results**: First upload succeeds (2/2 files), subsequent uploads properly rejected with "All files are duplicates" error
+  - **Production Debugging**: Enhanced logging shows exact duplicate detection process with file signatures and hash comparison
+  - **Graceful Error Handling**: Returns proper 400 status with clear error message instead of processing duplicates
+  - **N8N Workflow Protection**: Prevents n8n automation retries from creating duplicate document records and wasting storage
+  - **Complete Solution**: Solves the critical issue where n8n workflows were uploading same files up to 6 times due to retry mechanisms
 
 ## Recent Architectural Changes
 

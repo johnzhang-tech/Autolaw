@@ -1264,18 +1264,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Remove duplicate files based on content hash
+      // Check for existing files in database to prevent cross-request duplicates
+      const existingDocs = await storage.getDocuments(transaction.id, userId);
+      const existingHashes = new Set();
+      
+      // Build set of existing file signatures for duplicate detection
+      for (const doc of existingDocs) {
+        const signature = `${doc.originalFileName}_${doc.fileSize}`;
+        const hash = crypto.createHash('md5').update(signature).digest('hex');
+        existingHashes.add(hash);
+      }
+      
+      // Remove duplicate files based on content hash and database check
       const uniqueFiles = [];
       const seenHashes = new Set();
       
       for (const file of allFiles) {
-        const hash = crypto.createHash('md5').update(file.buffer).digest('hex');
-        if (!seenHashes.has(hash)) {
-          seenHashes.add(hash);
+        const contentHash = crypto.createHash('md5').update(file.buffer).digest('hex');
+        const fileSignature = `${file.originalname}_${file.size}`;
+        const signatureHash = crypto.createHash('md5').update(fileSignature).digest('hex');
+        
+        // Check if file already exists in database
+        if (existingHashes.has(signatureHash)) {
+          continue; // Skip files that already exist in database
+        }
+        
+        // Check if file is duplicate in current request
+        if (!seenHashes.has(contentHash)) {
+          seenHashes.add(contentHash);
           uniqueFiles.push(file);
-          console.log(`✓ Unique: ${file.originalname} (${hash.substring(0, 8)})`);
-        } else {
-          console.log(`✗ Duplicate skipped: ${file.originalname} (${hash.substring(0, 8)})`);
         }
       }
       
