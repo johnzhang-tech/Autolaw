@@ -1046,6 +1046,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to handle multiple file uploads
+  async function handleMultipleFileUpload(req: any, res: any, allFiles: Express.Multer.File[], transaction: any) {
+    const userId = req.user.claims.sub;
+    const transactionId = transaction.id;
+    
+    console.log('=== MULTIPLE FILE UPLOAD MODE ===');
+    console.log('- Files to process:', allFiles.length);
+    
+    // Filter files for upload
+    const fileFields = allFiles.filter(f => 
+      f.fieldname.startsWith('file') || 
+      f.fieldname.startsWith('attachment_') || 
+      f.fieldname === 'attachment' || 
+      f.fieldname === 'document'
+    );
+    
+    const storageUploads: string[] = [];
+    const uploadResults: any[] = [];
+    const failedUploads: any[] = [];
+    
+    try {
+      // Process all files atomically
+      for (const file of fileFields) {
+        try {
+          console.log(`Processing file: ${file.originalname} (${file.size} bytes)`);
+          
+          // Extract filename from form body if available
+          let filename = file.originalname;
+          const filenameKey = file.fieldname.replace('file', 'filename');
+          if (req.body[filenameKey]) {
+            filename = req.body[filenameKey];
+          }
+          
+          // Ensure proper file extension for Google Docs
+          if (file.mimetype.includes('google-apps') && filename && !filename.includes('.')) {
+            if (file.mimetype.includes('document')) filename += '.gdoc';
+            else if (file.mimetype.includes('spreadsheet')) filename += '.gsheet';
+            else if (file.mimetype.includes('presentation')) filename += '.gslides';
+          }
+          
+          // Upload to Replit Object Storage
+          const uploadResult = await replitObjectStorage.uploadFile(
+            file.buffer,
+            filename,
+            file.mimetype,
+            transaction.name,
+            transactionId
+          );
+          
+          storageUploads.push(uploadResult.objectKey);
+          
+          // Save document metadata to database
+          const documentData = {
+            transactionId: transactionId,
+            userId: userId,
+            fileName: uploadResult.objectKey.split('/')[1],
+            originalFileName: filename,
+            mimeType: file.mimetype,
+            fileSize: file.size,
+            replitStorageKey: uploadResult.objectKey,
+            uploadStatus: 'completed' as const,
+            uploadedAt: new Date(),
+          };
+          
+          const savedDocument = await storage.createDocument(documentData);
+          uploadResults.push({
+            fieldName: file.fieldname,
+            fileName: filename,
+            documentId: savedDocument.id,
+            storage: uploadResult
+          });
+          
+          console.log(`✓ Successfully uploaded: ${filename}`);
+        } catch (error: any) {
+          console.error(`✗ Failed to upload ${file.originalname}:`, error);
+          failedUploads.push({
+            fieldName: file.fieldname,
+            filename: file.originalname,
+            error: error.message
+          });
+        }
+      }
+      
+      // Update transaction document count
+      await storage.updateTransactionDocumentCount(transactionId);
+      
+      // Send webhook notification
+      if (uploadResults.length > 0) {
+        try {
+          const user = await storage.getUser(userId);
+          const allDocuments = await storage.getDocuments(transactionId, userId);
+          if (user) {
+            await webhookService.onTransactionCreated(transaction, user, allDocuments);
+          }
+        } catch (webhookError) {
+          console.error('Webhook notification failed (non-blocking):', webhookError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `${uploadResults.length} files uploaded successfully`,
+        uploaded: uploadResults.map(r => ({
+          fieldName: r.fieldName,
+          fileName: r.fileName,
+          documentId: r.documentId
+        })),
+        failed: failedUploads,
+        transactionId: transactionId
+      });
+      
+    } catch (error: any) {
+      console.error('Multiple file upload error:', error);
+      
+      // Clean up any uploaded files on error
+      for (const objectKey of storageUploads) {
+        try {
+          await replitObjectStorage.deleteFile(objectKey);
+        } catch (cleanupError) {
+          console.error(`Failed to cleanup file ${objectKey}:`, cleanupError);
+        }
+      }
+      
+      res.status(500).json({
+        success: false,
+        message: 'Multiple file upload failed',
+        error: error.message,
+        uploaded: [],
+        failed: failedUploads
+      });
+    }
+  }
+
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
   // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
   app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {
@@ -1130,16 +1263,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Default to a generic name if no filename provided
         if (!filename || typeof filename !== 'string') {
-          filename = `n8n-upload-${Date.now()}.pdf`;
+          // Try to determine extension from mime type
+          let ext = '.pdf';
+          if (detectedMimeType.includes('google-apps.document')) ext = '.gdoc';
+          else if (detectedMimeType.includes('google-apps.spreadsheet')) ext = '.gsheet';
+          else if (detectedMimeType.includes('google-apps.presentation')) ext = '.gslides';
+          else if (detectedMimeType.includes('msword')) ext = '.doc';
+          else if (detectedMimeType.includes('wordprocessingml.document')) ext = '.docx';
+          else if (detectedMimeType.includes('text/plain')) ext = '.txt';
+          
+          filename = `n8n-upload-${Date.now()}${ext}`;
         }
         
-        // Determine mime type from headers or filename
+        // Ensure proper file extension for Google Docs
+        if (detectedMimeType.includes('google-apps') && filename && !filename.includes('.')) {
+          if (detectedMimeType.includes('document')) filename += '.gdoc';
+          else if (detectedMimeType.includes('spreadsheet')) filename += '.gsheet';
+          else if (detectedMimeType.includes('presentation')) filename += '.gslides';
+        }
+        
+        // Determine mime type from headers or filename (including Google Docs)
         let detectedMimeType = req.headers['content-type'] || 'application/octet-stream';
         if (detectedMimeType === 'application/octet-stream' && filename.includes('.')) {
           const ext = filename.split('.').pop()?.toLowerCase();
           if (ext === 'pdf') detectedMimeType = 'application/pdf';
           else if (ext === 'doc') detectedMimeType = 'application/msword';
           else if (ext === 'docx') detectedMimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+          else if (ext === 'txt') detectedMimeType = 'text/plain';
+          else if (ext === 'rtf') detectedMimeType = 'application/rtf';
+          else if (ext === 'odt') detectedMimeType = 'application/vnd.oasis.opendocument.text';
+          else if (ext === 'xls') detectedMimeType = 'application/vnd.ms-excel';
+          else if (ext === 'xlsx') detectedMimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          else if (ext === 'ppt') detectedMimeType = 'application/vnd.ms-powerpoint';
+          else if (ext === 'pptx') detectedMimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+          else if (ext === 'gdoc') detectedMimeType = 'application/vnd.google-apps.document';
+          else if (ext === 'gsheet') detectedMimeType = 'application/vnd.google-apps.spreadsheet';
+          else if (ext === 'gslides') detectedMimeType = 'application/vnd.google-apps.presentation';
+        }
+        
+        // Handle Google Docs native MIME types
+        if (detectedMimeType.includes('google-apps')) {
+          console.log('- Google Docs file detected:', detectedMimeType);
         }
         
         // Create a multer-compatible file object
@@ -1159,14 +1323,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           hasBuffer: !!file.buffer
         });
       } else if (contentType.includes('multipart/form-data')) {
-        // Handle multipart form-data (traditional file upload)
+        // Handle multipart form-data (can be single or multiple files)
         const allFiles = req.files as Express.Multer.File[];
-        // Support n8n field naming: attachment_0, attachment_1, etc.
-        file = allFiles?.find(f => 
-          f.fieldname === 'document' || 
-          f.fieldname === 'attachment' ||
-          f.fieldname.startsWith('attachment_')
-        );
         
         console.log('- All files received:', allFiles?.map(f => ({ 
           fieldname: f.fieldname, 
@@ -1177,14 +1335,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })));
         console.log('- Total files count:', allFiles?.length || 0);
         console.log('- All field names:', allFiles?.map(f => f.fieldname) || []);
-        console.log('- Looking for fields matching: document, attachment, attachment_*');
-        console.log('- Selected file:', file ? {
-          fieldname: file.fieldname,
-          originalname: file.originalname,
-          size: file.size,
-          mimetype: file.mimetype,
-          hasBuffer: !!file.buffer
-        } : 'No file received');
+        
+        // Check if multiple files (file1, file2, etc.) are present
+        const multipleFiles = allFiles?.filter(f => 
+          f.fieldname.startsWith('file') || 
+          f.fieldname.startsWith('attachment_')
+        );
+        
+        if (multipleFiles && multipleFiles.length > 1) {
+          console.log('- Multiple files detected, switching to multi-upload mode');
+          // Handle multiple files in one request
+          return await handleMultipleFileUpload(req, res, allFiles, transaction);
+        } else {
+          // Single file upload (existing logic)
+          file = allFiles?.find(f => 
+            f.fieldname === 'document' || 
+            f.fieldname === 'attachment' ||
+            f.fieldname.startsWith('attachment_') ||
+            f.fieldname.startsWith('file')
+          );
+          
+          console.log('- Single file mode, selected file:', file ? {
+            fieldname: file.fieldname,
+            originalname: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype,
+            hasBuffer: !!file.buffer
+          } : 'No file received');
+        }
       } else {
         console.log('- No binary data received or body is not a buffer');
         console.log('- Body content preview:', req.body ? req.body.toString().substring(0, 100) : 'null');

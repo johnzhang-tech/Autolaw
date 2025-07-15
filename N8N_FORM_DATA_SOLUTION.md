@@ -10,7 +10,7 @@
 ## N8N HTTP Request Node Configuration
 
 ### Basic Settings
-- **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-form-data`
+- **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single`
 - **Method**: POST
 - **Send Body**: Form-Data
 
@@ -18,6 +18,8 @@
 ```
 X-API-Key: docuai_demo_key_123
 ```
+
+> **Note**: The existing `/upload-single` endpoint now automatically detects multiple files and switches to multi-upload mode. No need for a separate endpoint!
 
 ### Form-Data Fields (Method 1: Static Configuration)
 Add these fields to your form-data:
@@ -124,6 +126,8 @@ From the server logs, I can confirm that the form-data endpoint is working perfe
 - ✅ Works with any number of files
 - ✅ Proper cleanup on errors
 - ✅ Webhook notifications included
+- ✅ **Google Docs support**: Works with Google Docs, Sheets, Slides
+- ✅ **Multiple file formats**: PDF, DOC, DOCX, TXT, RTF, ODT, XLS, XLSX, PPT, PPTX, images
 
 ## Next Steps
 1. Update your n8n HTTP Request node to use form-data

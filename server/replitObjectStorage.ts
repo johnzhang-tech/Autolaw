@@ -186,13 +186,33 @@ class ReplitObjectStorageService {
    */
   private validateFile(buffer: Buffer, mimeType: string, maxSizeBytes: number = 10 * 1024 * 1024): void {
     const allowedTypes = [
+      // PDF Files
       'application/pdf',
+      // Microsoft Office Documents
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      // Google Workspace Documents
+      'application/vnd.google-apps.document',
+      'application/vnd.google-apps.spreadsheet',
+      'application/vnd.google-apps.presentation',
+      // Text Files
       'text/plain',
+      'application/rtf',
+      // OpenDocument Formats
+      'application/vnd.oasis.opendocument.text',
+      'application/vnd.oasis.opendocument.spreadsheet',
+      'application/vnd.oasis.opendocument.presentation',
+      // Image Files
       'image/jpeg',
       'image/png',
-      'image/gif'
+      'image/gif',
+      'image/webp',
+      // Generic binary for files that may not have proper MIME detection
+      'application/octet-stream'
     ];
 
     if (!allowedTypes.includes(mimeType)) {
