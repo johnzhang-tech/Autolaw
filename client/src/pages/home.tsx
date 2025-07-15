@@ -16,7 +16,9 @@ export default function Home() {
   const { toast } = useToast();
 
   const { data: transactionsData = [] } = useQuery({
-    queryKey: ["/api/transactions"],
+    queryKey: ["/api/transactions", Date.now()], // Add timestamp to force fresh fetch
+    staleTime: 0, // Don't use stale data
+    cacheTime: 0, // Don't cache the response
   });
   const transactions = transactionsData as TransactionResponse[];
 
