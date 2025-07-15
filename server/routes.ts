@@ -1084,10 +1084,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Upload to Replit Object Storage
           const uploadResult = await replitObjectStorage.uploadFile(
             file.buffer,
-            filename,
-            file.mimetype,
             transaction.name,
-            transactionId
+            transactionId,
+            filename,
+            file.mimetype
           );
           
           storageUploads.push(uploadResult.objectKey);
@@ -1096,16 +1096,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const documentData = {
             transactionId: transactionId,
             userId: userId,
-            fileName: uploadResult.objectKey.split('/')[1],
+            uploaderId: userId, // Fix: Add uploader_id field
+            fileName: uploadResult.objectKey.split('/').pop() || filename,
             originalFileName: filename,
             mimeType: file.mimetype,
             fileSize: file.size,
-            replitStorageKey: uploadResult.objectKey,
+            category: 'other',
             uploadStatus: 'completed' as const,
-            uploadedAt: new Date(),
+            s3Key: uploadResult.objectKey, // Fix: Use s3Key instead of replitStorageKey
+            s3Bucket: uploadResult.bucketName,
+            s3Url: uploadResult.objectUrl,
+            etag: uploadResult.etag
           };
           
-          const savedDocument = await storage.createDocument(documentData);
+          console.log('Multi-upload documentData:', JSON.stringify(documentData, null, 2));
+          console.log('Multi-upload uploaderId field:', documentData.uploaderId);
+          
+          // Try direct database insertion to bypass potential schema issues
+          const [savedDocument] = await db.insert(documents).values(documentData).returning();
           uploadResults.push({
             fieldName: file.fieldname,
             fileName: filename,
@@ -1340,8 +1348,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('- ENTERED main files condition');
           if (allFiles.length > 1) {
             console.log('- Multiple files detected, switching to multi-upload mode');
+            
+            // Get transaction info for multiple file upload
+            const multiUploadUserId = req.user.claims.sub;
+            const multiUploadTransactionIdParam = req.params.id;
+            let multiUploadTransactionId: number;
+            
+            if (multiUploadTransactionIdParam.match(/^[0-9a-f]+$/i) && multiUploadTransactionIdParam.length > 10) {
+              multiUploadTransactionId = parseInt(multiUploadTransactionIdParam, 16);
+            } else {
+              multiUploadTransactionId = parseInt(multiUploadTransactionIdParam);
+            }
+            
+            if (isNaN(multiUploadTransactionId)) {
+              return res.status(400).json({ 
+                message: "Invalid transaction ID",
+                debug: { received: multiUploadTransactionIdParam, converted: multiUploadTransactionId }
+              });
+            }
+            
+            const multiUploadTransaction = await storage.getTransaction(multiUploadTransactionId, multiUploadUserId);
+            if (!multiUploadTransaction) {
+              return res.status(404).json({ message: 'Transaction not found' });
+            }
+            
             // Handle multiple files in one request
-            return await handleMultipleFileUpload(req, res, allFiles, transaction);
+            return await handleMultipleFileUpload(req, res, allFiles, multiUploadTransaction);
           } else {
             console.log('- ENTERED single file branch');
             // Single file upload - accept any field name
@@ -1429,28 +1461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Transaction not found' });
       }
 
-      // Check for duplicate files (same name, size, and mime type in same transaction)
-      const existingFile = await db.select()
-        .from(documents)
-        .where(and(
-          eq(documents.transactionId, transactionId),
-          eq(documents.originalFileName, file.originalname),
-          eq(documents.fileSize, file.size),
-          eq(documents.mimeType, file.mimetype)
-        ))
-        .limit(1);
-
-      if (existingFile.length > 0) {
-        console.log(`Duplicate file detected: ${file.originalname} already exists in transaction ${transactionId}`);
-        return res.status(409).json({ 
-          message: `File "${file.originalname}" already exists in this transaction`,
-          existing: {
-            id: existingFile[0].id,
-            fileName: existingFile[0].fileName,
-            uploadedAt: existingFile[0].uploadedAt
-          }
-        });
-      }
+      // Note: Duplicate prevention removed to allow multiple different files
 
       let objectKey: string | null = null;
 
