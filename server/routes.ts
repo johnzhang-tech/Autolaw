@@ -1203,9 +1203,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // N8N-specific endpoint for dynamic attachment uploads with duplicate detection
-  app.post('/api/transactions/:id/upload-n8n', flexAuth, async (req, res) => {
-    console.log('\n=== N8N DYNAMIC UPLOAD ENDPOINT ===');
+  // N8N-specific endpoint for dynamic attachment uploads - accepts JSON with base64 files
+  app.post('/api/transactions/:id/upload-n8n-json', flexAuth, async (req, res) => {
+    console.log('\n=== N8N JSON UPLOAD ENDPOINT ===');
     console.log('Request for transaction:', req.params.id);
     console.log('Content-Type:', req.get('Content-Type'));
     console.log('User:', req.user?.id);
@@ -1224,8 +1224,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = await storage.getTransaction(transactionId, userId);
       console.log('Transaction found:', !!transaction);
       
-      // Transaction access validated above
-      
       if (!transaction) {
         console.log('Transaction not found, returning 404');
         return res.status(404).json({ success: false, error: 'Transaction not found' });
@@ -1238,36 +1236,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ success: false, error: 'Access denied' });
       }
       
-      // Use the proven working multer configuration
-      await new Promise((resolve, reject) => {
-        upload.any()(req, res, (err) => {
-          if (err) {
-            console.log('Multer error:', err);
-            reject(err);
-          } else {
-            console.log('Multer success - files received:', req.files ? req.files.length : 0);
-            resolve(true);
+      // Parse JSON body with attachments
+      const requestBody = req.body;
+      console.log('Request body keys:', Object.keys(requestBody));
+      
+      // Find all attachment fields dynamically
+      const attachmentFiles = [];
+      for (const key in requestBody) {
+        if (key.startsWith('attachment_') && requestBody[key]) {
+          const attachment = requestBody[key];
+          console.log(`Found attachment: ${key}`, {
+            filename: attachment.filename || key,
+            hasData: !!attachment.data,
+            mimeType: attachment.mimeType || 'application/octet-stream'
+          });
+          
+          if (attachment.data) {
+            // Convert base64 to buffer
+            const buffer = Buffer.from(attachment.data, 'base64');
+            attachmentFiles.push({
+              fieldname: key,
+              originalname: attachment.filename || key,
+              buffer: buffer,
+              size: buffer.length,
+              mimetype: attachment.mimeType || 'application/octet-stream'
+            });
           }
-        });
-      });
+        }
+      }
       
-      const allFiles = req.files as Express.Multer.File[];
+      console.log(`Found ${attachmentFiles.length} attachments in JSON`);
       
-      console.log('N8N Files received:', allFiles ? allFiles.length : 0);
-      console.log('Field names:', allFiles ? allFiles.map(f => f.fieldname) : []);
-      console.log('Filenames:', allFiles ? allFiles.map(f => f.originalname) : []);
-      
-      if (!allFiles || allFiles.length === 0) {
+      if (attachmentFiles.length === 0) {
         return res.status(400).json({ 
           success: false, 
-          error: 'No files received from n8n workflow' 
+          error: 'No attachments found in JSON body' 
         });
       }
       
       // Log all received files for debugging N8N issues
-      console.log('=== ALL FILES RECEIVED FROM N8N ===');
-      for (let i = 0; i < allFiles.length; i++) {
-        const file = allFiles[i];
+      console.log('=== ALL FILES RECEIVED FROM N8N JSON ===');
+      for (let i = 0; i < attachmentFiles.length; i++) {
+        const file = attachmentFiles[i];
         console.log(`File ${i + 1}:`);
         console.log(`  Field name: ${file.fieldname}`);
         console.log(`  Original name: ${file.originalname}`);
@@ -1278,8 +1288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('');
       }
       
-      const uniqueFiles = allFiles; // Process all files - no duplicate detection
-      console.log(`Processing ${uniqueFiles.length} files from N8N`);
+      const uniqueFiles = attachmentFiles; // Process all files - no duplicate detection
+      console.log(`Processing ${uniqueFiles.length} files from N8N JSON`);
       
       // Process files and return clean JSON response
       const uploadResults = [];
@@ -1364,7 +1374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `${uploadResults.length} unique files uploaded successfully`,
         uploaded: uploadResults,
         failed: failedUploads,
-        duplicatesRemoved: allFiles.length - uniqueFiles.length,
+        duplicatesRemoved: 0, // No duplicate detection for JSON endpoint
         transactionId: transaction.id
       });
       
