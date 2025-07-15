@@ -1238,7 +1238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Parse JSON body with attachments
       const requestBody = req.body;
+      console.log('Request body type:', typeof requestBody);
       console.log('Request body keys:', Object.keys(requestBody));
+      console.log('Full request body:', JSON.stringify(requestBody, null, 2));
       
       // Find all attachment fields dynamically
       const attachmentFiles = [];
@@ -1248,6 +1250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Found attachment: ${key}`, {
             filename: attachment.filename || key,
             hasData: !!attachment.data,
+            dataType: typeof attachment.data,
+            dataLength: attachment.data ? attachment.data.length : 0,
             mimeType: attachment.mimeType || 'application/octet-stream'
           });
           
@@ -1263,6 +1267,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
         }
+      }
+      
+      // Also check if the entire body is an attachment object
+      if (attachmentFiles.length === 0 && requestBody.filename && requestBody.data) {
+        console.log('Found single attachment in root object');
+        const buffer = Buffer.from(requestBody.data, 'base64');
+        attachmentFiles.push({
+          fieldname: 'attachment',
+          originalname: requestBody.filename,
+          buffer: buffer,
+          size: buffer.length,
+          mimetype: requestBody.mimeType || 'application/octet-stream'
+        });
       }
       
       console.log(`Found ${attachmentFiles.length} attachments in JSON`);
