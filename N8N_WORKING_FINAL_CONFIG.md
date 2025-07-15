@@ -1,154 +1,119 @@
-# N8N Working Configuration - Final Solution
+# N8N Working Final Configuration
 
-## 🎯 DYNAMIC ATTACHMENT SOLUTION
+## Problem Identified
+Your N8N code node is trying to access `input.binary` but your data structure shows `attachment_0` and `attachment_1` in the JSON format, not binary format.
 
-### NEW: N8N Dynamic Upload Endpoint
+## Corrected Code Node
 
-**Perfect for Dynamic Attachments - Use This URL:**
-```
-Method: POST
-URL: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-n8n
-```
+Replace your current code node with this corrected version:
 
-**Key Features:**
-- ✅ Accepts ANY number of files with ANY field names
-- ✅ Automatically removes duplicate files (same content)
-- ✅ Perfect for dynamic n8n workflows
-- ✅ No need to configure fixed parameters
+```javascript
+// Get the input data from the previous node
+const input = $input.all()[0].json;
+const payload = {};
 
-### HTTP Request Node Configuration
+console.log('Input keys:', Object.keys(input));
 
-**1. Method & URL:**
-```
-Method: POST
-URL: https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{transaction_id}/upload-n8n
-```
-
-**2. Authentication:**
-```
-Header Name: X-API-Key
-Header Value: docuai_demo_key_123
-```
-
-**3. Body Parameters (Form-Data) - DYNAMIC SOLUTION:**
-
-**For Dynamic Attachments (ANY number of files):**
-```
-For each attachment in your dynamic list:
-  Parameter Type: nBn Binary File
-  Name: {{ $json.attachments.filename }} (or any dynamic expression)
-  Input Data Field Name: {{ $item.attachment_field_name }}
-```
-
-**Simple Example:**
-```
-Parameter 1:
-  Type: nBn Binary File
-  Name: file1
-  Input Data Field Name: attachment_0
-
-Parameter 2:
-  Type: nBn Binary File
-  Name: file2
-  Input Data Field Name: attachment_1
-
-Parameter 3:
-  Type: nBn Binary File
-  Name: file3
-  Input Data Field Name: attachment_2
-
-(Continue for as many files as needed)
-```
-
-**The NEW endpoint automatically:**
-- ✅ Accepts files with ANY field names
-- ✅ Detects and removes duplicate files
-- ✅ Handles dynamic number of attachments
-- ✅ Works with your existing n8n setup
-
-## ⚠️ Common Issues & Solutions
-
-### Issue 1: Field Name Empty/Undefined
-**Problem:** `{{ $json.attachments.filename }}` resolves to empty
-**Solution:** Use static field names like `attachment_0`, `file1`, etc.
-
-### Issue 2: "MISSING_FIELD_NAME" Error
-**Problem:** n8n sends empty field names
-**Solution:** Always provide a static name in the "Name" field
-
-### Issue 3: File Not Found
-**Problem:** Input Data Field Name points to non-existent data
-**Solution:** Use the exact field name from your previous node output
-
-## 📋 Step-by-Step Setup
-
-1. **Add HTTP Request Node**
-2. **Set Method to POST**
-3. **Enter the full API URL with transaction ID**
-4. **Add Authentication Header:**
-   - Name: `X-API-Key`
-   - Value: `docuai_demo_key_123`
-5. **Add Body Parameters:**
-   - Click "Add Parameter"
-   - Select "nBn Binary File"
-   - Name: `attachment_0` (or any static name)
-   - Input Data Field Name: `attachment_0` (from your file input)
-
-## 🎯 Working Examples
-
-**Single File Upload:**
-```json
-{
-  "method": "POST",
-  "url": "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/54/upload-single",
-  "headers": {
-    "X-API-Key": "docuai_demo_key_123"
-  },
-  "body": {
-    "attachment_0": "[binary file data]"
+// Process each attachment from the input
+Object.keys(input).forEach(key => {
+  if (key.startsWith('attachment_')) {
+    const attachment = input[key];
+    console.log(`Processing ${key}:`, {
+      hasData: !!attachment.data,
+      fileName: attachment.fileName,
+      fileSize: attachment.fileSize
+    });
+    
+    // N8N binary data is already base64 encoded
+    payload[key] = {
+      filename: attachment.fileName || key,
+      data: attachment.data,
+      mimeType: attachment.mimeType || 'application/pdf'
+    };
   }
-}
+});
+
+console.log('Payload created with keys:', Object.keys(payload));
+return [payload];
 ```
 
-**Multiple Files:**
-```json
-{
-  "method": "POST", 
-  "url": "https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/54/upload-single",
-  "headers": {
-    "X-API-Key": "docuai_demo_key_123"
-  },
-  "body": {
-    "file1": "[binary file data 1]",
-    "file2": "[binary file data 2]",
-    "file3": "[binary file data 3]"
+## Alternative: Direct Binary Access
+
+If the above doesn't work, try this version that accesses binary data directly:
+
+```javascript
+// Access binary data from the input
+const payload = {};
+
+// Get all binary data from the input
+const binaryData = $input.all()[0].binary || {};
+
+console.log('Binary keys:', Object.keys(binaryData));
+
+// Process each binary attachment
+Object.keys(binaryData).forEach(key => {
+  if (key.startsWith('attachment_')) {
+    const binary = binaryData[key];
+    
+    payload[key] = {
+      filename: binary.fileName || key,
+      data: binary.data,
+      mimeType: binary.mimeType || 'application/pdf'
+    };
   }
+});
+
+// If no binary data found, try JSON data
+if (Object.keys(payload).length === 0) {
+  const jsonData = $input.all()[0].json;
+  Object.keys(jsonData).forEach(key => {
+    if (key.startsWith('attachment_')) {
+      payload[key] = {
+        filename: jsonData[key].fileName || key,
+        data: jsonData[key].data,
+        mimeType: jsonData[key].mimeType || 'application/pdf'
+      };
+    }
+  });
 }
+
+console.log('Final payload keys:', Object.keys(payload));
+return [payload];
 ```
 
-## ✅ Expected Success Response
+## HTTP Request Configuration
 
+Make sure your HTTP Request node has:
+
+1. **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/81/upload-n8n-json`
+2. **Method**: POST
+3. **Headers**: 
+   - `X-API-Key`: `docuai_demo_key_123`
+   - `Content-Type`: `application/json`
+4. **Body Content Type**: JSON
+5. **Body**: `{{ $json }}`
+
+## Debug Steps
+
+1. Add a debug node after your Code node to see what's being produced
+2. Check the console output for any error messages
+3. Verify the payload structure matches what the endpoint expects
+
+## Expected Success Response
+
+You should see:
 ```json
 {
   "success": true,
-  "message": "6 files uploaded successfully",
+  "message": "X unique files uploaded successfully",
   "uploaded": [
     {
-      "fieldName": "file1",
-      "fileName": "HOA-Declaration.pdf",
-      "documentId": 297
+      "fieldName": "attachment_0",
+      "fileName": "Jan Meeting Minutes Revised.pdf",
+      "documentId": 123
     }
-  ],
-  "failed": [],
-  "transactionId": 52
+  ]
 }
 ```
 
-## 🔧 Troubleshooting
-
-1. **Always use static field names** - don't use expressions for the "Name" field
-2. **Check your Input Data Field Name** - make sure it matches your previous node output
-3. **Verify transaction ID exists** - use a valid transaction ID in the URL
-4. **Test with single file first** - then expand to multiple files
-
-The system now accepts ANY field names, so focus on getting the basic configuration right!
+Try the first corrected code node and let me know what happens!
