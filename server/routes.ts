@@ -1230,21 +1230,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // Use fields() to accept any field names at all
-      ultraPermissiveUpload.fields([
-        { name: 'file1', maxCount: 1 },
-        { name: 'file2', maxCount: 1 },
-        { name: 'file3', maxCount: 1 },
-        { name: 'file4', maxCount: 1 },
-        { name: 'file5', maxCount: 1 },
-        { name: 'file6', maxCount: 1 },
-        { name: 'attachment_0', maxCount: 1 },
-        { name: 'attachment_1', maxCount: 1 },
-        { name: 'attachment_2', maxCount: 1 },
-        { name: 'attachment_3', maxCount: 1 },
-        { name: 'attachment_4', maxCount: 1 },
-        { name: 'attachment_5', maxCount: 1 }
-      ])(req, res, (err) => {
+      // Use any() to accept ANY field names from n8n
+      ultraPermissiveUpload.any()(req, res, (err) => {
         if (err) {
           console.error('- Ultra-permissive multer error:', err);
           // Even if multer fails, try to continue
@@ -1385,21 +1372,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else if (contentType.includes('multipart/form-data')) {
         // Handle multipart form-data (can be single or multiple files)
-        // multer.fields() returns an object, not an array, so we need to flatten it
-        const filesObject = req.files as { [fieldname: string]: Express.Multer.File[] };
-        const allFiles: Express.Multer.File[] = [];
+        // multer.any() returns an array directly
+        const allFiles = req.files as Express.Multer.File[];
         
-        console.log('- Files object from multer.fields():', typeof filesObject, Object.keys(filesObject || {}));
-        
-        // Flatten the files object into an array
-        if (filesObject && typeof filesObject === 'object') {
-          for (const fieldname in filesObject) {
-            const fileArray = filesObject[fieldname];
-            if (Array.isArray(fileArray)) {
-              allFiles.push(...fileArray);
-            }
-          }
-        }
+        console.log('- Files from multer.any():', typeof req.files, Array.isArray(req.files));
+        console.log('- Direct files array length:', allFiles?.length || 0);
         
         console.log('- All files received:', allFiles?.map(f => ({ 
           fieldname: f.fieldname, 
