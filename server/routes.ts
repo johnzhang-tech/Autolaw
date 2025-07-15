@@ -1264,46 +1264,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check for existing files in database to prevent cross-request duplicates
-      const existingDocs = await storage.getDocuments(transaction.id, userId);
-      const existingHashes = new Set();
-      
-      // Build set of existing file signatures for duplicate detection
-      for (const doc of existingDocs) {
-        const signature = `${doc.originalFileName}_${doc.fileSize}`;
-        const hash = crypto.createHash('md5').update(signature).digest('hex');
-        existingHashes.add(hash);
+      // Log all received files for debugging N8N issues
+      console.log('=== ALL FILES RECEIVED FROM N8N ===');
+      for (let i = 0; i < allFiles.length; i++) {
+        const file = allFiles[i];
+        console.log(`File ${i + 1}:`);
+        console.log(`  Field name: ${file.fieldname}`);
+        console.log(`  Original name: ${file.originalname}`);
+        console.log(`  Size: ${file.size} bytes`);
+        console.log(`  Buffer length: ${file.buffer.length}`);
+        console.log(`  MIME type: ${file.mimetype}`);
+        console.log(`  Content preview: ${file.buffer.toString('utf8', 0, Math.min(50, file.buffer.length))}...`);
+        console.log('');
       }
       
-      // Remove duplicate files based on content hash and database check
-      const uniqueFiles = [];
-      const seenHashes = new Set();
-      
-      for (const file of allFiles) {
-        const contentHash = crypto.createHash('md5').update(file.buffer).digest('hex');
-        const fileSignature = `${file.originalname}_${file.size}`;
-        const signatureHash = crypto.createHash('md5').update(fileSignature).digest('hex');
-        
-        // Check if file already exists in database
-        if (existingHashes.has(signatureHash)) {
-          continue; // Skip files that already exist in database
-        }
-        
-        // Check if file is duplicate in current request
-        if (!seenHashes.has(contentHash)) {
-          seenHashes.add(contentHash);
-          uniqueFiles.push(file);
-        }
-      }
-      
-      if (uniqueFiles.length === 0) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'All files are duplicates - check n8n workflow configuration' 
-        });
-      }
-      
-      console.log(`Processing ${uniqueFiles.length} unique files (${allFiles.length - uniqueFiles.length} duplicates removed)`);
+      const uniqueFiles = allFiles; // Process all files - no duplicate detection
+      console.log(`Processing ${uniqueFiles.length} files from N8N`);
       
       // Process files and return clean JSON response
       const uploadResults = [];
