@@ -1384,9 +1384,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             originalname: f.originalname, 
             size: f.size,
             mimetype: f.mimetype,
-            hasBuffer: !!f.buffer
+            hasBuffer: !!f.buffer,
+            bufferHash: f.buffer ? require('crypto').createHash('md5').update(f.buffer).digest('hex').substring(0, 8) : 'no-buffer'
           })));
           console.log('- All field names:', allFiles.map(f => f.fieldname));
+          console.log('- File content hashes:', allFiles.map(f => f.buffer ? require('crypto').createHash('md5').update(f.buffer).digest('hex').substring(0, 8) : 'no-buffer'));
         } else {
           console.log('- req.files is not an array:', req.files);
         }
