@@ -3014,8 +3014,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailData = req.body || {};
         console.log('JSON payload keys:', Object.keys(emailData));
         
-        // Extract attachments from JSON payload - look for various attachment patterns
-        const attachmentKeys = Object.keys(emailData).filter(key => 
+        // Extract attachments from JSON payload - handle multiple formats
+        let attachmentKeys = Object.keys(emailData).filter(key => 
           key.startsWith('attachment_') || 
           key === 'document' || 
           key === 'attachment' ||
@@ -3025,29 +3025,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('Found attachment keys:', attachmentKeys);
         
-        attachments = attachmentKeys.map(key => {
-          const attachment = emailData[key];
-          console.log(`Processing attachment key '${key}':`, JSON.stringify(attachment, null, 2));
+        // If no attachment keys found, check if this is a Gmail API response
+        if (attachmentKeys.length === 0 && emailData.headers && emailData.subject) {
+          console.log('Detected Gmail API response format, checking for attachment data in other fields...');
           
-          // Handle different N8N formats
-          if (attachment && typeof attachment === 'object') {
-            // If it's an object with filename, try to extract the data
-            if (attachment.filename) {
-              return {
-                filename: attachment.filename,
-                data: attachment.data || attachment.content || attachment.buffer,
-                mimeType: attachment.mimeType || attachment.contentType || 'application/octet-stream'
-              };
+          // Check for attachment data in various Gmail API response fields
+          const possibleAttachmentFields = ['parts', 'payload', 'body', 'data', 'attachmentData', 'files'];
+          
+          for (const field of possibleAttachmentFields) {
+            if (emailData[field]) {
+              console.log(`Found potential attachment data in field '${field}':`, typeof emailData[field]);
+              
+              // Handle array of parts (Gmail API structure)
+              if (Array.isArray(emailData[field])) {
+                const attachmentParts = emailData[field].filter(part => 
+                  part.filename && part.data
+                );
+                
+                if (attachmentParts.length > 0) {
+                  console.log(`Found ${attachmentParts.length} attachment parts in ${field}`);
+                  attachments = attachmentParts.map(part => ({
+                    filename: part.filename,
+                    data: part.data,
+                    mimeType: part.mimeType || part.contentType || 'application/octet-stream'
+                  }));
+                  break;
+                }
+              }
+              
+              // Handle single attachment object
+              if (typeof emailData[field] === 'object' && emailData[field].filename) {
+                console.log(`Found single attachment in ${field}:`, emailData[field].filename);
+                attachments = [{
+                  filename: emailData[field].filename,
+                  data: emailData[field].data || emailData[field].content,
+                  mimeType: emailData[field].mimeType || emailData[field].contentType || 'application/octet-stream'
+                }];
+                break;
+              }
             }
           }
           
-          // Fallback for simple formats
-          return {
-            filename: attachment.filename || `${key}.bin`,
-            data: attachment.data || attachment,
-            mimeType: attachment.mimeType || 'application/octet-stream'
-          };
-        }).filter(att => att.data); // Only keep attachments with actual data
+          // If still no attachments found, provide helpful error message
+          if (attachments.length === 0) {
+            console.log('No attachment data found in Gmail API response');
+            console.log('Available fields:', Object.keys(emailData));
+            console.log('Suggestion: Ensure N8N workflow extracts attachment data from Gmail API response');
+            
+            return res.status(400).json({
+              success: false,
+              error: 'No attachment data found in Gmail API response',
+              suggestion: 'Please ensure your N8N workflow extracts attachment data from the Gmail API response before sending to webhook',
+              availableFields: Object.keys(emailData),
+              expectedFormat: {
+                'attachment_0': {
+                  filename: 'document.pdf',
+                  data: 'base64-encoded-content',
+                  mimeType: 'application/pdf'
+                }
+              }
+            });
+          }
+        } else {
+          // Process regular attachment format
+          attachments = attachmentKeys.map(key => {
+            const attachment = emailData[key];
+            console.log(`Processing attachment key '${key}':`, JSON.stringify(attachment, null, 2));
+            
+            // Handle different N8N formats
+            if (attachment && typeof attachment === 'object') {
+              // If it's an object with filename, try to extract the data
+              if (attachment.filename) {
+                return {
+                  filename: attachment.filename,
+                  data: attachment.data || attachment.content || attachment.buffer,
+                  mimeType: attachment.mimeType || attachment.contentType || 'application/octet-stream'
+                };
+              }
+            }
+            
+            // Fallback for simple formats
+            return {
+              filename: attachment.filename || `${key}.bin`,
+              data: attachment.data || attachment,
+              mimeType: attachment.mimeType || 'application/octet-stream'
+            };
+          }).filter(att => att.data); // Only keep attachments with actual data
+        }
         
         console.log('Processed JSON attachments:', attachments.map(a => ({ 
           filename: a.filename, 
@@ -3055,6 +3119,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           hasData: !!a.data,
           dataType: typeof a.data
         })));
+        
+        console.log('Final attachment count:', attachments.length);
       }
       
       // Extract transaction name from email subject
@@ -3079,6 +3145,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Found ${attachments.length} attachments`);
       
       if (attachments.length === 0) {
+        // Check if this looks like a Gmail API response and provide helpful guidance
+        const hasHeaders = !!emailData.headers;
+        const hasThreadId = !!emailData.threadId;
+        const hasMessageId = !!emailData.messageId;
+        const hasSubject = !!emailData.subject;
+        const hasId = !!emailData.id;
+        
+        console.log('Gmail API detection:', { hasHeaders, hasThreadId, hasMessageId, hasSubject, hasId });
+        
+        if ((hasHeaders || hasThreadId || hasMessageId) && hasSubject && hasId) {
+          return res.status(400).json({
+            success: false,
+            error: 'No attachment data found in Gmail API response',
+            suggestion: 'Please ensure your N8N workflow extracts attachment data from the Gmail API response before sending to webhook',
+            availableFields: Object.keys(emailData),
+            expectedFormat: {
+              'attachment_0': {
+                filename: 'document.pdf',
+                data: 'base64-encoded-content',
+                mimeType: 'application/pdf'
+              }
+            },
+            instructions: [
+              '1. Add an "Extract Attachment Data" step in your N8N workflow',
+              '2. Use Gmail API to get attachment data for each attachment',
+              '3. Format the data as shown in expectedFormat above',
+              '4. Send the formatted data to this webhook endpoint'
+            ]
+          });
+        }
+        
         return res.status(400).json({
           success: false,
           error: 'No attachments found in email data'
