@@ -3012,17 +3012,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Handle JSON payload
         emailData = req.body || {};
+        console.log('JSON payload keys:', Object.keys(emailData));
         
-        // Extract attachments from JSON payload
-        const attachmentKeys = Object.keys(emailData).filter(key => key.startsWith('attachment_') || key === 'document' || key === 'attachment');
+        // Extract attachments from JSON payload - look for various attachment patterns
+        const attachmentKeys = Object.keys(emailData).filter(key => 
+          key.startsWith('attachment_') || 
+          key === 'document' || 
+          key === 'attachment' ||
+          key === 'attachments' ||
+          (typeof emailData[key] === 'object' && emailData[key] && emailData[key].filename)
+        );
+        
+        console.log('Found attachment keys:', attachmentKeys);
+        
         attachments = attachmentKeys.map(key => {
           const attachment = emailData[key];
+          console.log(`Processing attachment key '${key}':`, JSON.stringify(attachment, null, 2));
+          
+          // Handle different N8N formats
+          if (attachment && typeof attachment === 'object') {
+            // If it's an object with filename, try to extract the data
+            if (attachment.filename) {
+              return {
+                filename: attachment.filename,
+                data: attachment.data || attachment.content || attachment.buffer,
+                mimeType: attachment.mimeType || attachment.contentType || 'application/octet-stream'
+              };
+            }
+          }
+          
+          // Fallback for simple formats
           return {
             filename: attachment.filename || `${key}.bin`,
-            data: attachment.data,
+            data: attachment.data || attachment,
             mimeType: attachment.mimeType || 'application/octet-stream'
           };
-        });
+        }).filter(att => att.data); // Only keep attachments with actual data
+        
+        console.log('Processed JSON attachments:', attachments.map(a => ({ 
+          filename: a.filename, 
+          mimeType: a.mimeType, 
+          hasData: !!a.data,
+          dataType: typeof a.data
+        })));
       }
       
       // Extract transaction name from email subject
@@ -3098,11 +3130,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
           
-          if (buffer.length < 100) {
-            console.log(`Skipping ${attachment.filename} - too small (${buffer.length} bytes)`);
+          if (buffer.length === 0) {
+            console.log(`Skipping ${attachment.filename} - empty file`);
             failedUploads.push({
               filename: attachment.filename,
-              error: `File too small (${buffer.length} bytes) - likely corrupt`
+              error: 'File is empty'
             });
             continue;
           }
@@ -3120,6 +3152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Upload to Replit Object Storage
+          console.log(`Uploading ${attachment.filename} (${buffer.length} bytes, ${attachment.mimeType})`);
           const uploadResult = await replitObjectStorage.uploadFile(
             buffer,
             transaction.name,
@@ -3130,18 +3163,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Save to database
           const documentData = {
-            transaction_id: transaction.id,
-            filename: attachment.filename,
-            file_size: buffer.length,
-            mime_type: attachment.mimeType,
-            upload_status: 'completed' as const,
-            uploader_id: userId,
-            replit_object_key: uploadResult.objectKey,
-            replit_bucket_name: uploadResult.bucketName,
-            replit_object_url: uploadResult.objectUrl,
-            replit_etag: uploadResult.etag
+            transactionId: transaction.id,
+            userId: userId,
+            fileName: `${Date.now()}_${attachment.filename}`,
+            originalFileName: attachment.filename,
+            fileSize: buffer.length,
+            mimeType: attachment.mimeType,
+            uploadStatus: 'completed' as const,
+            uploaderId: userId,
+            s3Key: uploadResult.objectKey,
+            s3Bucket: uploadResult.bucketName,
+            s3Url: uploadResult.objectUrl,
+            etag: uploadResult.etag
           };
           
+
           const document = await storage.createDocument(documentData);
           
           uploadResults.push({
