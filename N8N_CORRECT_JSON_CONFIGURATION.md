@@ -22,15 +22,36 @@ Insert a **Code Node** between your file input and HTTP Request node with this J
 // Convert binary attachments to the required JSON format
 const files = [];
 
+// Helper function to get extension from MIME type
+function getExtensionFromMimeType(mimeType) {
+  const mimeMap = {
+    'application/pdf': '.pdf',
+    'application/msword': '.doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+    'text/plain': '.txt',
+    'image/jpeg': '.jpg',
+    'image/png': '.png'
+  };
+  return mimeMap[mimeType] || '.bin';
+}
+
 // Process all input items
 for (const item of $input.all()) {
   // Check if item has binary data
   if (item.binary) {
     // Process each binary attachment
     for (const [key, binaryData] of Object.entries(item.binary)) {
+      let filename = binaryData.fileName;
+      
+      // If no original filename, create one with proper extension
+      if (!filename) {
+        const ext = getExtensionFromMimeType(binaryData.mimeType);
+        filename = `attachment_${key}${ext}`;
+      }
+      
       files.push({
-        filename: binaryData.fileName || `attachment_${key}.txt`,
-        mimeType: binaryData.mimeType || 'text/plain',
+        filename: filename,
+        mimeType: binaryData.mimeType || 'application/octet-stream',
         data: binaryData.data // This is already base64 in N8N
       });
     }
