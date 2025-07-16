@@ -1,117 +1,101 @@
-# N8N Fixed Code Node for Binary Data
+# N8N Fixed Code Node - Alternative Approach
 
-## Problem
-Your N8N code node might not be properly converting binary data to base64 format.
-
-## Solution: Updated Code Node
-
-Replace your current code node with this corrected version:
+The issue is that `this.helpers.getBinaryData()` might not be working as expected. Let's try a different approach that uses N8N's built-in binary data handling:
 
 ```javascript
-// Get the input data
-const input = $input.all()[0].json;
-const payload = {};
+// DocuAI File Upload - Fixed Code for N8N Binary Data
+const files = [];
 
-// Find all attachment fields and convert binary data properly
-Object.keys(input).forEach(key => {
-  if (key.startsWith('attachment_') && input[key]) {
-    const attachment = input[key];
+console.log('=== PROCESSING FILES FOR DOCUAI ===');
+
+// Process all input items
+for (const item of $input.all()) {
+  console.log('Processing item...');
+  
+  // Check if item has binary data
+  if (item.binary) {
+    console.log(`Found ${Object.keys(item.binary).length} binary files`);
     
-    // Handle different data formats from N8N
-    let base64Data = null;
-    
-    if (attachment.data) {
-      // If data is already base64 string
-      base64Data = attachment.data;
-    } else if (attachment.buffer) {
-      // If data is in buffer format
-      base64Data = Buffer.from(attachment.buffer).toString('base64');
-    } else if (attachment.binary) {
-      // If data is in binary format
-      base64Data = attachment.binary;
-    } else {
-      // Try to access the binary data directly
-      const binaryData = $binary[key];
-      if (binaryData) {
-        base64Data = binaryData.toString('base64');
+    // Process each binary attachment
+    for (const [key, binaryData] of Object.entries(item.binary)) {
+      try {
+        console.log(`Processing file: ${binaryData.fileName}`);
+        console.log(`Binary ID: ${binaryData.id}`);
+        
+        // Try different methods to get binary data
+        let base64Data;
+        
+        // Method 1: Try getBinaryData with the full ID
+        try {
+          console.log('Trying getBinaryData method...');
+          const binaryBuffer = await this.helpers.getBinaryData(binaryData.id);
+          base64Data = binaryBuffer.toString('base64');
+          console.log(`✓ getBinaryData success: ${Math.round(base64Data.length/1024)}KB`);
+        } catch (error1) {
+          console.log(`getBinaryData failed: ${error1.message}`);
+          
+          // Method 2: Try with just the UUID part
+          try {
+            console.log('Trying with UUID only...');
+            const uuid = binaryData.id.split('/').pop();
+            const binaryBuffer = await this.helpers.getBinaryData(uuid);
+            base64Data = binaryBuffer.toString('base64');
+            console.log(`✓ UUID method success: ${Math.round(base64Data.length/1024)}KB`);
+          } catch (error2) {
+            console.log(`UUID method failed: ${error2.message}`);
+            
+            // Method 3: Try reading from input binary directly
+            try {
+              console.log('Trying direct binary access...');
+              const inputBinary = $input.item(0).binary[key];
+              const binaryBuffer = await this.helpers.getBinaryData(inputBinary.id);
+              base64Data = binaryBuffer.toString('base64');
+              console.log(`✓ Direct access success: ${Math.round(base64Data.length/1024)}KB`);
+            } catch (error3) {
+              console.log(`Direct access failed: ${error3.message}`);
+              console.log('All methods failed, skipping this file');
+              continue;
+            }
+          }
+        }
+        
+        if (base64Data) {
+          const fileInfo = {
+            filename: binaryData.fileName,
+            mimeType: binaryData.mimeType,
+            data: base64Data
+          };
+          
+          files.push(fileInfo);
+          console.log(`✓ Added: ${binaryData.fileName} (${Math.round(base64Data.length/1024)}KB base64)`);
+        }
+        
+      } catch (error) {
+        console.error(`✗ Error processing ${binaryData.fileName}:`, error.message);
+        console.error('Full error:', error);
       }
     }
-    
-    if (base64Data) {
-      payload[key] = {
-        filename: attachment.filename || attachment.fileName || key,
-        data: base64Data,
-        mimeType: attachment.mimeType || attachment.type || 'application/pdf'
-      };
-    }
-  }
-});
-
-// Debug output
-console.log('Payload keys:', Object.keys(payload));
-console.log('First attachment:', payload.attachment_0 ? {
-  filename: payload.attachment_0.filename,
-  hasData: !!payload.attachment_0.data,
-  dataLength: payload.attachment_0.data ? payload.attachment_0.data.length : 0
-} : 'Not found');
-
-return [payload];
-```
-
-## Alternative: Simpler Binary Access
-
-If the above doesn't work, try this simpler approach:
-
-```javascript
-const input = $input.all()[0];
-const payload = {};
-
-// Access binary data directly
-for (const key in input.binary) {
-  if (key.startsWith('attachment_')) {
-    const binaryData = input.binary[key];
-    payload[key] = {
-      filename: binaryData.fileName || key,
-      data: binaryData.data,
-      mimeType: binaryData.mimeType || 'application/pdf'
-    };
+  } else {
+    console.log('No binary data found in item');
   }
 }
 
-return [payload];
+console.log(`=== TOTAL FILES PROCESSED: ${files.length} ===`);
+
+// Return the properly formatted data for DocuAI API
+return [{ 
+  json: { 
+    files: files 
+  } 
+}];
 ```
 
-## Test Your Code Node
+This code tries three different methods to access the binary data:
 
-Before sending to the HTTP Request, add a debug step to verify the payload structure:
+1. **Full ID method**: Uses the complete filesystem ID
+2. **UUID method**: Extracts just the UUID portion
+3. **Direct access**: Accesses binary data directly from input
 
-1. Add a "Set" node after your Code node
-2. Set a value called `debug` to `{{ JSON.stringify($json, null, 2) }}`
-3. Check the output to ensure it matches the expected format
+The extensive logging will show us exactly what's happening and which method works with your N8N setup.
 
-## Expected Output Format
-
-Your code node should produce:
-```json
-{
-  "attachment_0": {
-    "filename": "Jan Meeting Minutes Revised.pdf",
-    "data": "base64encodedcontent...",
-    "mimeType": "application/pdf"
-  },
-  "attachment_1": {
-    "filename": "HOA Assessment Policy.pdf",
-    "data": "base64encodedcontent...",
-    "mimeType": "application/pdf"
-  }
-}
-```
-
-## Key Points
-
-- `data` field must be base64 encoded string
-- `filename` should be the original filename
-- `mimeType` should be the correct MIME type
-- Each attachment must have its own key (`attachment_0`, `attachment_1`, etc.)
-
-Try the updated code node and let me know what the debug output shows.
+Try this code and share the console output - it will tell us exactly why the binary data isn't being accessed correctly.
