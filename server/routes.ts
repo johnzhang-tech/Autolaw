@@ -2947,6 +2947,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple webhook endpoint for N8N that extracts transaction ID from email subject
+  app.post('/api/webhook/upload-attachments', flexAuth, async (req, res) => {
+    console.log('=== WEBHOOK UPLOAD ATTACHMENTS ===');
+    
+    try {
+      const userId = req.user.id;
+      const emailData = req.body;
+      
+      // Extract transaction name from email subject
+      const subject = emailData.subject || '';
+      console.log('Email subject:', subject);
+      
+      // Find transaction by name (case-insensitive)
+      const transactions = await storage.getTransactionsByUser(userId);
+      const transaction = transactions.find(t => 
+        t.name.toLowerCase() === subject.toLowerCase()
+      );
+      
+      if (!transaction) {
+        return res.status(404).json({ 
+          success: false, 
+          error: `Transaction not found for subject: ${subject}`,
+          availableTransactions: transactions.map(t => t.name)
+        });
+      }
+      
+      console.log('Found transaction:', transaction.name, 'ID:', transaction.id);
+      
+      // Extract all attachments from email data
+      const attachments = [];
+      Object.keys(emailData).forEach(key => {
+        if (key.startsWith('attachment_')) {
+          const attachment = emailData[key];
+          if (attachment && attachment.filename) {
+            attachments.push({
+              fieldName: key,
+              filename: attachment.filename,
+              data: attachment.data, // This will be base64 or filesystem-v2
+              mimeType: attachment.mimeType || 'application/pdf'
+            });
+          }
+        }
+      });
+      
+      console.log(`Found ${attachments.length} attachments`);
+      
+      if (attachments.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'No attachments found in email data'
+        });
+      }
+      
+      // Process each attachment
+      const uploadResults = [];
+      const failedUploads = [];
+      
+      for (const attachment of attachments) {
+        try {
+          console.log(`Processing attachment: ${attachment.filename}`);
+          
+          // Skip if data is filesystem-v2 (N8N binary data issue)
+          if (attachment.data === 'filesystem-v2') {
+            console.log(`Skipping ${attachment.filename} - filesystem-v2 data`);
+            failedUploads.push({
+              filename: attachment.filename,
+              error: 'N8N binary data issue - use multipart/form-data instead'
+            });
+            continue;
+          }
+          
+          // Convert base64 to buffer
+          let buffer;
+          try {
+            buffer = Buffer.from(attachment.data, 'base64');
+          } catch (error) {
+            console.error(`Failed to decode base64 for ${attachment.filename}:`, error);
+            failedUploads.push({
+              filename: attachment.filename,
+              error: 'Invalid base64 data'
+            });
+            continue;
+          }
+          
+          if (buffer.length < 100) {
+            console.log(`Skipping ${attachment.filename} - too small (${buffer.length} bytes)`);
+            failedUploads.push({
+              filename: attachment.filename,
+              error: `File too small (${buffer.length} bytes) - likely corrupt`
+            });
+            continue;
+          }
+          
+          // Check for duplicates
+          const existingDocs = await storage.getDocumentsByTransaction(transaction.id);
+          const isDuplicate = existingDocs.some(doc => 
+            doc.filename === attachment.filename && 
+            doc.file_size === buffer.length
+          );
+          
+          if (isDuplicate) {
+            console.log(`Skipping ${attachment.filename} - duplicate`);
+            continue;
+          }
+          
+          // Upload to Replit Object Storage
+          const uploadResult = await replitObjectStorage.uploadFile(
+            buffer,
+            attachment.filename,
+            attachment.mimeType,
+            transaction.name,
+            transaction.id
+          );
+          
+          // Save to database
+          const documentData = {
+            transaction_id: transaction.id,
+            filename: attachment.filename,
+            file_size: buffer.length,
+            mime_type: attachment.mimeType,
+            upload_status: 'completed' as const,
+            uploader_id: userId,
+            replit_object_key: uploadResult.objectKey,
+            replit_bucket_name: uploadResult.bucketName,
+            replit_object_url: uploadResult.objectUrl,
+            replit_etag: uploadResult.etag
+          };
+          
+          const document = await storage.createDocument(documentData);
+          
+          uploadResults.push({
+            filename: attachment.filename,
+            documentId: document.id,
+            size: buffer.length
+          });
+          
+          console.log(`Successfully uploaded: ${attachment.filename}`);
+          
+        } catch (error) {
+          console.error(`Failed to upload ${attachment.filename}:`, error);
+          failedUploads.push({
+            filename: attachment.filename,
+            error: error.message
+          });
+        }
+      }
+      
+      // Update transaction document count
+      await storage.updateTransactionDocumentCount(transaction.id);
+      
+      // Send webhook notification
+      try {
+        await webhookService.onTransactionCreated(transaction.id);
+      } catch (webhookError) {
+        console.error('Webhook notification failed:', webhookError);
+      }
+      
+      res.json({
+        success: true,
+        message: `${uploadResults.length} files uploaded successfully`,
+        transactionId: transaction.id,
+        transactionName: transaction.name,
+        uploadedFiles: uploadResults,
+        failedFiles: failedUploads,
+        totalProcessed: attachments.length
+      });
+      
+    } catch (error) {
+      console.error('Webhook upload error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Webhook upload failed: ' + error.message
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

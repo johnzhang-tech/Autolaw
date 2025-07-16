@@ -1,96 +1,65 @@
-# N8N Simple Working Solution
+# N8N Simple Solution - Direct Webhook Upload
 
 ## Problem
-Your code node shows "No Output" which means JavaScript execution failed.
+Complex N8N workflows with variables and binary data handling are too complicated and unreliable.
 
-## Simple Working Code Node
+## Solution: Direct Webhook with Embedded Transaction ID
 
-Replace your current code with this simplified version:
+### Step 1: Create Simple Webhook Endpoint ✅ COMPLETED
+Created a webhook endpoint at `/api/webhook/upload-attachments` that extracts the transaction ID from the email subject and handles all files dynamically.
 
-```javascript
-const input = $input.all()[0].json;
-const payload = {};
+### Step 2: Single HTTP Request Node Configuration
+**Method:** POST
+**URL:** `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/webhook/upload-attachments`
 
-Object.keys(input).forEach(key => {
-  if (key.startsWith('attachment_')) {
-    const attachment = input[key];
-    payload[key] = {
-      filename: attachment.fileName || key,
-      data: attachment.data,
-      mimeType: attachment.mimeType || 'application/pdf'
-    };
-  }
-});
+**Headers:**
+- `X-API-Key`: `docuai_demo_key_123`
+- `Content-Type`: `application/json`
 
-return [payload];
-```
+**Body Content Type:** JSON
+**Body:** `{{ $json }}`
 
-## Even Simpler Version (If Above Fails)
+### Step 3: How It Works
+1. **Email Subject** contains transaction ID (e.g., "Test-my-6" maps to transaction 81)
+2. **Webhook extracts** transaction ID from subject automatically
+3. **All attachments** are processed in a single request
+4. **No variables** need to be passed between nodes
 
-If the above still doesn't work, try this minimal version:
-
-```javascript
-const input = $input.all()[0].json;
-const result = {};
-
-for (const key in input) {
-  if (key.includes('attachment_')) {
-    result[key] = {
-      filename: input[key].fileName,
-      data: input[key].data,
-      mimeType: 'application/pdf'
-    };
-  }
-}
-
-return [result];
-```
-
-## Manual Construction (Last Resort)
-
-If both above fail, manually construct the payload:
-
-```javascript
-const input = $input.all()[0].json;
-
-return [{
-  attachment_0: {
-    filename: input.attachment_0.fileName,
-    data: input.attachment_0.data,
-    mimeType: 'application/pdf'
-  },
-  attachment_1: {
-    filename: input.attachment_1.fileName,
-    data: input.attachment_1.data,
-    mimeType: 'application/pdf'
-  }
-}];
-```
-
-## Test Steps
-
-1. Copy the first simple version into your code node
-2. Click "Execute node" 
-3. Check if you see output in the OUTPUT section
-4. If still no output, try the second version
-5. If still failing, try the manual construction
-
-## Expected Output
-
-You should see something like:
+### Expected Request Format
+The endpoint expects the raw email JSON with attachments:
 ```json
 {
-  "attachment_0": {
-    "filename": "Jan Meeting Minutes Revised.pdf",
-    "data": "base64data...",
-    "mimeType": "application/pdf"
-  },
-  "attachment_1": {
-    "filename": "HOA Assessment Delinquency Policy.pdf",
-    "data": "base64data...",
-    "mimeType": "application/pdf"
-  }
+  "subject": "Test-my-6",
+  "from": {...},
+  "to": {...},
+  "attachment_0": {...},
+  "attachment_1": {...},
+  ...any number of attachments
 }
 ```
 
-Start with the first simple version and let me know what happens!
+### Expected Response
+```json
+{
+  "success": true,
+  "message": "6 files uploaded successfully",
+  "transactionId": 81,
+  "transactionName": "Test-my-6",
+  "uploadedFiles": [
+    {
+      "filename": "Jan Meeting Minutes Revised.pdf",
+      "documentId": 330,
+      "size": 245760
+    }
+  ]
+}
+```
+
+### Benefits
+- **No complex workflow** - just one HTTP Request node
+- **No variables** to pass between nodes
+- **Dynamic file handling** - works with any number of attachments
+- **Automatic transaction** mapping from email subject
+- **Single API call** - faster and more reliable
+
+This eliminates all the complexity and should work immediately.
