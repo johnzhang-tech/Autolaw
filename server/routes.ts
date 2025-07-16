@@ -2952,15 +2952,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('=== WEBHOOK UPLOAD ATTACHMENTS ===');
     
     try {
-      const userId = req.user.id;
-      const emailData = req.body;
+      console.log('User object:', JSON.stringify(req.user, null, 2));
+      
+      // Safely extract user ID with fallback
+      let userId = null;
+      if (req.user) {
+        userId = req.user.id || req.user.claims?.sub;
+      }
+      
+      console.log('Extracted userId:', userId);
+      
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          error: 'User authentication failed',
+          debug: {
+            userObject: req.user,
+            hasUser: !!req.user,
+            userKeys: req.user ? Object.keys(req.user) : []
+          }
+        });
+      }
+      
+      // Handle both JSON and multipart form data
+      let emailData = {};
+      let attachments = [];
+      
+      const contentType = req.headers['content-type'] || '';
+      console.log('Content-Type:', contentType);
+      
+      if (contentType.includes('multipart/form-data')) {
+        console.log('Processing multipart form data...');
+        
+        // Parse multipart form data using multer
+        const uploadSingle = multer().any();
+        await new Promise((resolve, reject) => {
+          uploadSingle(req, res, (err) => {
+            if (err) reject(err);
+            else resolve(true);
+          });
+        });
+        
+        // Extract form fields and files
+        emailData = req.body || {};
+        const files = (req as any).files || [];
+        
+        console.log('Form fields (req.body):', JSON.stringify(emailData, null, 2));
+        console.log('Files found:', files.length);
+        console.log('Files:', files.map(f => ({ name: f.originalname, size: f.size })));
+        
+        // Convert files to attachment format
+        attachments = files.map((file: Express.Multer.File) => ({
+          filename: file.originalname,
+          data: file.buffer,
+          mimeType: file.mimetype
+        }));
+        
+        console.log('Processed attachments:', attachments.map(a => ({ filename: a.filename, mimeType: a.mimeType, dataLength: a.data.length })));
+      } else {
+        // Handle JSON payload
+        emailData = req.body || {};
+        
+        // Extract attachments from JSON payload
+        const attachmentKeys = Object.keys(emailData).filter(key => key.startsWith('attachment_') || key === 'document' || key === 'attachment');
+        attachments = attachmentKeys.map(key => {
+          const attachment = emailData[key];
+          return {
+            filename: attachment.filename || `${key}.bin`,
+            data: attachment.data,
+            mimeType: attachment.mimeType || 'application/octet-stream'
+          };
+        });
+      }
       
       // Extract transaction name from email subject
       const subject = emailData.subject || '';
       console.log('Email subject:', subject);
       
       // Find transaction by name (case-insensitive)
-      const transactions = await storage.getTransactionsByUser(userId);
+      const transactions = await storage.getTransactions(userId);
       const transaction = transactions.find(t => 
         t.name.toLowerCase() === subject.toLowerCase()
       );
@@ -2974,23 +3044,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('Found transaction:', transaction.name, 'ID:', transaction.id);
-      
-      // Extract all attachments from email data
-      const attachments = [];
-      Object.keys(emailData).forEach(key => {
-        if (key.startsWith('attachment_')) {
-          const attachment = emailData[key];
-          if (attachment && attachment.filename) {
-            attachments.push({
-              fieldName: key,
-              filename: attachment.filename,
-              data: attachment.data, // This will be base64 or filesystem-v2
-              mimeType: attachment.mimeType || 'application/pdf'
-            });
-          }
-        }
-      });
-      
       console.log(`Found ${attachments.length} attachments`);
       
       if (attachments.length === 0) {
@@ -3008,25 +3061,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           console.log(`Processing attachment: ${attachment.filename}`);
           
-          // Skip if data is filesystem-v2 (N8N binary data issue)
-          if (attachment.data === 'filesystem-v2') {
-            console.log(`Skipping ${attachment.filename} - filesystem-v2 data`);
-            failedUploads.push({
-              filename: attachment.filename,
-              error: 'N8N binary data issue - use multipart/form-data instead'
-            });
-            continue;
-          }
-          
-          // Convert base64 to buffer
           let buffer;
-          try {
-            buffer = Buffer.from(attachment.data, 'base64');
-          } catch (error) {
-            console.error(`Failed to decode base64 for ${attachment.filename}:`, error);
+          
+          // Handle different data types
+          if (Buffer.isBuffer(attachment.data)) {
+            // Already a buffer from multipart form data
+            buffer = attachment.data;
+          } else if (typeof attachment.data === 'string') {
+            // Skip if data is filesystem-v2 (N8N binary data issue)
+            if (attachment.data === 'filesystem-v2') {
+              console.log(`Skipping ${attachment.filename} - filesystem-v2 data`);
+              failedUploads.push({
+                filename: attachment.filename,
+                error: 'N8N binary data issue - use multipart/form-data instead'
+              });
+              continue;
+            }
+            
+            // Convert base64 to buffer
+            try {
+              buffer = Buffer.from(attachment.data, 'base64');
+            } catch (error) {
+              console.error(`Failed to decode base64 for ${attachment.filename}:`, error);
+              failedUploads.push({
+                filename: attachment.filename,
+                error: 'Invalid base64 data'
+              });
+              continue;
+            }
+          } else {
+            console.error(`Invalid data type for ${attachment.filename}:`, typeof attachment.data);
             failedUploads.push({
               filename: attachment.filename,
-              error: 'Invalid base64 data'
+              error: 'Invalid data type'
             });
             continue;
           }
@@ -3041,7 +3108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Check for duplicates
-          const existingDocs = await storage.getDocumentsByTransaction(transaction.id);
+          const existingDocs = await storage.getDocuments(transaction.id, userId);
           const isDuplicate = existingDocs.some(doc => 
             doc.filename === attachment.filename && 
             doc.file_size === buffer.length
@@ -3055,10 +3122,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Upload to Replit Object Storage
           const uploadResult = await replitObjectStorage.uploadFile(
             buffer,
-            attachment.filename,
-            attachment.mimeType,
             transaction.name,
-            transaction.id
+            transaction.id,
+            attachment.filename,
+            attachment.mimeType
           );
           
           // Save to database
@@ -3099,7 +3166,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send webhook notification
       try {
-        await webhookService.onTransactionCreated(transaction.id);
+        const user = await storage.getUser(userId);
+        const documents = await storage.getDocuments(transaction.id, userId);
+        if (user) {
+          await webhookService.onTransactionCreated(transaction, user, documents);
+        }
       } catch (webhookError) {
         console.error('Webhook notification failed:', webhookError);
       }
@@ -3116,10 +3187,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Webhook upload error:', error);
-      res.status(500).json({
+      
+      // Ensure we always return a proper JSON response
+      const errorResponse = {
         success: false,
-        error: 'Webhook upload failed: ' + error.message
-      });
+        error: 'Webhook upload failed: ' + (error.message || 'Unknown error'),
+        timestamp: new Date().toISOString()
+      };
+      
+      // Don't send response twice
+      if (!res.headersSent) {
+        res.status(500).json(errorResponse);
+      }
     }
   });
 
