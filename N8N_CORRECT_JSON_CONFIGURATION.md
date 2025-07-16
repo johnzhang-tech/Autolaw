@@ -35,7 +35,7 @@ function getExtensionFromMimeType(mimeType) {
   return mimeMap[mimeType] || '.bin';
 }
 
-// Process all input items
+// Process all input items  
 for (const item of $input.all()) {
   // Check if item has binary data
   if (item.binary) {
@@ -49,14 +49,20 @@ for (const item of $input.all()) {
         filename = `attachment_${key}${ext}`;
       }
       
+      // Read binary data using N8N's getBinaryData function
+      const binaryBuffer = await this.helpers.getBinaryData(binaryData.id);
+      const base64Data = binaryBuffer.toString('base64');
+      
       files.push({
         filename: filename,
         mimeType: binaryData.mimeType || 'application/octet-stream',
-        data: binaryData.data // This is already base64 in N8N
+        data: base64Data
       });
     }
   }
 }
+
+console.log(`Processed ${files.length} files:`, files.map(f => f.filename));
 
 // Return the properly formatted data
 return [{ 
