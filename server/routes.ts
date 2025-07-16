@@ -893,6 +893,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('- Transaction ID:', transactionId);
       console.log('- Total files received:', allFiles?.length || 0);
       console.log('- Form body keys:', Object.keys(req.body || {}));
+      console.log('- Raw body structure:', JSON.stringify(req.body, null, 2));
+      console.log('- Content-Type:', req.headers['content-type']);
       console.log('- Files:', allFiles?.map(f => ({ 
         fieldname: f.fieldname, 
         originalname: f.originalname, 
@@ -900,13 +902,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimetype: f.mimetype
       })));
       
+      // Check if N8N sent files in body.files (JSON format)
+      if ((!allFiles || allFiles.length === 0) && req.body.files) {
+        console.log('- Detected N8N JSON format in body.files');
+        try {
+          // Parse files from JSON body
+          const filesData = Array.isArray(req.body.files) ? req.body.files : [req.body.files];
+          console.log(`- Processing ${filesData.length} files from JSON body`);
+          
+          const uploadResults: any[] = [];
+          const failedUploads: any[] = [];
+          const storageUploads: string[] = [];
+          
+          // Validate transaction exists and user owns it
+          const transaction = await storage.getTransaction(transactionId, userId);
+          if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+          }
+          
+          for (let i = 0; i < filesData.length; i++) {
+            const fileData = filesData[i];
+            try {
+              console.log(`Processing file ${i + 1}: ${fileData.filename}`);
+              
+              if (!fileData.data || !fileData.filename) {
+                throw new Error('Missing file data or filename');
+              }
+              
+              // Convert base64 to buffer
+              const fileBuffer = Buffer.from(fileData.data, 'base64');
+              const mimeType = fileData.mimeType || 'application/octet-stream';
+              
+              // Upload to Replit Object Storage
+              const uploadResult = await replitObjectStorage.uploadFile(
+                fileBuffer,
+                fileData.filename,
+                mimeType,
+                transaction.name,
+                transactionId
+              );
+              
+              storageUploads.push(uploadResult.objectKey);
+              
+              // Save document metadata to database
+              const documentData = {
+                transactionId: transactionId,
+                userId: userId,
+                fileName: uploadResult.objectKey.split('/')[1],
+                originalFileName: fileData.filename,
+                mimeType: mimeType,
+                fileSize: fileBuffer.length,
+                replitStorageKey: uploadResult.objectKey,
+                uploadStatus: 'completed' as const,
+                uploadedAt: new Date(),
+              };
+              
+              const savedDocument = await storage.createDocument(documentData);
+              uploadResults.push({
+                fileName: fileData.filename,
+                documentId: savedDocument.id,
+                storage: uploadResult
+              });
+              
+              console.log(`✓ Successfully uploaded: ${fileData.filename}`);
+            } catch (error: any) {
+              console.error(`✗ Failed to upload file ${i + 1}:`, error);
+              failedUploads.push({
+                filename: fileData.filename || `file_${i + 1}`,
+                error: error.message
+              });
+            }
+          }
+          
+          // Update transaction document count
+          const updatedTransaction = await storage.updateTransactionDocumentCount(transactionId);
+          
+          // WEBHOOK: Notify n8n about transaction with new documents
+          if (uploadResults.length > 0 && updatedTransaction) {
+            try {
+              const user = await storage.getUser(userId);
+              const allDocuments = await storage.getDocuments(transactionId, userId);
+              if (user) {
+                await webhookService.onTransactionCreated(updatedTransaction, user, allDocuments);
+              }
+            } catch (webhookError) {
+              console.error('Webhook notification failed (non-blocking):', webhookError);
+            }
+          }
+          
+          return res.json({
+            success: true,
+            message: `${uploadResults.length} files uploaded successfully via JSON body`,
+            uploaded: uploadResults.map(r => ({
+              fileName: r.fileName,
+              documentId: r.documentId
+            })),
+            failed: failedUploads,
+            transactionId: transactionId
+          });
+          
+        } catch (jsonError: any) {
+          console.error('JSON body processing error:', jsonError);
+          return res.status(400).json({
+            message: 'Failed to process JSON files data',
+            error: jsonError.message,
+            debug: { bodyKeys: Object.keys(req.body || {}) }
+          });
+        }
+      }
+      
+      // Original multipart files handling
       if (!allFiles || allFiles.length === 0) {
         return res.status(400).json({ 
           message: 'No files uploaded',
           debug: {
             filesReceived: allFiles?.length || 0,
             contentType: req.headers['content-type'],
-            bodyKeys: Object.keys(req.body || {})
+            bodyKeys: Object.keys(req.body || {}),
+            hasFilesInBody: !!req.body.files
           }
         });
       }
