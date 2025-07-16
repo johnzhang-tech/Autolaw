@@ -1,0 +1,312 @@
+[Node: "Code2"] === N8N DIAGNOSTIC START ===
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Total input items: 1
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+--- ITEM 0 ---
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Full item structure: {
+  "json": {
+    "userId": "mock-user-1",
+    "name": "Test-my-7",
+    "address": "100 High Street, Los Altos, California, 94024",
+    "transactionType": "Purchase",
+    "status": "active",
+    "numDocuments": 0,
+    "createdAt": "2025-07-16T02:08:46.366Z",
+    "updatedAt": "2025-07-16T02:08:46.366Z",
+    "Tranx_id": 85,
+    "id": "19810fceea10b327",
+    "threadId": "19810fceea10b327",
+    "labelIds": [
+      "UNREAD",
+      "CATEGORY_PERSONAL",
+      "INBOX"
+    ],
+    "sizeEstimate": 19023265,
+    "headers": {
+      "delivered-to": "Delivered-To: legalai@altosera.com",
+      "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id 98e67ed59e1d1-31c3eb69d8fsor8257516a91.5.2025.07.15.19.07.48\r\n        for <legalai@altosera.com>\r\n        (Google Transport Security);\r\n        Tue, 15 Jul 2025 19:07:48 -0700 (PDT)",
+      "x-received": "X-Received: by 2002:a17:90b:4fcc:b0:312:e1ec:de44 with SMTP id\r\n 98e67ed59e1d1-31c9e77050fmr2016285a91.27.1752631665473; Tue, 15 Jul 2025\r\n 19:07:45 -0700 (PDT)",
+      "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1752631668; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=ToQoIKjnJDo5YE3/vmLXIrcuhWZe+Lh+CQZxngqUNpyjVozDT5RO1T9+KeZf+Bd8oV\r\n         x8pBl1hp0T4Es48YzFEaKO0AHyMLaOgrq25VMslwLz+jKzpR/3bLAM2G2ywZ68KnZZNR\r\n         4Sr6CGNs2gHroxy+kGzXChLWAR21AOR/U4wnj2Lti5Jjz/hMS1pSpsjPmilSddoF5grf\r\n         p86ysqylj5dlAk3XAquequtwOk6ThbQsG4s09vWV7Nq/GIut/8rN9vZNccV03lWhroKw\r\n         OTs1u8X9Jzwb4EcHlMlsxJL0SnUIer3pOu8xXcwE+B642PZMR1hSMQkmjXJFkRoMGRof\r\n         ygYw==",
+      "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        fh=JZzbb/NjS3VuY8VRWKX1xyu09DCBU4tfqnmF0RXTO/M=;\r\n        b=Mi7kKCSZP7OnYxFdP0r9wjx01hXYV5ZOhYB1aTKsgyOLQZs12ChCaTGYl90m3MnbcP\r\n         9AVo1dvcP+USUYB8uT0J40/TaGIQmmYYqO7N4vTXXKlf7TxyOxFZ4UKkcoNHJVwtBYgI\r\n         9TzYMntN63cX4dPgxub8orEQYxRYi2cPxPwnUGG4xhiJu4xDaeAvrmmGmIyB7ZqSpxhG\r\n         Eh1AxtEycGtNd94jk+03XJNt+x5aQVMrhHP1Wvjs0Es19hgjb7SFPKZuOoZxYy2UwjPW\r\n         NOwF3cKR5TDBogOAFKS54CQwcteGFI0oskOAB0GOmrTx4R0YYrR5ube/aoLng+Ctylvg\r\n         ptJQ==;\r\n        dara=google.com",
+      "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Sj0Sd1uW;\r\n       spf=pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=zhong.zhang@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@altosera.com",
+      "return-path": "Return-Path: <zhong.zhang@gmail.com>",
+      "received-spf": "Received-SPF: pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+      "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Sj0Sd1uW;\r\n       spf=pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=zhong.zhang@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@altosera.com",
+      "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1752631667; x=1753236467; darn=altosera.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        b=Sj0Sd1uWOTd9FXkfLMav5ZNx4K66Xn7r1fBoq20XOZZqMG5wFXA9uUfvAjhOOXW0Fv\r\n         lgkcNkbTql8KjqAMsdznjD9k2I8d1HiMBRf9YMJTKZ9gbJdv1aXCAmJCTxLfgPEj9QZ2\r\n         xwhxvOoYOw8lJq7fbpnAFAuskABqbzyPeov8Ulvv4AHSGgD1YE8o/KFVLHE6LMJmvUUo\r\n         filGlceONHps63w14SF8aUU59az1eaT3iCR/O4T8yMOpF+iCHNo+pzY/RWKPTk1Cwtmb\r\n         qSv6vkH6sibmPhdRSKTOjP20aqupUo8ihLReGoeCJFu+kPaP7ZBfVBNM1Mnl/duDI55n\r\n         tvmg==",
+      "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1752631668; x=1753236468;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-message-state\r\n         :from:to:cc:subject:date:message-id:reply-to;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        b=d5rOdrNNsrSVcUcBnAExIq0Azr3nRM7OZHJHUJ7diVur3GvK6sRxnNVmiOQcBBFnNs\r\n         k5bvZ6GcsrnVzE9Sts9m0G1ZZ2XLaZ4PPquDw1dB1H1eqIYEjj01XQwmWWudHFKs40jm\r\n         Q5aDoi5q2U7a/T0Ppy0gSYHvp6A8X3jibRWTYKOoiWT5PJ+9bM2t9afR0DEzzJwe90oA\r\n         OumSrvfA34F3396b9S+rXUfRTamcnFq+qCdu2D625P2nTJPgSGcpgihnJ1Adlg2mbh9m\r\n         r84N2bawXWpMC1hXU2Xp5+RpR77nW9JOLuMys1Sd4OPu1rQpTGdii4nmDnnrWKOU1enF\r\n         8RVg==",
+      "x-gm-message-state": "X-Gm-Message-State: AOJu0YwxvLt+TAg+Xt7mfELzHxU+hN/G6he+Mcn1SQYZRknB/cDI+EsY\r\n\tx3TwA/XPVVcRisn6t606UQ1qgkyMAlL/7sQ5tpdFrAz/SQ6J9+oeRq9LDQf4HewfQCr8MmjKrRn\r\n\tO5KTrYAVvfxpETveYxHYEB32ENKDkd1dRKRI=",
+      "x-gm-gg": "X-Gm-Gg: ASbGncuSEmvTpuq8cvhZmOzHsW/NeuEEIRqwsLAIV6GPXZ3h9YFHutl8WLpwxVnBvHq\r\n\tBE9lc5CjnlN2kYPUjSD76l0TaBascgA4foqe6YKKm0EOJQwow8FOkLo79VFfpm/TlmNQXPlCUCp\r\n\t0T3/Y6n29F2uAhnKz1ZFuLZuJk61mDZsjHPeZFP0f0wrZW1uDuIh/qF+RbqUFVBV0xGoeNTFiou\r\n\tgPN3wCL2sqGQRiHDu2xwRqe8Ua6GmB9yfdckDNi",
+      "x-google-smtp-source": "X-Google-Smtp-Source: AGHT+IEEfPRe+zv+KvXZUNlCmNijJgMGTKe5qO66ECrYt+GJE5oXmkrc7L/2YCrKEd3MAtJFViK7TQvKkEZBd116WDQ=",
+      "mime-version": "MIME-Version: 1.0",
+      "from": "From: John Zhang <zhong.zhang@gmail.com>",
+      "date": "Date: Tue, 15 Jul 2025 19:07:29 -0700",
+      "x-gm-features": "X-Gm-Features: Ac12FXxoEAV7vM53ZL5BHfnycAGaQYxDaiY0oEzfiK5BdYEe2O2NWWnEvhBmj3g",
+      "message-id": "Message-ID: <CAD2PbKgJ3tvYRR5kvidKgMkqgRSDArscKe907Cmjj6H3RcZeyw@mail.gmail.com>",
+      "subject": "Subject: Test-my-7",
+      "to": "To: \"legalai@altosera.com\" <legalai@altosera.com>",
+      "content-type": "Content-Type: multipart/mixed; boundary=\"000000000000d9d871063a025b22\""
+    },
+    "html": "<div dir=\"ltr\"><br></div>\n",
+    "text": "\n",
+    "textAsHtml": "<p></p>",
+    "subject": "Test-my-7",
+    "date": "2025-07-16T02:07:29.000Z",
+    "to": {
+      "value": [
+        {
+          "address": "legalai@altosera.com",
+          "name": ""
+        }
+      ],
+      "html": "<span class=\"mp_address_group\"><a href=\"mailto:legalai@altosera.com\" class=\"mp_address_email\">legalai@altosera.com</a></span>",
+      "text": "legalai@altosera.com"
+    },
+    "from": {
+      "value": [
+        {
+          "address": "zhong.zhang@gmail.com",
+          "name": "John Zhang"
+        }
+      ],
+      "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">John Zhang</span> &lt;<a href=\"mailto:zhong.zhang@gmail.com\" class=\"mp_address_email\">zhong.zhang@gmail.com</a>&gt;</span>",
+      "text": "\"John Zhang\" <zhong.zhang@gmail.com>"
+    },
+    "messageId": "<CAD2PbKgJ3tvYRR5kvidKgMkqgRSDArscKe907Cmjj6H3RcZeyw@mail.gmail.com>"
+  },
+  "binary": {
+    "attachment_0": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "Jan Meeting Minutes Revised.pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/1805f836-d651-4c58-aff5-5fd658ff2252",
+      "fileSize": "138 kB"
+    },
+    "attachment_1": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "HOA Assessment Delinquency Policy  (Approved Aug 2006).pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6e1af-50da-48a1-9ca0-981ad58039fe",
+      "fileSize": "302 kB"
+    },
+    "attachment_2": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "March 17 Meeting Minutes (1).pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/39a152ec-09ea-4cfd-a0ed-0a9b0bd7fbbd",
+      "fileSize": "187 kB"
+    },
+    "attachment_3": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "March 17 Meeting Minutes.pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/196cc904-b248-48e2-ad3f-560a006ea4c0",
+      "fileSize": "187 kB"
+    },
+    "attachment_4": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "ArticlesOfIncorporation.pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/2a314048-0f63-4978-bc49-92fb2a59cc14",
+      "fileSize": "1.4 MB"
+    },
+    "attachment_5": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "HOA-BY-LAWS.pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/55f2e935-0e9c-4d55-9ae5-f4d268909fa3",
+      "fileSize": "4.79 MB"
+    },
+    "attachment_6": {
+      "mimeType": "application/pdf",
+      "fileType": "pdf",
+      "fileExtension": "pdf",
+      "data": "filesystem-v2",
+      "fileName": "HOA-Declaration.pdf",
+      "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6b437-e08e-432e-96d0-f1a5c66f994e",
+      "fileSize": "6.88 MB"
+    }
+  },
+  "pairedItem": {
+    "item": 0
+  }
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data found: Array(7)
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_0
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "Jan Meeting Minutes Revised.pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/1805f836-d651-4c58-aff5-5fd658ff2252",
+  "fileSize": "138 kB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/1805f836-d651-4c58-aff5-5fd658ff2252
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_1
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "HOA Assessment Delinquency Policy  (Approved Aug 2006).pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6e1af-50da-48a1-9ca0-981ad58039fe",
+  "fileSize": "302 kB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6e1af-50da-48a1-9ca0-981ad58039fe
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "March 17 Meeting Minutes (1).pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/39a152ec-09ea-4cfd-a0ed-0a9b0bd7fbbd",
+  "fileSize": "187 kB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/39a152ec-09ea-4cfd-a0ed-0a9b0bd7fbbd
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_3
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "March 17 Meeting Minutes.pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/196cc904-b248-48e2-ad3f-560a006ea4c0",
+  "fileSize": "187 kB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/196cc904-b248-48e2-ad3f-560a006ea4c0
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_4
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "ArticlesOfIncorporation.pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/2a314048-0f63-4978-bc49-92fb2a59cc14",
+  "fileSize": "1.4 MB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/2a314048-0f63-4978-bc49-92fb2a59cc14
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_5
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "HOA-BY-LAWS.pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/55f2e935-0e9c-4d55-9ae5-f4d268909fa3",
+  "fileSize": "4.79 MB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/55f2e935-0e9c-4d55-9ae5-f4d268909fa3
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] 
+Binary key: attachment_6
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary data structure: {
+  "mimeType": "application/pdf",
+  "fileType": "pdf",
+  "fileExtension": "pdf",
+  "data": "filesystem-v2",
+  "fileName": "HOA-Declaration.pdf",
+  "id": "filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6b437-e08e-432e-96d0-f1a5c66f994e",
+  "fileSize": "6.88 MB"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data type: string
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Data value: filesystem-v2
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] Binary ID: filesystem-v2:workflows/l5uV5JHWsxZbuoQu/executions/755/binary_data/68c6b437-e08e-432e-96d0-f1a5c66f994e
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] JSON data found: {
+  "userId": "mock-user-1",
+  "name": "Test-my-7",
+  "address": "100 High Street, Los Altos, California, 94024",
+  "transactionType": "Purchase",
+  "status": "active",
+  "numDocuments": 0,
+  "createdAt": "2025-07-16T02:08:46.366Z",
+  "updatedAt": "2025-07-16T02:08:46.366Z",
+  "Tranx_id": 85,
+  "id": "19810fceea10b327",
+  "threadId": "19810fceea10b327",
+  "labelIds": [
+    "UNREAD",
+    "CATEGORY_PERSONAL",
+    "INBOX"
+  ],
+  "sizeEstimate": 19023265,
+  "headers": {
+    "delivered-to": "Delivered-To: legalai@altosera.com",
+    "received": "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n        by mx.google.com with SMTPS id 98e67ed59e1d1-31c3eb69d8fsor8257516a91.5.2025.07.15.19.07.48\r\n        for <legalai@altosera.com>\r\n        (Google Transport Security);\r\n        Tue, 15 Jul 2025 19:07:48 -0700 (PDT)",
+    "x-received": "X-Received: by 2002:a17:90b:4fcc:b0:312:e1ec:de44 with SMTP id\r\n 98e67ed59e1d1-31c9e77050fmr2016285a91.27.1752631665473; Tue, 15 Jul 2025\r\n 19:07:45 -0700 (PDT)",
+    "arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1752631668; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=ToQoIKjnJDo5YE3/vmLXIrcuhWZe+Lh+CQZxngqUNpyjVozDT5RO1T9+KeZf+Bd8oV\r\n         x8pBl1hp0T4Es48YzFEaKO0AHyMLaOgrq25VMslwLz+jKzpR/3bLAM2G2ywZ68KnZZNR\r\n         4Sr6CGNs2gHroxy+kGzXChLWAR21AOR/U4wnj2Lti5Jjz/hMS1pSpsjPmilSddoF5grf\r\n         p86ysqylj5dlAk3XAquequtwOk6ThbQsG4s09vWV7Nq/GIut/8rN9vZNccV03lWhroKw\r\n         OTs1u8X9Jzwb4EcHlMlsxJL0SnUIer3pOu8xXcwE+B642PZMR1hSMQkmjXJFkRoMGRof\r\n         ygYw==",
+    "arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:subject:message-id:date:from:mime-version:dkim-signature;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        fh=JZzbb/NjS3VuY8VRWKX1xyu09DCBU4tfqnmF0RXTO/M=;\r\n        b=Mi7kKCSZP7OnYxFdP0r9wjx01hXYV5ZOhYB1aTKsgyOLQZs12ChCaTGYl90m3MnbcP\r\n         9AVo1dvcP+USUYB8uT0J40/TaGIQmmYYqO7N4vTXXKlf7TxyOxFZ4UKkcoNHJVwtBYgI\r\n         9TzYMntN63cX4dPgxub8orEQYxRYi2cPxPwnUGG4xhiJu4xDaeAvrmmGmIyB7ZqSpxhG\r\n         Eh1AxtEycGtNd94jk+03XJNt+x5aQVMrhHP1Wvjs0Es19hgjb7SFPKZuOoZxYy2UwjPW\r\n         NOwF3cKR5TDBogOAFKS54CQwcteGFI0oskOAB0GOmrTx4R0YYrR5ube/aoLng+Ctylvg\r\n         ptJQ==;\r\n        dara=google.com",
+    "arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Sj0Sd1uW;\r\n       spf=pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=zhong.zhang@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@altosera.com",
+    "return-path": "Return-Path: <zhong.zhang@gmail.com>",
+    "received-spf": "Received-SPF: pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+    "authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Sj0Sd1uW;\r\n       spf=pass (google.com: domain of zhong.zhang@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=zhong.zhang@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@altosera.com",
+    "dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1752631667; x=1753236467; darn=altosera.com;\r\n        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        b=Sj0Sd1uWOTd9FXkfLMav5ZNx4K66Xn7r1fBoq20XOZZqMG5wFXA9uUfvAjhOOXW0Fv\r\n         lgkcNkbTql8KjqAMsdznjD9k2I8d1HiMBRf9YMJTKZ9gbJdv1aXCAmJCTxLfgPEj9QZ2\r\n         xwhxvOoYOw8lJq7fbpnAFAuskABqbzyPeov8Ulvv4AHSGgD1YE8o/KFVLHE6LMJmvUUo\r\n         filGlceONHps63w14SF8aUU59az1eaT3iCR/O4T8yMOpF+iCHNo+pzY/RWKPTk1Cwtmb\r\n         qSv6vkH6sibmPhdRSKTOjP20aqupUo8ihLReGoeCJFu+kPaP7ZBfVBNM1Mnl/duDI55n\r\n         tvmg==",
+    "x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1752631668; x=1753236468;\r\n        h=to:subject:message-id:date:from:mime-version:x-gm-message-state\r\n         :from:to:cc:subject:date:message-id:reply-to;\r\n        bh=uDwAHeIZrGIXceNuRHSr5be/vtUKTMF4BDaQVSKz5lA=;\r\n        b=d5rOdrNNsrSVcUcBnAExIq0Azr3nRM7OZHJHUJ7diVur3GvK6sRxnNVmiOQcBBFnNs\r\n         k5bvZ6GcsrnVzE9Sts9m0G1ZZ2XLaZ4PPquDw1dB1H1eqIYEjj01XQwmWWudHFKs40jm\r\n         Q5aDoi5q2U7a/T0Ppy0gSYHvp6A8X3jibRWTYKOoiWT5PJ+9bM2t9afR0DEzzJwe90oA\r\n         OumSrvfA34F3396b9S+rXUfRTamcnFq+qCdu2D625P2nTJPgSGcpgihnJ1Adlg2mbh9m\r\n         r84N2bawXWpMC1hXU2Xp5+RpR77nW9JOLuMys1Sd4OPu1rQpTGdii4nmDnnrWKOU1enF\r\n         8RVg==",
+    "x-gm-message-state": "X-Gm-Message-State: AOJu0YwxvLt+TAg+Xt7mfELzHxU+hN/G6he+Mcn1SQYZRknB/cDI+EsY\r\n\tx3TwA/XPVVcRisn6t606UQ1qgkyMAlL/7sQ5tpdFrAz/SQ6J9+oeRq9LDQf4HewfQCr8MmjKrRn\r\n\tO5KTrYAVvfxpETveYxHYEB32ENKDkd1dRKRI=",
+    "x-gm-gg": "X-Gm-Gg: ASbGncuSEmvTpuq8cvhZmOzHsW/NeuEEIRqwsLAIV6GPXZ3h9YFHutl8WLpwxVnBvHq\r\n\tBE9lc5CjnlN2kYPUjSD76l0TaBascgA4foqe6YKKm0EOJQwow8FOkLo79VFfpm/TlmNQXPlCUCp\r\n\t0T3/Y6n29F2uAhnKz1ZFuLZuJk61mDZsjHPeZFP0f0wrZW1uDuIh/qF+RbqUFVBV0xGoeNTFiou\r\n\tgPN3wCL2sqGQRiHDu2xwRqe8Ua6GmB9yfdckDNi",
+    "x-google-smtp-source": "X-Google-Smtp-Source: AGHT+IEEfPRe+zv+KvXZUNlCmNijJgMGTKe5qO66ECrYt+GJE5oXmkrc7L/2YCrKEd3MAtJFViK7TQvKkEZBd116WDQ=",
+    "mime-version": "MIME-Version: 1.0",
+    "from": "From: John Zhang <zhong.zhang@gmail.com>",
+    "date": "Date: Tue, 15 Jul 2025 19:07:29 -0700",
+    "x-gm-features": "X-Gm-Features: Ac12FXxoEAV7vM53ZL5BHfnycAGaQYxDaiY0oEzfiK5BdYEe2O2NWWnEvhBmj3g",
+    "message-id": "Message-ID: <CAD2PbKgJ3tvYRR5kvidKgMkqgRSDArscKe907Cmjj6H3RcZeyw@mail.gmail.com>",
+    "subject": "Subject: Test-my-7",
+    "to": "To: \"legalai@altosera.com\" <legalai@altosera.com>",
+    "content-type": "Content-Type: multipart/mixed; boundary=\"000000000000d9d871063a025b22\""
+  },
+  "html": "<div dir=\"ltr\"><br></div>\n",
+  "text": "\n",
+  "textAsHtml": "<p></p>",
+  "subject": "Test-my-7",
+  "date": "2025-07-16T02:07:29.000Z",
+  "to": {
+    "value": [
+      {
+        "address": "legalai@altosera.com",
+        "name": ""
+      }
+    ],
+    "html": "<span class=\"mp_address_group\"><a href=\"mailto:legalai@altosera.com\" class=\"mp_address_email\">legalai@altosera.com</a></span>",
+    "text": "legalai@altosera.com"
+  },
+  "from": {
+    "value": [
+      {
+        "address": "zhong.zhang@gmail.com",
+        "name": "John Zhang"
+      }
+    ],
+    "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">John Zhang</span> &lt;<a href=\"mailto:zhong.zhang@gmail.com\" class=\"mp_address_email\">zhong.zhang@gmail.com</a>&gt;</span>",
+    "text": "\"John Zhang\" <zhong.zhang@gmail.com>"
+  },
+  "messageId": "<CAD2PbKgJ3tvYRR5kvidKgMkqgRSDArscKe907Cmjj6H3RcZeyw@mail.gmail.com>"
+}
+usePushConnection-CfIZMtO2.js:373 [Node: "Code2"] === N8N DIAGNOSTIC END ===
