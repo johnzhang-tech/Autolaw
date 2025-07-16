@@ -56,7 +56,13 @@ class ReplitObjectStorageService {
     mimeType: string
   ): Promise<UploadResult> {
     try {
-      console.log(`ReplitObjectStorage.uploadFile called with buffer.length=${buffer.length}, filename=${originalFilename}`);
+      console.log(`ReplitObjectStorage.uploadFile called with:`, {
+        bufferLength: buffer.length,
+        transactionName,
+        transactionId,
+        originalFilename,
+        mimeType
+      });
       
       // Validate file
       this.validateFile(buffer, mimeType);

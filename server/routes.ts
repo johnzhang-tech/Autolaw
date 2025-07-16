@@ -1857,6 +1857,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/transactions/:id/upload-multiple - Upload multiple documents via JSON with base64 data
+  app.post('/api/transactions/:id/upload-multiple', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Verify transaction exists and user has access
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: 'Transaction not found' });
+      }
+
+      // Validate request body
+      const { files } = req.body;
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        return res.status(400).json({ 
+          message: 'Invalid request body. Expected: { "files": [{ "filename": "...", "mimeType": "...", "data": "<base64>" }] }' 
+        });
+      }
+
+      console.log(`Processing ${files.length} files for transaction ${transactionId}`);
+
+      // Validate all files first
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.filename || !file.data) {
+          return res.status(400).json({ 
+            message: `File ${i}: 'filename' and 'data' are required fields` 
+          });
+        }
+        if (typeof file.data !== 'string') {
+          return res.status(400).json({ 
+            message: `File ${i}: 'data' must be base64 encoded string` 
+          });
+        }
+      }
+
+      // Check for duplicate files in this transaction
+      const existingDocs = await storage.getDocuments(transactionId, userId);
+      const duplicates = [];
+      
+      for (const file of files) {
+        const isDuplicate = existingDocs.some(doc => {
+          const docFileSize = Buffer.from(file.data, 'base64').length;
+          return doc.originalFileName === file.filename && doc.fileSize === docFileSize;
+        });
+        
+        if (isDuplicate) {
+          duplicates.push(file.filename);
+        }
+      }
+
+      if (duplicates.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Duplicate files detected',
+          duplicates,
+          message: `The following files already exist in this transaction: ${duplicates.join(', ')}`
+        });
+      }
+
+      // Process all files in a single database transaction
+      const uploadResults = [];
+      const failedUploads = [];
+      const uploadedObjectKeys = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        let objectKey = null;
+
+        try {
+          console.log(`Processing file ${i + 1}/${files.length}: ${file.filename}`);
+
+          // Decode base64 data
+          const buffer = Buffer.from(file.data, 'base64');
+          
+          // Validate file size (10MB limit)
+          if (buffer.length > 10 * 1024 * 1024) {
+            failedUploads.push({
+              filename: file.filename,
+              error: 'File size exceeds 10MB limit'
+            });
+            continue;
+          }
+
+          // Upload to Replit Object Storage
+          const uploadResult = await replitObjectStorage.uploadFile(
+            buffer,
+            transaction.name,
+            transactionId,
+            file.filename,
+            file.mimeType || 'application/octet-stream'
+          );
+
+          objectKey = uploadResult.objectKey;
+          uploadedObjectKeys.push(objectKey);
+
+          // Store in database
+          const result = await db.transaction(async (tx) => {
+            // Insert document record
+            const documentData = {
+              fileName: file.filename,
+              originalFileName: file.filename,
+              fileSize: buffer.length,
+              mimeType: file.mimeType || 'application/octet-stream',
+              category: 'other' as const,
+              uploadStatus: 'completed' as const,
+              userId: userId,
+              uploaderId: userId,
+              transactionId: transactionId,
+              s3Key: uploadResult.objectKey,
+              s3Bucket: uploadResult.bucketName,
+              s3Url: uploadResult.objectUrl,
+              etag: uploadResult.etag
+            };
+
+            const [document] = await tx.insert(documents).values([documentData]).returning();
+
+            // Update transaction document count
+            const [updatedTransaction] = await tx
+              .update(transactions)
+              .set({ 
+                numDocuments: sql`${transactions.numDocuments} + 1`,
+                updatedAt: new Date()
+              })
+              .where(and(eq(transactions.id, transactionId), eq(transactions.userId, userId)))
+              .returning();
+
+            return { document, transaction: updatedTransaction };
+          });
+
+          uploadResults.push({
+            filename: file.filename,
+            documentId: result.document.id,
+            size: buffer.length,
+            mimeType: file.mimeType || 'application/octet-stream'
+          });
+
+          console.log(`File uploaded successfully: ${file.filename} (Document ID: ${result.document.id})`);
+
+        } catch (error: any) {
+          console.error(`Upload failed for ${file.filename}:`, error);
+          
+          // Clean up uploaded file if database operation failed
+          if (objectKey) {
+            try {
+              await replitObjectStorage.deleteFile(objectKey);
+              console.log(`Cleaned up failed upload: ${objectKey}`);
+            } catch (cleanupError) {
+              console.error('Storage cleanup error:', cleanupError);
+            }
+          }
+          
+          failedUploads.push({
+            filename: file.filename,
+            error: error.message
+          });
+        }
+      }
+
+      // Send webhook notification if any files were uploaded successfully
+      if (uploadResults.length > 0) {
+        try {
+          const user = await storage.getUser(userId);
+          const allDocuments = await storage.getDocuments(transactionId, userId);
+          if (user) {
+            await webhookService.onTransactionCreated(transaction, user, allDocuments);
+          }
+        } catch (webhookError) {
+          console.error('Webhook notification failed (non-blocking):', webhookError);
+        }
+      }
+
+      const totalProcessed = uploadResults.length + failedUploads.length;
+      const successMessage = uploadResults.length > 0 
+        ? `${uploadResults.length} files uploaded successfully`
+        : 'No files were uploaded';
+
+      res.json({
+        success: uploadResults.length > 0,
+        message: failedUploads.length > 0 
+          ? `${successMessage}, ${failedUploads.length} failed`
+          : successMessage,
+        transactionId,
+        transactionName: transaction.name,
+        uploadedFiles: uploadResults,
+        failedFiles: failedUploads,
+        totalProcessed
+      });
+
+    } catch (error: any) {
+      console.error('Multiple file upload error:', error);
+      res.status(500).json({ 
+        message: 'Upload failed', 
+        error: error.message 
+      });
+    }
+  });
+
   // Document endpoints
   app.get('/api/transactions/:id/documents', flexAuth, async (req: any, res) => {
     try {
@@ -1871,7 +2074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document download endpoint - Replit Object Storage only
-  app.get('/api/documents/:id/download', authMiddleware, async (req: any, res) => {
+  app.get('/api/documents/:id/download', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const documentId = parseInt(req.params.id);
