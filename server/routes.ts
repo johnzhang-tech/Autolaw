@@ -905,9 +905,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if N8N sent files in body.files (JSON format)
       if ((!allFiles || allFiles.length === 0) && req.body.files) {
         console.log('- Detected N8N JSON format in body.files');
+        console.log('- Type of req.body.files:', typeof req.body.files);
+        console.log('- Raw req.body.files:', req.body.files);
         try {
-          // Parse files from JSON body
-          const filesData = Array.isArray(req.body.files) ? req.body.files : [req.body.files];
+          // Parse files from JSON body - handle both objects and JSON strings
+          let filesData;
+          if (typeof req.body.files === 'string') {
+            console.log('- Parsing JSON string from N8N');
+            filesData = JSON.parse(req.body.files);
+          } else {
+            filesData = req.body.files;
+          }
+          
+          // Ensure it's an array
+          if (!Array.isArray(filesData)) {
+            filesData = [filesData];
+          }
+          
           console.log(`- Processing ${filesData.length} files from JSON body`);
           
           const uploadResults: any[] = [];
