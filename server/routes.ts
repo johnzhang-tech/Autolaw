@@ -1724,6 +1724,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`- Uploading to Replit Object Storage: ${fileName} (${fileSize} bytes)`);
       
+      // Debug: Log all parameters before calling uploadFile
+      console.log('- uploadFile parameters debug:', {
+        'fileBuffer.length': fileBuffer.length,
+        'transaction.name': transaction.name,
+        'transactionId': transactionId,
+        'fileName': fileName,
+        'mimeType': mimeType
+      });
+      
       // Upload to Replit Object Storage
       const uploadResult = await replitObjectStorage.uploadFile(
         fileBuffer,
