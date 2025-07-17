@@ -1,216 +1,108 @@
-# N8N Form-Data Multi-File Upload Solution ✅ WORKING - MULTIPLE FILES CONFIRMED
+# N8N Form-Data Solution for Filename Preservation
 
-## Why Form-Data is Better
-- ✅ Simpler configuration in n8n
-- ✅ Can send all files in one request
-- ✅ Better support for custom field names
-- ✅ More reliable than binary attachments
-- ✅ Proper filename preservation
+## Problem
+Files uploaded via N8N binary upload get random names like `raw-binary-1752721581912.pdf` instead of preserving original filenames.
 
-## N8N HTTP Request Node Configuration
+## ✅ SOLUTION: Use Form-Data Method
 
-### Basic Settings
-- **URL**: `https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single`
-- **Method**: POST
-- **Send Body**: Form-Data
+### N8N HTTP Request Node Configuration
 
-### Headers
-```
-X-API-Key: docuai_demo_key_123
-```
+1. **URL**: 
+   ```
+   https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single
+   ```
 
-> **Note**: The existing `/upload-single` endpoint now automatically detects multiple files and switches to multi-upload mode. No need for a separate endpoint!
+2. **Method**: `POST`
 
-### Form-Data Fields - Multiple File Upload ✅
-The endpoint now supports **multiple different files** in a single request:
+3. **Send Body**: `Form-Data`
 
-#### Method 1: Multiple Files with Standard Names (CORRECT WAY)
-```
-file1: {{$binary.attachment_0}}
-file2: {{$binary.attachment_1}}
-file3: {{$binary.attachment_2}}
-file4: {{$binary.attachment_3}}
-file5: {{$binary.attachment_4}}
-file6: {{$binary.attachment_5}}
-```
+4. **Body Parameters**:
+   - **Parameter 1**: 
+     - Name: `document` 
+     - Value Type: `Attachment/Binary Data`
+     - Value: `{{$binary.data}}`
+   
+   - **Parameter 2**:
+     - Name: `filename`
+     - Value Type: `String`
+     - Value: `{{$binary.data.fileName}}`
 
-🚨 **IMPORTANT**: Do NOT add filename parameters like this (WRONG):
-```
-filename1: {{$json.attachments_0[filename]}}  ❌ DON'T DO THIS
-filename2: {{$json.attachments_1[filename]}}  ❌ DON'T DO THIS
-```
+5. **Headers**:
+   - `X-API-Key`: `docuai_demo_key_123`
 
-The system automatically extracts filenames from the binary data!
+### Alternative Configuration (Query Parameter Method)
 
-#### Method 2: Multiple Files with Custom Names
-```
-HOA-Declaration.pdf: {{$binary.attachment_0}}
-HOA-BY-LAWS.pdf: {{$binary.attachment_1}}
-ArticlesOfIncorporation.pdf: {{$binary.attachment_2}}
-Contract.pdf: {{$binary.attachment_3}}
-Assessment.pdf: {{$binary.attachment_4}}
-Minutes.pdf: {{$binary.attachment_5}}
-```
+If you prefer to keep using binary upload:
 
-### 🔧 How It Works
-- **Single File**: Processed immediately with any field name
-- **Multiple Files**: All files processed in one request atomically
-- **Automatic Detection**: System detects single vs multiple files automatically
-- **Filename Extraction**: Uses original filename from binary data
+1. **URL**: 
+   ```
+   https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single?filename={{$binary.data.fileName}}
+   ```
 
-### 📁 N8N Configuration for Multiple Files
-To upload 6 different files, make sure you have:
-1. **6 different binary attachments** (attachment_0 through attachment_5)
-2. **6 different form fields** pointing to different attachments
-3. **Each attachment contains different file content**
+2. **Method**: `POST`
 
-### ⚠️ Important Note
-If you're seeing the same file uploaded multiple times, check that:
-- Each `{{$binary.attachment_X}}` points to a different file
-- Your n8n workflow has 6 distinct files, not the same file repeated
-- The binary data for each attachment is actually different content
+3. **Send Body**: `Attach Binary File`
 
-### 💡 Pro Tips
-- Field names can be **anything** (descriptive names help with debugging)
-- System automatically handles any number of files (1-60 files supported)
-- All files are processed in a single atomic transaction
-- Original filenames are preserved from binary data
+4. **Input Data Field Name**: `data`
 
-### 🎉 SUCCESS CONFIRMED
-**Multiple file upload has been successfully tested and verified:**
-- ✅ 6 files uploaded simultaneously in a single request
-- ✅ All files stored correctly in Replit Object Storage
-- ✅ Database records created with proper metadata
-- ✅ Transaction document count updated automatically
-- ✅ Works with any field names (file1, attachment_0, HOA-Declaration.pdf, etc.)
+5. **Headers**:
+   - `X-API-Key`: `docuai_demo_key_123`
 
-## ✅ TESTING RESULTS
-From the server logs, I can confirm that the form-data endpoint is working perfectly:
-- ✅ Successfully uploaded 4 files with different names
-- ✅ Original filenames preserved (e.g., "Jan Meeting Minutes Revised.pdf")
-- ✅ Atomic operation - all files uploaded in one request
-- ✅ Proper error handling and cleanup
-- ✅ Webhook notifications sent after successful uploads
+### Alternative Configuration (Header Method)
 
-## Sample Response
+1. **URL**: 
+   ```
+   https://beeed428-ed5d-4903-bc62-3ba70ac303df-00-38fn65dx21909.kirk.replit.dev/api/transactions/{{$json.Tranx_id}}/upload-single
+   ```
+
+2. **Method**: `POST`
+
+3. **Send Body**: `Attach Binary File`
+
+4. **Input Data Field Name**: `data`
+
+5. **Headers**:
+   - `X-API-Key`: `docuai_demo_key_123`
+   - `X-Filename`: `{{$binary.data.fileName}}`
+
+## Expected Result
+
+✅ **Before Fix**: `raw-binary-1752721581912.pdf`
+✅ **After Fix**: `HOA_Assessment_Delinquency_Policy.pdf` (original filename preserved)
+
+## API Response
+
 ```json
 {
   "success": true,
-  "message": "4 files uploaded successfully",
-  "uploaded": [
-    {
-      "fieldName": "file1",
-      "fileName": "Jan Meeting Minutes Revised.pdf",
-      "documentId": 205
-    },
-    {
-      "fieldName": "file2",
-      "fileName": "Contract Analysis.pdf", 
-      "documentId": 206
-    },
-    {
-      "fieldName": "file3",
-      "fileName": "HOA Document.pdf",
-      "documentId": 207
-    },
-    {
-      "fieldName": "file4",
-      "fileName": "Property Assessment.pdf",
-      "documentId": 208
-    }
-  ],
-  "failed": [],
-  "transactionId": 51
-}
-```
-
-## Benefits of This Solution
-- ✅ Single HTTP request for all files
-- ✅ Original filenames preserved automatically
-- ✅ Atomic operation (all succeed or all fail)
-- ✅ Easy to debug and monitor
-- ✅ No need for Split In Batches node
-- ✅ Works with any number of files
-- ✅ Proper cleanup on errors
-- ✅ Webhook notifications included
-- ✅ **Google Docs support**: Works with Google Docs, Sheets, Slides
-- ✅ **Multiple file formats**: PDF, DOC, DOCX, TXT, RTF, ODT, XLS, XLSX, PPT, PPTX, images
-
-## Next Steps
-1. Update your n8n HTTP Request node to use form-data
-2. Change the URL to `/upload-form-data` endpoint
-3. Add the form-data fields as shown above
-4. Test with your 4 attachments
-
-The system is now ready for reliable multi-file uploads from n8n!
-
-### Alternative: Dynamic Form-Data (Advanced)
-If you want to dynamically handle any number of files, use this approach:
-
-1. **Add Code Node** before HTTP Request:
-```javascript
-const items = [];
-const formData = {};
-
-// Find all attachment binary fields
-const binaryKeys = Object.keys($input.first().binary);
-const attachmentKeys = binaryKeys.filter(key => key.startsWith('attachment_'));
-
-// Create form-data structure
-attachmentKeys.forEach((key, index) => {
-  const fileFieldName = `file${index + 1}`;
-  const nameFieldName = `filename${index + 1}`;
-  
-  formData[fileFieldName] = $input.first().binary[key];
-  formData[nameFieldName] = $input.first().binary[key].fileName;
-});
-
-return [{
-  json: {
-    ...$input.first().json,
-    attachmentCount: attachmentKeys.length
+  "document": {
+    "id": 403,
+    "fileName": "HOA_Assessment_Delinquency_Policy.pdf",
+    "originalFileName": "HOA_Assessment_Delinquency_Policy.pdf",
+    "fileSize": 301891,
+    "mimeType": "application/pdf"
   },
-  binary: formData
-}];
-```
-
-2. **HTTP Request with Dynamic Fields**:
-   - Send Body: Form-Data
-   - Use the dynamically created form-data structure
-
-## Backend Support
-The backend endpoint `/api/transactions/:id/upload-form-data` will:
-- Accept multiple files with any field names (file1, file2, etc.)
-- Extract custom filenames from text fields (filename1, filename2, etc.)
-- Upload all files atomically to Replit Object Storage
-- Return success/failure status for each file
-
-## Expected Response
-```json
-{
-  "success": true,
-  "message": "4 files uploaded successfully",
-  "uploaded": [
-    {
-      "fieldName": "file1",
-      "fileName": "HOA_Document_1.pdf",
-      "documentId": 205
-    },
-    {
-      "fieldName": "file2", 
-      "fileName": "Contract_Analysis.pdf",
-      "documentId": 206
-    }
-  ],
-  "failed": [],
-  "transactionId": 48
+  "message": "File uploaded successfully"
 }
 ```
 
-## Benefits of This Approach
-- Single HTTP request for all files
-- Original filenames preserved
-- Atomic operation (all succeed or all fail)
-- Easy to debug and monitor
-- No need for Split In Batches node
-- Works with any number of files
+## Filename Sources (Priority Order)
+
+The API checks for filenames in this order:
+1. Form-data `filename` parameter
+2. Header `X-Filename`
+3. Header `X-Original-Filename` 
+4. Header `X-File-Name`
+5. Query parameter `filename`
+6. Query parameter `originalFilename`
+7. Query parameter `name`
+8. Content-Disposition header
+9. Fallback: `n8n-upload-{timestamp}.pdf`
+
+## Testing Your Configuration
+
+After implementing the fix, verify in DocuAI Documents section that files show their original names instead of generated names.
+
+## Recommendation
+
+**Use the Form-Data method** as it's the most reliable way to preserve both file content and filename in N8N workflows.

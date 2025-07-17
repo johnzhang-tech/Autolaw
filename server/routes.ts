@@ -15,6 +15,17 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 // Use busboy through multer's interface instead
 
+// Helper function to extract filename from Content-Disposition header
+function extractFilenameFromContentDisposition(contentDisposition?: string): string | null {
+  if (!contentDisposition) return null;
+  
+  const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+  if (matches && matches[1]) {
+    return matches[1].replace(/['"]/g, '');
+  }
+  return null;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication (includes Google OAuth)
   await setupAuth(app);
@@ -1661,13 +1672,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.file) {
         console.log('- Processing N8N Binary File from "data" field');
         fileBuffer = req.file.buffer;
-        fileName = req.file.originalname || `n8n-binary-${Date.now()}.pdf`;
+        
+        // Priority: form-data filename parameter > original filename > fallback
+        fileName = (req.body.filename || 
+                   req.file.originalname || 
+                   `n8n-binary-${Date.now()}.pdf`) as string;
+        
         mimeType = req.file.mimetype || 'application/pdf';
         fileSize = req.file.size;
         
         console.log('- N8N File details:', {
           fieldname: req.file.fieldname,
           originalname: req.file.originalname,
+          formDataFilename: req.body.filename,
+          finalFilename: fileName,
           size: fileSize,
           mimetype: mimeType
         });
@@ -1678,12 +1696,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileBuffer = req.rawBody;
         fileSize = req.rawBody.length;
         
-        // Extract filename from headers or query parameters
+        // Extract filename from multiple sources
         fileName = (req.headers['x-filename'] || 
                    req.headers['x-original-filename'] ||
+                   req.headers['x-file-name'] ||
                    req.query.filename || 
                    req.query.originalFilename ||
-                   `raw-binary-${Date.now()}.pdf`) as string;
+                   req.query.name ||
+                   extractFilenameFromContentDisposition(req.headers['content-disposition']) ||
+                   `n8n-upload-${Date.now()}.pdf`) as string;
         
         mimeType = req.headers['content-type'] || 'application/pdf';
         
