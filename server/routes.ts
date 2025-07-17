@@ -1753,11 +1753,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         originalFileName: fileName,
         mimeType: mimeType,
         fileSize: fileSize,
-        replitStorageKey: uploadResult.objectKey,
+        // S3/Replit Object Storage fields
+        s3Key: uploadResult.objectKey,
+        s3Bucket: uploadResult.bucketName,
+        s3Url: uploadResult.objectUrl,
+        etag: uploadResult.etag,
         uploadStatus: 'completed' as const,
         uploadedAt: new Date(),
       };
       
+      console.log('- Document data for database:', documentData);
       const savedDocument = await storage.createDocument(documentData);
       
       // Update transaction document count
