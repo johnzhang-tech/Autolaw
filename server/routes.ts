@@ -1748,6 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const documentData = {
         transactionId: transactionId,
         userId: userId,
+        uploaderId: userId, // Add missing uploaderId field
         fileName: uploadResult.objectKey.split('/')[1] || fileName,
         originalFileName: fileName,
         mimeType: mimeType,
