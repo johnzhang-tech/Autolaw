@@ -1552,130 +1552,255 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/transactions/:id/upload-single - Upload ONE document to a transaction (ATOMIC)
-  // Flexible endpoint that accepts both multipart form-data and raw binary data from n8n
+  // Enhanced for N8N Binary File support with "data" field name
   app.post('/api/transactions/:id/upload-single', flexAuth, (req: any, res, next) => {
-    console.log('=== ROUTE MATCHED ===');
-    console.log('- Route matched: /api/transactions/:id/upload-single');
-    console.log('- Transaction ID param:', req.params.id);
-    console.log('- Request path:', req.path);
-    console.log('- Request URL:', req.url);
+    console.log('=== N8N UPLOAD-SINGLE ROUTE MATCHED ===');
+    console.log('- Transaction ID:', req.params.id);
+    console.log('- Content-Type:', req.headers['content-type']);
+    console.log('- User-Agent:', req.headers['user-agent']);
+    
     const contentType = req.headers['content-type'] || '';
     
-    console.log('=== MIDDLEWARE DEBUG ===');
-    console.log('- Content-Type:', contentType);
-    console.log('- User-Agent:', req.headers['user-agent']);
-    console.log('- Is multipart:', contentType.includes('multipart/form-data'));
-    
+    // Handle N8N Binary File format (multipart with "data" field)
     if (contentType.includes('multipart/form-data')) {
-      // Use ultra-permissive multer for n8n multipart form-data
-      console.log('- Using ultra-permissive multer for n8n');
+      console.log('- Detected N8N multipart/form-data with Binary File');
       
-      // Create ultra-permissive multer on the fly
-      const ultraPermissiveUpload = multer({
+      // Ultra-permissive multer specifically for N8N "data" field
+      const n8nBinaryUpload = multer({
         storage: multer.memoryStorage(),
         limits: {
           fileSize: 10 * 1024 * 1024, // 10MB
-          files: 60
+          files: 1 // Single file upload
         },
         fileFilter: (req, file, cb) => {
-          // Accept ALL files, even with missing field names
-          console.log('- Ultra-permissive filter accepting file:', {
-            fieldname: file.fieldname || 'MISSING',
-            originalname: file.originalname || 'MISSING'
+          console.log('- N8N Binary File detected:', {
+            fieldname: file.fieldname,
+            originalname: file.originalname || 'N8N_BINARY_FILE',
+            mimetype: file.mimetype
           });
-          cb(null, true);
+          cb(null, true); // Accept all files
         }
       });
       
-      // Use any() to accept ANY field names from n8n
-      ultraPermissiveUpload.any()(req, res, (err) => {
+      // Use single('data') to specifically handle N8N's "data" field
+      n8nBinaryUpload.single('data')(req, res, (err) => {
         if (err) {
-          console.error('- Ultra-permissive multer error:', err);
-          // Even if multer fails, try to continue
-          req.files = {};
+          console.error('- N8N Binary upload error:', err);
+          return res.status(400).json({ 
+            success: false, 
+            error: 'N8N Binary File upload failed: ' + err.message 
+          });
         }
-        console.log('- Multer processing complete, req.files type:', typeof req.files);
-        console.log('- Multer processing complete, req.files:', req.files);
-        console.log('- Multer processing complete, req.body:', req.body);
+        
+        console.log('- N8N Binary File processed successfully');
+        console.log('- File details:', req.file ? {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          size: req.file.size,
+          mimetype: req.file.mimetype
+        } : 'No file received');
+        
         next();
       });
-    } else {
-      // Use raw body parsing for binary data
-      console.log('- Using raw body parsing for binary');
-      // Set up to collect raw binary data
+    } else if (contentType.includes('application/octet-stream') || contentType.includes('application/pdf')) {
+      // Handle raw binary data
+      console.log('- Detected raw binary upload');
       const chunks: Buffer[] = [];
       req.on('data', (chunk: Buffer) => {
         chunks.push(chunk);
       });
       req.on('end', () => {
-        req.body = Buffer.concat(chunks);
+        req.rawBody = Buffer.concat(chunks);
+        console.log('- Raw binary data collected, size:', req.rawBody.length);
         next();
       });
-      req.on('error', next);
+      req.on('error', (err) => {
+        console.error('- Raw binary upload error:', err);
+        next(err);
+      });
+    } else {
+      // Handle other formats (JSON, etc.)
+      console.log('- Using default express parsing');
+      next();
     }
   }, async (req: any, res) => {
-    console.log('=== UPLOAD-SINGLE MAIN HANDLER START ===');
-    console.log('- req.files type at main handler:', typeof req.files);
-    console.log('- req.files value at main handler:', req.files);
+    console.log('=== N8N UPLOAD-SINGLE MAIN HANDLER ===');
     
     try {
-      const contentType = req.headers['content-type'] || '';
-      let file: Express.Multer.File | null = null;
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
       
-      // Enhanced debugging for n8n integration
-      console.log('=== N8N SINGLE UPLOAD DEBUG ===');
-      console.log('- URL:', req.url);
-      console.log('- Method:', req.method);
-      console.log('- Headers:', JSON.stringify(req.headers, null, 2));
-      console.log('- Content-Type:', contentType);
-      console.log('- Content-Length:', req.headers['content-length']);
-      console.log('- Body type:', typeof req.body);
-      console.log('- Body is Buffer:', Buffer.isBuffer(req.body));
-      console.log('- Body size:', req.body ? (Buffer.isBuffer(req.body) ? req.body.length : JSON.stringify(req.body).length) : 0);
-      console.log('- Query params:', req.query);
+      console.log('- Transaction ID:', transactionId);
+      console.log('- User ID:', userId);
+      console.log('- Has req.file (N8N data field):', !!req.file);
+      console.log('- Has req.rawBody (binary):', !!req.rawBody);
       
-      // Handle raw binary data (n8n sends entire file as body)
-      if (Buffer.isBuffer(req.body) && req.body.length > 0) {
-        console.log('- Processing raw binary body, size:', req.body.length);
-        
-        // Get filename from multiple sources that n8n might use
-        let filename = req.headers['x-filename'] || 
-                       req.headers['x-original-filename'] ||
-                       req.headers['x-file-name'] ||
-                       req.headers['original-filename'] ||
-                       req.query.filename || 
-                       req.query.originalFilename ||
-                       req.query['original-filename'] ||
-                       req.headers['content-disposition'];
-        
-        // Parse Content-Disposition header if present
-        if (filename && typeof filename === 'string' && filename.includes('filename=')) {
-          const match = filename.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-          if (match && match[1]) {
-            filename = match[1].replace(/['"]/g, '');
-          }
-        }
-        
-        console.log('- Filename detection attempt:', {
-          'x-filename': req.headers['x-filename'],
-          'x-original-filename': req.headers['x-original-filename'],
-          'x-file-name': req.headers['x-file-name'],
-          'query.filename': req.query.filename,
-          'query.originalFilename': req.query.originalFilename,
-          'content-disposition': req.headers['content-disposition'],
-          'final-filename': filename
+      // Validate transaction ID
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid transaction ID' 
         });
+      }
+      
+      // Verify transaction exists and user has access
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Transaction not found' 
+        });
+      }
+      
+      let fileBuffer: Buffer;
+      let fileName: string;
+      let mimeType: string;
+      let fileSize: number;
+      
+      // Process N8N Binary File (multipart with "data" field)
+      if (req.file) {
+        console.log('- Processing N8N Binary File from "data" field');
+        fileBuffer = req.file.buffer;
+        fileName = req.file.originalname || `n8n-binary-${Date.now()}.pdf`;
+        mimeType = req.file.mimetype || 'application/pdf';
+        fileSize = req.file.size;
         
-        // Default to a generic name if no filename provided
-        if (!filename || typeof filename !== 'string') {
-          // Try to determine extension from mime type
-          let ext = '.pdf';
-          if (detectedMimeType.includes('google-apps.document')) ext = '.gdoc';
-          else if (detectedMimeType.includes('google-apps.spreadsheet')) ext = '.gsheet';
-          else if (detectedMimeType.includes('google-apps.presentation')) ext = '.gslides';
-          else if (detectedMimeType.includes('msword')) ext = '.doc';
-          else if (detectedMimeType.includes('wordprocessingml.document')) ext = '.docx';
-          else if (detectedMimeType.includes('text/plain')) ext = '.txt';
+        console.log('- N8N File details:', {
+          fieldname: req.file.fieldname,
+          originalname: req.file.originalname,
+          size: fileSize,
+          mimetype: mimeType
+        });
+      } 
+      // Process raw binary data
+      else if (req.rawBody && req.rawBody.length > 0) {
+        console.log('- Processing raw binary data');
+        fileBuffer = req.rawBody;
+        fileSize = req.rawBody.length;
+        
+        // Extract filename from headers or query parameters
+        fileName = (req.headers['x-filename'] || 
+                   req.headers['x-original-filename'] ||
+                   req.query.filename || 
+                   req.query.originalFilename ||
+                   `raw-binary-${Date.now()}.pdf`) as string;
+        
+        mimeType = req.headers['content-type'] || 'application/pdf';
+        
+        console.log('- Raw binary details:', {
+          size: fileSize,
+          filename: fileName,
+          mimetype: mimeType
+        });
+      } 
+      else {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'No file data received. Expected N8N Binary File in "data" field or raw binary data.' 
+        });
+      }
+      
+      // Validate file size (10MB limit)
+      if (fileSize > 10 * 1024 * 1024) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'File too large. Maximum size is 10MB.' 
+        });
+      }
+      
+      // Check for duplicate files
+      const existingDocs = await storage.getDocuments(transactionId, userId);
+      const isDuplicate = existingDocs.some(doc => 
+        doc.originalFileName === fileName && doc.fileSize === fileSize
+      );
+      
+      if (isDuplicate) {
+        return res.status(400).json({
+          success: false,
+          error: 'Duplicate file detected',
+          message: `File "${fileName}" already exists in this transaction`
+        });
+      }
+      
+      console.log(`- Uploading to Replit Object Storage: ${fileName} (${fileSize} bytes)`);
+      
+      // Upload to Replit Object Storage
+      const uploadResult = await replitObjectStorage.uploadFile(
+        fileBuffer,
+        fileName,
+        mimeType,
+        transaction.name,
+        transactionId
+      );
+      
+      console.log('- Upload successful, object key:', uploadResult.objectKey);
+      
+      // Save document metadata to database
+      const documentData = {
+        transactionId: transactionId,
+        userId: userId,
+        fileName: uploadResult.objectKey.split('/')[1] || fileName,
+        originalFileName: fileName,
+        mimeType: mimeType,
+        fileSize: fileSize,
+        replitStorageKey: uploadResult.objectKey,
+        uploadStatus: 'completed' as const,
+        uploadedAt: new Date(),
+      };
+      
+      const savedDocument = await storage.createDocument(documentData);
+      
+      // Update transaction document count
+      await storage.updateTransactionDocumentCount(transactionId);
+      
+      console.log('- Document saved with ID:', savedDocument.id);
+      
+      // WEBHOOK: Notify about new document
+      try {
+        const user = await storage.getUser(userId);
+        const allDocuments = await storage.getDocuments(transactionId, userId);
+        if (user) {
+          await webhookService.onTransactionCreated(transaction, user, allDocuments);
+        }
+      } catch (webhookError) {
+        console.error('Webhook notification failed (non-blocking):', webhookError);
+      }
+      
+      // Success response
+      res.json({
+        success: true,
+        message: 'File uploaded successfully via N8N Binary File',
+        document: {
+          id: savedDocument.id,
+          fileName: fileName,
+          fileSize: fileSize,
+          mimeType: mimeType,
+          uploadStatus: 'completed'
+        },
+        transactionId: transactionId
+      });
+      
+    } catch (error: any) {
+      console.error('N8N upload-single error:', error);
+      
+      // Clean up any uploaded files on error
+      if (error.uploadResult?.objectKey) {
+        try {
+          await replitObjectStorage.deleteFile(error.uploadResult.objectKey);
+          console.log('- Cleaned up uploaded file after error');
+        } catch (cleanupError) {
+          console.error('- Failed to cleanup uploaded file:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({
+        success: false,
+        error: 'Upload failed',
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  });
           
           filename = `n8n-upload-${Date.now()}${ext}`;
         }
