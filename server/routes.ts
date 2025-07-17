@@ -1727,10 +1727,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Upload to Replit Object Storage
       const uploadResult = await replitObjectStorage.uploadFile(
         fileBuffer,
-        fileName,
-        mimeType,
         transaction.name,
-        transactionId
+        transactionId,
+        fileName,
+        mimeType
       );
       
       console.log('- Upload successful, object key:', uploadResult.objectKey);
