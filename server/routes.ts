@@ -1593,8 +1593,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // Use single('data') to specifically handle N8N's "data" field
-      n8nBinaryUpload.single('data')(req, res, (err) => {
+      // Use any() to handle any field name (data, document, attachment, etc.)
+      n8nBinaryUpload.any()(req, res, (err) => {
         if (err) {
           console.error('- N8N Binary upload error:', err);
           return res.status(400).json({ 
@@ -1604,11 +1604,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         console.log('- N8N Binary File processed successfully');
-        console.log('- File details:', req.file ? {
-          fieldname: req.file.fieldname,
-          originalname: req.file.originalname,
-          size: req.file.size,
-          mimetype: req.file.mimetype
+        console.log('- File details:', req.files?.length ? {
+          fieldname: req.files[0].fieldname,
+          originalname: req.files[0].originalname,
+          size: req.files[0].size,
+          mimetype: req.files[0].mimetype
         } : 'No file received');
         
         next();
@@ -1643,7 +1643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('- Transaction ID:', transactionId);
       console.log('- User ID:', userId);
-      console.log('- Has req.file (N8N data field):', !!req.file);
+      console.log('- Has req.files (N8N data field):', !!req.files?.length);
       console.log('- Has req.rawBody (binary):', !!req.rawBody);
       
       // Validate transaction ID
@@ -1668,22 +1668,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let mimeType: string;
       let fileSize: number;
       
-      // Process N8N Binary File (multipart with "data" field)
-      if (req.file) {
-        console.log('- Processing N8N Binary File from "data" field');
-        fileBuffer = req.file.buffer;
+      // Process N8N Binary File (multipart with any field name)
+      if (req.files && req.files.length > 0) {
+        console.log('- Processing N8N Binary File from any field');
+        const file = req.files[0]; // Get the first (and should be only) file
+        fileBuffer = file.buffer;
         
         // Priority: form-data filename parameter > original filename > fallback
         fileName = (req.body.filename || 
-                   req.file.originalname || 
+                   file.originalname || 
                    `n8n-binary-${Date.now()}.pdf`) as string;
         
-        mimeType = req.file.mimetype || 'application/pdf';
-        fileSize = req.file.size;
+        mimeType = file.mimetype || 'application/pdf';
+        fileSize = file.size;
         
         console.log('- N8N File details:', {
-          fieldname: req.file.fieldname,
-          originalname: req.file.originalname,
+          fieldname: file.fieldname,
+          originalname: file.originalname,
           formDataFilename: req.body.filename,
           finalFilename: fileName,
           size: fileSize,
