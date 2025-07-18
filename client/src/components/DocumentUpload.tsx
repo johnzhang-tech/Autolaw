@@ -36,8 +36,16 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
   // Multiple file upload mutation for Replit Object Storage
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
+      const token = localStorage.getItem('docuai_token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers,
         body: formData,
       });
       
