@@ -3520,6 +3520,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe payment endpoint
+  app.post('/api/create-payment-intent', flexAuth, async (req: any, res) => {
+    try {
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      
+      const { amount, currency = 'usd', metadata = {} } = req.body;
+      
+      if (!amount || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ error: 'Valid amount is required' });
+      }
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: currency,
+        metadata: metadata
+      });
+      
+      res.json({
+        clientSecret: paymentIntent.client_secret
+      });
+    } catch (error) {
+      console.error('Stripe payment intent error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create payment intent: ' + error.message 
+      });
+    }
+  });
+
+  // Payment history endpoint (mock data for now)
+  app.get('/api/payments/history', flexAuth, async (req: any, res) => {
+    try {
+      // Mock payment history data
+      const paymentHistory = [
+        {
+          id: 'pi_1234567890',
+          amount: 29.00,
+          currency: 'usd',
+          status: 'succeeded',
+          tier: 'Reporting + Q&A',
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+          paymentMethod: 'Visa ending in 4242'
+        },
+        {
+          id: 'pi_0987654321',
+          amount: 20.00,
+          currency: 'usd',
+          status: 'succeeded',
+          tier: 'Reporting',
+          createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days ago
+          paymentMethod: 'Mastercard ending in 1234'
+        }
+      ];
+      
+      res.json(paymentHistory);
+    } catch (error) {
+      console.error('Payment history error:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch payment history: ' + error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
