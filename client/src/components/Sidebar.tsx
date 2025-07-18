@@ -80,7 +80,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     {
       icon: CreditCard,
       label: "Payment",
-      href: "/stripe-setup",
+      href: "/payment",
     },
   ];
 

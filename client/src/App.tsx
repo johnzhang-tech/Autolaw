@@ -13,6 +13,7 @@ import AgentQA from "@/pages/agent-qa";
 import Documents from "@/pages/documents";
 import Dashboard from "@/pages/dashboard";
 import PaymentSimple from "@/pages/payment-simple";
+import Payment from "@/pages/payment";
 import Manage from "@/pages/manage";
 import TestApi from "@/pages/test-api";
 import StorageBrowser from "@/pages/storage-browser";
@@ -57,6 +58,7 @@ function Router() {
           <Route path="/documents" component={Documents} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/manage" component={Manage} />
+          <Route path="/payment" component={Payment} />
           <Route path="/storage" component={StorageBrowser} />
           <Route path="/stripe-setup" component={StripeSetup} />
           <Route path="/test-api" component={TestApi} />
