@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Sidebar } from "@/components/Sidebar";
 import { 
   CreditCard, 
   FileText, 
@@ -204,6 +205,7 @@ function StripePaymentForm({ selectedTier, onSuccess, onError }: {
 function Payment() {
   const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState<PaymentTier | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Fetch payment history
   const { data: paymentHistory, isLoading: isLoadingHistory } = useQuery<PaymentTransaction[]>({
@@ -255,16 +257,21 @@ function Payment() {
   };
 
   return (
-    <Elements stripe={stripePromise}>
-      <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Payment & Billing</h2>
-            <p className="text-muted-foreground">
-              Manage your subscriptions and view payment history
-            </p>
-          </div>
-        </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar collapsed={sidebarCollapsed} onToggle={setSidebarCollapsed} />
+      
+      <main className="flex-1 overflow-hidden">
+        <Elements stripe={stripePromise}>
+          <div className="h-full overflow-y-auto">
+            <div className="space-y-6 p-4 md:p-8 pt-6">
+              <div className="flex items-center justify-between space-y-2">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight">Payment</h2>
+                  <p className="text-muted-foreground">
+                    Manage your subscriptions and view payment history
+                  </p>
+                </div>
+              </div>
 
         <Tabs defaultValue="subscribe" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
@@ -435,9 +442,12 @@ function Payment() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
-      </div>
-    </Elements>
+              </Tabs>
+            </div>
+          </div>
+        </Elements>
+      </main>
+    </div>
   );
 }
 
