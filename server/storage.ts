@@ -2,6 +2,7 @@ import {
   users,
   transactions,
   documents,
+  reports,
   chatSessions,
   chatMessages,
   paymentTransactions,
@@ -11,6 +12,8 @@ import {
   type InsertTransaction,
   type Document,
   type InsertDocument,
+  type Report,
+  type InsertReport,
   type ChatSession,
   type InsertChatSession,
   type ChatMessage,
@@ -50,6 +53,13 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: number, userId: string, updates: Partial<InsertDocument>): Promise<Document>;
   deleteDocument(id: number, userId: string): Promise<void>;
+
+  // Report operations
+  getReports(transactionId: number, userId: string): Promise<Report[]>;
+  getReport(id: number, userId: string): Promise<Report | undefined>;
+  createReport(report: InsertReport): Promise<Report>;
+  updateReport(id: number, userId: string, updates: Partial<InsertReport>): Promise<Report>;
+  deleteReport(id: number, userId: string): Promise<void>;
 
   // Chat operations
   getChatSessions(userId: string): Promise<ChatSession[]>;
@@ -376,6 +386,86 @@ export class DatabaseStorage implements IStorage {
     
     // Update the document count for the transaction
     await this.updateTransactionDocumentCount(document.transactionId);
+  }
+
+  // Report operations
+  async getReports(transactionId: number, userId: string): Promise<Report[]> {
+    // Check if user has access to this transaction
+    const transaction = await this.getTransaction(transactionId, userId);
+    if (!transaction) {
+      throw new Error("Transaction not found or access denied");
+    }
+
+    return await db
+      .select()
+      .from(reports)
+      .where(eq(reports.transactionId, transactionId))
+      .orderBy(desc(reports.generatedAt));
+  }
+
+  async getReport(id: number, userId: string): Promise<Report | undefined> {
+    // Check if user is admin
+    const user = await this.getUser(userId);
+    if (user?.role === 'admin') {
+      // Admin can see any report
+      const [report] = await db
+        .select()
+        .from(reports)
+        .where(eq(reports.id, id));
+      return report;
+    } else {
+      // Regular users only see their own reports
+      const [report] = await db
+        .select()
+        .from(reports)
+        .where(and(
+          eq(reports.id, id),
+          eq(reports.userId, userId)
+        ));
+      return report;
+    }
+  }
+
+  async createReport(report: InsertReport): Promise<Report> {
+    const [newReport] = await db
+      .insert(reports)
+      .values(report)
+      .returning();
+    
+    return newReport;
+  }
+
+  async updateReport(id: number, userId: string, updates: Partial<InsertReport>): Promise<Report> {
+    const [report] = await db
+      .update(reports)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(reports.id, id),
+        eq(reports.userId, userId)
+      ))
+      .returning();
+    
+    if (!report) {
+      throw new Error("Report not found or access denied");
+    }
+    
+    return report;
+  }
+
+  async deleteReport(id: number, userId: string): Promise<void> {
+    const result = await db
+      .delete(reports)
+      .where(and(
+        eq(reports.id, id),
+        eq(reports.userId, userId)
+      ));
+    
+    if (result.rowCount === 0) {
+      throw new Error("Report not found or access denied");
+    }
   }
 
   // Chat operations

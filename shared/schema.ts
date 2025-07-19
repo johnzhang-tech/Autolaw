@@ -60,6 +60,51 @@ export const transactions = pgTable("transactions", {
   transactionType: varchar("transaction_type").notNull(), // "purchase", "sale", "refinance", etc.
   status: varchar("status").notNull().default("active"), // "active", "closed", "cancelled"
   numDocuments: integer("num_documents").notNull().default(0), // Auto-maintained count of uploaded documents
+  
+  // Enhanced agent and knowledge base fields
+  agentName: varchar("agent_name"), // Internal agent name: transaction_name_transaction_number
+  knowledgeBaseName: varchar("knowledge_base_name"), // KB_transaction_name_transaction_number
+  
+  // Email capture fields for report delivery
+  senderEmail: varchar("sender_email"), // Email address of the sender
+  senderTimestamp: timestamp("sender_timestamp"), // When the email was sent
+  recipientEmail: varchar("recipient_email"), // Where to send reports (can be different from sender)
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Reports table for one-to-many transaction-to-reports relationship
+export const reports = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  transactionId: integer("transaction_id").notNull().references(() => transactions.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull(),
+  
+  // Report identification - using reportName to match our API
+  reportName: varchar("report_name").notNull(), // Transaction_name + brief_date for uniqueness
+  reportType: varchar("report_type").notNull().default("document_analysis"), // "document_analysis", "summary", "compliance", etc.
+  
+  // Generation tracking
+  generatedAt: timestamp("generated_at").defaultNow(),
+  generatedBy: varchar("generated_by"), // User or system that generated the report
+  
+  // Report content and storage
+  s3Key: varchar("s3_key"), // Replit Object Storage key for the report file
+  s3Url: varchar("s3_url"), // Full URL for accessing the report
+  fileSize: integer("file_size"), // Size of the generated report file
+  mimeType: varchar("mime_type").default("application/pdf"), // Usually PDF
+  
+  // Report metadata
+  status: varchar("status").notNull().default("generated"), // "generating", "generated", "delivered", "failed"
+  summary: text("summary"), // Brief description of the report content
+  reportData: jsonb("report_data"), // Structured report data (JSON)
+  
+  // Enhanced email tracking fields for our new requirements
+  senderEmail: varchar("sender_email"), // Email of the person sending the report
+  receiverEmail: varchar("receiver_email"), // Email of the recipient 
+  deliveredAt: timestamp("delivered_at"), // When the report was delivered
+  deliveryStatus: varchar("delivery_status"), // "pending", "sent", "failed"
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -168,6 +213,18 @@ export const transactionsRelations = relations(transactions, ({ one, many }) => 
     references: [users.id],
   }),
   documents: many(documents),
+  reports: many(reports),
+}));
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  transaction: one(transactions, {
+    fields: [reports.transactionId],
+    references: [transactions.id],
+  }),
+  user: one(users, {
+    fields: [reports.userId],
+    references: [users.id],
+  }),
 }));
 
 export const documentsRelations = relations(documents, ({ one }) => ({
@@ -252,6 +309,13 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertReportSchema = createInsertSchema(reports).omit({
+  id: true,
+  generatedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -277,3 +341,6 @@ export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 
 export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
 export type InsertPaymentTransaction = typeof paymentTransactions.$inferInsert;
+
+export type Report = typeof reports.$inferSelect;
+export type InsertReport = z.infer<typeof insertReportSchema>;

@@ -600,17 +600,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to generate unique agent name
+  const generateAgentName = (transactionName: string, transactionId: number): string => {
+    return `${transactionName}_${transactionId}`;
+  };
+
+  // Helper function to generate unique knowledge base name  
+  const generateKnowledgeBaseName = (transactionName: string, transactionId: number): string => {
+    return `KB_${transactionName}_${transactionId}`;
+  };
+
   app.post('/api/transactions', flexAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const validatedData = createTransactionSchema.parse(req.body);
+      
+      // Create transaction first to get the ID
       const transaction = await storage.createTransaction({
         ...validatedData,
         userId
       });
+
+      // Generate and update agent and knowledge base names based on transaction ID
+      const agentName = generateAgentName(transaction.name, transaction.id);
+      const knowledgeBaseName = generateKnowledgeBaseName(transaction.name, transaction.id);
+      
+      // Update transaction with generated names
+      const updatedTransaction = await storage.updateTransaction(transaction.id, userId, {
+        agentName,
+        knowledgeBaseName
+      });
       
       // Transform response to use Tranx_id instead of id to avoid downstream conflicts
-      const { id, ...rest } = transaction;
+      const { id, ...rest } = updatedTransaction;
       const transformedTransaction = {
         ...rest,
         Tranx_id: id
@@ -3521,6 +3543,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment endpoint
+  // Report endpoints
+  
+  // GET /api/transactions/:id/reports - Get all reports for a transaction
+  app.get('/api/transactions/:id/reports', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+      
+      const reports = await storage.getReports(transactionId, userId);
+      res.json(reports);
+    } catch (error: any) {
+      console.error("Error fetching reports:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  // GET /api/reports/:id - Get a specific report
+  app.get('/api/reports/:id', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reportId = parseInt(req.params.id);
+      
+      if (isNaN(reportId)) {
+        return res.status(400).json({ message: "Invalid report ID" });
+      }
+      
+      const report = await storage.getReport(reportId, userId);
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      
+      res.json(report);
+    } catch (error: any) {
+      console.error("Error fetching report:", error);
+      res.status(500).json({ message: "Failed to fetch report" });
+    }
+  });
+
+  // POST /api/transactions/:id/reports - Create a new report
+  app.post('/api/transactions/:id/reports', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const transactionId = parseInt(req.params.id);
+      
+      if (isNaN(transactionId)) {
+        return res.status(400).json({ message: "Invalid transaction ID" });
+      }
+
+      // Verify transaction exists and user has access
+      const transaction = await storage.getTransaction(transactionId, userId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      // Generate unique report name based on transaction name and current date
+      const dateStr = new Date().toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: '2-digit' 
+      }).replace(/\s+/g, '');
+      const reportName = `${transaction.name}_${dateStr}`;
+
+      // Validate required fields
+      const { reportData, reportType = 'document_analysis', senderEmail, receiverEmail } = req.body;
+      
+      if (!reportData) {
+        return res.status(400).json({ message: "Report data is required" });
+      }
+
+      const reportToCreate = {
+        transactionId,
+        userId,
+        reportName,
+        reportType,
+        reportData,
+        senderEmail,
+        receiverEmail,
+        generatedAt: new Date(),
+        deliveredAt: null
+      };
+      
+      const report = await storage.createReport(reportToCreate);
+      res.status(201).json(report);
+    } catch (error: any) {
+      console.error("Error creating report:", error);
+      res.status(500).json({ message: "Failed to create report" });
+    }
+  });
+
+  // PUT /api/reports/:id - Update a report
+  app.put('/api/reports/:id', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reportId = parseInt(req.params.id);
+      
+      if (isNaN(reportId)) {
+        return res.status(400).json({ message: "Invalid report ID" });
+      }
+
+      const updates = req.body;
+      const report = await storage.updateReport(reportId, userId, updates);
+      res.json(report);
+    } catch (error: any) {
+      console.error("Error updating report:", error);
+      if (error.message === "Report not found or access denied") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to update report" });
+      }
+    }
+  });
+
+  // DELETE /api/reports/:id - Delete a report
+  app.delete('/api/reports/:id', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reportId = parseInt(req.params.id);
+      
+      if (isNaN(reportId)) {
+        return res.status(400).json({ message: "Invalid report ID" });
+      }
+
+      await storage.deleteReport(reportId, userId);
+      res.json({ message: "Report deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting report:", error);
+      if (error.message === "Report not found or access denied") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to delete report" });
+      }
+    }
+  });
+
+  // POST /api/reports/:id/deliver - Mark a report as delivered
+  app.post('/api/reports/:id/deliver', flexAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reportId = parseInt(req.params.id);
+      
+      if (isNaN(reportId)) {
+        return res.status(400).json({ message: "Invalid report ID" });
+      }
+
+      const { receiverEmail } = req.body;
+      
+      const updates = {
+        deliveredAt: new Date(),
+        ...(receiverEmail && { receiverEmail })
+      };
+      
+      const report = await storage.updateReport(reportId, userId, updates);
+      res.json({
+        message: "Report marked as delivered",
+        report
+      });
+    } catch (error: any) {
+      console.error("Error marking report as delivered:", error);
+      if (error.message === "Report not found or access denied") {
+        res.status(404).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to mark report as delivered" });
+      }
+    }
+  });
+
   app.post('/api/create-payment-intent', flexAuth, async (req: any, res) => {
     try {
       const Stripe = require('stripe');
