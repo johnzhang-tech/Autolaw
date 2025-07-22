@@ -86,10 +86,11 @@ export default function Agents() {
             <Card className="h-full">
               <CardContent className="p-0 h-full">
                 <iframe
-                  src="https://your-ragflow-agent-2-url.com"
-                  className="w-full h-full border-0 rounded-b-lg"
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '100%', minHeight: '600px' }}
+                  frameBorder="0"
                   title="Case 2 Agent"
-                  sandbox="allow-same-origin allow-scripts allow-forms"
+                  className="rounded-b-lg"
                 />
               </CardContent>
             </Card>
