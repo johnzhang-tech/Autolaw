@@ -112,91 +112,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Panel - Law Theme */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 relative overflow-hidden items-center justify-center">
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-indigo-900/80"></div>
-        
-        {/* Legal Theme Illustration */}
+      {/* Left Panel - Law Theme with Provided Image */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 relative overflow-hidden items-center justify-center">
+        {/* Law Image */}
         <div className="relative z-10 w-full h-full flex items-center justify-center p-12">
-          <svg 
-            viewBox="0 0 400 400" 
-            className="w-full max-w-lg h-auto"
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Scales of Justice */}
-            <g transform="translate(200, 80)">
-              {/* Scale base */}
-              <ellipse cx="0" cy="120" rx="40" ry="12" fill="#4F46E5" opacity="0.8" />
-              
-              {/* Main pole */}
-              <rect x="-3" y="-60" width="6" height="180" fill="#6366F1" />
-              
-              {/* Top ornament */}
-              <circle cx="0" cy="-60" r="8" fill="#818CF8" />
-              
-              {/* Cross beam */}
-              <rect x="-80" y="-40" width="160" height="4" fill="#6366F1" />
-              
-              {/* Left scale */}
-              <g transform="translate(-60, -35)">
-                <path d="M -25 0 L 25 0 L 20 -15 L -20 -15 Z" fill="#8B5CF6" opacity="0.9" />
-                <path d="M -20 -15 Q 0 -25 20 -15" stroke="#A78BFA" strokeWidth="2" fill="none" />
-                <line x1="-25" y1="0" x2="-25" y2="-30" stroke="#6366F1" strokeWidth="2" />
-                <line x1="25" y1="0" x2="25" y2="-30" stroke="#6366F1" strokeWidth="2" />
-                <line x1="0" y1="-30" x2="0" y2="-40" stroke="#6366F1" strokeWidth="2" />
-              </g>
-              
-              {/* Right scale */}
-              <g transform="translate(60, -35)">
-                <path d="M -25 0 L 25 0 L 20 -15 L -20 -15 Z" fill="#8B5CF6" opacity="0.9" />
-                <path d="M -20 -15 Q 0 -25 20 -15" stroke="#A78BFA" strokeWidth="2" fill="none" />
-                <line x1="-25" y1="0" x2="-25" y2="-30" stroke="#6366F1" strokeWidth="2" />
-                <line x1="25" y1="0" x2="25" y2="-30" stroke="#6366F1" strokeWidth="2" />
-                <line x1="0" y1="-30" x2="0" y2="-40" stroke="#6366F1" strokeWidth="2" />
-              </g>
-            </g>
-            
-            {/* Stack of Law Books */}
-            <g transform="translate(200, 280)">
-              {/* Bottom book */}
-              <rect x="-60" y="0" width="120" height="20" rx="2" fill="#1E40AF" />
-              <rect x="-55" y="5" width="110" height="10" fill="#3B82F6" />
-              <text x="0" y="13" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">LAW</text>
-              
-              {/* Middle book */}
-              <rect x="-50" y="-25" width="100" height="18" rx="2" fill="#7C3AED" />
-              <rect x="-45" y="-20" width="90" height="8" fill="#8B5CF6" />
-              
-              {/* Top book */}
-              <rect x="-45" y="-45" width="90" height="16" rx="2" fill="#1D4ED8" />
-              <rect x="-40" y="-40" width="80" height="6" fill="#3B82F6" />
-              
-              {/* Second stack */}
-              <rect x="70" y="-10" width="80" height="18" rx="2" fill="#4338CA" />
-              <rect x="75" y="-5" width="70" height="8" fill="#6366F1" />
-              
-              <rect x="75" y="-30" width="70" height="16" rx="2" fill="#5B21B6" />
-              <rect x="80" y="-25" width="60" height="6" fill="#7C3AED" />
-            </g>
-            
-            {/* Glowing effects */}
-            <defs>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge> 
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            
-            {/* Background glow circles */}
-            <circle cx="150" cy="150" r="60" fill="#6366F1" opacity="0.1" filter="url(#glow)" />
-            <circle cx="250" cy="200" r="40" fill="#8B5CF6" opacity="0.15" filter="url(#glow)" />
-            <circle cx="320" cy="120" r="30" fill="#A78BFA" opacity="0.1" filter="url(#glow)" />
-          </svg>
+          <img 
+            src="/attached_assets/ChatGPT Image Jul 21, 2025, 07_35_10 PM_1753151956635.png"
+            alt="Scales of Justice and Law Books"
+            className="w-full max-w-lg h-auto object-contain"
+          />
         </div>
         
         {/* Brand text overlay */}
