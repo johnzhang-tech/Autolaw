@@ -1,22 +1,15 @@
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
+import { Toaster } from "@/components/ui/toaster";
+import Landing from "@/pages/landing";
 import "./index.css";
 
-// Minimal test component for wouter
-function TestPage() {
-  return (
-    <div className="p-8">
-      <h1>Test Page</h1>
-      <p>This is a minimal test with wouter routing.</p>
-    </div>
-  );
-}
-
+// Test if adding Landing page causes the error
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={TestPage} />
+      <Route path="/" component={Landing} />
       <Route component={() => <div className="p-8">404 Not Found</div>} />
     </Switch>
   );
@@ -25,7 +18,10 @@ function Router() {
 function MinimalApp() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <div>
+        <Toaster />
+        <Router />
+      </div>
     </QueryClientProvider>
   );
 }
