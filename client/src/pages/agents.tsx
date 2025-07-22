@@ -47,7 +47,7 @@ export default function Agents() {
             >
               <div className="flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
-                <span>Case 3 Agent</span>
+                <span className="font-bold">Case 3 Agent</span>
               </div>
             </button>
             <button
@@ -60,7 +60,7 @@ export default function Agents() {
             >
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
-                <span>Case 2 Agent</span>
+                <span className="font-bold">Case 2 Agent</span>
               </div>
             </button>
           </div>
@@ -103,10 +103,6 @@ export default function Agents() {
                   title="Case 2 Agent"
                   sandbox="allow-same-origin allow-scripts allow-forms"
                 />
-                <div className="p-4 bg-gray-50 text-center text-sm text-gray-500">
-                  <p>🔧 Ragflow Agent 2 - Replace with your actual Ragflow URL</p>
-                  <p className="text-xs mt-1">Update the iframe src in client/src/pages/agents.tsx</p>
-                </div>
               </CardContent>
             </Card>
           )}
