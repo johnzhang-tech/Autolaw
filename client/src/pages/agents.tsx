@@ -7,7 +7,7 @@ import { Bot, MessageSquare, FileText, Users } from "lucide-react";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2'>('agent1');
+  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>('agent1');
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -63,6 +63,19 @@ export default function Agents() {
                 <span className="font-bold">Case 2 Agent</span>
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab('agent3')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'agent3'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4" />
+                <span className="font-bold">Case Large File</span>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -90,6 +103,20 @@ export default function Agents() {
                   style={{ width: '100%', height: '100%', minHeight: '600px' }}
                   frameBorder="0"
                   title="Case 2 Agent"
+                  className="rounded-b-lg"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'agent3' && (
+            <Card className="h-full">
+              <CardContent className="p-0 h-full">
+                <iframe
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '100%', minHeight: '600px' }}
+                  frameBorder="0"
+                  title="Case Large File"
                   className="rounded-b-lg"
                 />
               </CardContent>
