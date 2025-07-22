@@ -15,11 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  CreditCard,
   Code,
   Users,
   Bot,
 } from "lucide-react";
+import altoseraLogo from "@assets/Altosera_Two_Toned_Logo (1)_1753162846233.png";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -83,12 +83,6 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       href: "/manage",
       special: false,
     },
-    {
-      icon: CreditCard,
-      label: "Payment",
-      href: "/payment",
-      special: false,
-    },
   ];
 
   // Add admin-only navigation items
@@ -122,8 +116,20 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       <div className="flex items-center justify-between p-4 border-b border-slate-200">
         {!collapsed && (
           <div className="flex items-center space-x-2">
-            <FileText className="h-6 w-6 text-primary" />
-            <span className="font-bold text-slate-900">DocuAI</span>
+            <img 
+              src={altoseraLogo} 
+              alt="Altosera Logo" 
+              className="h-8 w-auto object-contain" 
+            />
+          </div>
+        )}
+        {collapsed && (
+          <div className="flex items-center justify-center w-full">
+            <img 
+              src={altoseraLogo} 
+              alt="Altosera Logo" 
+              className="h-6 w-auto object-contain" 
+            />
           </div>
         )}
         {onToggle && (
