@@ -216,13 +216,12 @@ export default function LoginPage() {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="remember-me"
                   checked={formData.rememberMe}
-                  onCheckedChange={(checked) => 
-                    handleInputChange('rememberMe', checked as boolean)
-                  }
-                  className="h-3 w-3 scale-75 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
+                  className="h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <Label htmlFor="remember-me" className="text-sm text-gray-700 cursor-pointer">
                   Remember me
