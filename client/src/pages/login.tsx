@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import lawImagePath from "@assets/ChatGPT Image Jul 21, 2025, 07_35_10 PM_1753151956635.png";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -117,9 +118,49 @@ export default function LoginPage() {
         {/* Law Image */}
         <div className="relative z-10 w-full h-full flex items-center justify-center p-12">
           <img 
-            src="/attached_assets/ChatGPT Image Jul 21, 2025, 07_35_10 PM_1753151956635.png"
+            src={lawImagePath}
             alt="Scales of Justice and Law Books"
             className="w-full max-w-lg h-auto object-contain"
+            onError={(e) => {
+              // Fallback to a beautiful SVG if image fails to load
+              e.currentTarget.style.display = 'none';
+              const parent = e.currentTarget.parentElement;
+              if (parent && !parent.querySelector('.fallback-svg')) {
+                parent.innerHTML = `
+                  <svg class="fallback-svg w-full max-w-lg h-auto" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(200, 100)">
+                      <ellipse cx="0" cy="120" rx="40" ry="12" fill="#4F46E5" opacity="0.8" />
+                      <rect x="-3" y="-60" width="6" height="180" fill="#6366F1" />
+                      <circle cx="0" cy="-60" r="8" fill="#818CF8" />
+                      <rect x="-80" y="-40" width="160" height="4" fill="#6366F1" />
+                      <g transform="translate(-60, -35)">
+                        <path d="M -25 0 L 25 0 L 20 -15 L -20 -15 Z" fill="#8B5CF6" opacity="0.9" />
+                        <path d="M -20 -15 Q 0 -25 20 -15" stroke="#A78BFA" stroke-width="2" fill="none" />
+                        <line x1="-25" y1="0" x2="-25" y2="-30" stroke="#6366F1" stroke-width="2" />
+                        <line x1="25" y1="0" x2="25" y2="-30" stroke="#6366F1" stroke-width="2" />
+                        <line x1="0" y1="-30" x2="0" y2="-40" stroke="#6366F1" stroke-width="2" />
+                      </g>
+                      <g transform="translate(60, -35)">
+                        <path d="M -25 0 L 25 0 L 20 -15 L -20 -15 Z" fill="#8B5CF6" opacity="0.9" />
+                        <path d="M -20 -15 Q 0 -25 20 -15" stroke="#A78BFA" stroke-width="2" fill="none" />
+                        <line x1="-25" y1="0" x2="-25" y2="-30" stroke="#6366F1" stroke-width="2" />
+                        <line x1="25" y1="0" x2="25" y2="-30" stroke="#6366F1" stroke-width="2" />
+                        <line x1="0" y1="-30" x2="0" y2="-40" stroke="#6366F1" stroke-width="2" />
+                      </g>
+                    </g>
+                    <g transform="translate(200, 280)">
+                      <rect x="-60" y="0" width="120" height="20" rx="2" fill="#1E40AF" />
+                      <rect x="-55" y="5" width="110" height="10" fill="#3B82F6" />
+                      <text x="0" y="13" text-anchor="middle" fill="white" font-size="10" font-weight="bold">LAW</text>
+                      <rect x="-50" y="-25" width="100" height="18" rx="2" fill="#7C3AED" />
+                      <rect x="-45" y="-20" width="90" height="8" fill="#8B5CF6" />
+                      <rect x="-45" y="-45" width="90" height="16" rx="2" fill="#1D4ED8" />
+                      <rect x="-40" y="-40" width="80" height="6" fill="#3B82F6" />
+                    </g>
+                  </svg>
+                `;
+              }
+            }}
           />
         </div>
         
