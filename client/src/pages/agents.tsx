@@ -81,15 +81,12 @@ export default function Agents() {
               </CardHeader>
               <CardContent className="p-0 h-[calc(100%-120px)]">
                 <iframe
-                  src="https://your-ragflow-agent-1-url.com"
-                  className="w-full h-full border-0 rounded-b-lg"
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '100%', minHeight: '600px' }}
+                  frameBorder="0"
                   title="Contract Analysis Agent"
-                  sandbox="allow-same-origin allow-scripts allow-forms"
+                  className="rounded-b-lg"
                 />
-                <div className="p-4 bg-gray-50 text-center text-sm text-gray-500">
-                  <p>🔧 Ragflow Agent 1 - Replace with your actual Ragflow URL</p>
-                  <p className="text-xs mt-1">Update the iframe src in client/src/pages/agents.tsx</p>
-                </div>
               </CardContent>
             </Card>
           )}
