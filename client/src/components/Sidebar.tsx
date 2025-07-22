@@ -67,7 +67,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
     {
       icon: Bot,
-      label: "Agents",
+      label: "MR Assistant",
       href: "/agents",
       special: false,
     },
