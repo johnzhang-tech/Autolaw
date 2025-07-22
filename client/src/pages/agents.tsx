@@ -47,7 +47,7 @@ export default function Agents() {
             >
               <div className="flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
-                <span>Contract Analysis Agent</span>
+                <span>Case 3 Agent</span>
               </div>
             </button>
             <button
@@ -60,7 +60,7 @@ export default function Agents() {
             >
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
-                <span>Legal Compliance Agent</span>
+                <span>Case 2 Agent</span>
               </div>
             </button>
           </div>
@@ -73,7 +73,7 @@ export default function Agents() {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  <CardTitle>Contract Analysis Agent</CardTitle>
+                  <CardTitle>Case 3 Agent</CardTitle>
                 </div>
                 <CardDescription>
                   Specialized in analyzing contracts, terms, obligations, and legal risks
@@ -84,7 +84,7 @@ export default function Agents() {
                   src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
                   style={{ width: '100%', height: '100%', minHeight: '600px' }}
                   frameBorder="0"
-                  title="Contract Analysis Agent"
+                  title="Case 3 Agent"
                   className="rounded-b-lg"
                 />
               </CardContent>
@@ -96,7 +96,7 @@ export default function Agents() {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-green-600" />
-                  <CardTitle>Legal Compliance Agent</CardTitle>
+                  <CardTitle>Case 2 Agent</CardTitle>
                 </div>
                 <CardDescription>
                   Focused on regulatory compliance, violations, and risk assessment
@@ -106,7 +106,7 @@ export default function Agents() {
                 <iframe
                   src="https://your-ragflow-agent-2-url.com"
                   className="w-full h-full border-0 rounded-b-lg"
-                  title="Legal Compliance Agent"
+                  title="Case 2 Agent"
                   sandbox="allow-same-origin allow-scripts allow-forms"
                 />
                 <div className="p-4 bg-gray-50 text-center text-sm text-gray-500">
