@@ -51,36 +51,43 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Home,
       label: "Home",
       href: "/",
+      special: false,
     },
     {
       icon: FileText,
       label: "Documents",
       href: "/documents",
+      special: false,
     },
     {
       icon: BarChart3,
       label: "Dashboard",
       href: "/dashboard",
+      special: false,
     },
     {
       icon: MessageCircleQuestion,
       label: "Q&A",
       href: "/qa",
+      special: false,
     },
     {
       icon: Bot,
       label: "Agent Q&A",
       href: "/agent-qa",
+      special: false,
     },
     {
       icon: Settings,
       label: "Setting",
       href: "/manage",
+      special: false,
     },
     {
       icon: CreditCard,
       label: "Payment",
       href: "/payment",
+      special: false,
     },
   ];
 
@@ -90,13 +97,15 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Users,
       label: "User Management",
       href: "/admin-users",
-      color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50"
+      color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50",
+      special: false,
     },
     {
       icon: Code,
       label: "Test API",
       href: "/test-api",
-      color: "text-orange-600 hover:text-orange-900 hover:bg-orange-50"
+      color: "text-orange-600 hover:text-orange-900 hover:bg-orange-50",
+      special: false,
     },
   ] : [];
 

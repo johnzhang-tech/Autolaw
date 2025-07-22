@@ -83,7 +83,7 @@ export function useAuth() {
         setIsLoggedOut(false);
       }
       return result;
-    } catch (error) {
+    } catch (error: any) {
       // Only set logged out if it's actually a 401 error
       if (error?.message?.includes('401')) {
         setIsLoggedOut(true);
