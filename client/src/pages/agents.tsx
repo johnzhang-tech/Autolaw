@@ -70,14 +70,11 @@ export default function Agents() {
         <div className="flex-1 p-6">
           {activeTab === 'agent1' && (
             <Card className="h-full">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-2">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  <CardTitle>Case 3 Agent</CardTitle>
+                  <CardTitle className="font-bold">Case 3 Agent</CardTitle>
                 </div>
-                <CardDescription>
-                  Specialized in analyzing contracts, terms, obligations, and legal risks
-                </CardDescription>
               </CardHeader>
               <CardContent className="p-0 h-[calc(100%-120px)]">
                 <iframe
@@ -93,14 +90,11 @@ export default function Agents() {
 
           {activeTab === 'agent2' && (
             <Card className="h-full">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-2">
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5 text-green-600" />
-                  <CardTitle>Case 2 Agent</CardTitle>
+                  <CardTitle className="font-bold">Case 2 Agent</CardTitle>
                 </div>
-                <CardDescription>
-                  Focused on regulatory compliance, violations, and risk assessment
-                </CardDescription>
               </CardHeader>
               <CardContent className="p-0 h-[calc(100%-120px)]">
                 <iframe
