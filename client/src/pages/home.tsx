@@ -65,7 +65,7 @@ export default function Home() {
         <div className="p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-slate-900">
-              Welcome to DocuAI
+              Welcome to Tade-Altosera
             </h1>
             <p className="text-lg text-slate-600 mt-2">
               Your intelligent real estate document analysis platform

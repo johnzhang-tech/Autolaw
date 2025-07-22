@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // HomeDocsInterfaces Object Storage - Multiple file upload with transaction-based folder organization
+  // Tade-Altosera Object Storage - Multiple file upload with transaction-based folder organization
   app.post('/api/upload', flexAuth, upload.array('documents', 60), async (req: any, res) => {
     try {
       const files = req.files as Express.Multer.File[];
@@ -281,9 +281,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
           
-          // Generate transaction-based S3 key: HomeDocsInterfaces/{transaction-name}/{file}
+          // Generate transaction-based S3 key: TadeAltosera/{transaction-name}/{file}
           const transactionFolder = `${transaction.name.replace(/[^a-zA-Z0-9-]/g, '_')}_${transaction.id}`;
-          const s3Key = `HomeDocsInterfaces/${transactionFolder}/${Date.now()}_${file.originalname}`;
+          const s3Key = `TadeAltosera/${transactionFolder}/${Date.now()}_${file.originalname}`;
           
           // Create initial document record for Replit Object Storage
           const document = await storage.createDocument({
@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`About to upload buffer of ${file.buffer.length} bytes to Replit Object Storage`);
 
-          // Upload to Replit Object Storage (HomeDocsInterfaces bucket)
+          // Upload to Replit Object Storage (TadeAltosera bucket)
           const uploadResult = await replitObjectStorage.uploadFile(
             file.buffer,
             transaction.name,
@@ -333,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "Compliance checks passed"
             ],
             recommendations: [
-              "Document stored in HomeDocsInterfaces",
+              "Document stored in TadeAltosera",
               "Ready for detailed analysis workflow"
             ]
           };
@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalFiles: files.length,
           successful: uploadResults.length,
           failed: failedUploads.length,
-          storageLocation: 'HomeDocsInterfaces'
+          storageLocation: 'TadeAltosera'
         }
       });
 
@@ -2219,10 +2219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storageType: 'Replit Object Storage',
         configured: isConfigured,
         connected: connectionTest,
-        bucketName: 'HomeDocsInterfaces',
+        bucketName: 'TadeAltosera',
         location: 'Replit Object Storage (Cloud)',
         debug: {
-          bucketName: 'HomeDocsInterfaces',
+          bucketName: 'TadeAltosera',
           replitDomains: !!process.env.REPLIT_DOMAINS,
           baseUrl: `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/storage`
         }
@@ -2238,7 +2238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Replit Object Storage browser endpoint
   app.get('/api/storage/browse', authMiddleware, async (req: any, res) => {
     try {
-      // List all objects in the HomeDocsInterfaces bucket
+      // List all objects in the TadeAltosera bucket
       const objects = await replitObjectStorage.listObjects();
       
       // Group objects by transaction folder

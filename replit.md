@@ -1,8 +1,10 @@
-# DocuAI - Intelligent Real Estate Document Analysis
+# Tade-Altosera - Intelligent Real Estate Document Analysis
 
 ## Overview
 
-DocuAI is a full-stack web application designed for real estate professionals to analyze documents using AI-powered tools. The application provides intelligent document review, automated analysis, and Q&A capabilities to streamline real estate workflows.
+Tade-Altosera is a full-stack web application designed for real estate professionals to analyze documents using AI-powered tools. The application provides intelligent document review, automated analysis, and Q&A capabilities to streamline real estate workflows.
+
+**Database Separation**: July 22, 2025 - Completely separated from original DocuAI database. Fresh PostgreSQL database with zero data mixing.
 
 ## System Architecture
 
