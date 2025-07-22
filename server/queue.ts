@@ -36,7 +36,7 @@ documentQueue.process('analyzeDocument', async (job) => {
     }
 
     // Analyze content with AI (Ragflow simulation for now)
-    const analysisResult = await analyzeHOADocument(content);
+    const analysisResult = await analyzeLegalDocument(content);
     
     // Update document with analysis results
     await db.update(documents)
@@ -62,8 +62,8 @@ documentQueue.process('analyzeDocument', async (job) => {
     await db.update(documents)
       .set({
         analysisStatus: 'failed',
-        retryCount: (await db.select().from(documents).where(eq(documents.id, documentId)))[0]?.retryCount + 1,
-        lastError: error.message,
+        retryCount: ((await db.select().from(documents).where(eq(documents.id, documentId)))[0]?.retryCount || 0) + 1,
+        lastError: error instanceof Error ? error.message : String(error),
       })
       .where(eq(documents.id, documentId));
 
@@ -71,7 +71,7 @@ documentQueue.process('analyzeDocument', async (job) => {
     await db.update(queueJobs)
       .set({ 
         status: 'failed', 
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         attempts: job.attemptsMade + 1
       })
       .where(eq(queueJobs.jobId, job.id.toString()));
@@ -100,14 +100,14 @@ documentQueue.process('generateSummaryPDF', async (job) => {
     return { pdfPath };
   } catch (error) {
     await db.update(queueJobs)
-      .set({ status: 'failed', error: error.message })
+      .set({ status: 'failed', error: error instanceof Error ? error.message : String(error) })
       .where(eq(queueJobs.jobId, job.id.toString()));
     throw error;
   }
 });
 
-// Simulate Ragflow AI analysis for HOA documents
-async function analyzeHOADocument(content: string) {
+// Simulate Ragflow AI analysis for legal documents
+async function analyzeLegalDocument(content: string) {
   // Simulate processing delay
   await new Promise(resolve => setTimeout(resolve, 2000));
   
@@ -121,7 +121,7 @@ async function analyzeHOADocument(content: string) {
 
   let riskScore = 10; // Base risk
   const complianceIssues = [];
-  const findings = {};
+  const findings: Record<string, string[]> = {};
 
   // Analyze content for risk factors
   for (const [category, words] of Object.entries(keywords)) {
@@ -148,7 +148,7 @@ async function analyzeHOADocument(content: string) {
   riskScore = Math.min(riskScore, 100);
 
   return {
-    summary: `HOA document analysis completed. Found ${Object.keys(findings).length} key areas of concern.`,
+    summary: `Legal document analysis completed. Found ${Object.keys(findings).length} key areas of concern.`,
     riskScore,
     complianceIssues,
     findings,
@@ -187,8 +187,8 @@ async function generateAnalysisPDF(documentId: number, analysisResult: any): Pro
   
   // Create a simple text file as placeholder
   const summaryText = `
-HOA Document Analysis Summary
-============================
+Legal Document Analysis Summary
+===============================
 
 Document ID: ${documentId}
 Analysis Date: ${new Date().toLocaleDateString()}

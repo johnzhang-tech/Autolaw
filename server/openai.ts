@@ -17,9 +17,9 @@ export async function generateDocumentResponse(
   documentContext: DocumentAnalysisContext
 ): Promise<string> {
   try {
-    const systemPrompt = `You are an expert real estate document analyst specializing in HOA (Homeowners Association) documents. 
+    const systemPrompt = `You are an expert legal document analyst specializing in legal documents and contracts. 
     
-You help real estate professionals and homeowners understand complex HOA documents by providing clear, actionable insights.
+You help legal professionals and clients understand complex legal documents by providing clear, actionable insights.
 
 DOCUMENT CONTEXT:
 - File: ${documentContext.fileName}
@@ -28,11 +28,11 @@ DOCUMENT CONTEXT:
 - Previous Analysis: ${JSON.stringify(documentContext.analysisResult || {})}
 
 RESPONSE GUIDELINES:
-1. Focus specifically on HOA-related topics: fees, violations, compliance, restrictions, insurance, maintenance
-2. Provide practical, actionable advice
-3. Highlight potential risks or concerns
-4. Use simple language that non-lawyers can understand
-5. If the question is outside HOA scope, redirect to relevant HOA aspects
+1. Focus specifically on legal topics: contract terms, compliance, liability, obligations, regulatory requirements
+2. Provide practical, actionable legal advice
+3. Highlight potential legal risks or concerns
+4. Use clear language that clients can understand
+5. If the question is outside legal scope, redirect to relevant legal aspects
 6. Always reference the specific document when possible
 
 RESPONSE FORMAT:

@@ -163,7 +163,7 @@ export default function QA() {
   };
 
   const handleNewChat = () => {
-    const title = "New HOA Question";
+    const title = "New Legal Question";
     createSessionMutation.mutate(title);
   };
 
@@ -174,10 +174,10 @@ export default function QA() {
 
   // Sample questions for new users
   const sampleQuestions = [
-    "What are the typical HOA fees I should expect?",
-    "How do I check for compliance violations?",
-    "What insurance requirements should I look for?",
-    "How are maintenance responsibilities divided?",
+    "What are the key contract terms I should review?",
+    "How do I check for legal compliance issues?",
+    "What liability exposures should I look for?",
+    "How are obligations and responsibilities divided?",
   ];
 
   return (
@@ -245,10 +245,10 @@ export default function QA() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-xl font-semibold text-gray-800">
-                  HOA Document Q&A
+                  Legal Document Q&A
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Ask questions about your HOA documents and compliance
+                  Ask questions about your legal documents and compliance
                 </p>
               </div>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
@@ -368,7 +368,7 @@ export default function QA() {
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask about HOA fees, violations, compliance..."
+                  placeholder="Ask about contract terms, compliance, legal risks..."
                   className="pr-12 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   disabled={sendMessageMutation.isPending}
                 />
@@ -387,7 +387,7 @@ export default function QA() {
             </form>
             
             <div className="mt-2 text-xs text-gray-500 text-center">
-              AI responses are generated based on general HOA knowledge and your document analysis
+              AI responses are generated based on general legal knowledge and your document analysis
             </div>
           </div>
         </div>

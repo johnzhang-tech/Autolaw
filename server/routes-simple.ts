@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Simulate AI analysis with mock data
       const mockAnalysis = {
-        summary: "HOA document analysis completed successfully. Found key compliance areas requiring attention.",
+        summary: "Legal document analysis completed successfully. Found key compliance areas requiring attention.",
         riskScore: Math.floor(Math.random() * 100),
         complianceIssues: [
           "Monthly fees schedule requires review",
@@ -66,11 +66,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const document = await storage.createDocument({
         transactionId: parseInt(transactionId),
         userId,
+        uploaderId: userId,
         fileName: req.file.filename,
         originalFileName: req.file.originalname,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
-        category: category || 'hoa',
+        category: category || 'legal',
         analysisResult: mockAnalysis,
         analysisStatus: 'completed',
         riskScore: mockAnalysis.riskScore
@@ -145,16 +146,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate AI response based on document analysis
-      let response = "I can help you understand this HOA document. ";
+      let response = "I can help you understand this legal document. ";
       
       if (message.toLowerCase().includes('risk')) {
         response += `The risk score for this document is ${document.riskScore || 50}/100.`;
-      } else if (message.toLowerCase().includes('fee')) {
-        response += "I found information about HOA fees and payment schedules in this document.";
+      } else if (message.toLowerCase().includes('fee') || message.toLowerCase().includes('payment')) {
+        response += "I found information about payment terms and financial obligations in this document.";
       } else if (message.toLowerCase().includes('compliance')) {
-        response += "This document has been reviewed for compliance issues and violations.";
+        response += "This document has been reviewed for legal compliance issues and regulatory violations.";
       } else {
-        response += "What specific aspect of this HOA document would you like to know about?";
+        response += "What specific aspect of this legal document would you like to know about?";
       }
 
       res.json({ response });
