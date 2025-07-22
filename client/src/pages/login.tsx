@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import lawImagePath from "@assets/ChatGPT Image Jul 21, 2025, 07_35_10 PM_1753151956635.png";
+import altoseraBrandPath from "@assets/Altosera_Two_Toned_Logo (1)_1753153209175.png";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -129,36 +130,11 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Altosera Brand Logo */}
           <div className="text-center">
-            {/* Altosera Brand SVG Logo */}
-            <svg 
-              className="h-12 mx-auto mb-6" 
-              viewBox="0 0 200 40" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Mountain/Triangle symbol */}
-              <path 
-                d="M8 25 L18 8 L28 25 Z" 
-                fill="#3B82F6" 
-              />
-              <path 
-                d="M12 25 L18 15 L24 25 Z" 
-                fill="#10B981" 
-              />
-              
-              {/* Altosera Text */}
-              <text 
-                x="35" 
-                y="26" 
-                fontFamily="system-ui, -apple-system, sans-serif" 
-                fontSize="20" 
-                fontWeight="600" 
-                fill="#1F2937"
-              >
-                Altosera
-              </text>
-            </svg>
-            
+            <img 
+              src={altoseraBrandPath}
+              alt="Altosera"
+              className="h-8 mx-auto mb-6"
+            />
             <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
             <p className="mt-2 text-sm text-gray-600">
               Access your real estate document platform
@@ -246,7 +222,7 @@ export default function LoginPage() {
                   onCheckedChange={(checked) => 
                     handleInputChange('rememberMe', checked as boolean)
                   }
-                  className="h-4 w-4"
+                  className="h-3.5 w-3.5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <Label htmlFor="remember-me" className="text-sm text-gray-700 cursor-pointer">
                   Remember me
