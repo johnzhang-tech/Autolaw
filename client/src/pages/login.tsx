@@ -137,7 +137,7 @@ export default function LoginPage() {
             />
             <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Access your real estate document platform
+              Access your legal document platform
             </p>
           </div>
 

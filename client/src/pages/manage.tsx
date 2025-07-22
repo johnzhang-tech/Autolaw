@@ -210,13 +210,13 @@ export default function Manage() {
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
               <p className="text-gray-600 mt-1">
-                Manage your transactions, preferences, and account settings
+                Manage your cases, preferences, and account settings
               </p>
             </div>
 
             <Tabs defaultValue="account" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="account">Account & Transactions</TabsTrigger>
+                <TabsTrigger value="account">Account & Cases</TabsTrigger>
                 <TabsTrigger value="preferences">Preferences</TabsTrigger>
               </TabsList>
 
@@ -240,7 +240,7 @@ export default function Manage() {
                         <p className="text-gray-900">{user.email}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-700">Total Transactions</Label>
+                        <Label className="text-sm font-medium text-gray-700">Total Cases</Label>
                         <p className="text-gray-900">{transactions.length}</p>
                       </div>
                       <div>
@@ -251,32 +251,32 @@ export default function Manage() {
                   </CardContent>
                 </Card>
 
-                {/* Transaction Management */}
+                {/* Case Management */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 mr-2" />
-                        Transaction Management
+                        Case Management
                       </div>
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button size="sm">
                             <Plus className="h-4 w-4 mr-2" />
-                            Add Transaction
+                            Add Case
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Create New Transaction</DialogTitle>
+                            <DialogTitle>Create New Case</DialogTitle>
                           </DialogHeader>
                           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <div>
-                              <Label htmlFor="name">Transaction Name</Label>
+                              <Label htmlFor="name">Case Name</Label>
                               <Input
                                 id="name"
                                 {...form.register("name")}
-                                placeholder="Enter transaction name"
+                                placeholder="Enter case name"
                               />
                               {form.formState.errors.name && (
                                 <p className="text-sm text-red-500 mt-1">{form.formState.errors.name.message}</p>
@@ -284,25 +284,25 @@ export default function Manage() {
                             </div>
                             
                             <div>
-                              <Label htmlFor="address">Property Address</Label>
+                              <Label htmlFor="address">Client/Matter Address</Label>
                               <Input
                                 id="address"
                                 {...form.register("address")}
-                                placeholder="Enter property address"
+                                placeholder="Enter client or matter address"
                               />
                             </div>
                             
                             <div>
-                              <Label htmlFor="transactionType">Transaction Type</Label>
+                              <Label htmlFor="transactionType">Case Type</Label>
                               <Select onValueChange={(value) => form.setValue("transactionType", value)}>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select transaction type" />
+                                  <SelectValue placeholder="Select case type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="sale">Sale</SelectItem>
-                                  <SelectItem value="purchase">Purchase</SelectItem>
-                                  <SelectItem value="lease">Lease</SelectItem>
-                                  <SelectItem value="refinance">Refinance</SelectItem>
+                                  <SelectItem value="sale">Litigation</SelectItem>
+                                  <SelectItem value="purchase">Contract</SelectItem>
+                                  <SelectItem value="lease">Corporate</SelectItem>
+                                  <SelectItem value="refinance">Real Estate</SelectItem>
                                 </SelectContent>
                               </Select>
                               {form.formState.errors.transactionType && (

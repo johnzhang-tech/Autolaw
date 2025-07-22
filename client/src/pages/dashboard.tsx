@@ -137,7 +137,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
-            <p className="text-sm md:text-base text-gray-600">Monitor your real estate document portfolio and transaction insights</p>
+            <p className="text-sm md:text-base text-gray-600">Monitor your legal document portfolio and case insights</p>
           </div>
 
           {/* Key Metrics - Mobile Responsive Grid */}

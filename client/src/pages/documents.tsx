@@ -145,7 +145,7 @@ export default function Documents() {
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
-              <p className="text-slate-600">Manage your HOA documents stored in Replit Object Storage</p>
+              <p className="text-slate-600">Manage your legal documents stored in Replit Object Storage</p>
             </div>
 
             {/* Statistics Cards */}
@@ -225,9 +225,9 @@ export default function Documents() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      <SelectItem value="hoa">HOA</SelectItem>
+                      <SelectItem value="hoa">Legal</SelectItem>
                       <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="inspection">Inspection</SelectItem>
+                      <SelectItem value="inspection">Discovery</SelectItem>
                       <SelectItem value="financial">Financial</SelectItem>
                     </SelectContent>
                   </Select>

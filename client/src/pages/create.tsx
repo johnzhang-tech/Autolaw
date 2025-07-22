@@ -55,27 +55,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { TransactionResponse } from "@shared/schema";
 
-const transactionSchema = z.object({
-  name: z.string().min(1, "Transaction name is required"),
+const caseSchema = z.object({
+  name: z.string().min(1, "Case name is required"),
   address: z.string().optional(),
   transactionType: z.enum(["purchase", "sale", "refinance", "rental"]),
 });
 
-type TransactionForm = z.infer<typeof transactionSchema>;
+type CaseForm = z.infer<typeof caseSchema>;
 
 export default function Create() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [isCaseDialogOpen, setIsCaseDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<number | null>(null);
-  const [editingTransaction, setEditingTransaction] = useState<TransactionResponse | null>(null);
-  const [deletingTransaction, setDeletingTransaction] = useState<TransactionResponse | null>(null);
+  const [selectedCase, setSelectedCase] = useState<number | null>(null);
+  const [editingCase, setEditingCase] = useState<TransactionResponse | null>(null);
+  const [deletingCase, setDeletingCase] = useState<TransactionResponse | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<TransactionForm>({
-    resolver: zodResolver(transactionSchema),
+  const form = useForm<CaseForm>({
+    resolver: zodResolver(caseSchema),
     defaultValues: {
       name: "",
       address: "",
@@ -83,8 +83,8 @@ export default function Create() {
     },
   });
 
-  const editForm = useForm<TransactionForm>({
-    resolver: zodResolver(transactionSchema),
+  const editForm = useForm<CaseForm>({
+    resolver: zodResolver(caseSchema),
     defaultValues: {
       name: "",
       address: "",
@@ -104,17 +104,17 @@ export default function Create() {
     return acc;
   }, {} as Record<number, number>);
 
-  // Create transaction mutation
-  const createTransactionMutation = useMutation({
-    mutationFn: async (data: TransactionForm) => {
+  // Create case mutation
+  const createCaseMutation = useMutation({
+    mutationFn: async (data: CaseForm) => {
       return await apiRequest("POST", "/api/transactions", data);
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Transaction created successfully",
+        description: "Case created successfully",
       });
-      setIsTransactionDialogOpen(false);
+      setIsCaseDialogOpen(false);
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
     },
@@ -127,18 +127,18 @@ export default function Create() {
     },
   });
 
-  // Update transaction mutation
-  const updateTransactionMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: TransactionForm }) => {
+  // Update case mutation
+  const updateCaseMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: CaseForm }) => {
       return await apiRequest("PUT", `/api/transactions/${id}`, data);
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Transaction updated successfully",
+        description: "Case updated successfully",
       });
       setIsEditDialogOpen(false);
-      setEditingTransaction(null);
+      setEditingCase(null);
       editForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
     },
@@ -151,8 +151,8 @@ export default function Create() {
     },
   });
 
-  // Delete transaction mutation
-  const deleteTransactionMutation = useMutation({
+  // Delete case mutation
+  const deleteCaseMutation = useMutation({
     mutationFn: async (id: number) => {
       return await apiRequest("DELETE", `/api/transactions/${id}`);
     },
@@ -163,9 +163,9 @@ export default function Create() {
       queryClient.removeQueries({ queryKey: ["/api/all-user-documents"] });
       
       // Also clear any transaction-specific document queries
-      if (deletingTransaction) {
+      if (deletingCase) {
         queryClient.removeQueries({ 
-          queryKey: [`/api/transactions/${deletingTransaction.Tranx_id}/documents`] 
+          queryKey: [`/api/transactions/${deletingCase.Tranx_id}/documents`] 
         });
       }
       
@@ -174,13 +174,13 @@ export default function Create() {
       
       toast({
         title: "Success",
-        description: "Transaction and all documents deleted successfully!",
+        description: "Case and all documents deleted successfully!",
       });
       setIsDeleteDialogOpen(false);
-      setDeletingTransaction(null);
-      // Clear selection if deleted transaction was selected
-      if (deletingTransaction && selectedTransaction === deletingTransaction.Tranx_id) {
-        setSelectedTransaction(null);
+      setDeletingCase(null);
+      // Clear selection if deleted case was selected
+      if (deletingCase && selectedCase === deletingCase.Tranx_id) {
+        setSelectedCase(null);
       }
     },
     onError: (error: any) => {
@@ -190,12 +190,12 @@ export default function Create() {
         variant: "destructive",
       });
       setIsDeleteDialogOpen(false);
-      setDeletingTransaction(null);
+      setDeletingCase(null);
     },
   });
 
   const openEditDialog = (transaction: TransactionResponse) => {
-    setEditingTransaction(transaction);
+    setEditingCase(transaction);
     // Pre-populate the edit form with current transaction data
     editForm.reset({
       name: transaction.name,
@@ -206,23 +206,23 @@ export default function Create() {
   };
 
   const openDeleteDialog = (transaction: TransactionResponse) => {
-    setDeletingTransaction(transaction);
+    setDeletingCase(transaction);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (deletingTransaction) {
-      deleteTransactionMutation.mutate(deletingTransaction.Tranx_id);
+    if (deletingCase) {
+      deleteCaseMutation.mutate(deletingCase.Tranx_id);
     }
   };
 
-  const onSubmit = (data: TransactionForm) => {
-    createTransactionMutation.mutate(data);
+  const onSubmit = (data: CaseForm) => {
+    createCaseMutation.mutate(data);
   };
 
-  const onEditSubmit = (data: TransactionForm) => {
-    if (editingTransaction) {
-      updateTransactionMutation.mutate({ id: editingTransaction.Tranx_id, data });
+  const onEditSubmit = (data: CaseForm) => {
+    if (editingCase) {
+      updateCaseMutation.mutate({ id: editingCase.Tranx_id, data });
     }
   };
 
@@ -236,32 +236,32 @@ export default function Create() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto p-6">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Transaction</h1>
-            <p className="text-gray-600">Start a new real estate transaction and upload documents for analysis</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Case</h1>
+            <p className="text-gray-600">Start a new legal case and upload documents for analysis</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Transaction Management */}
+            {/* Left Column - Case Management */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Folder className="h-5 w-5" />
-                    Your Transactions
+                    Your Cases
                   </CardTitle>
                   
-                  <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
+                  <Dialog open={isCaseDialogOpen} onOpenChange={setIsCaseDialogOpen}>
                     <DialogTrigger asChild>
                       <Button size="sm">
                         <Plus className="h-4 w-4 mr-2" />
-                        New Transaction
+                        New Case
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Create New Transaction</DialogTitle>
+                        <DialogTitle>Create New Case</DialogTitle>
                         <DialogDescription>
-                          Start a new real estate transaction to organize your documents
+                          Start a new legal case to organize your documents
                         </DialogDescription>
                       </DialogHeader>
                       
@@ -272,9 +272,9 @@ export default function Create() {
                             name="name"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Transaction Name</FormLabel>
+                                <FormLabel>Case Name</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="e.g., 123 Main St Purchase" />
+                                  <Input {...field} placeholder="e.g., Smith vs. Jones Contract Dispute" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -286,7 +286,7 @@ export default function Create() {
                             name="address"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Property Address (Optional)</FormLabel>
+                                <FormLabel>Client/Matter Address (Optional)</FormLabel>
                                 <FormControl>
                                   <Input {...field} placeholder="123 Main St, City, State" />
                                 </FormControl>
@@ -300,18 +300,18 @@ export default function Create() {
                             name="transactionType"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Transaction Type</FormLabel>
+                                <FormLabel>Case Type</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
-                                      <SelectValue placeholder="Select transaction type" />
+                                      <SelectValue placeholder="Select case type" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="purchase">Purchase</SelectItem>
-                                    <SelectItem value="sale">Sale</SelectItem>
-                                    <SelectItem value="refinance">Refinance</SelectItem>
-                                    <SelectItem value="rental">Rental</SelectItem>
+                                    <SelectItem value="purchase">Contract</SelectItem>
+                                    <SelectItem value="sale">Litigation</SelectItem>
+                                    <SelectItem value="refinance">Corporate</SelectItem>
+                                    <SelectItem value="rental">Real Estate</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -320,8 +320,8 @@ export default function Create() {
                           />
                           
                           <DialogFooter>
-                            <Button type="submit" disabled={createTransactionMutation.isPending}>
-                              {createTransactionMutation.isPending ? "Creating..." : "Create Transaction"}
+                            <Button type="submit" disabled={createCaseMutation.isPending}>
+                              {createCaseMutation.isPending ? "Creating..." : "Create Case"}
                             </Button>
                           </DialogFooter>
                         </form>
@@ -334,13 +334,13 @@ export default function Create() {
                 {transactionsLoading ? (
                   <div className="text-center py-8">
                     <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p className="text-sm text-muted-foreground">Loading transactions...</p>
+                    <p className="text-sm text-muted-foreground">Loading cases...</p>
                   </div>
                 ) : transactions.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Folder className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium mb-2">No transactions yet</p>
-                    <p className="text-sm">Create your first transaction to get started</p>
+                    <p className="text-lg font-medium mb-2">No cases yet</p>
+                    <p className="text-sm">Create your first case to get started</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -348,11 +348,11 @@ export default function Create() {
                       <div
                         key={transaction.Tranx_id}
                         className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                          selectedTransaction === transaction.Tranx_id
+                          selectedCase === transaction.Tranx_id
                             ? "border-primary bg-primary/5"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
-                        onClick={() => setSelectedTransaction(transaction.Tranx_id)}
+                        onClick={() => setSelectedCase(transaction.Tranx_id)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -414,13 +414,13 @@ export default function Create() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {selectedTransaction ? (
-                  <DocumentUpload transactionId={selectedTransaction} />
+                {selectedCase ? (
+                  <DocumentUpload transactionId={selectedCase} />
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium mb-2">Select a transaction first</p>
-                    <p className="text-sm">Choose a transaction from the left to upload documents</p>
+                    <p className="text-lg font-medium mb-2">Select a case first</p>
+                    <p className="text-sm">Choose a case from the left to upload documents</p>
                   </div>
                 )}
               </CardContent>
@@ -429,79 +429,7 @@ export default function Create() {
         </div>
       </main>
 
-      {/* Create Transaction Dialog */}
-      <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Transaction</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Transaction Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter transaction name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Property Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter property address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="transactionType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Transaction Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select transaction type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="purchase">Purchase</SelectItem>
-                        <SelectItem value="sale">Sale</SelectItem>
-                        <SelectItem value="refinance">Refinance</SelectItem>
-                        <SelectItem value="lease">Lease</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsTransactionDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createTransactionMutation.isPending}>
-                  {createTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Create Transaction
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -509,14 +437,14 @@ export default function Create() {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              Delete Transaction
+              Delete Case
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div>
-                <p>Are you sure you want to delete "{deletingTransaction?.name}"? This will permanently remove:</p>
+                <p>Are you sure you want to delete "{deletingCase?.name}"? This will permanently remove:</p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>The transaction record</li>
-                  <li>{documentCounts[deletingTransaction?.Tranx_id || 0] || 0} uploaded documents</li>
+                  <li>The case record</li>
+                  <li>{documentCounts[deletingCase?.Tranx_id || 0] || 0} uploaded documents</li>
                   <li>All chat sessions and messages</li>
                   <li>All files from storage</li>
                 </ul>
@@ -529,22 +457,22 @@ export default function Create() {
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
-              disabled={deleteTransactionMutation.isPending}
+              disabled={deleteCaseMutation.isPending}
             >
-              {deleteTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Delete Transaction
+              {deleteCaseMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Delete Case
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Transaction Dialog */}
+      {/* Edit Case Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Transaction</DialogTitle>
+            <DialogTitle>Edit Case</DialogTitle>
             <DialogDescription>
-              Update transaction details
+              Update case details
             </DialogDescription>
           </DialogHeader>
           
@@ -555,9 +483,9 @@ export default function Create() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Transaction Name</FormLabel>
+                    <FormLabel>Case Name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., 123 Main St Purchase" />
+                      <Input {...field} placeholder="e.g., Smith vs. Jones Contract Dispute" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -569,7 +497,7 @@ export default function Create() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property Address (Optional)</FormLabel>
+                    <FormLabel>Client/Matter Address (Optional)</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="123 Main St, City, State" />
                     </FormControl>
@@ -583,18 +511,18 @@ export default function Create() {
                 name="transactionType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Transaction Type</FormLabel>
+                    <FormLabel>Case Type</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select transaction type" />
+                          <SelectValue placeholder="Select case type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="purchase">Purchase</SelectItem>
-                        <SelectItem value="sale">Sale</SelectItem>
-                        <SelectItem value="refinance">Refinance</SelectItem>
-                        <SelectItem value="rental">Rental</SelectItem>
+                        <SelectItem value="purchase">Contract</SelectItem>
+                        <SelectItem value="sale">Litigation</SelectItem>
+                        <SelectItem value="refinance">Corporate</SelectItem>
+                        <SelectItem value="rental">Real Estate</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -606,9 +534,9 @@ export default function Create() {
                 <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={updateTransactionMutation.isPending}>
-                  {updateTransactionMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Update Transaction
+                <Button type="submit" disabled={updateCaseMutation.isPending}>
+                  {updateCaseMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Update Case
                 </Button>
               </DialogFooter>
             </form>

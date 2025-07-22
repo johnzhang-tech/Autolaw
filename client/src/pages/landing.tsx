@@ -186,7 +186,7 @@ export default function Landing() {
               
               {/* Tagline */}
               <p className="mt-6 max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 leading-relaxed">
-                Transform your real estate workflow with AI-powered document review, automated analysis, and intelligent Q&A. 
+                Transform your legal workflow with AI-powered document review, automated analysis, and intelligent Q&A. 
                 Trust in technology that understands your business.
               </p>
 
@@ -204,7 +204,7 @@ export default function Landing() {
 
               {/* Trust indicators */}
               <div className="mt-12 text-sm text-slate-500">
-                <p className="mb-4">Trusted by 500+ real estate professionals</p>
+                <p className="mb-4">Trusted by 500+ legal professionals</p>
                 <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 opacity-60">
                   <span className="font-semibold">🏢 Enterprise Ready</span>
                   <span className="font-semibold">🔒 SOC 2 Compliant</span>
@@ -229,7 +229,7 @@ export default function Landing() {
                 Powered by Advanced AI
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Our intelligent platform transforms complex real estate documents into actionable insights, 
+                Our intelligent platform transforms complex legal documents into actionable insights, 
                 saving you time and reducing risk.
               </p>
             </div>
@@ -274,7 +274,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-4">Upload Documents</h3>
                 <p className="text-slate-600 leading-relaxed">
-                  Simply drag and drop your real estate documents or import from your existing systems.
+                  Simply drag and drop your legal documents or import from your existing systems.
                 </p>
               </div>
 
@@ -314,7 +314,7 @@ export default function Landing() {
               Ready to Transform Your Document Workflow?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join hundreds of real estate professionals who trust DocuAI to streamline their document analysis and reduce risk.
+              Join hundreds of legal professionals who trust Tade-Altosera to streamline their document analysis and reduce risk.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" variant="outline" className="px-8 py-4 text-lg font-medium rounded-xl border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
@@ -332,7 +332,7 @@ export default function Landing() {
                 Simple, transparent pricing
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-                Choose the perfect plan for your real estate document analysis needs. All plans include our core AI features with no hidden fees.
+                Choose the perfect plan for your legal document analysis needs. All plans include our core AI features with no hidden fees.
               </p>
               
               {/* Monthly/Annual Toggle */}

@@ -68,7 +68,7 @@ export default function Home() {
               Welcome to Tade-Altosera
             </h1>
             <p className="text-lg text-slate-600 mt-2">
-              Your intelligent real estate document analysis platform
+              Your intelligent legal document analysis platform
             </p>
           </div>
 
@@ -82,20 +82,20 @@ export default function Home() {
               <CardContent>
                 <div className="text-2xl font-bold">{totalDocuments}</div>
                 <p className="text-xs text-muted-foreground">
-                  Documents across all transactions
+                  Documents across all cases
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Transactions</CardTitle>
+                <CardTitle className="text-sm font-medium">Active Cases</CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{transactions.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  Real estate transactions
+                  Legal cases
                 </p>
               </CardContent>
             </Card>
@@ -133,14 +133,14 @@ export default function Home() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Transaction</CardTitle>
+                  <CardTitle>Recent Cases</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {transactions.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <FileText className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                      <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
-                      <p className="text-sm mb-4">Create your first transaction to get started</p>
+                      <h3 className="text-lg font-medium mb-2">No cases yet</h3>
+                      <p className="text-sm mb-4">Create your first case to get started</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -193,8 +193,8 @@ export default function Home() {
                         <span className="text-white text-xs font-bold">1</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900">Create a Transaction</h4>
-                        <p className="text-sm text-slate-500">Start by creating a real estate transaction</p>
+                        <h4 className="font-medium text-slate-900">Create a Case</h4>
+                        <p className="text-sm text-slate-500">Start by creating a legal case</p>
                       </div>
                     </div>
                     
@@ -204,7 +204,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h4 className="font-medium text-slate-900">Upload Documents</h4>
-                        <p className="text-sm text-slate-500">Add contracts, HOA docs, and other files</p>
+                        <p className="text-sm text-slate-500">Add contracts, legal docs, and other files</p>
                       </div>
                     </div>
                     
