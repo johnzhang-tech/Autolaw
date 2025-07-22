@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Sidebar } from "@/components/Sidebar";
@@ -202,7 +202,7 @@ export default function Manage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar collapsed={sidebarCollapsed} onToggle={setSidebarCollapsed} />
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       
       <main className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">

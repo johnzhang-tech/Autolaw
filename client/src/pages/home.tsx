@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

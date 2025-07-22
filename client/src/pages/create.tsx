@@ -165,7 +165,7 @@ export default function Create() {
       // Also clear any transaction-specific document queries
       if (deletingTransaction) {
         queryClient.removeQueries({ 
-          queryKey: [`/api/transactions/${deletingTransaction.id}/documents`] 
+          queryKey: [`/api/transactions/${deletingTransaction.Tranx_id}/documents`] 
         });
       }
       
@@ -516,7 +516,7 @@ export default function Create() {
                 <p>Are you sure you want to delete "{deletingTransaction?.name}"? This will permanently remove:</p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
                   <li>The transaction record</li>
-                  <li>{documentCounts[deletingTransaction?.id || 0] || 0} uploaded documents</li>
+                  <li>{documentCounts[deletingTransaction?.Tranx_id || 0] || 0} uploaded documents</li>
                   <li>All chat sessions and messages</li>
                   <li>All files from storage</li>
                 </ul>
