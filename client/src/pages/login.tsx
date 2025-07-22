@@ -222,7 +222,7 @@ export default function LoginPage() {
                   onCheckedChange={(checked) => 
                     handleInputChange('rememberMe', checked as boolean)
                   }
-                  className="h-3.5 w-3.5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                  className="h-3 w-3 scale-75 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
                 <Label htmlFor="remember-me" className="text-sm text-gray-700 cursor-pointer">
                   Remember me
