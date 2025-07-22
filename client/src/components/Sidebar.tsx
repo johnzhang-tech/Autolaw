@@ -61,7 +61,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
     {
       icon: MessageCircleQuestion,
-      label: "Q&A",
+      label: "Email Assistant",
       href: "/qa",
       special: false,
     },
