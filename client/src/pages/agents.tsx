@@ -70,13 +70,7 @@ export default function Agents() {
         <div className="flex-1 p-6">
           {activeTab === 'agent1' && (
             <Card className="h-full">
-              <CardHeader className="pb-2">
-                <div className="flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <CardTitle className="font-bold">Case 3 Agent</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 h-[calc(100%-120px)]">
+              <CardContent className="p-0 h-full">
                 <iframe
                   src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
                   style={{ width: '100%', height: '100%', minHeight: '600px' }}
@@ -90,13 +84,7 @@ export default function Agents() {
 
           {activeTab === 'agent2' && (
             <Card className="h-full">
-              <CardHeader className="pb-2">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-green-600" />
-                  <CardTitle className="font-bold">Case 2 Agent</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0 h-[calc(100%-120px)]">
+              <CardContent className="p-0 h-full">
                 <iframe
                   src="https://your-ragflow-agent-2-url.com"
                   className="w-full h-full border-0 rounded-b-lg"
