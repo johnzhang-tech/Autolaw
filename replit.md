@@ -390,6 +390,14 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Documentation Updates**: Complete replit.md update reflecting legal platform focus and expertise
   - **TypeScript Error Resolution**: Fixed all type safety issues in queue processing and document handling
   - **Platform Identity**: Tade-Altosera now fully positioned as AI-powered legal document analysis platform
+- July 22, 2025. **RAGFLOW AGENTS INTEGRATION: DUAL IFRAME EMBEDDED AGENT SYSTEM**
+  - **Two-Tab Agent Interface**: Created dedicated /agents page with tabbed navigation for multiple Ragflow agents
+  - **Contract Analysis Agent**: Specialized iframe embed for contract terms, obligations, and legal risk analysis
+  - **Legal Compliance Agent**: Focused iframe embed for regulatory compliance, violations, and risk assessment
+  - **Professional UI Design**: Clean tabbed interface with agent descriptions and proper iframe sandboxing
+  - **Sidebar Navigation Updated**: Replaced "Agent Q&A" with "Agents" for better user experience
+  - **Flexible Agent URLs**: Easy configuration for actual Ragflow agent URLs when ready for deployment
+  - **Security Features**: Proper iframe sandboxing with controlled permissions for external agent content
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management

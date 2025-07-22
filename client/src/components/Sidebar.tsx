@@ -67,8 +67,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
     {
       icon: Bot,
-      label: "Agent Q&A",
-      href: "/agent-qa",
+      label: "Agents",
+      href: "/agents",
       special: false,
     },
     {

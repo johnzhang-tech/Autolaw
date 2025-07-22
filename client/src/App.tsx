@@ -10,6 +10,7 @@ import Create from "@/pages/create";
 import Upload from "@/pages/upload";
 import QA from "@/pages/qa";
 import AgentQA from "@/pages/agent-qa";
+import Agents from "@/pages/agents";
 import Documents from "@/pages/documents";
 import FullDashboard from "@/pages/dashboard";
 import PaymentSimple from "@/pages/payment-simple";
@@ -53,6 +54,8 @@ function Router() {
           <Route path="/home" component={Home} />
           <Route path="/create" component={Create} />
           <Route path="/documents" component={Documents} />
+          <Route path="/qa" component={QA} />
+          <Route path="/agents" component={Agents} />
           <Route path="/dashboard" component={FullDashboard} />
           <Route path="/manage" component={Manage} />
         </>
