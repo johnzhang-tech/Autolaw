@@ -60,12 +60,6 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       special: false,
     },
     {
-      icon: BarChart3,
-      label: "Dashboard",
-      href: "/dashboard",
-      special: false,
-    },
-    {
       icon: MessageCircleQuestion,
       label: "Q&A",
       href: "/qa",

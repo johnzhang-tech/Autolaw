@@ -378,7 +378,8 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **HTML Title Update**: Updated browser title from "DocuAI" to "Tade-Altosera" for complete rebranding
   - **Admin Credentials**: admin@tade-altosera.com / TadeAltosera2025! for accessing clean system
   - **Authentication Working**: JWT token authentication fully functional with new database
-  - **Sidebar Navigation Restored**: Full sidebar with Create, Home, Documents, Dashboard, Q&A, Settings sections
+  - **Sidebar Navigation Restored**: Full sidebar with Create, Home, Documents, Q&A, Settings sections
+  - **Dashboard Removal**: Removed Dashboard section from sidebar navigation per user request
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
