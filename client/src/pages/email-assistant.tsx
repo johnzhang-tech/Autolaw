@@ -6,66 +6,24 @@ import { Bot, Mail } from "lucide-react";
 
 export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activePrompt, setActivePrompt] = useState<string>('');
-  const [inputValue, setInputValue] = useState<string>('');
 
-  const handlePromptSelect = (promptText: string) => {
-    // Set the prompt directly in our input field
-    setActivePrompt(promptText);
-    setInputValue(promptText);
-    
-    // Show success notification
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-    notification.innerHTML = `
-      <div class="text-sm font-medium">✓ Prompt loaded</div>
-      <div class="text-xs mt-1">Click "Send to Chat" to proceed</div>
-    `;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
-    }, 3000);
-    
-    // Auto-focus the input field
-    setTimeout(() => {
-      const inputField = document.querySelector('textarea[placeholder="Type your prompt here..."]') as HTMLTextAreaElement;
-      if (inputField) {
-        inputField.focus();
-        inputField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
-  };
-
-  const handleSendPrompt = async () => {
-    if (!inputValue.trim()) return;
-    
+  const handlePromptSelect = async (promptText: string) => {
     try {
-      // Copy to clipboard so user can paste in Ragflow
-      await navigator.clipboard.writeText(inputValue);
+      // Copy to clipboard
+      await navigator.clipboard.writeText(promptText);
       
-      // Show instruction notification
+      // Show clear instructions
       const notification = document.createElement('div');
-      notification.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-sm';
+      notification.className = 'fixed top-4 right-4 bg-orange-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-sm';
       notification.innerHTML = `
-        <div class="text-sm font-medium">✓ Prompt copied to clipboard!</div>
-        <div class="text-xs mt-2">Now:</div>
-        <div class="text-xs">1. Click in the Ragflow chat input below</div>
-        <div class="text-xs">2. Press Ctrl+V (or Cmd+V) to paste</div>
-        <div class="text-xs">3. Press Enter to send</div>
+        <div class="text-sm font-bold mb-2">⚠️ Technical Limitation</div>
+        <div class="text-xs mb-2">Cannot auto-paste into Ragflow due to browser security.</div>
+        <div class="text-xs mb-1"><strong>Prompt copied to clipboard.</strong></div>
+        <div class="text-xs">Please manually paste (Ctrl+V) in chat below.</div>
       `;
       document.body.appendChild(notification);
       
-      // Clear the input
-      setInputValue('');
-      setActivePrompt('');
-      
-      // Auto-scroll to iframe
+      // Auto-scroll to Ragflow iframe
       const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
       if (iframe) {
         iframe.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -78,7 +36,7 @@ export default function EmailAssistant() {
             document.body.removeChild(notification);
           }
         }, 300);
-      }, 6000);
+      }, 8000);
       
     } catch (error) {
       const notification = document.createElement('div');
@@ -91,13 +49,6 @@ export default function EmailAssistant() {
           document.body.removeChild(notification);
         }
       }, 3000);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendPrompt();
     }
   };
 
@@ -202,38 +153,6 @@ export default function EmailAssistant() {
                     <p className="text-xs text-gray-600 mt-1">Check for suspicious content and security threats</p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Send Input */}
-          <Card className="flex-shrink-0">
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Bot className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-medium text-gray-900">Quick Send to Chat</h3>
-                </div>
-                <div className="flex gap-2">
-                  <textarea
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type your prompt here or select from suggestions above..."
-                    className="flex-1 p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[80px]"
-                    rows={3}
-                  />
-                  <button
-                    onClick={handleSendPrompt}
-                    disabled={!inputValue.trim()}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium whitespace-nowrap self-start"
-                  >
-                    Send to Chat
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500">
-                  Tip: Select a prompt above to auto-fill, or type your own. Press Enter or click "Send to Chat" to copy to clipboard for pasting in Ragflow below.
-                </p>
               </div>
             </CardContent>
           </Card>
