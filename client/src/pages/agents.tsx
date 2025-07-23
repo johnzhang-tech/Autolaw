@@ -4,85 +4,99 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, MessageSquare, FileText, Users } from "lucide-react";
-import { useAgentState } from "@/lib/agentState";
-import { globalIframeManager } from "@/lib/globalIframeManager";
+
+// Global iframe persistence using a single hidden container
+const IFRAME_STORAGE_KEY = 'mr-assistant-iframes';
+
+class SimpleIframeManager {
+  private static instance: SimpleIframeManager;
+  private container: HTMLDivElement | null = null;
+  private iframes: Map<string, HTMLIFrameElement> = new Map();
+
+  static getInstance(): SimpleIframeManager {
+    if (!SimpleIframeManager.instance) {
+      SimpleIframeManager.instance = new SimpleIframeManager();
+    }
+    return SimpleIframeManager.instance;
+  }
+
+  init() {
+    if (this.container || typeof window === 'undefined') return;
+    
+    this.container = document.createElement('div');
+    this.container.id = 'iframe-storage';
+    this.container.style.cssText = 'position:absolute;top:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;';
+    document.body.appendChild(this.container);
+  }
+
+  getOrCreateIframe(agentId: string, src: string): HTMLIFrameElement {
+    this.init();
+    
+    if (!this.iframes.has(agentId)) {
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.style.cssText = 'width:100%;height:100%;min-height:600px;border:none;border-radius:0 0 8px 8px;';
+      iframe.frameBorder = '0';
+      iframe.title = `Agent ${agentId}`;
+      
+      this.iframes.set(agentId, iframe);
+      
+      // Store in hidden container initially
+      if (this.container) {
+        this.container.appendChild(iframe);
+      }
+    }
+    
+    return this.iframes.get(agentId)!;
+  }
+
+  showInContainer(agentId: string, container: HTMLElement) {
+    const iframe = this.iframes.get(agentId);
+    if (iframe && container) {
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+      container.appendChild(iframe);
+    }
+  }
+
+  hideIframe(agentId: string) {
+    const iframe = this.iframes.get(agentId);
+    if (iframe && this.container) {
+      if (iframe.parentNode && iframe.parentNode !== this.container) {
+        iframe.parentNode.removeChild(iframe);
+        this.container.appendChild(iframe);
+      }
+    }
+  }
+}
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const agentState = useAgentState();
-  const agent1Ref = useRef<HTMLDivElement>(null);
-  const agent2Ref = useRef<HTMLDivElement>(null);
-  const agent3Ref = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>('agent1');
+  const [loadedAgents, setLoadedAgents] = useState<Set<string>>(new Set(['agent1']));
   
-  // Initialize state from persistent storage
-  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>(
-    agentState.getActiveAgent() as 'agent1' | 'agent2' | 'agent3'
-  );
+  const iframeManager = SimpleIframeManager.getInstance();
 
-  // Agent configuration
-  const agentConfigs = {
-    agent1: {
-      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
-      title: 'Case 3 Agent'
-    },
-    agent2: {
-      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
-      title: 'Case 2 Agent'
-    },
-    agent3: {
-      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
-      title: 'Case Large File'
-    }
+  // Agent URLs
+  const agentUrls = {
+    agent1: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
+    agent2: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
+    agent3: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm'
   };
 
-  // Initialize and manage iframes
+  // Restore last active tab from sessionStorage
   useEffect(() => {
-    const setupIframes = () => {
-      // Initialize all iframes
-      Object.keys(agentConfigs).forEach(agentId => {
-        const config = agentConfigs[agentId as keyof typeof agentConfigs];
-        globalIframeManager.createOrGetIframe(agentId, config.src);
-      });
-
-      // Show active tab iframe
-      const refs = { agent1: agent1Ref, agent2: agent2Ref, agent3: agent3Ref };
-      const activeRef = refs[activeTab];
-      
-      if (activeRef.current) {
-        globalIframeManager.moveIframeToContainer(activeTab, activeRef.current);
-        agentState.markAgentLoaded(activeTab);
-      }
-    };
-
-    setupIframes();
-  }, []);
-
-  // Update active tab when component mounts to restore last viewed agent
-  useEffect(() => {
-    const lastActive = agentState.getActiveAgent() as 'agent1' | 'agent2' | 'agent3';
-    setActiveTab(lastActive);
+    const saved = sessionStorage.getItem('mr-assistant-active-tab');
+    if (saved && ['agent1', 'agent2', 'agent3'].includes(saved)) {
+      setActiveTab(saved as 'agent1' | 'agent2' | 'agent3');
+    }
   }, []);
 
   const handleTabChange = (newTab: 'agent1' | 'agent2' | 'agent3') => {
-    // Hide current iframe
-    globalIframeManager.hideIframe(activeTab);
-    
-    // Update state
     setActiveTab(newTab);
-    agentState.setActiveAgent(newTab);
-    
-    // Show new iframe
-    const refs = { agent1: agent1Ref, agent2: agent2Ref, agent3: agent3Ref };
-    const newRef = refs[newTab];
-    
-    if (newRef.current) {
-      globalIframeManager.moveIframeToContainer(newTab, newRef.current);
-      agentState.markAgentLoaded(newTab);
-    }
-  };
-
-  const handleAgentLoad = (agentId: string) => {
-    agentState.markAgentLoaded(agentId);
+    setLoadedAgents(prev => new Set(Array.from(prev).concat([newTab])));
+    sessionStorage.setItem('mr-assistant-active-tab', newTab);
   };
 
   return (
@@ -125,7 +139,7 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
                   <span className="font-bold">Case 3 Agent</span>
-                  {agentState.isAgentLoaded('agent1') && (
+                  {loadedAgents.has('agent1') && (
                     <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
                   )}
                 </div>
@@ -141,7 +155,7 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span className="font-bold">Case 2 Agent</span>
-                  {agentState.isAgentLoaded('agent2') && (
+                  {loadedAgents.has('agent2') && (
                     <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
                   )}
                 </div>
@@ -157,7 +171,7 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
                   <span className="font-bold">Case Large File</span>
-                  {agentState.isAgentLoaded('agent3') && (
+                  {loadedAgents.has('agent3') && (
                     <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
                   )}
                 </div>
@@ -168,30 +182,82 @@ export default function Agents() {
           </div>
         </div>
 
-        {/* Tab Content with persistent iframe containers */}
+        {/* Tab Content with persistent iframes */}
         <div className="flex-1 p-6">
           {/* Case 3 Agent */}
           <Card className={`h-full ${activeTab === 'agent1' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              <div ref={agent1Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
+              <PersistentIframe 
+                agentId="agent1"
+                src={agentUrls.agent1}
+                isActive={activeTab === 'agent1'}
+                onLoad={() => setLoadedAgents(prev => new Set(Array.from(prev).concat(['agent1'])))}
+              />
             </CardContent>
           </Card>
 
           {/* Case 2 Agent */}
           <Card className={`h-full ${activeTab === 'agent2' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              <div ref={agent2Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
+              {(loadedAgents.has('agent2') || activeTab === 'agent2') && (
+                <PersistentIframe 
+                  agentId="agent2"
+                  src={agentUrls.agent2}
+                  isActive={activeTab === 'agent2'}
+                  onLoad={() => setLoadedAgents(prev => new Set(Array.from(prev).concat(['agent2'])))}
+                />
+              )}
             </CardContent>
           </Card>
 
           {/* Case Large File */}
           <Card className={`h-full ${activeTab === 'agent3' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              <div ref={agent3Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
+              {(loadedAgents.has('agent3') || activeTab === 'agent3') && (
+                <PersistentIframe 
+                  agentId="agent3"
+                  src={agentUrls.agent3}
+                  isActive={activeTab === 'agent3'}
+                  onLoad={() => setLoadedAgents(prev => new Set(Array.from(prev).concat(['agent3'])))}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
   );
+}
+
+// Component for persistent iframe management
+function PersistentIframe({ 
+  agentId, 
+  src, 
+  isActive, 
+  onLoad 
+}: { 
+  agentId: string; 
+  src: string; 
+  isActive: boolean; 
+  onLoad: () => void; 
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const iframeManager = SimpleIframeManager.getInstance();
+
+  useEffect(() => {
+    if (containerRef.current && isActive) {
+      const iframe = iframeManager.getOrCreateIframe(agentId, src);
+      iframeManager.showInContainer(agentId, containerRef.current);
+      
+      // Handle load event
+      if (!iframe.onload) {
+        iframe.onload = onLoad;
+      }
+    } else if (!isActive) {
+      // Hide iframe when not active
+      iframeManager.hideIframe(agentId);
+    }
+  }, [agentId, src, isActive, onLoad]);
+
+  return <div ref={containerRef} className="w-full h-full" style={{ minHeight: '600px' }} />;
 }
