@@ -58,8 +58,8 @@ function Router() {
           <Route path="/create" component={Create} />
           <Route path="/documents" component={Documents} />
           <Route path="/qa" component={EmailAssistant} />
-          <Route path="/agents" component={AgentsTest} />
-          <Route path="/agents-original" component={Agents} />
+          <Route path="/agents" component={Agents} />
+          <Route path="/agents-test" component={AgentsTest} />
           <Route path="/dashboard" component={FullDashboard} />
           <Route path="/manage" component={Manage} />
           <Route component={NotFound} />

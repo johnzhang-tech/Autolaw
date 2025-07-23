@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Bot, FileText, Users } from "lucide-react";
 
 export default function Agents() {
@@ -26,10 +24,10 @@ export default function Agents() {
                 Specialized legal document analysis agents
               </p>
             </div>
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-2">
+            <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
               <Bot className="w-4 h-4" />
               AI Powered
-            </Badge>
+            </div>
           </div>
         </div>
 
@@ -80,39 +78,34 @@ export default function Agents() {
 
         {/* Tab Content */}
         <div className="flex-1 p-6">
-          <Card className="h-full">
-            <CardContent className="p-0 h-full">
-              {activeTab === 'agent1' && (
-                <iframe
-                  key="case3-agent"
-                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                  style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                  title="Case 3 Agent"
-                  className="rounded-lg"
-                />
-              )}
-              
-              {activeTab === 'agent2' && (
-                <iframe
-                  key="case2-agent"
-                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                  style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                  title="Case 2 Agent"
-                  className="rounded-lg"
-                />
-              )}
-              
-              {activeTab === 'agent3' && (
-                <iframe
-                  key="large-file-agent"
-                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                  style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                  title="Case Large File"
-                  className="rounded-lg"
-                />
-              )}
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg shadow-sm border h-full">
+            {activeTab === 'agent1' && (
+              <iframe
+                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
+                title="Case 3 Agent"
+                className="rounded-lg"
+              />
+            )}
+            
+            {activeTab === 'agent2' && (
+              <iframe
+                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
+                title="Case 2 Agent"
+                className="rounded-lg"
+              />
+            )}
+            
+            {activeTab === 'agent3' && (
+              <iframe
+                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
+                title="Case Large File"
+                className="rounded-lg"
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
