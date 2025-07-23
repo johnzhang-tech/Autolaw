@@ -2,13 +2,8 @@ import { useState, useEffect } from "react";
 
 export function useAuthSimple() {
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isLoggedOut, setIsLoggedOut] = useState(false);
-
-  useEffect(() => {
-    const loggedOut = localStorage.getItem('docuai_logged_out');
-    setIsLoggedOut(loggedOut === 'true');
-  }, []);
 
   const checkAuth = async () => {
     if (isLoggedOut) return null;
@@ -47,6 +42,18 @@ export function useAuthSimple() {
       return null;
     }
   };
+
+  useEffect(() => {
+    const loggedOut = localStorage.getItem('docuai_logged_out');
+    setIsLoggedOut(loggedOut === 'true');
+    
+    // Automatically check authentication when hook mounts
+    if (loggedOut !== 'true') {
+      checkAuth();
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     user,

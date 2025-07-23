@@ -166,10 +166,10 @@ function UserInfoForm({ user }: { user: any }) {
 
 export default function Manage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
-  // Show loading if user data is still being fetched
-  if (!user) {
+  // Show loading if user data is still being fetched or if user is not available
+  if (isLoading || !user) {
     return (
       <div className="flex h-screen bg-gray-50">
         <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
@@ -178,7 +178,17 @@ export default function Manage() {
             <div className="p-8">
               <div className="text-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading user data...</p>
+                <p className="mt-4 text-gray-600">
+                  {isLoading ? "Loading user data..." : "Authentication required. Please log in."}
+                </p>
+                {!isLoading && !user && (
+                  <button 
+                    onClick={() => window.location.href = '/'}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Go to Login
+                  </button>
+                )}
               </div>
             </div>
           </div>
