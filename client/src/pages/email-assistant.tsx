@@ -7,6 +7,40 @@ import { Bot, Mail } from "lucide-react";
 export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  const handlePromptSelect = (promptText: string) => {
+    // Try to send the prompt to the Ragflow iframe
+    const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      try {
+        // Try to post message to iframe (this may not work due to cross-origin restrictions)
+        iframe.contentWindow.postMessage({
+          type: 'INSERT_PROMPT',
+          prompt: promptText
+        }, '*');
+      } catch (error) {
+        console.log('Cannot directly communicate with iframe due to cross-origin policy');
+      }
+    }
+    
+    // Alternative: Copy to clipboard for user to paste
+    navigator.clipboard.writeText(promptText).then(() => {
+      // Show a temporary notification that text was copied
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+      notification.textContent = 'Prompt copied to clipboard!';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 2000);
+    }).catch(() => {
+      console.log('Could not copy to clipboard');
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -39,47 +73,71 @@ export default function EmailAssistant() {
             <CardContent className="p-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Analysis Best Practice Prompts</h3>
-                <p className="text-sm text-gray-600">Select a prompt to get started with professional email analysis</p>
+                <p className="text-sm text-gray-600">Double-click a prompt to copy it to your clipboard, then paste in the chat below</p>
               </div>
               
               <div className="overflow-y-auto" style={{ maxHeight: 'calc(40vh - 120px)' }}>
                 <div className="space-y-3">
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Analyze email tone and professionalism - Review communication style and suggest improvements")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Analyze email tone and professionalism</p>
                     <p className="text-xs text-gray-600 mt-1">Review communication style and suggest improvements</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Extract key action items and deadlines - Identify tasks, responsibilities, and time-sensitive items from this email")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Extract key action items and deadlines</p>
                     <p className="text-xs text-gray-600 mt-1">Identify tasks, responsibilities, and time-sensitive items</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Identify legal risks and compliance issues - Scan for potential legal concerns in email content")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Identify legal risks and compliance issues</p>
                     <p className="text-xs text-gray-600 mt-1">Scan for potential legal concerns in email content</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Summarize email thread and key decisions - Create concise summary of long email conversations")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Summarize email thread and key decisions</p>
                     <p className="text-xs text-gray-600 mt-1">Create concise summary of long email conversations</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Check for confidentiality and privacy concerns - Review for sensitive information disclosure risks")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Check for confidentiality and privacy concerns</p>
                     <p className="text-xs text-gray-600 mt-1">Review for sensitive information disclosure risks</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Generate professional email response draft - Create appropriate reply based on context and tone")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Generate professional email response draft</p>
                     <p className="text-xs text-gray-600 mt-1">Create appropriate reply based on context and tone</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Analyze contract terms mentioned in email - Review contractual obligations and commitments discussed")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Analyze contract terms mentioned in email</p>
                     <p className="text-xs text-gray-600 mt-1">Review contractual obligations and commitments discussed</p>
                   </div>
                   
-                  <div className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
+                  <div 
+                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200 hover:border-blue-300"
+                    onDoubleClick={() => handlePromptSelect("Validate email authenticity and detect phishing - Check for suspicious content and security threats")}
+                  >
                     <p className="text-sm font-medium text-gray-900">Validate email authenticity and detect phishing</p>
                     <p className="text-xs text-gray-600 mt-1">Check for suspicious content and security threats</p>
                   </div>
