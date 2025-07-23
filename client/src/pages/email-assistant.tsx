@@ -11,59 +11,110 @@ export default function EmailAssistant() {
     const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
     
     try {
-      // Copy to clipboard first
+      // Copy to clipboard
       await navigator.clipboard.writeText(promptText);
       
-      // Focus the iframe to prepare for paste operation
       if (iframe) {
+        // Focus iframe first
         iframe.focus();
         
-        // Try multiple approaches to send the prompt to the iframe
-        try {
-          // Approach 1: Post message to iframe
-          iframe.contentWindow?.postMessage({
-            type: 'INSERT_PROMPT',
-            prompt: promptText
-          }, '*');
-          
-          // Approach 2: Try to trigger paste event after a short delay
-          setTimeout(() => {
+        // Multiple aggressive approaches to auto-paste
+        setTimeout(async () => {
+          try {
+            // Approach 1: PostMessage with multiple event types
+            iframe.contentWindow?.postMessage({
+              type: 'INSERT_TEXT',
+              text: promptText
+            }, '*');
+            
+            iframe.contentWindow?.postMessage({
+              type: 'SET_INPUT_VALUE',
+              value: promptText
+            }, '*');
+            
+            // Approach 2: Focus iframe content and simulate paste
             if (iframe.contentWindow) {
-              // Focus the iframe content
               iframe.contentWindow.focus();
               
-              // Try to find input field and set value (may not work due to cross-origin)
-              try {
-                const inputs = iframe.contentDocument?.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-                if (inputs && inputs.length > 0) {
-                  const input = inputs[inputs.length - 1] as HTMLInputElement | HTMLTextAreaElement;
-                  input.value = promptText;
-                  input.dispatchEvent(new Event('input', { bubbles: true }));
+              // Try to programmatically trigger paste
+              setTimeout(() => {
+                // Simulate Ctrl+V keypress
+                const pasteEvent = new KeyboardEvent('keydown', {
+                  key: 'v',
+                  code: 'KeyV',
+                  ctrlKey: true,
+                  bubbles: true
+                });
+                
+                try {
+                  iframe.contentWindow?.dispatchEvent(pasteEvent);
+                } catch (e) {
+                  // Expected cross-origin restriction
                 }
-              } catch (e) {
-                // Cross-origin restriction - this is expected
-              }
+                
+                // Try direct DOM manipulation
+                try {
+                  const doc = iframe.contentDocument;
+                  if (doc) {
+                    // Find input elements
+                    const selectors = [
+                      'input[type="text"]',
+                      'textarea', 
+                      '[contenteditable="true"]',
+                      '[data-testid*="input"]',
+                      '.chat-input',
+                      '.message-input',
+                      'input[placeholder*="message"]',
+                      'input[placeholder*="ask"]',
+                      'input[placeholder*="type"]'
+                    ];
+                    
+                    for (const selector of selectors) {
+                      const elements = doc.querySelectorAll(selector);
+                      if (elements.length > 0) {
+                        const lastElement = elements[elements.length - 1] as HTMLInputElement | HTMLTextAreaElement;
+                        lastElement.focus();
+                        lastElement.value = promptText;
+                        
+                        // Trigger multiple events
+                        lastElement.dispatchEvent(new Event('input', { bubbles: true }));
+                        lastElement.dispatchEvent(new Event('change', { bubbles: true }));
+                        lastElement.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+                        
+                        // Try to trigger submit if there's a form
+                        const form = lastElement.closest('form');
+                        if (form) {
+                          const submitBtn = form.querySelector('button[type="submit"], button:last-child, [data-testid*="send"]');
+                          if (submitBtn instanceof HTMLButtonElement) {
+                            setTimeout(() => submitBtn.click(), 100);
+                          }
+                        }
+                        break;
+                      }
+                    }
+                  }
+                } catch (e) {
+                  // Cross-origin restriction - this is expected
+                }
+              }, 150);
             }
-          }, 100);
-          
-        } catch (error) {
-          console.log('Direct iframe communication restricted');
-        }
+            
+          } catch (error) {
+            console.log('Auto-paste attempts completed');
+          }
+        }, 100);
+        
+        // Auto-scroll to chat
+        setTimeout(() => {
+          iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
       }
       
-      // Show notification with enhanced instructions
+      // Show success notification
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity max-w-sm';
-      notification.innerHTML = `
-        <div class="font-medium">✓ Prompt Ready!</div>
-        <div class="text-sm mt-1">Click in the chat below and press Ctrl+V (or Cmd+V) to paste</div>
-      `;
+      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+      notification.textContent = '✓ Prompt sent to chat!';
       document.body.appendChild(notification);
-      
-      // Auto-scroll to chat area
-      setTimeout(() => {
-        iframe?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 200);
       
       setTimeout(() => {
         notification.style.opacity = '0';
@@ -72,24 +123,19 @@ export default function EmailAssistant() {
             document.body.removeChild(notification);
           }
         }, 300);
-      }, 4000);
+      }, 2000);
       
     } catch (error) {
-      console.log('Could not copy to clipboard:', error);
-      
       // Fallback notification
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-      notification.textContent = 'Could not copy prompt. Please manually select the text.';
+      notification.className = 'fixed top-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = 'Prompt copied - paste in chat below';
       document.body.appendChild(notification);
       
       setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-          if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
-          }
-        }, 300);
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
       }, 3000);
     }
   };
