@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Users, Search, Shield, UserCheck, UserX, Calendar, Mail, MapPin, Plus, Edit, Trash2 } from "lucide-react";
+import { Users, Search, Shield, UserCheck, UserX, Calendar, Mail, MapPin, Plus, Edit, Trash2, Lock, Unlock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/Sidebar";
 import { useForm } from "react-hook-form";
@@ -57,16 +57,7 @@ export default function AdminUsers() {
     retry: false,
   });
 
-  // Debug log for users data
-  console.log('Admin Users Debug:', { 
-    currentUser: currentUser?.role, 
-    users: users,
-    usersType: typeof users,
-    isArray: Array.isArray(users),
-    usersLength: users?.length, 
-    isLoading, 
-    error: error?.message 
-  });
+
 
   // Form instances
   const createForm = useForm<CreateUserForm>({
@@ -272,6 +263,19 @@ export default function AdminUsers() {
 
   const handleDeleteUser = (userId: string) => {
     deleteUserMutation.mutate(userId);
+  };
+
+  const handleToggleLockUser = (user: User) => {
+    const newStatus = user.userStatus === 'Locked' ? 'Active' : 'Locked';
+    updateUserMutation.mutate({ 
+      userId: user.id, 
+      data: { 
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        role: user.role as 'user' | 'admin',
+        userStatus: newStatus as 'Active' | 'Locked' | 'Expired'
+      } 
+    });
   };
 
   if (isLoading) {
@@ -590,6 +594,27 @@ export default function AdminUsers() {
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleLockUser(user)}
+                      className={user.userStatus === 'Locked' 
+                        ? "text-green-600 hover:text-green-700" 
+                        : "text-orange-600 hover:text-orange-700"
+                      }
+                    >
+                      {user.userStatus === 'Locked' ? (
+                        <>
+                          <Unlock className="h-4 w-4 mr-1" />
+                          Unlock
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="h-4 w-4 mr-1" />
+                          Lock
+                        </>
+                      )}
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
