@@ -35,7 +35,7 @@ import type { Transaction } from "@shared/schema";
 
 const transactionSchema = z.object({
   name: z.string().min(1, "Transaction name is required"),
-  address: z.string().optional(),
+  caseNo: z.string().min(1, "Case number is required"),
   transactionType: z.string().min(1, "Transaction type is required"),
   status: z.string().min(1, "Status is required"),
 });
@@ -56,7 +56,7 @@ export default function Manage() {
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       name: "",
-      address: "",
+      caseNo: "",
       transactionType: "",
       status: "",
     },
@@ -158,7 +158,7 @@ export default function Manage() {
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
     form.setValue("name", transaction.name);
-    form.setValue("address", transaction.address || "");
+    form.setValue("caseNo", transaction.caseNo || "");
     form.setValue("transactionType", transaction.transactionType);
     form.setValue("status", transaction.status);
     setIsEditDialogOpen(true);
@@ -284,12 +284,15 @@ export default function Manage() {
                             </div>
                             
                             <div>
-                              <Label htmlFor="address">Client/Matter Address</Label>
+                              <Label htmlFor="caseNo">Case Number</Label>
                               <Input
-                                id="address"
-                                {...form.register("address")}
-                                placeholder="Enter client or matter address"
+                                id="caseNo"
+                                {...form.register("caseNo")}
+                                placeholder="Enter case number"
                               />
+                              {form.formState.errors.caseNo && (
+                                <p className="text-sm text-red-500 mt-1">{form.formState.errors.caseNo.message}</p>
+                              )}
                             </div>
                             
                             <div>
@@ -355,7 +358,7 @@ export default function Manage() {
                           <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                             <div className="flex-1">
                               <h3 className="font-medium text-gray-900">{transaction.name}</h3>
-                              <p className="text-sm text-gray-600">{transaction.address}</p>
+                              <p className="text-sm text-gray-600">Case: {transaction.caseNo}</p>
                               <div className="flex items-center mt-2 space-x-4">
                                 <Badge className={getStatusColor(transaction.status)}>
                                   {transaction.status}
@@ -411,12 +414,15 @@ export default function Manage() {
                       </div>
                       
                       <div>
-                        <Label htmlFor="address">Property Address</Label>
+                        <Label htmlFor="caseNo">Case Number</Label>
                         <Input
-                          id="address"
-                          {...form.register("address")}
-                          placeholder="Enter property address"
+                          id="caseNo"
+                          {...form.register("caseNo")}
+                          placeholder="Enter case number"
                         />
+                        {form.formState.errors.caseNo && (
+                          <p className="text-sm text-red-500 mt-1">{form.formState.errors.caseNo.message}</p>
+                        )}
                       </div>
                       
                       <div>
