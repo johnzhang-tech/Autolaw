@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
+import { globalPersistence } from "@/utils/globalIframePersistence";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
+  const displayRef = useRef<HTMLDivElement>(null);
 
   const agents = {
     agent1: {
@@ -23,9 +25,27 @@ export default function Agents() {
     }
   };
 
-  // Save active tab to localStorage
+  // Initialize global persistence on mount
+  useEffect(() => {
+    globalPersistence.initializeAgents(agents);
+  }, []);
+
+  // Save active tab and display iframe
   useEffect(() => {
     localStorage.setItem('agent-active-tab', activeTab);
+    
+    if (displayRef.current) {
+      globalPersistence.moveToDisplay(activeTab, displayRef.current);
+    }
+  }, [activeTab]);
+
+  // Move current iframe back to storage when component unmounts
+  useEffect(() => {
+    return () => {
+      if (displayRef.current && displayRef.current.children.length > 0) {
+        globalPersistence.moveToStorage(activeTab);
+      }
+    };
   }, [activeTab]);
 
   return (
@@ -123,33 +143,17 @@ export default function Agents() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
-          <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px', 
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-            border: '1px solid #e5e7eb',
-            height: '100%',
-            position: 'relative'
-          }}>
-            {/* All iframes are rendered but only the active one is visible */}
-            {Object.entries(agents).map(([agentId, config]) => (
-              <iframe
-                key={agentId}
-                src={config.src}
-                title={config.title}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '600px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  display: activeTab === agentId ? 'block' : 'none'
-                }}
-              />
-            ))}
+          <div 
+            ref={displayRef}
+            style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+              border: '1px solid #e5e7eb',
+              height: '100%'
+            }}
+          >
+            {/* Active iframe will be moved here by global persistence */}
           </div>
         </div>
       </div>

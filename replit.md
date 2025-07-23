@@ -399,14 +399,14 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Flexible Agent URLs**: Easy configuration for actual Ragflow agent URLs when ready for deployment
   - **Security Features**: Proper iframe sandboxing with controlled permissions for external agent content
 - July 23, 2025. **MR ASSISTANT CONVERSATION PERSISTENCE SYSTEM COMPLETED**
-  - **Cross-Page Persistence**: Implemented iframe persistence system that preserves conversations when navigating between pages
-  - **Hidden DOM Container**: Created persistent storage container that maintains iframe states outside visible DOM
-  - **localStorage Integration**: Active tab selection persists across page reloads and navigation
-  - **Dynamic Iframe Management**: Smart system moves iframes between hidden storage and visible container as needed
-  - **Three Agent Support**: All three Ragflow agents (Case 3, Case 2, Case Large File) maintain independent conversation histories
-  - **Memory Preservation**: Conversations, chat history, and agent states preserved when navigating to Documents, Home, etc.
-  - **Seamless User Experience**: Users can start conversations, navigate away, and return to find all conversations intact
-  - **Production Ready**: Clean implementation without debug code, optimized for performance and reliability
+  - **Global Persistence Architecture**: Implemented robust global iframe persistence system that survives component unmounting and page navigation
+  - **Hidden Global Container**: Created document-level persistence container that maintains iframe states outside React component lifecycle
+  - **Component Lifecycle Management**: Smart system moves iframes between global storage and active display containers
+  - **Cross-Page Navigation Support**: Conversations preserved when navigating to Documents, Home, Settings, and returning to MR Assistant
+  - **Tab Navigation Enhancement**: Seamless tab switching between Case 3, Case 2, and Case Large File agents without conversation loss
+  - **Memory Preservation**: All three Ragflow agents maintain independent conversation histories across all navigation scenarios
+  - **localStorage Integration**: Active tab selection persists across page reloads and browser sessions
+  - **Production Ready**: Clean global persistence class with proper cleanup and error handling
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
