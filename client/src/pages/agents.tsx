@@ -4,7 +4,7 @@ import { Bot, FileText, Users } from "lucide-react";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>('agent1');
+  const [activeTab, setActiveTab] = useState('agent1');
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -35,75 +35,116 @@ export default function Agents() {
         <div className="bg-white border-b border-gray-200">
           <div className="flex px-6">
             <button
-              onClick={() => setActiveTab('agent1')}
-              className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent1'
-                  ? 'border-blue-500 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => {
+                console.log('Clicking agent1');
+                setActiveTab('agent1');
+              }}
+              style={{
+                padding: '16px 24px',
+                borderBottom: activeTab === 'agent1' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'agent1' ? '#eff6ff' : 'transparent',
+                color: activeTab === 'agent1' ? '#2563eb' : '#6b7280',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
             >
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText style={{ width: '16px', height: '16px' }} />
                 <span>Case 3 Agent</span>
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('agent2')}
-              className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent2'
-                  ? 'border-blue-500 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => {
+                console.log('Clicking agent2');
+                setActiveTab('agent2');
+              }}
+              style={{
+                padding: '16px 24px',
+                borderBottom: activeTab === 'agent2' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'agent2' ? '#eff6ff' : 'transparent',
+                color: activeTab === 'agent2' ? '#2563eb' : '#6b7280',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
             >
-              <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users style={{ width: '16px', height: '16px' }} />
                 <span>Case 2 Agent</span>
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('agent3')}
-              className={`py-4 px-6 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent3'
-                  ? 'border-blue-500 text-blue-600 bg-blue-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => {
+                console.log('Clicking agent3');
+                setActiveTab('agent3');
+              }}
+              style={{
+                padding: '16px 24px',
+                borderBottom: activeTab === 'agent3' ? '2px solid #3b82f6' : '2px solid transparent',
+                backgroundColor: activeTab === 'agent3' ? '#eff6ff' : 'transparent',
+                color: activeTab === 'agent3' ? '#2563eb' : '#6b7280',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
             >
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText style={{ width: '16px', height: '16px' }} />
                 <span>Case Large File</span>
               </div>
             </button>
           </div>
+          
+          {/* Debug info */}
+          <div style={{ padding: '8px 24px', backgroundColor: '#f3f4f6', fontSize: '12px' }}>
+            Active tab: {activeTab}
+          </div>
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 p-6">
-          <div className="bg-white rounded-lg shadow-sm border h-full">
+        <div style={{ flex: 1, padding: '24px' }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px', 
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+            border: '1px solid #e5e7eb',
+            height: '100%'
+          }}>
             {activeTab === 'agent1' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                title="Case 3 Agent"
-                className="rounded-lg"
-              />
+              <div style={{ backgroundColor: '#fee2e2', padding: '20px', height: '100%' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>CASE 3 AGENT ACTIVE</h3>
+                <iframe
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '80%', border: 'none', borderRadius: '8px' }}
+                  title="Case 3 Agent"
+                />
+              </div>
             )}
             
             {activeTab === 'agent2' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                title="Case 2 Agent"
-                className="rounded-lg"
-              />
+              <div style={{ backgroundColor: '#dcfce7', padding: '20px', height: '100%' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>CASE 2 AGENT ACTIVE</h3>
+                <iframe
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '80%', border: 'none', borderRadius: '8px' }}
+                  title="Case 2 Agent"
+                />
+              </div>
             )}
             
             {activeTab === 'agent3' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none' }}
-                title="Case Large File"
-                className="rounded-lg"
-              />
+              <div style={{ backgroundColor: '#dbeafe', padding: '20px', height: '100%' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>CASE LARGE FILE ACTIVE</h3>
+                <iframe
+                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                  style={{ width: '100%', height: '80%', border: 'none', borderRadius: '8px' }}
+                  title="Case Large File"
+                />
+              </div>
             )}
           </div>
         </div>
