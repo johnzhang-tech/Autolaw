@@ -56,6 +56,82 @@ export default function Agents() {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
 
+  // Function to copy prompt text to clipboard
+  const copyPromptToClipboard = async (promptText: string) => {
+    try {
+      await navigator.clipboard.writeText(promptText);
+      // Optional: Show a brief success indicator
+      console.log('Prompt copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy prompt:', err);
+    }
+  };
+
+  // Prompt templates for copy functionality
+  const promptTemplates = {
+    summary: `Summarize the attached medical chronology for legal review. The summary must be structured, legally relevant, and formatted for attorney or insurance use. Follow this format:
+
+### Patient Overview
+- Name:
+- Date of Injury:
+- Mechanism of Injury:
+- Primary Complaint(s):
+- Pre-existing Conditions:
+- First treatment date:
+- Total duration of care:
+
+### Chronological Summary Table
+| Date | Provider | Facility | Visit Type | Diagnosis/Treatment | Notable Findings |
+|------|----------|----------|-------------|----------------------|-------------------|`,
+
+    executive: `Summarize the medical chronology in a structured format for legal case preparation. Include:
+- Diagnosis Summary
+- Treatment Timeline
+- Gaps in Treatment
+- Provider Involvement
+- Medical Opinions (including QME/IME if available)
+- Current Status & Restrictions
+- Legal Relevance or Red Flags`,
+
+    timeline: `From the medical record, generate a table with the following columns:
+- Date of Visit
+- Provider Name
+- Specialty
+- Facility
+- Purpose of Visit
+- Key Diagnoses / Procedures
+Only include medical visits relevant to the injury or litigation.`,
+
+    legal: `Extract the following legally relevant facts from the medical chronology:
+- Any mention of malingering, exaggeration, or subjective complaints
+- Gaps in treatment > 30 days
+- Work restrictions or functional impairments
+- IME or QME opinions that impact liability or damages
+- Pre-existing conditions that may conflict with the claim
+- Non-compliance with treatment`,
+
+    demand: `Based on the medical record, write a brief summary suitable for inclusion in a demand letter. The summary should include:
+- Mechanism of injury
+- Primary diagnoses and complaints
+- Duration and nature of treatment
+- Degree of recovery or permanent restrictions
+- Any medical support for pain/suffering or disability claims`,
+
+    mmi: `Review the record and determine:
+- Has the patient reached Maximum Medical Improvement?
+- If yes, when and by which provider?
+- Are there any references to Functional Capacity Evaluations (FCEs)?
+- Does the record document any permanent impairment ratings?`,
+
+    future: `Identify and list all references to:
+- Follow-up care or surgeries
+- Long-term medication needs
+- Physical or occupational therapy
+- Chronic pain or mobility issues
+- Psychiatric or psychological care
+- Provider opinions on future prognosis`
+  };
+
   const agents = {
     agent1: {
       src: "https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm",
@@ -198,7 +274,11 @@ export default function Agents() {
               
               <div className="h-[580px] overflow-y-auto p-4 space-y-4">
                 {/* Prompt 0: Summary */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.summary)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 0: Summary</h4>
                   <div className="text-sm text-gray-700 space-y-2">
                     <p>Summarize the attached medical chronology for legal review. The summary must be structured, legally relevant, and formatted for attorney or insurance use. Follow this format:</p>
@@ -222,7 +302,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 1: Executive Medical Summary */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.executive)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 1: Executive Medical Summary</h4>
                   <div className="text-sm text-gray-700">
                     <p>Summarize the medical chronology in a structured format for legal case preparation. Include:</p>
@@ -239,7 +323,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 2: Provider Timeline Table */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.timeline)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 2: Provider Timeline Table</h4>
                   <div className="text-sm text-gray-700">
                     <p>From the medical record, generate a table with the following columns:</p>
@@ -256,7 +344,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 3: Legal Highlight Extraction */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.legal)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 3: Legal Highlight Extraction</h4>
                   <div className="text-sm text-gray-700">
                     <p>Extract the following legally relevant facts from the medical chronology:</p>
@@ -272,7 +364,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 4: Paralegal Summary for Demand Letter */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.demand)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 4: Paralegal Summary for Demand Letter</h4>
                   <div className="text-sm text-gray-700">
                     <p>Based on the medical record, write a brief summary suitable for inclusion in a demand letter. The summary should include:</p>
@@ -287,7 +383,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 5: MMI & Functional Capacity Check */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.mmi)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 5: MMI & Functional Capacity Check</h4>
                   <div className="text-sm text-gray-700">
                     <p>Review the record and determine:</p>
@@ -301,7 +401,11 @@ export default function Agents() {
                 </div>
 
                 {/* Prompt 6: Future Medical Needs Summary */}
-                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div 
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow cursor-pointer select-text"
+                  onDoubleClick={() => copyPromptToClipboard(promptTemplates.future)}
+                  title="Double-click to copy prompt to clipboard"
+                >
                   <h4 className="font-medium text-gray-900 mb-2">Prompt 6: Future Medical Needs Summary</h4>
                   <div className="text-sm text-gray-700">
                     <p>Identify and list all references to:</p>
