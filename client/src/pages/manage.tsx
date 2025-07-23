@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -48,9 +48,19 @@ export default function Manage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, checkAuth } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  // Ensure auth check runs on component mount
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // Ensure auth check runs on component mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const form = useForm<TransactionForm>({
     resolver: zodResolver(transactionSchema),
