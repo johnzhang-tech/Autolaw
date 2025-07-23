@@ -6,138 +6,31 @@ import { Bot, Mail } from "lucide-react";
 
 export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
+  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
 
-  const handlePromptSelect = async (promptText: string) => {
-    const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
+  const handlePromptSelect = (promptText: string) => {
+    // Set the selected prompt and force iframe reload with new URL
+    setSelectedPrompt(promptText);
+    setIframeKey(prev => prev + 1);
     
-    try {
-      // Copy to clipboard
-      await navigator.clipboard.writeText(promptText);
-      
-      if (iframe) {
-        // Focus iframe first
-        iframe.focus();
-        
-        // Multiple aggressive approaches to auto-paste
-        setTimeout(async () => {
-          try {
-            // Approach 1: PostMessage with multiple event types
-            iframe.contentWindow?.postMessage({
-              type: 'INSERT_TEXT',
-              text: promptText
-            }, '*');
-            
-            iframe.contentWindow?.postMessage({
-              type: 'SET_INPUT_VALUE',
-              value: promptText
-            }, '*');
-            
-            // Approach 2: Focus iframe content and simulate paste
-            if (iframe.contentWindow) {
-              iframe.contentWindow.focus();
-              
-              // Try to programmatically trigger paste
-              setTimeout(() => {
-                // Simulate Ctrl+V keypress
-                const pasteEvent = new KeyboardEvent('keydown', {
-                  key: 'v',
-                  code: 'KeyV',
-                  ctrlKey: true,
-                  bubbles: true
-                });
-                
-                try {
-                  iframe.contentWindow?.dispatchEvent(pasteEvent);
-                } catch (e) {
-                  // Expected cross-origin restriction
-                }
-                
-                // Try direct DOM manipulation
-                try {
-                  const doc = iframe.contentDocument;
-                  if (doc) {
-                    // Find input elements
-                    const selectors = [
-                      'input[type="text"]',
-                      'textarea', 
-                      '[contenteditable="true"]',
-                      '[data-testid*="input"]',
-                      '.chat-input',
-                      '.message-input',
-                      'input[placeholder*="message"]',
-                      'input[placeholder*="ask"]',
-                      'input[placeholder*="type"]'
-                    ];
-                    
-                    for (const selector of selectors) {
-                      const elements = doc.querySelectorAll(selector);
-                      if (elements.length > 0) {
-                        const lastElement = elements[elements.length - 1] as HTMLInputElement | HTMLTextAreaElement;
-                        lastElement.focus();
-                        lastElement.value = promptText;
-                        
-                        // Trigger multiple events
-                        lastElement.dispatchEvent(new Event('input', { bubbles: true }));
-                        lastElement.dispatchEvent(new Event('change', { bubbles: true }));
-                        lastElement.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
-                        
-                        // Try to trigger submit if there's a form
-                        const form = lastElement.closest('form');
-                        if (form) {
-                          const submitBtn = form.querySelector('button[type="submit"], button:last-child, [data-testid*="send"]');
-                          if (submitBtn instanceof HTMLButtonElement) {
-                            setTimeout(() => submitBtn.click(), 100);
-                          }
-                        }
-                        break;
-                      }
-                    }
-                  }
-                } catch (e) {
-                  // Cross-origin restriction - this is expected
-                }
-              }, 150);
-            }
-            
-          } catch (error) {
-            console.log('Auto-paste attempts completed');
-          }
-        }, 100);
-        
-        // Auto-scroll to chat
-        setTimeout(() => {
-          iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 200);
-      }
-      
-      // Show success notification
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-      notification.textContent = '✓ Prompt sent to chat!';
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-          if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
-          }
-        }, 300);
-      }, 2000);
-      
-    } catch (error) {
-      // Fallback notification
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = 'Prompt copied - paste in chat below';
-      document.body.appendChild(notification);
-      
+    // Copy to clipboard as backup
+    navigator.clipboard.writeText(promptText).catch(() => {});
+    
+    // Show notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+    notification.textContent = '✓ Reloading chat with prompt...';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.opacity = '0';
       setTimeout(() => {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
         }
-      }, 3000);
-    }
+      }, 300);
+    }, 2000);
   };
 
   return (
@@ -248,8 +141,28 @@ export default function EmailAssistant() {
           {/* Ragflow Chat Assistant */}
           <Card className="flex-1 min-h-0">
             <CardContent className="p-0 h-full">
+              {selectedPrompt && (
+                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <Mail className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-blue-700 font-medium">Selected Prompt:</p>
+                      <p className="text-sm text-blue-600 mt-1">{selectedPrompt}</p>
+                      <button 
+                        onClick={() => setSelectedPrompt('')}
+                        className="text-xs text-blue-500 hover:text-blue-700 mt-2 underline"
+                      >
+                        Clear prompt
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=5fe51950675711f0a9ce0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
+                key={iframeKey}
+                src={`https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=5fe51950675711f0a9ce0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm${selectedPrompt ? `&initial_prompt=${encodeURIComponent(selectedPrompt)}` : ''}`}
                 style={{ width: '100%', height: '100%', minHeight: '400px' }}
                 frameBorder="0"
                 title="Email Agentic Assistant"
