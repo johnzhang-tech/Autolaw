@@ -1,10 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
+import { useAgentPersistence } from "@/hooks/useAgentPersistence";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('agent1');
+  const { 
+    activeTab, 
+    setActiveTab, 
+    createOrGetIframe, 
+    moveIframeToContainer, 
+    moveIframeToHidden 
+  } = useAgentPersistence();
+  
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const agents = {
+    agent1: {
+      src: "https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm",
+      title: "Case 3 Agent"
+    },
+    agent2: {
+      src: "https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm",
+      title: "Case 2 Agent"
+    },
+    agent3: {
+      src: "https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm",
+      title: "Case Large File"
+    }
+  };
+
+  // Initialize all iframes and handle tab switching
+  useEffect(() => {
+    // Create all iframes initially
+    Object.entries(agents).forEach(([agentId, config]) => {
+      createOrGetIframe(agentId, config.src, config.title);
+    });
+  }, []);
+
+  // Handle active tab changes
+  useEffect(() => {
+    if (contentRef.current) {
+      // Hide all iframes first
+      Object.keys(agents).forEach(agentId => {
+        if (agentId !== activeTab) {
+          moveIframeToHidden(agentId);
+        }
+      });
+      
+      // Show active iframe
+      moveIframeToContainer(activeTab, contentRef.current);
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -101,36 +148,17 @@ export default function Agents() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
-          <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px', 
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-            border: '1px solid #e5e7eb',
-            height: '100%'
-          }}>
-            {activeTab === 'agent1' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', borderRadius: '8px' }}
-                title="Case 3 Agent"
-              />
-            )}
-            
-            {activeTab === 'agent2' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', borderRadius: '8px' }}
-                title="Case 2 Agent"
-              />
-            )}
-            
-            {activeTab === 'agent3' && (
-              <iframe
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', borderRadius: '8px' }}
-                title="Case Large File"
-              />
-            )}
+          <div 
+            ref={contentRef}
+            style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+              border: '1px solid #e5e7eb',
+              height: '100%'
+            }}
+          >
+            {/* Iframe will be dynamically moved here */}
           </div>
         </div>
       </div>
