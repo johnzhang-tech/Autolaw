@@ -11,6 +11,7 @@ import Upload from "@/pages/upload";
 import QA from "@/pages/qa";
 import AgentQA from "@/pages/agent-qa";
 import Agents from "@/pages/agents";
+import AgentsTest from "@/pages/agents-test";
 import EmailAssistant from "@/pages/email-assistant";
 import Documents from "@/pages/documents";
 import FullDashboard from "@/pages/dashboard";
@@ -57,7 +58,8 @@ function Router() {
           <Route path="/create" component={Create} />
           <Route path="/documents" component={Documents} />
           <Route path="/qa" component={EmailAssistant} />
-          <Route path="/agents" component={Agents} />
+          <Route path="/agents" component={AgentsTest} />
+          <Route path="/agents-original" component={Agents} />
           <Route path="/dashboard" component={FullDashboard} />
           <Route path="/manage" component={Manage} />
           <Route component={NotFound} />
