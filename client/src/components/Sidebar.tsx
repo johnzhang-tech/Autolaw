@@ -16,6 +16,8 @@ import {
   ChevronRight,
   LogOut,
   Bot,
+  Users,
+  Code,
 } from "lucide-react";
 import altoseraLogo from "@assets/Altosera_Two_Toned_Logo (1)_1753162846233.png";
 
@@ -77,8 +79,26 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
     },
   ];
 
-  // Use only regular navigation items - no admin sections
-  const allNavigationItems = navigationItems;
+  // Add admin-only navigation items for admin users
+  const adminItems = user?.role === 'admin' ? [
+    {
+      icon: Users,
+      label: "User Management",
+      href: "/admin-users",
+      color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50",
+      special: false,
+    },
+    {
+      icon: Code,
+      label: "Test API",
+      href: "/test-api",
+      color: "text-orange-600 hover:text-orange-900 hover:bg-orange-50",
+      special: false,
+    },
+  ] : [];
+
+  // Combine regular and admin navigation items
+  const allNavigationItems = [...navigationItems, ...adminItems];
 
   return (
     <div className={cn(
@@ -157,7 +177,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
                   "w-full justify-start h-12 rounded-xl",
                   isActive
                     ? "bg-primary/10 text-primary font-medium"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    : item.color || "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 )}
               >
                 <IconComponent className={cn(
