@@ -1,38 +1,60 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
 
-// Global persistence container outside React lifecycle
-let globalPersistenceContainer: HTMLDivElement | null = null;
-let persistentIframes: Record<string, HTMLIFrameElement> = {};
-
-function initGlobalPersistence() {
-  if (!globalPersistenceContainer) {
-    globalPersistenceContainer = document.createElement('div');
-    globalPersistenceContainer.id = 'agent-persistence-container';
-    globalPersistenceContainer.style.cssText = `
-      position: fixed;
-      top: -9999px;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      visibility: hidden;
-      pointer-events: none;
-      z-index: -1;
-    `;
-    document.body.appendChild(globalPersistenceContainer);
+// Global persistence system for cross-page navigation
+const globalPersistence = {
+  container: null as HTMLDivElement | null,
+  iframes: {} as Record<string, HTMLIFrameElement>,
+  
+  init() {
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'ragflow-persistence';
+      this.container.style.cssText = `
+        position: fixed;
+        top: -10000px;
+        left: -10000px;
+        width: 800px;
+        height: 600px;
+        overflow: hidden;
+        visibility: hidden;
+        pointer-events: none;
+        z-index: -9999;
+      `;
+      document.body.appendChild(this.container);
+    }
+  },
+  
+  createIframe(agentId: string, src: string, title: string) {
+    if (!this.iframes[agentId]) {
+      this.init();
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.title = title;
+      iframe.style.cssText = `
+        width: 100%;
+        height: 100%;
+        min-height: 600px;
+        border: none;
+        border-radius: 8px;
+      `;
+      this.iframes[agentId] = iframe;
+      this.container!.appendChild(iframe);
+    }
+    return this.iframes[agentId];
+  },
+  
+  getIframe(agentId: string) {
+    return this.iframes[agentId];
   }
-  return globalPersistenceContainer;
-}
+};
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
-  
-  const displayContainerRef = useRef<HTMLDivElement>(null);
 
   const agents = {
     agent1: {
@@ -49,61 +71,16 @@ export default function Agents() {
     }
   };
 
-  // Initialize persistent iframes once
+  // Initialize persistent iframes
   useEffect(() => {
-    const persistenceContainer = initGlobalPersistence();
-    
-    // Create persistent iframes if they don't exist
     Object.entries(agents).forEach(([agentId, config]) => {
-      if (!persistentIframes[agentId]) {
-        const iframe = document.createElement('iframe');
-        iframe.src = config.src;
-        iframe.title = config.title;
-        iframe.style.cssText = `
-          width: 100%;
-          height: 100%;
-          min-height: 600px;
-          border: none;
-          border-radius: 8px;
-        `;
-        persistentIframes[agentId] = iframe;
-        persistenceContainer.appendChild(iframe);
-      }
+      globalPersistence.createIframe(agentId, config.src, config.title);
     });
   }, []);
 
-  // Move active iframe to display and others to persistence
+  // Save active tab
   useEffect(() => {
-    if (displayContainerRef.current) {
-      const displayContainer = displayContainerRef.current;
-      const persistenceContainer = initGlobalPersistence();
-      
-      // Clear display container
-      displayContainer.innerHTML = '';
-      
-      // Move all iframes back to persistence first
-      Object.entries(persistentIframes).forEach(([agentId, iframe]) => {
-        if (iframe.parentNode !== persistenceContainer) {
-          persistenceContainer.appendChild(iframe);
-        }
-      });
-      
-      // Move active iframe to display
-      if (persistentIframes[activeTab]) {
-        displayContainer.appendChild(persistentIframes[activeTab]);
-      }
-    }
-    
     localStorage.setItem('agent-active-tab', activeTab);
-  }, [activeTab]);
-
-  // On component unmount, move active iframe back to persistence
-  useEffect(() => {
-    return () => {
-      if (persistentIframes[activeTab] && globalPersistenceContainer) {
-        globalPersistenceContainer.appendChild(persistentIframes[activeTab]);
-      }
-    };
   }, [activeTab]);
 
   return (
@@ -133,87 +110,99 @@ export default function Agents() {
 
         {/* Tab Navigation */}
         <div className="bg-white border-b border-gray-200">
-          <div className="flex px-6">
-            <button
-              onClick={() => setActiveTab('agent1')}
-              style={{
-                padding: '16px 24px',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                borderBottom: activeTab === 'agent1' ? '2px solid #3b82f6' : '2px solid transparent',
-                backgroundColor: activeTab === 'agent1' ? '#eff6ff' : 'transparent',
-                color: activeTab === 'agent1' ? '#2563eb' : '#6b7280',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText style={{ width: '16px', height: '16px' }} />
-                <span>Case 3 Agent</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('agent2')}
-              style={{
-                padding: '16px 24px',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                borderBottom: activeTab === 'agent2' ? '2px solid #3b82f6' : '2px solid transparent',
-                backgroundColor: activeTab === 'agent2' ? '#eff6ff' : 'transparent',
-                color: activeTab === 'agent2' ? '#2563eb' : '#6b7280',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users style={{ width: '16px', height: '16px' }} />
-                <span>Case 2 Agent</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('agent3')}
-              style={{
-                padding: '16px 24px',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                borderBottom: activeTab === 'agent3' ? '2px solid #3b82f6' : '2px solid transparent',
-                backgroundColor: activeTab === 'agent3' ? '#eff6ff' : 'transparent',
-                color: activeTab === 'agent3' ? '#2563eb' : '#6b7280',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText style={{ width: '16px', height: '16px' }} />
-                <span>Case Large File</span>
-              </div>
-            </button>
+          <div className="flex space-x-8 px-6">
+            {Object.entries(agents).map(([agentId, config]) => (
+              <button
+                key={agentId}
+                onClick={() => setActiveTab(agentId)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === agentId
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {agentId === 'agent1' && <FileText className="w-4 h-4" />}
+                  {agentId === 'agent2' && <Users className="w-4 h-4" />}
+                  {agentId === 'agent3' && <Bot className="w-4 h-4" />}
+                  {config.title}
+                </div>
+              </button>
+            ))}
           </div>
-          
 
+          <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+            <div className="text-sm text-gray-600">
+              {activeTab === 'agent1' && "Specialized in contract analysis, terms review, and obligation assessment"}
+              {activeTab === 'agent2' && "Expert in legal compliance monitoring and regulatory risk detection"}
+              {activeTab === 'agent3' && "Handles large document analysis with comprehensive risk scoring"}
+            </div>
+          </div>
+
+          
         </div>
 
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
-          <div 
-            ref={displayContainerRef}
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '8px', 
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-              border: '1px solid #e5e7eb',
-              height: '100%',
-              minHeight: '600px',
-              position: 'relative'
-            }}
-          >
-            {/* Active iframe will be moved here dynamically */}
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px', 
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+            border: '1px solid #e5e7eb',
+            height: '100%',
+            minHeight: '600px',
+            position: 'relative'
+          }}>
+            {/* All iframes rendered simultaneously, only active one visible */}
+            {Object.entries(agents).map(([agentId, config]) => {
+              const persistentIframe = globalPersistence.getIframe(agentId);
+              const isActive = activeTab === agentId;
+              
+              if (persistentIframe && isActive) {
+                // Move persistent iframe to display
+                setTimeout(() => {
+                  const container = document.getElementById(`agent-container-${agentId}`);
+                  if (container && persistentIframe.parentNode !== container) {
+                    container.appendChild(persistentIframe);
+                  }
+                }, 0);
+                
+                return (
+                  <div
+                    key={agentId}
+                    id={`agent-container-${agentId}`}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'block'
+                    }}
+                  />
+                );
+              }
+              
+              // Fallback iframe for immediate display
+              return (
+                <iframe
+                  key={agentId}
+                  src={config.src}
+                  title={config.title}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '600px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    display: isActive ? 'block' : 'none'
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
