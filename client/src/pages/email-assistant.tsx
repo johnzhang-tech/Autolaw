@@ -8,90 +8,119 @@ export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handlePromptSelect = async (promptText: string) => {
-    // Create floating overlay with the prompt text
-    const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
-    overlay.innerHTML = `
-      <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-2xl">
-        <h3 class="text-lg font-bold mb-4">Selected Prompt</h3>
-        <div class="bg-gray-50 p-3 rounded border text-sm mb-4 max-h-32 overflow-y-auto">
-          ${promptText}
-        </div>
-        <div class="flex gap-3">
-          <button id="send-prompt" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-            Send to Chat
-          </button>
-          <button id="cancel-prompt" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-            Cancel
-          </button>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    // Handle send button
-    const sendBtn = overlay.querySelector('#send-prompt');
-    sendBtn?.addEventListener('click', async () => {
-      // Copy to clipboard
+    try {
+      // Copy to clipboard immediately
+      await navigator.clipboard.writeText(promptText);
+      
+      // Create a temporary textarea to simulate user selection and copy
+      const tempTextarea = document.createElement('textarea');
+      tempTextarea.value = promptText;
+      tempTextarea.style.position = 'fixed';
+      tempTextarea.style.left = '-9999px';
+      document.body.appendChild(tempTextarea);
+      
+      // Select and focus the textarea
+      tempTextarea.select();
+      tempTextarea.setSelectionRange(0, promptText.length);
+      
+      // Try multiple clipboard approaches
       try {
-        await navigator.clipboard.writeText(promptText);
+        document.execCommand('copy');
       } catch (e) {
-        // Clipboard failed, continue anyway
+        // Fallback if execCommand fails
       }
       
-      // Remove overlay
-      document.body.removeChild(overlay);
+      // Remove temp textarea
+      document.body.removeChild(tempTextarea);
       
-      // Simulate clicking in the iframe and pasting
+      // Focus the iframe and simulate user interaction
       const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
       if (iframe) {
-        // Focus iframe
+        // Click on iframe to focus it
         iframe.focus();
+        iframe.click();
         
-        // Try to simulate user clicking in iframe
-        const clickEvent = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        
-        iframe.dispatchEvent(clickEvent);
-        
-        // Wait a bit, then try to trigger paste
+        // Wait and try to trigger focus and paste events
         setTimeout(() => {
-          // Simulate keyboard paste
-          document.execCommand('paste');
+          // Create and dispatch a series of events to simulate user paste
+          const events = [
+            new FocusEvent('focus', { bubbles: true }),
+            new MouseEvent('click', { bubbles: true }),
+            new KeyboardEvent('keydown', { key: 'v', ctrlKey: true, bubbles: true }),
+            new KeyboardEvent('keypress', { key: 'v', ctrlKey: true, bubbles: true }),
+            new KeyboardEvent('keyup', { key: 'v', ctrlKey: true, bubbles: true })
+          ];
           
-          // Also try dispatching paste event to iframe
-          const pasteEvent = new ClipboardEvent('paste', {
-            bubbles: true,
-            cancelable: true,
-            clipboardData: new DataTransfer()
+          events.forEach(event => {
+            iframe.dispatchEvent(event);
+            
+            // Also try dispatching to the iframe's content window
+            try {
+              iframe.contentWindow?.dispatchEvent(event);
+            } catch (e) {
+              // Cross-origin restriction
+            }
           });
           
-          // Add text to clipboard data
+          // Try direct paste command on the iframe
           try {
-            pasteEvent.clipboardData?.setData('text/plain', promptText);
+            iframe.contentWindow?.document.execCommand('paste');
           } catch (e) {
-            // Some browsers don't allow this
+            // Cross-origin restriction
           }
           
-          iframe.dispatchEvent(pasteEvent);
-          
-          // Try window-level paste
-          window.dispatchEvent(pasteEvent);
-          
-        }, 100);
+        }, 50);
         
-        // Scroll to iframe
+        // Second attempt with different timing
+        setTimeout(() => {
+          try {
+            // Try to simulate Ctrl+V at document level
+            const pasteEvent = new KeyboardEvent('keydown', {
+              key: 'v',
+              code: 'KeyV',
+              ctrlKey: true,
+              bubbles: true,
+              cancelable: true
+            });
+            
+            document.dispatchEvent(pasteEvent);
+            iframe.dispatchEvent(pasteEvent);
+            
+            // Try paste command
+            document.execCommand('paste');
+            
+          } catch (e) {
+            // Expected failure due to security restrictions
+          }
+        }, 200);
+        
+        // Scroll to chat input area
         iframe.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
       
-      // Show completion message
+      // Show simple notification
       const notification = document.createElement('div');
-      notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = 'Prompt sent! Check the chat input below.';
+      notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+      notification.innerHTML = `
+        <div class="text-sm font-medium">Prompt copied to clipboard</div>
+        <div class="text-xs mt-1">Click in chat below and paste (Ctrl+V)</div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 4000);
+      
+    } catch (error) {
+      // Fallback notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = 'Failed to copy prompt';
       document.body.appendChild(notification);
       
       setTimeout(() => {
@@ -99,20 +128,7 @@ export default function EmailAssistant() {
           document.body.removeChild(notification);
         }
       }, 3000);
-    });
-    
-    // Handle cancel button
-    const cancelBtn = overlay.querySelector('#cancel-prompt');
-    cancelBtn?.addEventListener('click', () => {
-      document.body.removeChild(overlay);
-    });
-    
-    // Handle overlay click to close
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        document.body.removeChild(overlay);
-      }
-    });
+    }
   };
 
   return (
