@@ -231,23 +231,57 @@ export default function Manage() {
                   </CardContent>
                 </Card>
 
-                {/* Account Security */}
+                {/* Account Details */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Shield className="h-5 w-5 mr-2" />
-                      Account Security
+                      Account Details
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <Label className="text-sm font-medium text-gray-700">Account Type</Label>
-                        <p className="text-gray-900 py-2">{user?.isAdmin ? 'Administrator' : 'Standard User'}</p>
+                        <Label className="text-sm font-medium text-gray-700">User Role</Label>
+                        <p className="text-gray-900 py-2 capitalize">
+                          {user?.role === 'admin' ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Administrator
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Standard User
+                            </span>
+                          )}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-700">User ID</Label>
                         <p className="text-gray-500 py-2 text-sm font-mono">{user?.id}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Account Created</Label>
+                        <p className="text-gray-900 py-2">
+                          {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Not available'}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Last Modified</Label>
+                        <p className="text-gray-900 py-2">
+                          {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Not available'}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
