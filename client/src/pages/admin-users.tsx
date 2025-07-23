@@ -19,23 +19,7 @@ export default function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (!isAuthenticated) {
-      window.location.href = '/';
-      return;
-    }
-    
-    if (currentUser && currentUser.role !== 'admin') {
-      toast({
-        title: "Access Denied",
-        description: "This page is only accessible to administrators.",
-        variant: "destructive",
-      });
-      window.location.href = '/';
-      return;
-    }
-  }, [currentUser, isAuthenticated, toast]);
+  // Note: Authentication and role checks are handled in the render logic below
 
   // Fetch all users (admin only)
   const { data: users = [], isLoading, error, refetch } = useQuery<User[]>({
@@ -86,17 +70,41 @@ export default function AdminUsers() {
     },
   });
 
-  // Show loading or access denied
-  if (!currentUser || currentUser.role !== 'admin') {
+  // Show loading while checking authentication
+  if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="w-96">
-          <CardContent className="pt-6 text-center">
-            <Shield className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Access Restricted</h2>
-            <p className="text-slate-600">This page requires administrator privileges.</p>
-          </CardContent>
-        </Card>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar collapsed={false} onToggle={() => {}} />
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="p-8">
+              <div className="text-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                <p className="mt-4 text-gray-600">Loading user data...</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Show access denied if not admin
+  if (currentUser.role !== 'admin') {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar collapsed={false} onToggle={() => {}} />
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="p-8">
+              <div className="text-center py-8">
+                <Shield className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                <h2 className="text-lg font-semibold text-slate-900 mb-2">Access Restricted</h2>
+                <p className="text-slate-600">This page requires administrator privileges.</p>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -115,7 +123,7 @@ export default function AdminUsers() {
   });
 
   const handleRoleUpdate = (userId: string, newRole: 'user' | 'admin') => {
-    updateRoleMutation.mutate({ userId, newRole });
+    updateRoleMutation.mutate({ userId, role: newRole });
   };
 
   if (isLoading) {
@@ -320,7 +328,7 @@ export default function AdminUsers() {
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            {new Date(user.createdAt).toLocaleDateString()}
+                            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
                           </span>
                         </div>
                       </div>
