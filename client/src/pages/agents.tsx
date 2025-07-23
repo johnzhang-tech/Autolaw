@@ -1,12 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
+
+// Global persistence container outside React lifecycle
+let globalPersistenceContainer: HTMLDivElement | null = null;
+let persistentIframes: Record<string, HTMLIFrameElement> = {};
+
+function initGlobalPersistence() {
+  if (!globalPersistenceContainer) {
+    globalPersistenceContainer = document.createElement('div');
+    globalPersistenceContainer.id = 'agent-persistence-container';
+    globalPersistenceContainer.style.cssText = `
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: -1;
+    `;
+    document.body.appendChild(globalPersistenceContainer);
+  }
+  return globalPersistenceContainer;
+}
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
+  
+  const displayContainerRef = useRef<HTMLDivElement>(null);
 
   const agents = {
     agent1: {
@@ -23,9 +49,61 @@ export default function Agents() {
     }
   };
 
-  // Save active tab
+  // Initialize persistent iframes once
   useEffect(() => {
+    const persistenceContainer = initGlobalPersistence();
+    
+    // Create persistent iframes if they don't exist
+    Object.entries(agents).forEach(([agentId, config]) => {
+      if (!persistentIframes[agentId]) {
+        const iframe = document.createElement('iframe');
+        iframe.src = config.src;
+        iframe.title = config.title;
+        iframe.style.cssText = `
+          width: 100%;
+          height: 100%;
+          min-height: 600px;
+          border: none;
+          border-radius: 8px;
+        `;
+        persistentIframes[agentId] = iframe;
+        persistenceContainer.appendChild(iframe);
+      }
+    });
+  }, []);
+
+  // Move active iframe to display and others to persistence
+  useEffect(() => {
+    if (displayContainerRef.current) {
+      const displayContainer = displayContainerRef.current;
+      const persistenceContainer = initGlobalPersistence();
+      
+      // Clear display container
+      displayContainer.innerHTML = '';
+      
+      // Move all iframes back to persistence first
+      Object.entries(persistentIframes).forEach(([agentId, iframe]) => {
+        if (iframe.parentNode !== persistenceContainer) {
+          persistenceContainer.appendChild(iframe);
+        }
+      });
+      
+      // Move active iframe to display
+      if (persistentIframes[activeTab]) {
+        displayContainer.appendChild(persistentIframes[activeTab]);
+      }
+    }
+    
     localStorage.setItem('agent-active-tab', activeTab);
+  }, [activeTab]);
+
+  // On component unmount, move active iframe back to persistence
+  useEffect(() => {
+    return () => {
+      if (persistentIframes[activeTab] && globalPersistenceContainer) {
+        globalPersistenceContainer.appendChild(persistentIframes[activeTab]);
+      }
+    };
   }, [activeTab]);
 
   return (
@@ -123,33 +201,19 @@ export default function Agents() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
-          <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px', 
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-            border: '1px solid #e5e7eb',
-            height: '100%',
-            position: 'relative'
-          }}>
-            {/* All iframes rendered simultaneously, only active one visible */}
-            {Object.entries(agents).map(([agentId, config]) => (
-              <iframe
-                key={agentId}
-                src={config.src}
-                title={config.title}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '600px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  display: activeTab === agentId ? 'block' : 'none'
-                }}
-              />
-            ))}
+          <div 
+            ref={displayContainerRef}
+            style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+              border: '1px solid #e5e7eb',
+              height: '100%',
+              minHeight: '600px',
+              position: 'relative'
+            }}
+          >
+            {/* Active iframe will be moved here dynamically */}
           </div>
         </div>
       </div>
