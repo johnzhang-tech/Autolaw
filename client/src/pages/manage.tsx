@@ -196,9 +196,7 @@ export default function Manage() {
     }
   };
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  // Remove the user loading check as it's handled by the router
 
   return (
     <div className="flex h-screen bg-gray-50">
