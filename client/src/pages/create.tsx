@@ -57,8 +57,8 @@ import type { TransactionResponse } from "@shared/schema";
 
 const caseSchema = z.object({
   name: z.string().min(1, "Case name is required"),
-  address: z.string().optional(),
-  transactionType: z.enum(["purchase", "sale", "refinance", "rental"]),
+  caseNo: z.string().optional(),
+  transactionType: z.enum(["Contract", "Litigation", "Corporate", "Real Estate"]),
 });
 
 type CaseForm = z.infer<typeof caseSchema>;
@@ -78,8 +78,8 @@ export default function Create() {
     resolver: zodResolver(caseSchema),
     defaultValues: {
       name: "",
-      address: "",
-      transactionType: "purchase",
+      caseNo: "",
+      transactionType: "Contract",
     },
   });
 
@@ -87,8 +87,8 @@ export default function Create() {
     resolver: zodResolver(caseSchema),
     defaultValues: {
       name: "",
-      address: "",
-      transactionType: "purchase",
+      caseNo: "",
+      transactionType: "Contract",
     },
   });
 
@@ -199,8 +199,8 @@ export default function Create() {
     // Pre-populate the edit form with current transaction data
     editForm.reset({
       name: transaction.name,
-      address: transaction.address || "",
-      transactionType: transaction.transactionType as "purchase" | "sale" | "refinance" | "rental",
+      caseNo: transaction.caseNo || "",
+      transactionType: transaction.transactionType as "Contract" | "Litigation" | "Corporate" | "Real Estate",
     });
     setIsEditDialogOpen(true);
   };
@@ -283,12 +283,12 @@ export default function Create() {
                           
                           <FormField
                             control={form.control}
-                            name="address"
+                            name="caseNo"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Client/Matter Address (Optional)</FormLabel>
+                                <FormLabel>Case No (Optional)</FormLabel>
                                 <FormControl>
-                                  <Input {...field} placeholder="123 Main St, City, State" />
+                                  <Input {...field} placeholder="e.g., 2024-CV-001234" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -308,10 +308,10 @@ export default function Create() {
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem value="purchase">Contract</SelectItem>
-                                    <SelectItem value="sale">Litigation</SelectItem>
-                                    <SelectItem value="refinance">Corporate</SelectItem>
-                                    <SelectItem value="rental">Real Estate</SelectItem>
+                                    <SelectItem value="Contract">Contract</SelectItem>
+                                    <SelectItem value="Litigation">Litigation</SelectItem>
+                                    <SelectItem value="Corporate">Corporate</SelectItem>
+                                    <SelectItem value="Real Estate">Real Estate</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -357,8 +357,8 @@ export default function Create() {
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="font-medium">{transaction.name}</h4>
-                            {transaction.address && (
-                              <p className="text-sm text-muted-foreground">{transaction.address}</p>
+                            {transaction.caseNo && (
+                              <p className="text-sm text-muted-foreground">Case No: {transaction.caseNo}</p>
                             )}
                             <div className="flex items-center gap-2 mt-1">
                               <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
@@ -494,12 +494,12 @@ export default function Create() {
               
               <FormField
                 control={editForm.control}
-                name="address"
+                name="caseNo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client/Matter Address (Optional)</FormLabel>
+                    <FormLabel>Case No (Optional)</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="123 Main St, City, State" />
+                      <Input {...field} placeholder="e.g., 2024-CV-001234" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -519,10 +519,10 @@ export default function Create() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="purchase">Contract</SelectItem>
-                        <SelectItem value="sale">Litigation</SelectItem>
-                        <SelectItem value="refinance">Corporate</SelectItem>
-                        <SelectItem value="rental">Real Estate</SelectItem>
+                        <SelectItem value="Contract">Contract</SelectItem>
+                        <SelectItem value="Litigation">Litigation</SelectItem>
+                        <SelectItem value="Corporate">Corporate</SelectItem>
+                        <SelectItem value="Real Estate">Real Estate</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
