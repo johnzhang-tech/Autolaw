@@ -48,7 +48,8 @@ function Router() {
       <Route path="/billing" component={PaymentSimple} />
       
       {!isAuthenticated ? (
-        <Route path="/" component={LoginPage} />
+        // When not authenticated, redirect all routes to login
+        <Route component={LoginPage} />
       ) : (
         <>
           <Route path="/" component={Home} />
@@ -59,9 +60,9 @@ function Router() {
           <Route path="/agents" component={Agents} />
           <Route path="/dashboard" component={FullDashboard} />
           <Route path="/manage" component={Manage} />
+          <Route component={NotFound} />
         </>
       )}
-      <Route component={NotFound} />
     </Switch>
   );
 }
