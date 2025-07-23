@@ -71,11 +71,25 @@ export default function Agents() {
     }
   };
 
-  // Initialize persistent iframes
+  // Initialize persistent iframes for cross-page navigation
   useEffect(() => {
     Object.entries(agents).forEach(([agentId, config]) => {
       globalPersistence.createIframe(agentId, config.src, config.title);
     });
+  }, []);
+
+  // On component unmount, save current iframes to global persistence
+  useEffect(() => {
+    return () => {
+      // Move currently displayed iframes to global storage when leaving page
+      Object.keys(agents).forEach(agentId => {
+        const iframe = document.querySelector(`iframe[title="${agents[agentId as keyof typeof agents].title}"]`) as HTMLIFrameElement;
+        if (iframe && globalPersistence.container) {
+          globalPersistence.iframes[agentId] = iframe;
+          globalPersistence.container.appendChild(iframe);
+        }
+      });
+    };
   }, []);
 
   // Save active tab
@@ -153,56 +167,25 @@ export default function Agents() {
             minHeight: '600px',
             position: 'relative'
           }}>
-            {/* All iframes rendered simultaneously, only active one visible */}
-            {Object.entries(agents).map(([agentId, config]) => {
-              const persistentIframe = globalPersistence.getIframe(agentId);
-              const isActive = activeTab === agentId;
-              
-              if (persistentIframe && isActive) {
-                // Move persistent iframe to display
-                setTimeout(() => {
-                  const container = document.getElementById(`agent-container-${agentId}`);
-                  if (container && persistentIframe.parentNode !== container) {
-                    container.appendChild(persistentIframe);
-                  }
-                }, 0);
-                
-                return (
-                  <div
-                    key={agentId}
-                    id={`agent-container-${agentId}`}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      display: 'block'
-                    }}
-                  />
-                );
-              }
-              
-              // Fallback iframe for immediate display
-              return (
-                <iframe
-                  key={agentId}
-                  src={config.src}
-                  title={config.title}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '600px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    display: isActive ? 'block' : 'none'
-                  }}
-                />
-              );
-            })}
+            {/* Simple approach: all iframes loaded, only active one visible */}
+            {Object.entries(agents).map(([agentId, config]) => (
+              <iframe
+                key={agentId}
+                src={config.src}
+                title={config.title}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '600px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  display: activeTab === agentId ? 'block' : 'none'
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
