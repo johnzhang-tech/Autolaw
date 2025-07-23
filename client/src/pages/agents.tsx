@@ -156,36 +156,167 @@ export default function Agents() {
           
         </div>
 
-        {/* Tab Content */}
-        <div style={{ flex: 1, padding: '24px' }}>
-          <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px', 
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-            border: '1px solid #e5e7eb',
-            height: '100%',
-            minHeight: '600px',
-            position: 'relative'
-          }}>
-            {/* Simple approach: all iframes loaded, only active one visible */}
-            {Object.entries(agents).map(([agentId, config]) => (
-              <iframe
-                key={agentId}
-                src={config.src}
-                title={config.title}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '600px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  display: activeTab === agentId ? 'block' : 'none'
-                }}
-              />
-            ))}
+        {/* Main Content Area */}
+        <div className="flex-1 flex gap-6 p-6">
+          {/* Left Side - Agent Interface */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full min-h-[600px] relative">
+              {/* Simple approach: all iframes loaded, only active one visible */}
+              {Object.entries(agents).map(([agentId, config]) => (
+                <iframe
+                  key={agentId}
+                  src={config.src}
+                  title={config.title}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '600px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    display: activeTab === agentId ? 'block' : 'none'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Right Side - Best Practice Prompts */}
+          <div className="w-80">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Best Practice Prompts
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Medical chronology review templates
+                </p>
+              </div>
+              
+              <div className="h-[580px] overflow-y-auto p-4 space-y-4">
+                {/* Prompt 0: Summary */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 0: Summary</h4>
+                  <div className="text-sm text-gray-700 space-y-2">
+                    <p>Summarize the attached medical chronology for legal review. The summary must be structured, legally relevant, and formatted for attorney or insurance use. Follow this format:</p>
+                    
+                    <div className="bg-gray-50 p-3 rounded text-xs">
+                      <div className="font-medium mb-2">### Patient Overview</div>
+                      <div className="ml-2 space-y-1">
+                        <div>- Name:</div>
+                        <div>- Date of Injury:</div>
+                        <div>- Mechanism of Injury:</div>
+                        <div>- Primary Complaint(s):</div>
+                        <div>- Pre-existing Conditions:</div>
+                        <div>- First treatment date:</div>
+                        <div>- Total duration of care:</div>
+                      </div>
+                      
+                      <div className="font-medium mt-3 mb-2">### Chronological Summary Table</div>
+                      <div className="text-xs">| Date | Provider | Facility | Visit Type | Diagnosis/Treatment | Notable Findings |</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prompt 1: Executive Medical Summary */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 1: Executive Medical Summary</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>Summarize the medical chronology in a structured format for legal case preparation. Include:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Diagnosis Summary</li>
+                      <li>• Treatment Timeline</li>
+                      <li>• Gaps in Treatment</li>
+                      <li>• Provider Involvement</li>
+                      <li>• Medical Opinions (including QME/IME if available)</li>
+                      <li>• Current Status & Restrictions</li>
+                      <li>• Legal Relevance or Red Flags</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Prompt 2: Provider Timeline Table */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 2: Provider Timeline Table</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>From the medical record, generate a table with the following columns:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Date of Visit</li>
+                      <li>• Provider Name</li>
+                      <li>• Specialty</li>
+                      <li>• Facility</li>
+                      <li>• Purpose of Visit</li>
+                      <li>• Key Diagnoses / Procedures</li>
+                    </ul>
+                    <p className="text-xs mt-2 italic">Only include medical visits relevant to the injury or litigation.</p>
+                  </div>
+                </div>
+
+                {/* Prompt 3: Legal Highlight Extraction */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 3: Legal Highlight Extraction</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>Extract the following legally relevant facts from the medical chronology:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Any mention of malingering, exaggeration, or subjective complaints</li>
+                      <li>• Gaps in treatment &gt; 30 days</li>
+                      <li>• Work restrictions or functional impairments</li>
+                      <li>• IME or QME opinions that impact liability or damages</li>
+                      <li>• Pre-existing conditions that may conflict with the claim</li>
+                      <li>• Non-compliance with treatment</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Prompt 4: Paralegal Summary for Demand Letter */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 4: Paralegal Summary for Demand Letter</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>Based on the medical record, write a brief summary suitable for inclusion in a demand letter. The summary should include:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Mechanism of injury</li>
+                      <li>• Primary diagnoses and complaints</li>
+                      <li>• Duration and nature of treatment</li>
+                      <li>• Degree of recovery or permanent restrictions</li>
+                      <li>• Any medical support for pain/suffering or disability claims</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Prompt 5: MMI & Functional Capacity Check */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 5: MMI & Functional Capacity Check</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>Review the record and determine:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Has the patient reached Maximum Medical Improvement?</li>
+                      <li>• If yes, when and by which provider?</li>
+                      <li>• Are there any references to Functional Capacity Evaluations (FCEs)?</li>
+                      <li>• Does the record document any permanent impairment ratings?</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Prompt 6: Future Medical Needs Summary */}
+                <div className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                  <h4 className="font-medium text-gray-900 mb-2">Prompt 6: Future Medical Needs Summary</h4>
+                  <div className="text-sm text-gray-700">
+                    <p>Identify and list all references to:</p>
+                    <ul className="mt-2 ml-4 space-y-1 text-xs">
+                      <li>• Follow-up care or surgeries</li>
+                      <li>• Long-term medication needs</li>
+                      <li>• Physical or occupational therapy</li>
+                      <li>• Chronic pain or mobility issues</li>
+                      <li>• Psychiatric or psychological care</li>
+                      <li>• Provider opinions on future prognosis</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -407,6 +407,24 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Memory Preservation**: All three Ragflow agents maintain independent conversation histories across all navigation scenarios
   - **localStorage Integration**: Active tab selection persists across page reloads and browser sessions
   - **Production Ready**: Clean global persistence class with proper cleanup and error handling
+- July 24, 2025. **CASE CREATION ENHANCEMENT: MANDATORY CASE NUMBER SYSTEM COMPLETED**
+  - **Database Schema Update**: Renamed address column to case_no with NOT NULL constraint for mandatory case numbers
+  - **Frontend Form Validation**: Updated case creation forms to require case number with proper validation messages
+  - **Legal Case Types**: Enhanced case types to Contract, Litigation, Corporate, Real Estate for legal platform focus
+  - **Field Mapping Complete**: All frontend components updated to use caseNo instead of address field
+  - **Database Migration**: Successfully executed column rename and constraint updates without data loss
+  - **API Compatibility**: Backend endpoints automatically support new caseNo field through existing schema
+  - **Validation Enhancement**: Form validation shows "Case number is required" error for empty field
+  - **Production Ready**: Case creation working with mandatory case numbers and proper error handling
+- July 24, 2025. **MR ASSISTANT BEST PRACTICE PROMPTS: MEDICAL CHRONOLOGY REVIEW TEMPLATES COMPLETED**
+  - **Scrollable Prompts Panel**: Added dedicated right-side panel with 6 medical review prompt templates
+  - **Professional Layout**: Two-column layout with agent interface on left and prompts panel on right
+  - **Medical Review Templates**: Complete prompt library for legal medical chronology analysis
+  - **Structured Prompt Categories**: Summary, Executive Summary, Provider Timeline, Legal Highlights, Demand Letter, MMI Check, Future Medical Needs
+  - **Template Formatting**: Each prompt includes structured format examples and detailed instructions
+  - **Legal Focus**: Prompts specialized for attorney and paralegal use in medical record review
+  - **Scrollable Interface**: 580px height with smooth scrolling for easy navigation through all prompts
+  - **Professional Design**: Clean card-based layout with hover effects and proper typography
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
