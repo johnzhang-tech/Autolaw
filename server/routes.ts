@@ -2903,29 +2903,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Admin endpoint: Get all users with extended information
-  app.get('/api/admin/users', tokenAuth, async (req: any, res) => {
+  // GET /api/users - Get users (admin sees all, user sees only themselves)
+  app.get('/api/users', tokenAuth, async (req: any, res) => {
     try {
-      // req.user now contains the full user object with role
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin access required' });
+      if (req.user.role === 'admin') {
+        // Admin can see all users
+        const allUsers = await storage.getAllUsers();
+        res.json(allUsers);
+      } else {
+        // Regular users only see their own profile
+        const user = await storage.getUser(req.user.id);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        const { passwordHash, ...userResponse } = user;
+        res.json([userResponse]); // Return as array for consistency
       }
-      
-      // Use the storage method that includes admin check
-      const allUsers = await storage.getAllUsers();
-      
-      res.json(allUsers);
     } catch (error: any) {
-      console.error('Error fetching users for admin:', error);
+      console.error('Error fetching users:', error);
       res.status(500).json({ message: 'Failed to fetch users' });
     }
   });
 
-  // Admin endpoint: Create new user
-  app.post('/api/admin/users', tokenAuth, async (req: any, res) => {
+  // Unified User API with role-based access control
+  
+  // POST /api/users - Create new user (admin only)
+  app.post('/api/users', tokenAuth, async (req: any, res) => {
     try {
       if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin access required' });
+        return res.status(403).json({ message: 'Admin access required to create users' });
       }
       
       const { email, firstName, lastName, role, userStatus, password } = req.body;
@@ -2965,15 +2971,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin endpoint: Update user
-  app.put('/api/admin/users/:userId', tokenAuth, async (req: any, res) => {
+  // PUT /api/users/:userId - Update user (admin for any user, user for own profile)
+  app.put('/api/users/:userId', tokenAuth, async (req: any, res) => {
     try {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin access required' });
-      }
-      
       const { userId } = req.params;
       const { firstName, lastName, role, userStatus } = req.body;
+      
+      // Check access permissions
+      const isAdmin = req.user.role === 'admin';
+      const isOwnProfile = req.user.id === userId;
+      
+      if (!isAdmin && !isOwnProfile) {
+        return res.status(403).json({ message: 'Access denied. Can only update own profile unless admin.' });
+      }
+      
+      // Non-admin users cannot change roles
+      if (!isAdmin && role !== undefined) {
+        return res.status(403).json({ message: 'Only admins can change user roles' });
+      }
       
       // Check if user exists
       const existingUser = await storage.getUser(userId);
@@ -2985,8 +3000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = {
         firstName,
         lastName,
-        role,
-        userStatus
+        ...(isAdmin && { role, userStatus }) // Only include role/status updates for admins
       };
       
       const updatedUser = await storage.updateUserProfile(userId, updates);
@@ -3001,11 +3015,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin endpoint: Delete user
-  app.delete('/api/admin/users/:userId', tokenAuth, async (req: any, res) => {
+  // DELETE /api/users/:userId - Delete user (admin only, cannot delete self)
+  app.delete('/api/users/:userId', tokenAuth, async (req: any, res) => {
     try {
       if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin access required' });
+        return res.status(403).json({ message: 'Admin access required to delete users' });
       }
       
       const { userId } = req.params;

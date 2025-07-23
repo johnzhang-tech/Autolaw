@@ -50,17 +50,20 @@ export default function AdminUsers() {
 
   // Note: Authentication and role checks are handled in the render logic below
 
-  // Fetch all users (admin only)
+  // Fetch all users (admin sees all, regular users see only themselves)
   const { data: users = [], isLoading, error, refetch } = useQuery<User[]>({
-    queryKey: ["/api/admin/users"],
-    enabled: currentUser?.role === 'admin',
+    queryKey: ["/api/users"],
+    enabled: !!currentUser,
     retry: false,
   });
 
   // Debug log for users data
   console.log('Admin Users Debug:', { 
     currentUser: currentUser?.role, 
-    usersLength: users.length, 
+    users: users,
+    usersType: typeof users,
+    isArray: Array.isArray(users),
+    usersLength: users?.length, 
     isLoading, 
     error: error?.message 
   });
@@ -91,7 +94,7 @@ export default function AdminUsers() {
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserForm) => {
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +111,7 @@ export default function AdminUsers() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
         title: "User Created",
         description: "User has been created successfully.",
@@ -128,7 +131,7 @@ export default function AdminUsers() {
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: async ({ userId, data }: { userId: string; data: EditUserForm }) => {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +148,7 @@ export default function AdminUsers() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
         title: "User Updated",
         description: "User has been updated successfully.",
@@ -164,7 +167,7 @@ export default function AdminUsers() {
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('docuai_token')}`
@@ -179,7 +182,7 @@ export default function AdminUsers() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
         title: "User Deleted",
         description: "User has been deleted successfully.",
