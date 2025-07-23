@@ -1,19 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
-import { useAgentPersistence } from "@/hooks/useAgentPersistence";
+import { useGlobalIframePersistence } from "@/hooks/useGlobalIframePersistence";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { 
     activeTab, 
     setActiveTab, 
-    createOrGetIframe, 
-    moveIframeToContainer, 
-    moveIframeToHidden 
-  } = useAgentPersistence();
-  
-  const contentRef = useRef<HTMLDivElement>(null);
+    initializeAgent,
+    displayAgent,
+    displayContainerRef
+  } = useGlobalIframePersistence();
 
   const agents = {
     agent1: {
@@ -30,27 +28,16 @@ export default function Agents() {
     }
   };
 
-  // Initialize all iframes and handle tab switching
+  // Initialize all agents on mount
   useEffect(() => {
-    // Create all iframes initially
     Object.entries(agents).forEach(([agentId, config]) => {
-      createOrGetIframe(agentId, config.src, config.title);
+      initializeAgent(agentId, config);
     });
   }, []);
 
-  // Handle active tab changes
+  // Display active agent when tab changes
   useEffect(() => {
-    if (contentRef.current) {
-      // Hide all iframes first
-      Object.keys(agents).forEach(agentId => {
-        if (agentId !== activeTab) {
-          moveIframeToHidden(agentId);
-        }
-      });
-      
-      // Show active iframe
-      moveIframeToContainer(activeTab, contentRef.current);
-    }
+    displayAgent(activeTab);
   }, [activeTab]);
 
   return (
@@ -149,7 +136,7 @@ export default function Agents() {
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
           <div 
-            ref={contentRef}
+            ref={displayContainerRef}
             style={{ 
               backgroundColor: 'white', 
               borderRadius: '8px', 
@@ -158,7 +145,7 @@ export default function Agents() {
               height: '100%'
             }}
           >
-            {/* Iframe will be dynamically moved here */}
+            {/* Agent iframe will be displayed here */}
           </div>
         </div>
       </div>

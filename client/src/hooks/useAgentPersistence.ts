@@ -1,61 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
 
-interface AgentState {
-  activeTab: string;
-  iframeStates: Record<string, HTMLIFrameElement | null>;
+// Global persistence container
+let globalPersistenceContainer: HTMLDivElement | null = null;
+let globalIframeRefs: Record<string, HTMLIFrameElement> = {};
+
+function getOrCreatePersistenceContainer(): HTMLDivElement {
+  if (!globalPersistenceContainer) {
+    globalPersistenceContainer = document.createElement('div');
+    globalPersistenceContainer.id = 'global-agent-persistence';
+    globalPersistenceContainer.style.position = 'fixed';
+    globalPersistenceContainer.style.top = '0';
+    globalPersistenceContainer.style.left = '0';
+    globalPersistenceContainer.style.width = '100vw';
+    globalPersistenceContainer.style.height = '100vh';
+    globalPersistenceContainer.style.pointerEvents = 'none';
+    globalPersistenceContainer.style.zIndex = '-1000';
+    globalPersistenceContainer.style.visibility = 'hidden';
+    document.body.appendChild(globalPersistenceContainer);
+  }
+  return globalPersistenceContainer;
 }
 
 export function useAgentPersistence() {
-  const [activeTab, setActiveTab] = useState('agent1');
-  const hiddenContainerRef = useRef<HTMLDivElement | null>(null);
-  const iframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({});
-
-  // Create hidden container for iframe persistence on mount
-  useEffect(() => {
-    // Create hidden container if it doesn't exist
-    if (!hiddenContainerRef.current) {
-      const container = document.createElement('div');
-      container.id = 'agent-iframe-persistence';
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.width = '1px';
-      container.style.height = '1px';
-      container.style.overflow = 'hidden';
-      document.body.appendChild(container);
-      hiddenContainerRef.current = container;
-    }
-
-    // Load saved state
-    const savedTab = localStorage.getItem('agent-active-tab');
-    if (savedTab) {
-      setActiveTab(savedTab);
-    }
-
-    return () => {
-      // Cleanup on unmount - move iframes to hidden container
-      if (hiddenContainerRef.current) {
-        Object.values(iframeRefs.current).forEach(iframe => {
-          if (iframe && iframe.parentNode) {
-            hiddenContainerRef.current?.appendChild(iframe);
-          }
-        });
-      }
-    };
-  }, []);
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('agent-active-tab') || 'agent1';
+  });
 
   // Save active tab to localStorage
   useEffect(() => {
     localStorage.setItem('agent-active-tab', activeTab);
   }, [activeTab]);
 
-  const createOrGetIframe = (agentId: string, src: string, title: string) => {
-    // Check if iframe already exists in hidden container
-    let iframe = iframeRefs.current[agentId];
-    
-    if (!iframe) {
-      // Create new iframe
-      iframe = document.createElement('iframe');
+  const ensureIframeExists = (agentId: string, src: string, title: string): HTMLIFrameElement => {
+    if (!globalIframeRefs[agentId]) {
+      const iframe = document.createElement('iframe');
       iframe.src = src;
       iframe.title = title;
       iframe.style.width = '100%';
@@ -63,40 +41,49 @@ export function useAgentPersistence() {
       iframe.style.minHeight = '600px';
       iframe.style.border = 'none';
       iframe.style.borderRadius = '8px';
+      iframe.style.position = 'absolute';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
       
-      iframeRefs.current[agentId] = iframe;
+      globalIframeRefs[agentId] = iframe;
       
-      // Initially place in hidden container
-      if (hiddenContainerRef.current) {
-        hiddenContainerRef.current.appendChild(iframe);
-      }
-    }
-    
-    return iframe;
-  };
-
-  const moveIframeToContainer = (agentId: string, container: HTMLElement) => {
-    const iframe = iframeRefs.current[agentId];
-    if (iframe && container) {
-      // Clear container first
-      container.innerHTML = '';
-      // Move iframe to visible container
+      // Add to global persistence container
+      const container = getOrCreatePersistenceContainer();
       container.appendChild(iframe);
     }
+    
+    return globalIframeRefs[agentId];
   };
 
-  const moveIframeToHidden = (agentId: string) => {
-    const iframe = iframeRefs.current[agentId];
-    if (iframe && hiddenContainerRef.current) {
-      hiddenContainerRef.current.appendChild(iframe);
+  const showIframe = (agentId: string, targetContainer: HTMLElement) => {
+    const iframe = globalIframeRefs[agentId];
+    if (iframe && targetContainer) {
+      // Clone the iframe and place it in the target container
+      const clone = iframe.cloneNode(true) as HTMLIFrameElement;
+      clone.style.position = 'static';
+      clone.style.visibility = 'visible';
+      clone.style.pointerEvents = 'auto';
+      
+      // Clear target container and add clone
+      targetContainer.innerHTML = '';
+      targetContainer.appendChild(clone);
+      
+      // Copy the src to ensure it loads
+      clone.src = iframe.src;
+    }
+  };
+
+  const hideAllIframes = (targetContainer: HTMLElement) => {
+    if (targetContainer) {
+      targetContainer.innerHTML = '';
     }
   };
 
   return {
     activeTab,
     setActiveTab,
-    createOrGetIframe,
-    moveIframeToContainer,
-    moveIframeToHidden
+    ensureIframeExists,
+    showIframe,
+    hideAllIframes
   };
 }
