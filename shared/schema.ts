@@ -56,7 +56,7 @@ export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   name: varchar("name").notNull(),
-  caseNo: varchar("case_no"), // Case number for legal case identification
+  caseNo: varchar("case_no").notNull(), // Case number for legal case identification
   transactionType: varchar("transaction_type").notNull(), // "Contract", "Litigation", "Corporate", "Real Estate"
   status: varchar("status").notNull().default("active"), // "active", "closed", "cancelled"
   numDocuments: integer("num_documents").notNull().default(0), // Auto-maintained count of uploaded documents

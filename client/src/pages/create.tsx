@@ -57,7 +57,7 @@ import type { TransactionResponse } from "@shared/schema";
 
 const caseSchema = z.object({
   name: z.string().min(1, "Case name is required"),
-  caseNo: z.string().optional(),
+  caseNo: z.string().min(1, "Case number is required"),
   transactionType: z.enum(["Contract", "Litigation", "Corporate", "Real Estate"]),
 });
 
@@ -286,7 +286,7 @@ export default function Create() {
                             name="caseNo"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Case No (Optional)</FormLabel>
+                                <FormLabel>Case No</FormLabel>
                                 <FormControl>
                                   <Input {...field} placeholder="e.g., 2024-CV-001234" />
                                 </FormControl>
@@ -497,7 +497,7 @@ export default function Create() {
                 name="caseNo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Case No (Optional)</FormLabel>
+                    <FormLabel>Case No</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="e.g., 2024-CV-001234" />
                     </FormControl>
