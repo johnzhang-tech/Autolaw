@@ -34,48 +34,87 @@ export default function Agents() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation with Controls */}
         <div className="bg-white border-b border-gray-200">
-          <div className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('agent1')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent1'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4" />
-                <span className="font-bold">Case 3 Agent</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('agent2')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent2'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4" />
-                <span className="font-bold">Case 2 Agent</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('agent3')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'agent3'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4" />
-                <span className="font-bold">Case Large File</span>
-              </div>
-            </button>
+          <div className="flex justify-between items-center px-6">
+            <div className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab('agent1')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'agent1'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span className="font-bold">Case 3 Agent</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('agent2')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'agent2'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span className="font-bold">Case 2 Agent</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('agent3')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === 'agent3'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span className="font-bold">Case Large File</span>
+                </div>
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-xs">
+                Conversations persist across agents
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (confirm('Clear all conversation history? This action cannot be undone.')) {
+                    // Reload all iframes to start fresh
+                    const iframes = document.querySelectorAll('iframe');
+                    iframes.forEach(iframe => {
+                      const src = iframe.src;
+                      iframe.src = '';
+                      setTimeout(() => iframe.src = src, 100);
+                    });
+                    
+                    // Show confirmation
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                    notification.textContent = '✓ New conversation started';
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                      if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                      }
+                    }, 3000);
+                  }
+                }}
+                className="text-xs"
+              >
+                <MessageSquare className="w-3 h-3 mr-1" />
+                New Conversation
+              </Button>
+            </div>
           </div>
         </div>
 
