@@ -122,7 +122,7 @@ export default function Documents() {
         
         toast({
           title: "Download Started",
-          description: `${fileName} is being downloaded from Replit Object Storage`,
+          description: `${fileName} is being downloaded`,
         });
       } else {
         throw new Error('Invalid download response');
@@ -130,7 +130,7 @@ export default function Documents() {
     } catch (error) {
       toast({
         title: "Download Failed",
-        description: "Could not download file from Replit Object Storage",
+        description: "Could not download file",
         variant: "destructive",
       });
     }
@@ -145,11 +145,11 @@ export default function Documents() {
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">Documents</h1>
-              <p className="text-slate-600">Manage your legal documents stored in Replit Object Storage</p>
+              <p className="text-slate-600">Manage your legal documents</p>
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center">
@@ -185,18 +185,6 @@ export default function Documents() {
                       <p className="text-2xl font-bold text-slate-900">
                         {documentsArray.filter(doc => doc.riskScore && doc.riskScore >= 70).length}
                       </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <FolderOpen className="h-8 w-8 text-purple-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-slate-600">Storage</p>
-                      <p className="text-2xl font-bold text-slate-900">Replit Object Storage</p>
                     </div>
                   </div>
                 </CardContent>
@@ -240,7 +228,7 @@ export default function Documents() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Documents in Replit Object Storage ({filteredDocuments.length})
+                  Documents ({filteredDocuments.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>

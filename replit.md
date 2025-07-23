@@ -435,6 +435,12 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Code Cleanup**: Removed unused mutation logic, imports (useMutation, Button, useToast, apiRequest, FileCheck)
   - **Simplified Layout**: Cleaner case display with only transaction name, type, document count, and status badge
   - **Reduced Complexity**: Streamlined home page interface focusing on core case information display
+- July 24, 2025. **DOCUMENTS PAGE UI CLEANUP: REMOVED STORAGE REFERENCES**
+  - **Storage Section Removal**: Removed "Storage Replit Object Storage" statistics card from Documents page
+  - **Grid Layout Update**: Changed statistics cards from 4-column to 3-column layout for better spacing
+  - **Text Cleanup**: Removed "in Replit Object Storage" from document header while keeping document counter
+  - **Toast Message Updates**: Simplified download notifications by removing storage provider references
+  - **Page Description Cleanup**: Changed from "stored in Replit Object Storage" to simply "legal documents"
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
