@@ -131,7 +131,7 @@ export default function Agents() {
             height: '100%',
             position: 'relative'
           }}>
-            {/* All iframes rendered, only active one visible */}
+            {/* SIMPLE APPROACH: All iframes rendered, only active one visible */}
             <iframe
               src={agents.agent1.src}
               title={agents.agent1.title}
