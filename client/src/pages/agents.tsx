@@ -1,17 +1,12 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users } from "lucide-react";
-import { useGlobalIframePersistence } from "@/hooks/useGlobalIframePersistence";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const { 
-    activeTab, 
-    setActiveTab, 
-    initializeAgent,
-    displayAgent,
-    displayContainerRef
-  } = useGlobalIframePersistence();
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('agent-active-tab') || 'agent1';
+  });
 
   const agents = {
     agent1: {
@@ -28,16 +23,9 @@ export default function Agents() {
     }
   };
 
-  // Initialize all agents on mount
+  // Save active tab to localStorage
   useEffect(() => {
-    Object.entries(agents).forEach(([agentId, config]) => {
-      initializeAgent(agentId, config);
-    });
-  }, []);
-
-  // Display active agent when tab changes
-  useEffect(() => {
-    displayAgent(activeTab);
+    localStorage.setItem('agent-active-tab', activeTab);
   }, [activeTab]);
 
   return (
@@ -135,17 +123,33 @@ export default function Agents() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, padding: '24px' }}>
-          <div 
-            ref={displayContainerRef}
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '8px', 
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
-              border: '1px solid #e5e7eb',
-              height: '100%'
-            }}
-          >
-            {/* Agent iframe will be displayed here */}
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px', 
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', 
+            border: '1px solid #e5e7eb',
+            height: '100%',
+            position: 'relative'
+          }}>
+            {/* All iframes are rendered but only the active one is visible */}
+            {Object.entries(agents).map(([agentId, config]) => (
+              <iframe
+                key={agentId}
+                src={config.src}
+                title={config.title}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '600px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  display: activeTab === agentId ? 'block' : 'none'
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
