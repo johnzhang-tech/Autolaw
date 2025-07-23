@@ -1,19 +1,15 @@
 import { useState } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { FileText, Upload, BarChart3, MessageCircleQuestion, TrendingUp, AlertTriangle, FileCheck } from "lucide-react";
+import { FileText, BarChart3, TrendingUp, AlertTriangle } from "lucide-react";
 
-import { apiRequest } from "@/lib/queryClient";
 import type { TransactionResponse } from "@shared/schema";
 
 export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const { data: transactionsData = [] } = useQuery({
     queryKey: ["/api/transactions"],
@@ -23,34 +19,6 @@ export default function Home() {
   const transactions = transactionsData as TransactionResponse[];
 
   const totalDocuments = transactions.reduce((acc, t) => acc + (t.numDocuments || 0), 0);
-
-  // Generate Report mutation
-  const generateReportMutation = useMutation({
-    mutationFn: async (transactionId: number) => {
-      const transaction = transactions.find(t => t.Tranx_id === transactionId);
-      const documentCount = transaction?.numDocuments || 0;
-      
-      if (documentCount === 0) {
-        throw new Error("Please upload your documents first");
-      }
-
-      // Trigger n8n workflow
-      return await apiRequest("POST", `/api/transactions/${transactionId}/generate-report`);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Report Generation Started",
-        description: "Your report is being generated and will be available shortly.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Cannot Generate Report",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
 
   return (
     <div className="flex h-screen bg-white">
@@ -156,21 +124,10 @@ export default function Home() {
                               {transaction.numDocuments || 0} documents
                             </p>
                           </div>
-                          <div className="flex items-center space-x-3">
-                            <Button
-                              onClick={() => generateReportMutation.mutate(transaction.Tranx_id)}
-                              disabled={generateReportMutation.isPending}
-                              size="sm"
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              <FileCheck className="h-4 w-4 mr-1" />
-                              {generateReportMutation.isPending ? "Generating..." : "Generate Report"}
-                            </Button>
-                            <div className="text-right">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {transaction.status}
-                              </span>
-                            </div>
+                          <div className="text-right">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              {transaction.status}
+                            </span>
                           </div>
                         </div>
                       ))}

@@ -430,6 +430,11 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Complete Prompt Templates**: Full-text templates stored for clipboard copying, ensuring consistent and complete prompts
   - **Copy Success Notification**: Green toast notification appears for 3 seconds after copying, guiding users to paste into chat box
   - **User Guidance**: Clear messaging "Prompt copied to clipboard!" with instruction "Now paste it into the chat box" for improved workflow
+- July 24, 2025. **HOME PAGE UI CLEANUP: REMOVED GENERATE REPORT FUNCTIONALITY**
+  - **Generate Report Button Removal**: Removed "Generate Report" button from Recent Cases section in Home page
+  - **Code Cleanup**: Removed unused mutation logic, imports (useMutation, Button, useToast, apiRequest, FileCheck)
+  - **Simplified Layout**: Cleaner case display with only transaction name, type, document count, and status badge
+  - **Reduced Complexity**: Streamlined home page interface focusing on core case information display
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
