@@ -2498,97 +2498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // RESTful Users API Endpoints
-  
-  // POST /api/users - Create a new user with all fields
-  app.post('/api/users', isAuthenticated, async (req: any, res) => {
-    try {
-      const currentUserId = req.user.claims.sub;
-      const currentUser = await storage.getUser(currentUserId);
-      
-      // Only admins can create users through this endpoint
-      if (currentUser?.role !== 'admin') {
-        return res.status(403).json({ message: 'Admin access required to create users' });
-      }
-      
-      const { 
-        id, 
-        email, 
-        firstName, 
-        lastName, 
-        provider, 
-        role, 
-        region, 
-        userType, 
-        userStatus, 
-        expirationDate 
-      } = req.body;
-      
-      // Validate required fields
-      if (!id || !email) {
-        return res.status(400).json({ message: 'id and email are required fields' });
-      }
-      
-      // Validate enum values
-      if (userType && !['One time', 'Recurring'].includes(userType)) {
-        return res.status(400).json({ message: 'Invalid userType. Must be "One time" or "Recurring"' });
-      }
-      
-      if (userStatus && !['Locked', 'Active', 'Expired'].includes(userStatus)) {
-        return res.status(400).json({ message: 'Invalid userStatus. Must be "Locked", "Active", or "Expired"' });
-      }
-      
-      if (role && !['user', 'admin'].includes(role)) {
-        return res.status(400).json({ message: 'Invalid role. Must be "user" or "admin"' });
-      }
-      
-      if (provider && !['replit', 'google', 'microsoft', 'local'].includes(provider)) {
-        return res.status(400).json({ message: 'Invalid provider. Must be "replit", "google", "microsoft", or "local"' });
-      }
-      
-      // Parse expiration date if provided
-      let parsedExpirationDate = null;
-      if (expirationDate) {
-        parsedExpirationDate = new Date(expirationDate);
-        if (isNaN(parsedExpirationDate.getTime())) {
-          return res.status(400).json({ message: 'Invalid expirationDate format. Use ISO date string' });
-        }
-      }
-      
-      // Check if user already exists
-      const existingUser = await storage.getUser(id);
-      if (existingUser) {
-        return res.status(409).json({ message: 'User with this ID already exists' });
-      }
-      
-      // Create user data object
-      const userData = {
-        id,
-        email,
-        firstName: firstName || null,
-        lastName: lastName || null,
-        provider: provider || 'replit',
-        role: role || 'user',
-        region: region || null,
-        userType: userType || 'One time',
-        userStatus: userStatus || 'Active',
-        expirationDate: parsedExpirationDate,
-      };
-      
-      const newUser = await storage.upsertUser(userData);
-      
-      // Return created user without sensitive data
-      const { passwordHash, ...userResponse } = newUser;
-      res.status(201).json(userResponse);
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      if (error.code === '23505') { // PostgreSQL unique constraint violation
-        res.status(409).json({ message: 'User with this email already exists' });
-      } else {
-        res.status(500).json({ message: 'Failed to create user' });
-      }
-    }
-  });
+  // RESTful Users API Endpoints (Consolidated with Unified API below)
 
   // Get user profile (including new fields) - MUST come before /:id route
   app.get('/api/users/profile', flexAuth, async (req: any, res) => {
@@ -2843,7 +2753,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/users - Create new user (admin only)
   app.post('/api/users', tokenAuth, async (req: any, res) => {
     try {
+      
       if (req.user.role !== 'admin') {
+        console.log('POST /api/users - Access denied, user role:', req.user?.role);
         return res.status(403).json({ message: 'Admin access required to create users' });
       }
       
