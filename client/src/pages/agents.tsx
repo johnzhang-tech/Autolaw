@@ -1,19 +1,61 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, MessageSquare, FileText, Users } from "lucide-react";
 import { useAgentState } from "@/lib/agentState";
+import { globalIframeManager } from "@/lib/globalIframeManager";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const agentState = useAgentState();
+  const agent1Ref = useRef<HTMLDivElement>(null);
+  const agent2Ref = useRef<HTMLDivElement>(null);
+  const agent3Ref = useRef<HTMLDivElement>(null);
   
   // Initialize state from persistent storage
   const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>(
     agentState.getActiveAgent() as 'agent1' | 'agent2' | 'agent3'
   );
+
+  // Agent configuration
+  const agentConfigs = {
+    agent1: {
+      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
+      title: 'Case 3 Agent'
+    },
+    agent2: {
+      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
+      title: 'Case 2 Agent'
+    },
+    agent3: {
+      src: 'https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm',
+      title: 'Case Large File'
+    }
+  };
+
+  // Initialize and manage iframes
+  useEffect(() => {
+    const setupIframes = () => {
+      // Initialize all iframes
+      Object.keys(agentConfigs).forEach(agentId => {
+        const config = agentConfigs[agentId as keyof typeof agentConfigs];
+        globalIframeManager.createOrGetIframe(agentId, config.src);
+      });
+
+      // Show active tab iframe
+      const refs = { agent1: agent1Ref, agent2: agent2Ref, agent3: agent3Ref };
+      const activeRef = refs[activeTab];
+      
+      if (activeRef.current) {
+        globalIframeManager.moveIframeToContainer(activeTab, activeRef.current);
+        agentState.markAgentLoaded(activeTab);
+      }
+    };
+
+    setupIframes();
+  }, []);
 
   // Update active tab when component mounts to restore last viewed agent
   useEffect(() => {
@@ -22,8 +64,21 @@ export default function Agents() {
   }, []);
 
   const handleTabChange = (newTab: 'agent1' | 'agent2' | 'agent3') => {
+    // Hide current iframe
+    globalIframeManager.hideIframe(activeTab);
+    
+    // Update state
     setActiveTab(newTab);
     agentState.setActiveAgent(newTab);
+    
+    // Show new iframe
+    const refs = { agent1: agent1Ref, agent2: agent2Ref, agent3: agent3Ref };
+    const newRef = refs[newTab];
+    
+    if (newRef.current) {
+      globalIframeManager.moveIframeToContainer(newTab, newRef.current);
+      agentState.markAgentLoaded(newTab);
+    }
   };
 
   const handleAgentLoad = (agentId: string) => {
@@ -113,53 +168,26 @@ export default function Agents() {
           </div>
         </div>
 
-        {/* Tab Content - All iframes rendered but only active one visible */}
-        <div className="flex-1 p-6 relative">
+        {/* Tab Content with persistent iframe containers */}
+        <div className="flex-1 p-6">
           {/* Case 3 Agent */}
           <Card className={`h-full ${activeTab === 'agent1' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              <iframe
-                key="agent1-persistent"
-                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=ef91e43c674a11f0b85b0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                style={{ width: '100%', height: '100%', minHeight: '600px' }}
-                frameBorder="0"
-                title="Case 3 Agent"
-                className="rounded-b-lg"
-              />
+              <div ref={agent1Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
             </CardContent>
           </Card>
 
           {/* Case 2 Agent */}
-          <Card className={`h-full absolute inset-0 m-6 ${activeTab === 'agent2' ? '' : 'hidden'}`}>
+          <Card className={`h-full ${activeTab === 'agent2' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              {(agentState.isAgentLoaded('agent2') || activeTab === 'agent2') && (
-                <iframe
-                  key="agent2-persistent"
-                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                  style={{ width: '100%', height: '100%', minHeight: '600px' }}
-                  frameBorder="0"
-                  title="Case 2 Agent"
-                  className="rounded-b-lg"
-                  onLoad={() => handleAgentLoad('agent2')}
-                />
-              )}
+              <div ref={agent2Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
             </CardContent>
           </Card>
 
           {/* Case Large File */}
-          <Card className={`h-full absolute inset-0 m-6 ${activeTab === 'agent3' ? '' : 'hidden'}`}>
+          <Card className={`h-full ${activeTab === 'agent3' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              {(agentState.isAgentLoaded('agent3') || activeTab === 'agent3') && (
-                <iframe
-                  key="agent3-persistent"
-                  src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
-                  style={{ width: '100%', height: '100%', minHeight: '600px' }}
-                  frameBorder="0"
-                  title="Case Large File"
-                  className="rounded-b-lg"
-                  onLoad={() => handleAgentLoad('agent3')}
-                />
-              )}
+              <div ref={agent3Ref} className="w-full h-full" style={{ minHeight: '600px' }} />
             </CardContent>
           </Card>
         </div>
