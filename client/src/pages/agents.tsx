@@ -79,51 +79,7 @@ export default function Agents() {
               </button>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="text-xs">
-                {activeTab === 'agent1' && 'Case 3 Agent'}
-                {activeTab === 'agent2' && 'Case 2 Agent'}
-                {activeTab === 'agent3' && 'Case Large File'}
-                {' - History preserved'}
-              </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const agentNames = {
-                    'agent1': 'Case 3 Agent',
-                    'agent2': 'Case 2 Agent',
-                    'agent3': 'Case Large File'
-                  };
-                  
-                  if (confirm(`Clear conversation history for ${agentNames[activeTab]}? This action cannot be undone.`)) {
-                    // Reload only the current active iframe
-                    const currentIframe = document.querySelector(`iframe[title="${agentNames[activeTab]}"]`) as HTMLIFrameElement;
-                    if (currentIframe) {
-                      const src = currentIframe.src;
-                      currentIframe.src = '';
-                      setTimeout(() => currentIframe.src = src, 100);
-                    }
-                    
-                    // Show confirmation
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                    notification.textContent = `✓ ${agentNames[activeTab]} conversation cleared`;
-                    document.body.appendChild(notification);
-                    
-                    setTimeout(() => {
-                      if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                      }
-                    }, 3000);
-                  }
-                }}
-                className="text-xs"
-              >
-                <MessageSquare className="w-3 h-3 mr-1" />
-                New Conversation
-              </Button>
-            </div>
+
           </div>
         </div>
 
