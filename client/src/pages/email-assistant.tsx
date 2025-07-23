@@ -7,38 +7,91 @@ import { Bot, Mail } from "lucide-react";
 export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const handlePromptSelect = (promptText: string) => {
-    // Try to send the prompt to the Ragflow iframe
+  const handlePromptSelect = async (promptText: string) => {
     const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      try {
-        // Try to post message to iframe (this may not work due to cross-origin restrictions)
-        iframe.contentWindow.postMessage({
-          type: 'INSERT_PROMPT',
-          prompt: promptText
-        }, '*');
-      } catch (error) {
-        console.log('Cannot directly communicate with iframe due to cross-origin policy');
-      }
-    }
     
-    // Alternative: Copy to clipboard for user to paste
-    navigator.clipboard.writeText(promptText).then(() => {
-      // Show a temporary notification that text was copied
+    try {
+      // Copy to clipboard first
+      await navigator.clipboard.writeText(promptText);
+      
+      // Focus the iframe to prepare for paste operation
+      if (iframe) {
+        iframe.focus();
+        
+        // Try multiple approaches to send the prompt to the iframe
+        try {
+          // Approach 1: Post message to iframe
+          iframe.contentWindow?.postMessage({
+            type: 'INSERT_PROMPT',
+            prompt: promptText
+          }, '*');
+          
+          // Approach 2: Try to trigger paste event after a short delay
+          setTimeout(() => {
+            if (iframe.contentWindow) {
+              // Focus the iframe content
+              iframe.contentWindow.focus();
+              
+              // Try to find input field and set value (may not work due to cross-origin)
+              try {
+                const inputs = iframe.contentDocument?.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+                if (inputs && inputs.length > 0) {
+                  const input = inputs[inputs.length - 1] as HTMLInputElement | HTMLTextAreaElement;
+                  input.value = promptText;
+                  input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+              } catch (e) {
+                // Cross-origin restriction - this is expected
+              }
+            }
+          }, 100);
+          
+        } catch (error) {
+          console.log('Direct iframe communication restricted');
+        }
+      }
+      
+      // Show notification with enhanced instructions
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-      notification.textContent = 'Prompt copied to clipboard!';
+      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity max-w-sm';
+      notification.innerHTML = `
+        <div class="font-medium">✓ Prompt Ready!</div>
+        <div class="text-sm mt-1">Click in the chat below and press Ctrl+V (or Cmd+V) to paste</div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Auto-scroll to chat area
+      setTimeout(() => {
+        iframe?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 200);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 4000);
+      
+    } catch (error) {
+      console.log('Could not copy to clipboard:', error);
+      
+      // Fallback notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+      notification.textContent = 'Could not copy prompt. Please manually select the text.';
       document.body.appendChild(notification);
       
       setTimeout(() => {
         notification.style.opacity = '0';
         setTimeout(() => {
-          document.body.removeChild(notification);
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
         }, 300);
-      }, 2000);
-    }).catch(() => {
-      console.log('Could not copy to clipboard');
-    });
+      }, 3000);
+    }
   };
 
   return (
@@ -73,7 +126,7 @@ export default function EmailAssistant() {
             <CardContent className="p-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Analysis Best Practice Prompts</h3>
-                <p className="text-sm text-gray-600">Double-click a prompt to copy it to your clipboard, then paste in the chat below</p>
+                <p className="text-sm text-gray-600">Double-click a prompt to auto-paste it into the chat below</p>
               </div>
               
               <div className="overflow-y-auto" style={{ maxHeight: 'calc(40vh - 120px)' }}>
