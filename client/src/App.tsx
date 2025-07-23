@@ -62,6 +62,8 @@ function Router() {
           <Route path="/agents-test" component={AgentsTest} />
           <Route path="/dashboard" component={FullDashboard} />
           <Route path="/manage" component={Manage} />
+          <Route path="/admin-users" component={AdminUsers} />
+          <Route path="/test-api" component={TestApi} />
           <Route component={NotFound} />
         </>
       )}
