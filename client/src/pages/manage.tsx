@@ -1,210 +1,172 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Sidebar } from "@/components/Sidebar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Settings, 
-  Plus, 
-  Edit, 
-  Trash, 
-  MoreVertical,
+import {
   User,
-  FileText,
-  Archive,
-  RefreshCw,
-  CreditCard,
-  AlertCircle,
-  Loader2
+  Bell,
+  Shield,
+  Palette,
+  Globe,
+  Save
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import type { Transaction } from "@shared/schema";
-
-const transactionSchema = z.object({
-  name: z.string().min(1, "Transaction name is required"),
-  caseNo: z.string().min(1, "Case number is required"),
-  transactionType: z.string().min(1, "Transaction type is required"),
-  status: z.string().min(1, "Status is required"),
+// User info schema for editing
+const userInfoSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Please enter a valid email address"),
 });
 
-type TransactionForm = z.infer<typeof transactionSchema>;
+type UserInfoForm = z.infer<typeof userInfoSchema>;
 
-export default function Manage() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<any>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const { user, checkAuth } = useAuth();
-  const queryClient = useQueryClient();
+// User Info Form Component
+function UserInfoForm({ user }: { user: any }) {
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Ensure auth check runs on component mount
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  // Ensure auth check runs on component mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const form = useForm<TransactionForm>({
-    resolver: zodResolver(transactionSchema),
+  const form = useForm<UserInfoForm>({
+    resolver: zodResolver(userInfoSchema),
     defaultValues: {
-      name: "",
-      caseNo: "",
-      transactionType: "",
-      status: "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
     },
   });
 
-  // Queries
-  const { data: transactionsData = [], isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/transactions"],
-  });
-  const transactions = transactionsData as Transaction[];
-
-  const { data: chatSessions = [] } = useQuery({
-    queryKey: ["/api/chat/sessions"],
-  });
-
-  // Calculate document counts from transaction data (numDocuments field)
-  const documentCounts = transactions.reduce((acc, t) => {
-    acc[t.id] = t.numDocuments || 0;
-    return acc;
-  }, {} as Record<number, number>);
-
-  // Mutations
-  const createTransactionMutation = useMutation({
-    mutationFn: async (data: TransactionForm) => {
-      return apiRequest("POST", "/api/transactions", {
-        method: "POST",
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: UserInfoForm) => {
+      return apiRequest("PATCH", "/api/users/profile", {
+        method: "PATCH",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Success",
-        description: "Transaction created successfully!",
+        description: "User information updated successfully!",
       });
-      form.reset();
+      setIsEditing(false);
     },
     onError: (error: Error) => {
-      console.error("Create transaction error:", error);
-      toast({
-        title: "Error",  
-        description: "Failed to create transaction. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const updateTransactionMutation = useMutation({
-    mutationFn: async (data: TransactionForm) => {
-      return apiRequest("PATCH", `/api/transactions/${editingTransaction.id}`, {
-        method: "PATCH",
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      toast({
-        title: "Success",
-        description: "Transaction updated successfully!",
-      });
-      setIsEditDialogOpen(false);
-      setEditingTransaction(null);
-    },
-    onError: (error: Error) => {
-      console.error("Update transaction error:", error);
+      console.error("Update user error:", error);
       toast({
         title: "Error",
-        description: "Failed to update transaction. Please try again.",
+        description: "Failed to update user information. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const deleteTransactionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/transactions/${id}`, {
-        method: "DELETE",
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      toast({
-        title: "Success",
-        description: "Transaction deleted successfully!",
-      });
-      setIsDeleteDialogOpen(false);
-      setDeletingTransaction(null);
-    },
-    onError: (error: Error) => {
-      console.error("Delete transaction error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete transaction. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-    form.setValue("name", transaction.name);
-    form.setValue("caseNo", transaction.caseNo || "");
-    form.setValue("transactionType", transaction.transactionType);
-    form.setValue("status", transaction.status);
-    setIsEditDialogOpen(true);
+  const handleSubmit = (data: UserInfoForm) => {
+    updateUserMutation.mutate(data);
   };
 
-  const handleDelete = (transaction: Transaction) => {
-    setDeletingTransaction(transaction);
-    setIsDeleteDialogOpen(true);
-  };
+  if (isEditing) {
+    return (
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+              id="firstName"
+              {...form.register("firstName")}
+              placeholder="Enter first name"
+            />
+            {form.formState.errors.firstName && (
+              <p className="text-sm text-red-500 mt-1">{form.formState.errors.firstName.message}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              {...form.register("lastName")}
+              placeholder="Enter last name"
+            />
+            {form.formState.errors.lastName && (
+              <p className="text-sm text-red-500 mt-1">{form.formState.errors.lastName.message}</p>
+            )}
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="email">Email Address</Label>
+          <Input
+            id="email"
+            type="email"
+            {...form.register("email")}
+            placeholder="Enter email address"
+          />
+          {form.formState.errors.email && (
+            <p className="text-sm text-red-500 mt-1">{form.formState.errors.email.message}</p>
+          )}
+        </div>
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={updateUserMutation.isPending}>
+            <Save className="h-4 w-4 mr-2" />
+            {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </form>
+    );
+  }
 
-  const confirmDelete = () => {
-    if (deletingTransaction) {
-      deleteTransactionMutation.mutate(deletingTransaction.id);
-    }
-  };
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label className="text-sm font-medium text-gray-700">First Name</Label>
+          <p className="text-gray-900 py-2">{user?.firstName || 'Not set'}</p>
+        </div>
+        <div>
+          <Label className="text-sm font-medium text-gray-700">Last Name</Label>
+          <p className="text-gray-900 py-2">{user?.lastName || 'Not set'}</p>
+        </div>
+      </div>
+      <div>
+        <Label className="text-sm font-medium text-gray-700">Email Address</Label>
+        <p className="text-gray-900 py-2">{user?.email || 'Not set'}</p>
+      </div>
+      <div className="flex justify-end">
+        <Button onClick={() => setIsEditing(true)}>
+          <User className="h-4 w-4 mr-2" />
+          Edit Information
+        </Button>
+      </div>
+    </div>
+  );
+}
 
-  const onSubmit = (data: TransactionForm) => {
-    if (editingTransaction) {
-      updateTransactionMutation.mutate(data);
-    } else {
-      createTransactionMutation.mutate(data);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'closed':
-        return 'bg-gray-100 text-gray-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+export default function Manage() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { user } = useAuth();
 
   // Show loading if user data is still being fetched
   if (!user) {
@@ -235,276 +197,136 @@ export default function Manage() {
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
               <p className="text-gray-600 mt-1">
-                Manage your cases, preferences, and account settings
+                Manage your account settings and preferences
               </p>
             </div>
 
             <Tabs defaultValue="account" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="account">Account & Cases</TabsTrigger>
+                <TabsTrigger value="account">Account Information</TabsTrigger>
                 <TabsTrigger value="preferences">Preferences</TabsTrigger>
               </TabsList>
 
               <TabsContent value="account" className="space-y-8 mt-8">
-                {/* Account Overview */}
+                {/* Editable User Information */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <User className="h-5 w-5 mr-2" />
-                      Account Overview
+                      User Information
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <UserInfoForm user={user} />
+                  </CardContent>
+                </Card>
+
+                {/* Account Security */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Shield className="h-5 w-5 mr-2" />
+                      Account Security
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium text-gray-700">Name</Label>
-                        <p className="text-gray-900">{user.firstName} {user.lastName}</p>
+                        <Label className="text-sm font-medium text-gray-700">Account Type</Label>
+                        <p className="text-gray-900 py-2">{user?.isAdmin ? 'Administrator' : 'Standard User'}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-700">Email</Label>
-                        <p className="text-gray-900">{user.email}</p>
+                        <Label className="text-sm font-medium text-gray-700">User ID</Label>
+                        <p className="text-gray-500 py-2 text-sm font-mono">{user?.id}</p>
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700">Total Cases</Label>
-                        <p className="text-gray-900">{transactions.length}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="preferences" className="space-y-8 mt-8">
+                {/* Notification Preferences */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Bell className="h-5 w-5 mr-2" />
+                      Notification Preferences
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-900">Email Notifications</Label>
+                          <p className="text-sm text-gray-600">Receive notifications via email</p>
+                        </div>
+                        <Switch defaultChecked />
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700">Total Documents</Label>
-                        <p className="text-gray-900">{Object.values(documentCounts).reduce((a, b) => a + b, 0)}</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-900">Document Analysis Complete</Label>
+                          <p className="text-sm text-gray-600">Get notified when document analysis is finished</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-900">Case Updates</Label>
+                          <p className="text-sm text-gray-600">Receive updates about your cases</p>
+                        </div>
+                        <Switch defaultChecked />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Case Management */}
+                {/* Display Preferences */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 mr-2" />
-                        Case Management
-                      </div>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button size="sm">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Case
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Create New Case</DialogTitle>
-                          </DialogHeader>
-                          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <div>
-                              <Label htmlFor="name">Case Name</Label>
-                              <Input
-                                id="name"
-                                {...form.register("name")}
-                                placeholder="Enter case name"
-                              />
-                              {form.formState.errors.name && (
-                                <p className="text-sm text-red-500 mt-1">{form.formState.errors.name.message}</p>
-                              )}
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="caseNo">Case Number</Label>
-                              <Input
-                                id="caseNo"
-                                {...form.register("caseNo")}
-                                placeholder="Enter case number"
-                              />
-                              {form.formState.errors.caseNo && (
-                                <p className="text-sm text-red-500 mt-1">{form.formState.errors.caseNo.message}</p>
-                              )}
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="transactionType">Case Type</Label>
-                              <Select onValueChange={(value) => form.setValue("transactionType", value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select case type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="sale">Litigation</SelectItem>
-                                  <SelectItem value="purchase">Contract</SelectItem>
-                                  <SelectItem value="lease">Corporate</SelectItem>
-                                  <SelectItem value="refinance">Real Estate</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              {form.formState.errors.transactionType && (
-                                <p className="text-sm text-red-500 mt-1">{form.formState.errors.transactionType.message}</p>
-                              )}
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="status">Status</Label>
-                              <Select onValueChange={(value) => form.setValue("status", value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="active">Active</SelectItem>
-                                  <SelectItem value="closed">Closed</SelectItem>
-                                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              {form.formState.errors.status && (
-                                <p className="text-sm text-red-500 mt-1">{form.formState.errors.status.message}</p>
-                              )}
-                            </div>
-                            
-                            <div className="flex justify-end space-x-2">
-                              <Button type="submit" disabled={createTransactionMutation.isPending}>
-                                {createTransactionMutation.isPending ? "Creating..." : "Create Transaction"}
-                              </Button>
-                            </div>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
+                    <CardTitle className="flex items-center">
+                      <Palette className="h-5 w-5 mr-2" />
+                      Display Preferences
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {transactionsLoading ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-                        <p className="text-gray-600">Loading transactions...</p>
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-900">Dark Mode</Label>
+                          <p className="text-sm text-gray-600">Use dark theme for the interface</p>
+                        </div>
+                        <Switch />
                       </div>
-                    ) : transactions.length === 0 ? (
-                      <div className="text-center py-8">
-                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Transactions Yet</h3>
-                        <p className="text-gray-600">Create your first transaction to get started.</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-900">Compact Layout</Label>
+                          <p className="text-sm text-gray-600">Use a more compact layout to fit more content</p>
+                        </div>
+                        <Switch />
                       </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {transactions.map((transaction) => (
-                          <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-900">{transaction.name}</h3>
-                              <p className="text-sm text-gray-600">Case: {transaction.caseNo}</p>
-                              <div className="flex items-center mt-2 space-x-4">
-                                <Badge className={getStatusColor(transaction.status)}>
-                                  {transaction.status}
-                                </Badge>
-                                <span className="text-sm text-gray-500">
-                                  {transaction.transactionType}
-                                </span>
-                                <span className="text-sm text-gray-500">
-                                  {documentCounts[transaction.id] || 0} documents
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(transaction)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(transaction)}
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
 
-                {/* Edit Transaction Dialog */}
-                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Edit Transaction</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Transaction Name</Label>
-                        <Input
-                          id="name"
-                          {...form.register("name")}
-                          placeholder="Enter transaction name"
-                        />
-                        {form.formState.errors.name && (
-                          <p className="text-sm text-red-500 mt-1">{form.formState.errors.name.message}</p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="caseNo">Case Number</Label>
-                        <Input
-                          id="caseNo"
-                          {...form.register("caseNo")}
-                          placeholder="Enter case number"
-                        />
-                        {form.formState.errors.caseNo && (
-                          <p className="text-sm text-red-500 mt-1">{form.formState.errors.caseNo.message}</p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="transactionType">Transaction Type</Label>
-                        <Select onValueChange={(value) => form.setValue("transactionType", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select transaction type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="sale">Sale</SelectItem>
-                            <SelectItem value="purchase">Purchase</SelectItem>
-                            <SelectItem value="lease">Lease</SelectItem>
-                            <SelectItem value="refinance">Refinance</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.transactionType && (
-                          <p className="text-sm text-red-500 mt-1">{form.formState.errors.transactionType.message}</p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="status">Status</Label>
-                        <Select onValueChange={(value) => form.setValue("status", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="closed">Closed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {form.formState.errors.status && (
-                          <p className="text-sm text-red-500 mt-1">{form.formState.errors.status.message}</p>
-                        )}
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit" disabled={updateTransactionMutation.isPending}>
-                          {updateTransactionMutation.isPending ? "Updating..." : "Update"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </TabsContent>
-
-              <TabsContent value="preferences" className="space-y-8 mt-8">
+                {/* Language & Region */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Application Preferences</CardTitle>
+                    <CardTitle className="flex items-center">
+                      <Globe className="h-5 w-5 mr-2" />
+                      Language & Region
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">Preferences settings coming soon...</p>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Language</Label>
+                        <p className="text-gray-900 py-2">English (US)</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Timezone</Label>
+                        <p className="text-gray-900 py-2">UTC-05:00 (Eastern Time)</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -512,60 +334,6 @@ export default function Manage() {
           </div>
         </div>
       </main>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Delete Transaction
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-slate-600">
-              Are you sure you want to delete <strong>{deletingTransaction?.name}</strong>?
-            </p>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h4 className="font-medium text-red-800 mb-2">This action cannot be undone</h4>
-              <ul className="text-sm text-red-700 space-y-1">
-                <li>• All documents will be permanently deleted from storage</li>
-                <li>• All chat sessions and Q&A history will be removed</li>
-                <li>• Transaction data will be completely erased</li>
-                {documentCounts[deletingTransaction?.id || 0] > 0 && (
-                  <li>• <strong>{documentCounts[deletingTransaction?.id || 0]} documents</strong> will be deleted</li>
-                )}
-              </ul>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-              disabled={deleteTransactionMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={confirmDelete}
-              disabled={deleteTransactionMutation.isPending}
-            >
-              {deleteTransactionMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash className="h-4 w-4 mr-2" />
-                  Delete Transaction
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
