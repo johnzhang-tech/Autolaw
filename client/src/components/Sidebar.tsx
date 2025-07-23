@@ -85,14 +85,12 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       icon: Users,
       label: "User Management",
       href: "/admin-users",
-      color: "text-purple-600 hover:text-purple-900 hover:bg-purple-50",
       special: false,
     },
     {
       icon: Code,
       label: "Test API",
       href: "/test-api",
-      color: "text-orange-600 hover:text-orange-900 hover:bg-orange-50",
       special: false,
     },
   ] : [];
@@ -177,7 +175,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
                   "w-full justify-start h-12 rounded-xl",
                   isActive
                     ? "bg-primary/10 text-primary font-medium"
-                    : item.color || "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 )}
               >
                 <IconComponent className={cn(

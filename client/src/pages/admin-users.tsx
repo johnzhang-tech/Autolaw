@@ -1,15 +1,41 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Search, Shield, UserCheck, UserX, Calendar, Mail, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Users, Search, Shield, UserCheck, UserX, Calendar, Mail, MapPin, Plus, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sidebar } from "@/components/Sidebar";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import type { User } from "@shared/schema";
+
+// Form schemas
+const createUserSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  role: z.enum(['user', 'admin']),
+  userStatus: z.enum(['Active', 'Locked', 'Expired']),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const editUserSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  role: z.enum(['user', 'admin']),
+  userStatus: z.enum(['Active', 'Locked', 'Expired']),
+});
+
+type CreateUserForm = z.infer<typeof createUserSchema>;
+type EditUserForm = z.infer<typeof editUserSchema>;
 
 export default function AdminUsers() {
   const { user: currentUser, isAuthenticated } = useAuth();
@@ -18,6 +44,9 @@ export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   // Note: Authentication and role checks are handled in the render logic below
 
@@ -36,20 +65,44 @@ export default function AdminUsers() {
     error: error?.message 
   });
 
-  // Role update mutation
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: 'user' | 'admin' }) => {
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
+  // Form instances
+  const createForm = useForm<CreateUserForm>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      role: "user",
+      userStatus: "Active",
+      password: "",
+    },
+  });
+
+  const editForm = useForm<EditUserForm>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      role: "user",
+      userStatus: "Active",
+    },
+  });
+
+  // Create user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (data: CreateUserForm) => {
+      const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('docuai_token')}`
         },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update user role');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create user');
       }
 
       return response.json();
@@ -57,9 +110,47 @@ export default function AdminUsers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
-        title: "Role Updated",
-        description: "User role has been updated successfully.",
+        title: "User Created",
+        description: "User has been created successfully.",
       });
+      setIsCreateDialogOpen(false);
+      createForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Creation Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, data }: { userId: string; data: EditUserForm }) => {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('docuai_token')}`
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update user');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "User Updated",
+        description: "User has been updated successfully.",
+      });
+      setEditingUser(null);
     },
     onError: (error: Error) => {
       toast({
@@ -70,11 +161,44 @@ export default function AdminUsers() {
     },
   });
 
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('docuai_token')}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "User Deleted",
+        description: "User has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Deletion Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Show loading while checking authentication
   if (!currentUser) {
     return (
       <div className="flex h-screen bg-gray-50">
-        <Sidebar collapsed={false} onToggle={() => {}} />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
         <main className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto">
             <div className="p-8">
@@ -93,7 +217,7 @@ export default function AdminUsers() {
   if (currentUser.role !== 'admin') {
     return (
       <div className="flex h-screen bg-gray-50">
-        <Sidebar collapsed={false} onToggle={() => {}} />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
         <main className="flex-1 overflow-hidden">
           <div className="h-full overflow-y-auto">
             <div className="p-8">
@@ -122,8 +246,29 @@ export default function AdminUsers() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleRoleUpdate = (userId: string, newRole: 'user' | 'admin') => {
-    updateRoleMutation.mutate({ userId, role: newRole });
+  // Handler functions
+  const handleCreateUser = (data: CreateUserForm) => {
+    createUserMutation.mutate(data);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    editForm.reset({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      role: user.role as 'user' | 'admin',
+      userStatus: user.userStatus as 'Active' | 'Locked' | 'Expired',
+    });
+  };
+
+  const handleUpdateUser = (data: EditUserForm) => {
+    if (editingUser) {
+      updateUserMutation.mutate({ userId: editingUser.id, data });
+    }
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    deleteUserMutation.mutate(userId);
   };
 
   if (isLoading) {
@@ -145,21 +290,120 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="flex h-screen bg-white">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="min-h-screen bg-slate-50">
-          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-2">
-            <Users className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
-          </div>
-          <p className="text-slate-600">
-            Manage all users in the system. You can update roles and view user details.
-          </p>
-        </div>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto">
+          <div className="p-8">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                  <p className="text-gray-600 mt-1">
+                    Manage all users in the system. You can create, edit, and delete users.
+                  </p>
+                </div>
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Create New User</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={createForm.handleSubmit(handleCreateUser)} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="firstName">First Name</Label>
+                          <Input
+                            id="firstName"
+                            {...createForm.register("firstName")}
+                            placeholder="First name"
+                          />
+                          {createForm.formState.errors.firstName && (
+                            <p className="text-sm text-red-500 mt-1">{createForm.formState.errors.firstName.message}</p>
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input
+                            id="lastName"
+                            {...createForm.register("lastName")}
+                            placeholder="Last name"
+                          />
+                          {createForm.formState.errors.lastName && (
+                            <p className="text-sm text-red-500 mt-1">{createForm.formState.errors.lastName.message}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          {...createForm.register("email")}
+                          placeholder="Email address"
+                        />
+                        {createForm.formState.errors.email && (
+                          <p className="text-sm text-red-500 mt-1">{createForm.formState.errors.email.message}</p>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          {...createForm.register("password")}
+                          placeholder="Password"
+                        />
+                        {createForm.formState.errors.password && (
+                          <p className="text-sm text-red-500 mt-1">{createForm.formState.errors.password.message}</p>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="role">Role</Label>
+                          <Select value={createForm.watch("role")} onValueChange={(value: 'user' | 'admin') => createForm.setValue("role", value)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="userStatus">Status</Label>
+                          <Select value={createForm.watch("userStatus")} onValueChange={(value: 'Active' | 'Locked' | 'Expired') => createForm.setValue("userStatus", value)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Active">Active</SelectItem>
+                              <SelectItem value="Locked">Locked</SelectItem>
+                              <SelectItem value="Expired">Expired</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={createUserMutation.isPending}>
+                          {createUserMutation.isPending ? "Creating..." : "Create User"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -336,25 +580,39 @@ export default function AdminUsers() {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    {user.role === 'admin' ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRoleUpdate(user.id, 'user')}
-                        disabled={updateRoleMutation.isPending || user.id === currentUser.id}
-                      >
-                        Make User
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleRoleUpdate(user.id, 'admin')}
-                        disabled={updateRoleMutation.isPending}
-                      >
-                        Make Admin
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditUser(user)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the user account for {user.email}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete User
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}
@@ -374,9 +632,81 @@ export default function AdminUsers() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Edit User Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            {editingUser && (
+              <form onSubmit={editForm.handleSubmit(handleUpdateUser)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editFirstName">First Name</Label>
+                    <Input
+                      id="editFirstName"
+                      {...editForm.register("firstName")}
+                      placeholder="First name"
+                    />
+                    {editForm.formState.errors.firstName && (
+                      <p className="text-sm text-red-500 mt-1">{editForm.formState.errors.firstName.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="editLastName">Last Name</Label>
+                    <Input
+                      id="editLastName"
+                      {...editForm.register("lastName")}
+                      placeholder="Last name"
+                    />
+                    {editForm.formState.errors.lastName && (
+                      <p className="text-sm text-red-500 mt-1">{editForm.formState.errors.lastName.message}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editRole">Role</Label>
+                    <Select value={editForm.watch("role")} onValueChange={(value: 'user' | 'admin') => editForm.setValue("role", value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editUserStatus">Status</Label>
+                    <Select value={editForm.watch("userStatus")} onValueChange={(value: 'Active' | 'Locked' | 'Expired') => editForm.setValue("userStatus", value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Locked">Locked</SelectItem>
+                        <SelectItem value="Expired">Expired</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={updateUserMutation.isPending}>
+                    {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+          </div>
         </div>
-      </div>
-      </div>
+      </main>
     </div>
   );
 }

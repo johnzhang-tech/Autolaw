@@ -32,13 +32,18 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createLocalUser(userData: { email: string; firstName?: string; lastName?: string; passwordHash: string }): Promise<User>;
+  createUser(userData: { id: string; email: string; firstName?: string; lastName?: string; role?: string; userStatus?: string; provider?: string; passwordHash?: string }): Promise<User>;
   updateUserRole(userId: string, role: 'user' | 'admin'): Promise<User>;
   updateUserProfile(userId: string, updates: { 
     region?: string; 
     userType?: 'One time' | 'Recurring';
     userStatus?: 'Locked' | 'Active' | 'Expired';
     expirationDate?: Date | null;
+    firstName?: string;
+    lastName?: string;
+    role?: 'user' | 'admin';
   }): Promise<User>;
+  deleteUser(userId: string): Promise<void>;
 
   // Transaction operations
   getTransactions(userId: string): Promise<Transaction[]>;
@@ -137,6 +142,9 @@ export class DatabaseStorage implements IStorage {
     userType?: 'One time' | 'Recurring';
     userStatus?: 'Locked' | 'Active' | 'Expired';
     expirationDate?: Date | null;
+    firstName?: string;
+    lastName?: string;
+    role?: 'user' | 'admin';
   }): Promise<User> {
     const [user] = await db
       .update(users)
@@ -147,6 +155,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async createUser(userData: { 
+    id: string; 
+    email: string; 
+    firstName?: string; 
+    lastName?: string; 
+    role?: string; 
+    userStatus?: string; 
+    provider?: string; 
+    passwordHash?: string 
+  }): Promise<User> {
+    const bcrypt = await import('bcryptjs');
+    
+    const [user] = await db
+      .insert(users)
+      .values({
+        id: userData.id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: userData.role as 'user' | 'admin' || 'user',
+        userStatus: userData.userStatus as 'Locked' | 'Active' | 'Expired' || 'Active',
+        provider: userData.provider || 'local',
+        passwordHash: userData.passwordHash ? await bcrypt.hash(userData.passwordHash, 10) : undefined,
+      })
+      .returning();
+    return user;
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    // First delete all user's transactions, documents, etc.
+    // This will cascade delete related data
+    await db.delete(users).where(eq(users.id, userId));
   }
 
   // Transaction operations

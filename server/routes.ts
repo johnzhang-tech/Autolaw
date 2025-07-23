@@ -2921,6 +2921,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoint: Create new user
+  app.post('/api/admin/users', tokenAuth, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      const { email, firstName, lastName, role, userStatus, password } = req.body;
+      
+      // Validate required fields
+      if (!email || !firstName || !lastName || !password) {
+        return res.status(400).json({ message: 'Email, firstName, lastName, and password are required' });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: 'User with this email already exists' });
+      }
+      
+      // Create user using storage method
+      const userData = {
+        id: `user-${Date.now()}-${Math.random().toString(36).substring(2)}`,
+        email,
+        firstName,
+        lastName,
+        role: role || 'user',
+        userStatus: userStatus || 'Active',
+        provider: 'local',
+        passwordHash: password // storage.createUser will hash this
+      };
+      
+      const newUser = await storage.createUser(userData);
+      
+      // Remove password hash from response
+      const { passwordHash, ...userResponse } = newUser;
+      
+      res.status(201).json(userResponse);
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ message: 'Failed to create user' });
+    }
+  });
+
+  // Admin endpoint: Update user
+  app.put('/api/admin/users/:userId', tokenAuth, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      const { userId } = req.params;
+      const { firstName, lastName, role, userStatus } = req.body;
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Update user
+      const updates = {
+        firstName,
+        lastName,
+        role,
+        userStatus
+      };
+      
+      const updatedUser = await storage.updateUserProfile(userId, updates);
+      
+      // Remove password hash from response
+      const { passwordHash, ...userResponse } = updatedUser;
+      
+      res.json(userResponse);
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ message: 'Failed to update user' });
+    }
+  });
+
+  // Admin endpoint: Delete user
+  app.delete('/api/admin/users/:userId', tokenAuth, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      const { userId } = req.params;
+      
+      // Check if user exists
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Prevent admin from deleting themselves
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: 'Cannot delete your own account' });
+      }
+      
+      // Delete user
+      await storage.deleteUser(userId);
+      
+      res.json({ message: 'User deleted successfully' });
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
+
   // Admin endpoint: Update any user's profile
   app.patch('/api/admin/users/:targetUserId', isAuthenticated, async (req: any, res) => {
     try {
