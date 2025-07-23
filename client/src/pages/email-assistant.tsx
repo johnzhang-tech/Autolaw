@@ -6,31 +6,52 @@ import { Bot, Mail } from "lucide-react";
 
 export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
-  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
 
-  const handlePromptSelect = (promptText: string) => {
-    // Set the selected prompt and force iframe reload with new URL
-    setSelectedPrompt(promptText);
-    setIframeKey(prev => prev + 1);
-    
-    // Copy to clipboard as backup
-    navigator.clipboard.writeText(promptText).catch(() => {});
-    
-    // Show notification
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
-    notification.textContent = '✓ Reloading chat with prompt...';
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.style.opacity = '0';
+  const handlePromptSelect = async (promptText: string) => {
+    try {
+      // Copy to clipboard
+      await navigator.clipboard.writeText(promptText);
+      
+      // Show success notification with clear instructions
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 transition-opacity max-w-sm';
+      notification.innerHTML = `
+        <div class="font-medium">✓ Prompt Copied!</div>
+        <div class="text-sm mt-2">Now:</div>
+        <div class="text-sm">1. Click in the chat input box below</div>
+        <div class="text-sm">2. Press Ctrl+V (or Cmd+V) to paste</div>
+        <div class="text-sm">3. Press Enter to send</div>
+      `;
+      document.body.appendChild(notification);
+      
+      // Auto-scroll to the chat input area
+      const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
+      if (iframe) {
+        iframe.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }, 5000);
+      
+    } catch (error) {
+      // Fallback if clipboard fails
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = 'Copy failed - please select text manually';
+      document.body.appendChild(notification);
+      
       setTimeout(() => {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
         }
-      }, 300);
-    }, 2000);
+      }, 3000);
+    }
   };
 
   return (
@@ -65,7 +86,7 @@ export default function EmailAssistant() {
             <CardContent className="p-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Analysis Best Practice Prompts</h3>
-                <p className="text-sm text-gray-600">Double-click a prompt to auto-paste it into the chat below</p>
+                <p className="text-sm text-gray-600">Double-click a prompt to copy it, then paste in the chat input below</p>
               </div>
               
               <div className="overflow-y-auto" style={{ maxHeight: 'calc(40vh - 120px)' }}>
@@ -141,28 +162,8 @@ export default function EmailAssistant() {
           {/* Ragflow Chat Assistant */}
           <Card className="flex-1 min-h-0">
             <CardContent className="p-0 h-full">
-              {selectedPrompt && (
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <Mail className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-blue-700 font-medium">Selected Prompt:</p>
-                      <p className="text-sm text-blue-600 mt-1">{selectedPrompt}</p>
-                      <button 
-                        onClick={() => setSelectedPrompt('')}
-                        className="text-xs text-blue-500 hover:text-blue-700 mt-2 underline"
-                      >
-                        Clear prompt
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
               <iframe
-                key={iframeKey}
-                src={`https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=5fe51950675711f0a9ce0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm${selectedPrompt ? `&initial_prompt=${encodeURIComponent(selectedPrompt)}` : ''}`}
+                src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=5fe51950675711f0a9ce0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
                 style={{ width: '100%', height: '100%', minHeight: '400px' }}
                 frameBorder="0"
                 title="Email Agentic Assistant"
