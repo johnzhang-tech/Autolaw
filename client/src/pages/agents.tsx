@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { Bot, FileText, Users } from "lucide-react";
+import { Bot, FileText, Users, CheckCircle } from "lucide-react";
 
 // Global persistence system for cross-page navigation
 const globalPersistence = {
@@ -55,13 +55,21 @@ export default function Agents() {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
+  const [showCopyNotification, setShowCopyNotification] = useState(false);
 
   // Function to copy prompt text to clipboard
   const copyPromptToClipboard = async (promptText: string) => {
     try {
       await navigator.clipboard.writeText(promptText);
-      // Optional: Show a brief success indicator
       console.log('Prompt copied to clipboard');
+      
+      // Show notification message
+      setShowCopyNotification(true);
+      
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        setShowCopyNotification(false);
+      }, 3000);
     } catch (err) {
       console.error('Failed to copy prompt:', err);
     }
@@ -174,7 +182,18 @@ Only include medical visits relevant to the injury or litigation.`,
   }, [activeTab]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Copy Success Notification */}
+      {showCopyNotification && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-in slide-in-from-top-2 duration-300">
+          <CheckCircle className="w-5 h-5" />
+          <div>
+            <div className="font-medium">Prompt copied to clipboard!</div>
+            <div className="text-sm text-green-100">Now paste it into the chat box</div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 bg-white border-r border-gray-200`}>
         <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />

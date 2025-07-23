@@ -428,6 +428,8 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Double-Click Copy Functionality**: All prompt boxes support double-click to copy full template text to clipboard for easy pasting into chat
   - **Interactive Elements**: Cursor pointer, tooltips, and visual feedback for prompt selection and copying workflow
   - **Complete Prompt Templates**: Full-text templates stored for clipboard copying, ensuring consistent and complete prompts
+  - **Copy Success Notification**: Green toast notification appears for 3 seconds after copying, guiding users to paste into chat box
+  - **User Guidance**: Clear messaging "Prompt copied to clipboard!" with instruction "Now paste it into the chat box" for improved workflow
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
