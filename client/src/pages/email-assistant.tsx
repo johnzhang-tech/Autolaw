@@ -8,42 +8,90 @@ export default function EmailAssistant() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handlePromptSelect = async (promptText: string) => {
-    try {
+    // Create floating overlay with the prompt text
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    overlay.innerHTML = `
+      <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-2xl">
+        <h3 class="text-lg font-bold mb-4">Selected Prompt</h3>
+        <div class="bg-gray-50 p-3 rounded border text-sm mb-4 max-h-32 overflow-y-auto">
+          ${promptText}
+        </div>
+        <div class="flex gap-3">
+          <button id="send-prompt" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Send to Chat
+          </button>
+          <button id="cancel-prompt" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Handle send button
+    const sendBtn = overlay.querySelector('#send-prompt');
+    sendBtn?.addEventListener('click', async () => {
       // Copy to clipboard
-      await navigator.clipboard.writeText(promptText);
+      try {
+        await navigator.clipboard.writeText(promptText);
+      } catch (e) {
+        // Clipboard failed, continue anyway
+      }
       
-      // Show success notification with clear instructions
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 transition-opacity max-w-sm';
-      notification.innerHTML = `
-        <div class="font-medium">✓ Prompt Copied!</div>
-        <div class="text-sm mt-2">Now:</div>
-        <div class="text-sm">1. Click in the chat input box below</div>
-        <div class="text-sm">2. Press Ctrl+V (or Cmd+V) to paste</div>
-        <div class="text-sm">3. Press Enter to send</div>
-      `;
-      document.body.appendChild(notification);
+      // Remove overlay
+      document.body.removeChild(overlay);
       
-      // Auto-scroll to the chat input area
+      // Simulate clicking in the iframe and pasting
       const iframe = document.querySelector('iframe[title="Email Agentic Assistant"]') as HTMLIFrameElement;
       if (iframe) {
+        // Focus iframe
+        iframe.focus();
+        
+        // Try to simulate user clicking in iframe
+        const clickEvent = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        
+        iframe.dispatchEvent(clickEvent);
+        
+        // Wait a bit, then try to trigger paste
+        setTimeout(() => {
+          // Simulate keyboard paste
+          document.execCommand('paste');
+          
+          // Also try dispatching paste event to iframe
+          const pasteEvent = new ClipboardEvent('paste', {
+            bubbles: true,
+            cancelable: true,
+            clipboardData: new DataTransfer()
+          });
+          
+          // Add text to clipboard data
+          try {
+            pasteEvent.clipboardData?.setData('text/plain', promptText);
+          } catch (e) {
+            // Some browsers don't allow this
+          }
+          
+          iframe.dispatchEvent(pasteEvent);
+          
+          // Try window-level paste
+          window.dispatchEvent(pasteEvent);
+          
+        }, 100);
+        
+        // Scroll to iframe
         iframe.scrollIntoView({ behavior: 'smooth', block: 'end' });
       }
       
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        setTimeout(() => {
-          if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
-          }
-        }, 300);
-      }, 5000);
-      
-    } catch (error) {
-      // Fallback if clipboard fails
+      // Show completion message
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = 'Copy failed - please select text manually';
+      notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = 'Prompt sent! Check the chat input below.';
       document.body.appendChild(notification);
       
       setTimeout(() => {
@@ -51,7 +99,20 @@ export default function EmailAssistant() {
           document.body.removeChild(notification);
         }
       }, 3000);
-    }
+    });
+    
+    // Handle cancel button
+    const cancelBtn = overlay.querySelector('#cancel-prompt');
+    cancelBtn?.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+    });
+    
+    // Handle overlay click to close
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        document.body.removeChild(overlay);
+      }
+    });
   };
 
   return (
