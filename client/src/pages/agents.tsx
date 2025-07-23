@@ -1,16 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bot, MessageSquare, FileText, Users } from "lucide-react";
+import { useAgentState } from "@/lib/agentState";
 
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>('agent1');
+  const agentState = useAgentState();
   
-  // Track which iframes have been loaded to preserve their state
-  const [loadedAgents, setLoadedAgents] = useState<Set<string>>(new Set(['agent1']));
+  // Initialize state from persistent storage
+  const [activeTab, setActiveTab] = useState<'agent1' | 'agent2' | 'agent3'>(
+    agentState.getActiveAgent() as 'agent1' | 'agent2' | 'agent3'
+  );
+
+  // Update active tab when component mounts to restore last viewed agent
+  useEffect(() => {
+    const lastActive = agentState.getActiveAgent() as 'agent1' | 'agent2' | 'agent3';
+    setActiveTab(lastActive);
+  }, []);
+
+  const handleTabChange = (newTab: 'agent1' | 'agent2' | 'agent3') => {
+    setActiveTab(newTab);
+    agentState.setActiveAgent(newTab);
+  };
+
+  const handleAgentLoad = (agentId: string) => {
+    agentState.markAgentLoaded(agentId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -42,7 +60,7 @@ export default function Agents() {
           <div className="flex justify-between items-center px-6">
             <div className="flex space-x-8">
               <button
-                onClick={() => setActiveTab('agent1')}
+                onClick={() => handleTabChange('agent1')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'agent1'
                     ? 'border-blue-500 text-blue-600'
@@ -52,10 +70,13 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
                   <span className="font-bold">Case 3 Agent</span>
+                  {agentState.isAgentLoaded('agent1') && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
+                  )}
                 </div>
               </button>
               <button
-                onClick={() => setActiveTab('agent2')}
+                onClick={() => handleTabChange('agent2')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'agent2'
                     ? 'border-blue-500 text-blue-600'
@@ -65,10 +86,13 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
                   <span className="font-bold">Case 2 Agent</span>
+                  {agentState.isAgentLoaded('agent2') && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
+                  )}
                 </div>
               </button>
               <button
-                onClick={() => setActiveTab('agent3')}
+                onClick={() => handleTabChange('agent3')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'agent3'
                     ? 'border-blue-500 text-blue-600'
@@ -78,6 +102,9 @@ export default function Agents() {
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
                   <span className="font-bold">Case Large File</span>
+                  {agentState.isAgentLoaded('agent3') && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full" title="Conversation active" />
+                  )}
                 </div>
               </button>
             </div>
@@ -105,7 +132,7 @@ export default function Agents() {
           {/* Case 2 Agent */}
           <Card className={`h-full absolute inset-0 m-6 ${activeTab === 'agent2' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              {(loadedAgents.has('agent2') || activeTab === 'agent2') && (
+              {(agentState.isAgentLoaded('agent2') || activeTab === 'agent2') && (
                 <iframe
                   key="agent2-persistent"
                   src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=f73d46aa674e11f09eda0242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
@@ -113,7 +140,7 @@ export default function Agents() {
                   frameBorder="0"
                   title="Case 2 Agent"
                   className="rounded-b-lg"
-                  onLoad={() => setLoadedAgents(prev => new Set(Array.from(prev).concat(['agent2'])))}
+                  onLoad={() => handleAgentLoad('agent2')}
                 />
               )}
             </CardContent>
@@ -122,7 +149,7 @@ export default function Agents() {
           {/* Case Large File */}
           <Card className={`h-full absolute inset-0 m-6 ${activeTab === 'agent3' ? '' : 'hidden'}`}>
             <CardContent className="p-0 h-full">
-              {(loadedAgents.has('agent3') || activeTab === 'agent3') && (
+              {(agentState.isAgentLoaded('agent3') || activeTab === 'agent3') && (
                 <iframe
                   key="agent3-persistent"
                   src="https://ragflow-altosera-u49235.vm.elestio.app/chat/share?shared_id=6a016e68674b11f090050242ac120003&from=agent&auth=VhZmFlZTYyNWM1NjExZjA4NGJjMDI0Mm"
@@ -130,7 +157,7 @@ export default function Agents() {
                   frameBorder="0"
                   title="Case Large File"
                   className="rounded-b-lg"
-                  onLoad={() => setLoadedAgents(prev => new Set(Array.from(prev).concat(['agent3'])))}
+                  onLoad={() => handleAgentLoad('agent3')}
                 />
               )}
             </CardContent>
