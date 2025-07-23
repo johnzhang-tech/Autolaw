@@ -196,7 +196,24 @@ export default function Manage() {
     }
   };
 
-  // Remove the user loading check as it's handled by the router
+  // Show loading if user data is still being fetched
+  if (!user) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="p-8">
+              <div className="text-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                <p className="mt-4 text-gray-600">Loading user data...</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
