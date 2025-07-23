@@ -18,7 +18,7 @@ import {
   MessageCircleQuestion
 } from "lucide-react";
 import { Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { 

@@ -91,8 +91,8 @@ export default function LoginPage() {
           description: "You have been successfully logged in.",
         });
 
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
+        // Redirect to home page instead of dashboard
+        window.location.href = '/';
       } else {
         const error = await response.json();
         toast({
