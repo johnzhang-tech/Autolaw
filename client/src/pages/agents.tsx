@@ -2,27 +2,34 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users, CheckCircle } from "lucide-react";
 
-// Global persistence system for cross-page navigation
+// Enhanced global persistence system with automatic refresh prevention
 const globalPersistence = {
   container: null as HTMLDivElement | null,
   iframes: {} as Record<string, HTMLIFrameElement>,
+  initialized: false,
   
   init() {
     if (!this.container) {
+      // Remove any existing container first
+      const existing = document.getElementById('ragflow-persistence');
+      if (existing) existing.remove();
+      
       this.container = document.createElement('div');
       this.container.id = 'ragflow-persistence';
       this.container.style.cssText = `
         position: fixed;
         top: -10000px;
         left: -10000px;
-        width: 800px;
-        height: 600px;
+        width: 1200px;
+        height: 800px;
         overflow: hidden;
         visibility: hidden;
         pointer-events: none;
         z-index: -9999;
       `;
       document.body.appendChild(this.container);
+      this.initialized = true;
+      console.log('✓ Global persistence container initialized');
     }
   },
   
@@ -30,6 +37,7 @@ const globalPersistence = {
     if (!this.iframes[agentId]) {
       this.init();
       const iframe = document.createElement('iframe');
+      iframe.id = `agent-iframe-${agentId}`;
       iframe.src = src;
       iframe.title = title;
       iframe.style.cssText = `
@@ -39,14 +47,57 @@ const globalPersistence = {
         border: none;
         border-radius: 8px;
       `;
+      
+      // Prevent automatic refresh by storing reference
       this.iframes[agentId] = iframe;
       this.container!.appendChild(iframe);
+      console.log(`✓ Created persistent iframe for ${agentId}`);
     }
     return this.iframes[agentId];
   },
   
   getIframe(agentId: string) {
     return this.iframes[agentId];
+  },
+  
+  moveToDisplay(agentId: string, displayContainer: HTMLElement) {
+    const iframe = this.iframes[agentId];
+    if (iframe && displayContainer) {
+      try {
+        // Clear display container first
+        displayContainer.innerHTML = '';
+        // Remove iframe from current parent if it has one
+        if (iframe.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+        // Move iframe to display container
+        displayContainer.appendChild(iframe);
+        iframe.style.display = 'block';
+        console.log(`✓ Moved ${agentId} to display container`);
+      } catch (error) {
+        console.warn(`Warning moving ${agentId} to display:`, error);
+      }
+    }
+  },
+  
+  moveToStorage(agentId: string) {
+    const iframe = this.iframes[agentId];
+    if (iframe && this.container) {
+      try {
+        // Remove iframe from current parent if it has one
+        if (iframe.parentNode && iframe.parentNode !== this.container) {
+          iframe.parentNode.removeChild(iframe);
+        }
+        // Only append if not already in storage container
+        if (iframe.parentNode !== this.container) {
+          this.container.appendChild(iframe);
+        }
+        iframe.style.display = 'none';
+        console.log(`✓ Moved ${agentId} to storage container`);
+      } catch (error) {
+        console.warn(`Warning moving ${agentId} to storage:`, error);
+      }
+    }
   }
 };
 
@@ -56,6 +107,7 @@ export default function Agents() {
     return localStorage.getItem('agent-active-tab') || 'agent1';
   });
   const [showCopyNotification, setShowCopyNotification] = useState(false);
+  const [displayContainer, setDisplayContainer] = useState<HTMLDivElement | null>(null);
 
   // Function to copy prompt text to clipboard
   const copyPromptToClipboard = async (promptText: string) => {
@@ -155,31 +207,51 @@ Only include medical visits relevant to the injury or litigation.`,
     }
   };
 
-  // Initialize persistent iframes for cross-page navigation
+  // Initialize agent iframes and display container reference
   useEffect(() => {
+    // Create all iframes immediately to prevent refresh on tab switches
     Object.entries(agents).forEach(([agentId, config]) => {
       globalPersistence.createIframe(agentId, config.src, config.title);
     });
-  }, []);
 
-  // On component unmount, save current iframes to global persistence
-  useEffect(() => {
+    // Cleanup function to ensure proper state when component unmounts
     return () => {
-      // Move currently displayed iframes to global storage when leaving page
-      Object.keys(agents).forEach(agentId => {
-        const iframe = document.querySelector(`iframe[title="${agents[agentId as keyof typeof agents].title}"]`) as HTMLIFrameElement;
-        if (iframe && globalPersistence.container) {
-          globalPersistence.iframes[agentId] = iframe;
-          globalPersistence.container.appendChild(iframe);
-        }
-      });
+      console.log('Agents component unmounting - iframes preserved in global storage');
+      // Move current iframe back to storage
+      if (displayContainer) {
+        globalPersistence.moveToStorage(activeTab);
+      }
     };
   }, []);
 
-  // Save active tab
+  // Handle active tab changes - move iframes between storage and display
   useEffect(() => {
     localStorage.setItem('agent-active-tab', activeTab);
-  }, [activeTab]);
+    
+    if (displayContainer) {
+      // Move previous iframe to storage
+      Object.keys(agents).forEach(agentId => {
+        if (agentId !== activeTab) {
+          globalPersistence.moveToStorage(agentId);
+        }
+      });
+      
+      // Move active iframe to display
+      globalPersistence.moveToDisplay(activeTab, displayContainer);
+    }
+  }, [activeTab, displayContainer]);
+
+  // Initialize display when component first mounts with display container
+  useEffect(() => {
+    if (displayContainer && activeTab) {
+      // Small delay to ensure iframes are created
+      const timer = setTimeout(() => {
+        globalPersistence.moveToDisplay(activeTab, displayContainer);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [displayContainer]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex relative">
@@ -256,25 +328,15 @@ Only include medical visits relevant to the injury or litigation.`,
           {/* Left Side - Agent Interface */}
           <div className="flex-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full min-h-[600px] relative">
-              {/* Simple approach: all iframes loaded, only active one visible */}
-              {Object.entries(agents).map(([agentId, config]) => (
-                <iframe
-                  key={agentId}
-                  src={config.src}
-                  title={config.title}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '600px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    display: activeTab === agentId ? 'block' : 'none'
-                  }}
-                />
-              ))}
+              {/* Display container for active iframe - prevents automatic refresh */}
+              <div 
+                ref={setDisplayContainer}
+                className="w-full h-full min-h-[600px] relative"
+                style={{ 
+                  borderRadius: '8px',
+                  overflow: 'hidden'
+                }}
+              />
             </div>
           </div>
 
