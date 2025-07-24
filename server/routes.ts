@@ -212,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for multiple file uploads with memory storage for S3
   const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB per file
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB per file
     fileFilter: (req, file, cb) => {
       // Accept all files for n8n compatibility - we'll validate later
       console.log('- Multer fileFilter - fieldname:', file.fieldname || 'MISSING', 'originalname:', file.originalname || 'MISSING');
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const n8nUpload = multer({
     storage: multer.memoryStorage(),
     limits: { 
-      fileSize: 10 * 1024 * 1024, // 10MB per file
+      fileSize: 100 * 1024 * 1024, // 100MB per file
       files: 60 // Allow up to 60 files
     },
     fileFilter: (req, file, cb) => {
@@ -1602,7 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const n8nBinaryUpload = multer({
         storage: multer.memoryStorage(),
         limits: {
-          fileSize: 10 * 1024 * 1024, // 10MB
+          fileSize: 100 * 1024 * 1024, // 100MB
           files: 1 // Single file upload
         },
         fileFilter: (req, file, cb) => {
@@ -1744,11 +1744,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Validate file size (10MB limit)
-      if (fileSize > 10 * 1024 * 1024) {
+      // Validate file size (100MB limit)
+      if (fileSize > 100 * 1024 * 1024) {
         return res.status(400).json({ 
           success: false, 
-          error: 'File too large. Maximum size is 10MB.' 
+          error: 'File too large. Maximum size is 100MB.' 
         });
       }
       
@@ -1941,11 +1941,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Decode base64 data
           const buffer = Buffer.from(file.data, 'base64');
           
-          // Validate file size (10MB limit)
-          if (buffer.length > 10 * 1024 * 1024) {
+          // Validate file size (100MB limit)
+          if (buffer.length > 100 * 1024 * 1024) {
             failedUploads.push({
               filename: file.filename,
-              error: 'File size exceeds 10MB limit'
+              error: 'File size exceeds 100MB limit'
             });
             continue;
           }

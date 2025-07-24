@@ -188,7 +188,7 @@ class ReplitObjectStorageService {
   /**
    * Validate file type and size
    */
-  private validateFile(buffer: Buffer, mimeType: string, maxSizeBytes: number = 10 * 1024 * 1024): void {
+  private validateFile(buffer: Buffer, mimeType: string, maxSizeBytes: number = 100 * 1024 * 1024): void {
     const allowedTypes = [
       // PDF Files
       'application/pdf',

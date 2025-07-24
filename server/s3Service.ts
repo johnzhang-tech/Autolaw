@@ -186,8 +186,8 @@ class S3Service {
   /**
    * Validate file type and size
    */
-  static validateFile(buffer: Buffer, mimeType: string, maxSizeBytes: number = 10 * 1024 * 1024): void {
-    // Check file size (default 10MB)
+  static validateFile(buffer: Buffer, mimeType: string, maxSizeBytes: number = 100 * 1024 * 1024): void {
+    // Check file size (default 100MB)
     if (buffer.length > maxSizeBytes) {
       throw new Error(`File size exceeds limit of ${maxSizeBytes / (1024 * 1024)}MB`);
     }

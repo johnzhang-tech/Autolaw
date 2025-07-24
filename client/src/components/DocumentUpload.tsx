@@ -129,8 +129,8 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
         return;
       }
 
-      // Validate file size (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
+      // Validate file size (100MB max)
+      if (file.size > 100 * 1024 * 1024) {
         invalidFiles.push(`${file.name} (too large)`);
         return;
       }
@@ -216,7 +216,7 @@ export function DocumentUpload({ transactionId, onUploadComplete }: DocumentUplo
               Drag and drop files here, or click the button below
             </p>
             <p className="text-sm text-gray-500">
-              PDF, DOC, DOCX, TXT, and images • Max 10MB per file • Up to 60 files
+              PDF, DOC, DOCX, TXT, and images • Max 100MB per file • Up to 60 files
             </p>
           </div>
           
