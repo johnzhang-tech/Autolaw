@@ -2,18 +2,6 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Bot, FileText, Users, CheckCircle } from "lucide-react";
 
-// Improved persistence system using CSS visibility instead of DOM manipulation
-const conversationPersistence = {
-  initialized: false,
-  
-  init() {
-    if (!this.initialized) {
-      console.log('✓ Conversation persistence system initialized');
-      this.initialized = true;
-    }
-  }
-};
-
 export default function Agents() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
@@ -119,12 +107,6 @@ Only include medical visits relevant to the injury or litigation.`,
     }
   };
 
-  // Initialize conversation persistence system
-  useEffect(() => {
-    conversationPersistence.init();
-    console.log('✓ Agent conversations will persist across tab switches');
-  }, []);
-
   // Save active tab to localStorage
   useEffect(() => {
     localStorage.setItem('agent-active-tab', activeTab);
@@ -205,21 +187,25 @@ Only include medical visits relevant to the injury or litigation.`,
           {/* Left Side - Agent Interface */}
           <div className="flex-1">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full min-h-[600px] relative">
-              {/* All iframes loaded simultaneously - conversation persistence via CSS visibility */}
-              {Object.entries(agents).map(([agentId, config]) => (
-                <iframe
-                  key={agentId}
-                  src={config.src}
-                  title={config.title}
-                  className={`absolute inset-0 w-full h-full min-h-[600px] border-none rounded-lg ${
-                    activeTab === agentId ? 'block' : 'hidden'
-                  }`}
-                  style={{
-                    visibility: activeTab === agentId ? 'visible' : 'hidden',
-                    pointerEvents: activeTab === agentId ? 'auto' : 'none'
-                  }}
-                />
-              ))}
+              {/* Super simple: All iframes always rendered, just use CSS to show/hide */}
+              <iframe
+                src={agents.agent1.src}
+                title={agents.agent1.title}
+                className="absolute inset-0 w-full h-full min-h-[600px] border-none rounded-lg"
+                style={{ display: activeTab === 'agent1' ? 'block' : 'none' }}
+              />
+              <iframe
+                src={agents.agent2.src}
+                title={agents.agent2.title}
+                className="absolute inset-0 w-full h-full min-h-[600px] border-none rounded-lg"
+                style={{ display: activeTab === 'agent2' ? 'block' : 'none' }}
+              />
+              <iframe
+                src={agents.agent3.src}
+                title={agents.agent3.title}
+                className="absolute inset-0 w-full h-full min-h-[600px] border-none rounded-lg"
+                style={{ display: activeTab === 'agent3' ? 'block' : 'none' }}
+              />
             </div>
           </div>
 

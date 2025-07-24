@@ -457,6 +457,14 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Role-Based Display**: Enhanced Account Details section to show user role badge, creation date, and last modified timestamp
   - **Clean Interface**: Settings page now focuses purely on Account Information and Preferences without case management complexity
   - **User Experience**: Clean, professional settings interface with editable user data, role information, and notification preferences
+- July 24, 2025. **MR ASSISTANT IFRAME REFRESH ISSUE RESOLVED: DEAD-SIMPLE CONVERSATION PERSISTENCE**
+  - **Root Problem Identified**: Complex DOM manipulation and iframe moving was causing Ragflow sessions to reset
+  - **Solution Applied**: Completely rewrote MR Assistant with static iframe approach - all 3 iframes always loaded, only CSS display toggled
+  - **No More DOM Movement**: Eliminated all iframe repositioning, global containers, and complex persistence systems
+  - **Pure CSS Visibility**: Simple display:block/none switching prevents any iframe reloading or session loss
+  - **Conversation Persistence**: Users can now switch between Case 3, Case 2, and Case Large File agents without losing chat history
+  - **Performance Optimized**: All three Ragflow agents load simultaneously for instant tab switching
+  - **User Experience**: Seamless conversation preservation across all MR Assistant tabs with zero refresh delays
 - July 19, 2025. **COMPLETE REPORTS API SYSTEM: COMPREHENSIVE TRANSACTION ENHANCEMENT COMPLETED**
   - **Reports Database Schema**: Successfully migrated reports table from legacy "name" column to "reportName" with enhanced email tracking fields
   - **Complete CRUD Operations**: Implemented full reports API with GET, POST, PUT, DELETE endpoints supporting transaction-based report management
