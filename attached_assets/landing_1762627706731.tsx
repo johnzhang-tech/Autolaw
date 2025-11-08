@@ -34,7 +34,7 @@ export default function Landing() {
         block: "start",
       });
     }
-    setIsMobileMenuOpen(false);
+    setIsMobileMenuOpen(false); // Close mobile menu after navigation
   };
 
   const openSignInModal = () => {
@@ -50,44 +50,44 @@ export default function Landing() {
   const features = [
     {
       icon: FileText,
-      title: "Legal Document Clarity",
+      title: "Instant Clarity",
       description:
-        "Analyze entire legal packets—contracts, pleadings, discovery documents—covering 50+ critical dimensions like obligations, deadlines, payment terms, liability clauses, indemnification, and compliance requirements. Example: See exactly what payment obligations exist and who bears liability for specific scenarios, then ask 'Given these contract terms, what are my key obligations and potential exposure?'",
+        "Analyze entire packets—tens of documents, hundreds of pages—covering 50+ critical dimensions like dues, reserves, insurance coverage, rental rules, pet restrictions, and maintenance responsibilities. Example: See exactly what’s included in monthly dues and who is responsible for roof repairs, then ask “Given what’s covered, what ongoing costs will I still be responsible for?”",
       color: "bg-blue-100 text-primary",
     },
     {
       icon: AlertTriangle,
-      title: "Legal Risk Assessment",
+      title: "Accelerated Due Diligence",
       description:
-        "Identify key risks, protections, and unfavorable terms in hours, not days—helping you make informed decisions faster and with confidence. Example: Instantly flag that a contract has unlimited liability provisions or missing force majeure clauses, then ask 'How do these liability terms compare to industry standards and what risks should I prioritize?'",
+        "Identify key risks, protections, and terms in hours, not days—helping you make informed decisions faster and with confidence. Example: Instantly flag that an HOA’s reserves are only 35% funded or that rental caps are already met, then ask “How soon might the HOA need to raise dues or levy a special assessment?”",
       color: "bg-red-100 text-red-600",
     },
     {
       icon: Workflow,
-      title: "Multi-Document Analysis",
+      title: "Cross-Document Insights",
       description:
-        "Spot connections, contradictions, and hidden clauses across multiple legal documents that could impact liability, obligations, or future costs. Example: Discover that a warranty limitation in the main contract conflicts with representations in an exhibit, then ask 'Are there any inconsistencies between these documents that could create legal exposure?'",
+        "Spot connections, contradictions, and hidden clauses across multiple documents that could impact ownership or future costs. Example: Discover that a short-term rental limit in the CC&Rs is reinforced by a recent meeting minute note, then ask “Are there any recent rule changes or board actions that affect my intended use of the property?”",
       color: "bg-emerald-100 text-emerald-600",
     },
     {
       icon: MessageCircleQuestion,
-      title: "Legal Q&A Intelligence",
+      title: " Interactive Guidance",
       description:
-        "Search, compare, and chat with your legal documents to get answers—and learn what questions you should be asking before signing or litigating. Example: Ask if you can terminate the agreement early and see all related clauses, then follow up with 'What are the financial and legal consequences of early termination under these terms?'",
+        "Search, compare, and chat with your documents to get answers—and learn what questions you should be asking before making a commitment. Example: Ask if you can install solar panels and see all related clauses, then follow up with “What other rules or requirements could indirectly affect installing solar panels?”",
       color: "bg-purple-100 text-purple-600",
     },
     {
       icon: Shield,
-      title: "Compliance & Regulatory Intelligence",
+      title: "Fact-Based Intelligence",
       description:
-        "Every insight is tied to its source and enhanced with updated regulations, legal precedents, and industry best practices—giving context beyond the documents themselves. Example: See how a non-compete clause aligns with state law restrictions, then ask 'Is this non-compete enforceable under current law, and what modifications would strengthen it?'",
+        "Every insight is tied to its source and enhanced with updated regulations, best-practice benchmarks, and market norms—giving context beyond the HOA packet itself. Example: See how a reserve funding level compares to state standards, then ask “How does this HOA’s reserve funding compare to industry norms, and what does that mean for my risk?”",
       color: "bg-orange-100 text-orange-600",
     },
     {
       icon: BarChart3,
-      title: "Decision-Ready Legal Insights",
+      title: "Actionable, Distilled Reporting",
       description:
-        "We analyze 50+ legal dimensions comprehensively, but deliver a distilled, decision-ready view that never omits critical details. Example: Get a one-page summary of the five most urgent legal issues, then ask 'Which three issues should I address before signing or filing?'",
+        "We analyze 50+ dimensions comprehensively, but deliver a distilled, decision-ready view that never omits critical details. Example: Get a one-page summary of the five most urgent issues, then ask “Which three should I address before making an offer?”",
       color: "bg-blue-100 text-primary",
     },
   ];
@@ -123,13 +123,13 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
-                      <Link href="/product/legal-document-insight" className="cursor-pointer">
-                        Legal Document Insight
+                      <Link href="/product/hoa-document-insight" className="cursor-pointer">
+                        HOA Document Insight
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/product/medical-record-review" className="cursor-pointer">
-                        Medical Record Review
+                      <Link href="/product/digital-autopilot" className="cursor-pointer">
+                        Digital Autopilot
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -142,24 +142,21 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
-                      <Link href="/solutions/contract-litigation" className="cursor-pointer">
-                        Contract & Litigation
+                      <Link href="/solutions/hoa-property-management" className="cursor-pointer">
+                        HOA & Property Mgmt
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/solutions/corporate-real-estate" className="cursor-pointer">
-                        Corporate & Real Estate
+                      <Link href="/solutions/hvac-electrician" className="cursor-pointer">
+                        Home Services
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <button 
-                  onClick={() => scrollToSection('pricing')}
-                  className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
-                >
+                <Link href="/pricing" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   Pricing
-                </button>
+                </Link>
 
                 <Link href="/contact" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
                   Contact
@@ -188,30 +185,27 @@ export default function Landing() {
                   <nav className="flex flex-col space-y-4 mt-8">
                     <div className="space-y-2">
                       <div className="text-slate-900 py-2 text-base font-semibold">Product</div>
-                      <Link href="/product/legal-document-insight" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Legal Document Insight
+                      <Link href="/product/hoa-document-insight" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                        HOA Document Insight
                       </Link>
-                      <Link href="/product/medical-record-review" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Medical Record Review
+                      <Link href="/product/digital-autopilot" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                        Digital Autopilot
                       </Link>
                     </div>
                     
                     <div className="space-y-2">
                       <div className="text-slate-900 py-2 text-base font-semibold">Solutions</div>
-                      <Link href="/solutions/contract-litigation" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Contract & Litigation
+                      <Link href="/solutions/hoa-property-management" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                        HOA & Property Mgmt
                       </Link>
-                      <Link href="/solutions/corporate-real-estate" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Corporate & Real Estate
+                      <Link href="/solutions/hvac-electrician" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                        Home Services
                       </Link>
                     </div>
 
-                    <button 
-                      onClick={() => scrollToSection('pricing')}
-                      className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium text-left"
-                    >
+                    <Link href="/pricing" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
                       Pricing
-                    </button>
+                    </Link>
 
                     <Link href="/contact" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
                       Contact
@@ -241,7 +235,7 @@ export default function Landing() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="text-slate-900 bg-transparent">Turn </span>
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Legal Documents
+                  Real Estate Disclosures
                 </span>
                 <br />
                 <span className="text-slate-900">into Clear Insights—Fast</span>
@@ -249,9 +243,10 @@ export default function Landing() {
 
               {/* Tagline */}
               <p className="mt-8 max-w-3xl mx-auto text-xl text-slate-600 leading-relaxed">
-                Altosera reads legal documents—contracts, litigation files, corporate agreements, medical records—and
-                highlights what matters: obligations, deadlines, risks, liabilities, and compliance requirements,
-                so attorneys and legal professionals can review with confidence.
+                Altosera reads Real Estate Disclosures such as HOA documents and
+                highlights what matters—monthly dues, reserves, coverage,
+                amenities, responsibilities, and rules—so buyers, sellers, and
+                agents can review with confidence.
               </p>
 
               {/* CTA Buttons */}
@@ -290,14 +285,14 @@ export default function Landing() {
                 Powered by Advanced AI
               </div>
               <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                Transform Legal
+                Transform Real Estate
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Document Analysis
                 </span>
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                Our intelligent platform transforms complex legal
+                Our intelligent platform transforms complex real estate
                 documents into actionable insights, saving you time and reducing
                 risk with precision AI analysis.
               </p>
@@ -343,6 +338,8 @@ export default function Landing() {
                 </div>
               ))}
             </div>
+
+            {/* Bottom decorative element */}
           </div>
         </section>
 
@@ -368,7 +365,7 @@ export default function Landing() {
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
                 Get started in minutes with our intelligent three-step process
-                that turns complex legal documents into clear insights
+                that turns complex documents into clear insights
               </p>
             </div>
 
@@ -379,15 +376,15 @@ export default function Landing() {
                   <span className="text-2xl font-bold text-white">1</span>
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                  Upload Legal Documents
+                  Upload Documents
                 </h3>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Drag-and-drop your legal documents or import them from
-                  your existing case management systems—fast and secure. We accept PDFs,
+                  Drag-and-drop your real-estate documents or import them from
+                  your existing systems—fast and secure. We accept PDFs,
                   Microsoft Word, Excel/CSV, and image formats (JPG/PNG/TIFF).
-                  Our pipeline handles complex legal layouts, tables, multi-document
-                  batches, and very large case files. Even decades-old scanned
-                  documents are processed with high-accuracy
+                  Our pipeline handles complex layouts, tables, multi-document
+                  batches, and very large files. Even decades-old scanned
+                  documents (&gt;50 years) are processed with high-accuracy
                   OCR and reconstructed structure—no special prep required.
                 </p>
               </div>
@@ -398,16 +395,16 @@ export default function Landing() {
                   <span className="text-2xl font-bold text-white">2</span>
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                  AI Legal Analysis
+                  AI Analysis
                 </h3>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Our advanced AI reads every page to identify the key obligations,
-                  restrictions, and legal requirements that matter. It classifies
-                  content across multiple legal dimensions, extracts critical dates,
-                  payment terms, and deadlines, and highlights inconsistencies or missing clauses.
-                  Potential compliance issues and legal risks are flagged automatically, and the
-                  findings are explained in clear, plain language so anyone can
-                  understand what's there—and what's not.
+                  Our advanced AI reads every page to identify the key rules,
+                  restrictions, and requirements that matter. It classifies
+                  content across multiple dimensions, extracts critical numbers
+                  and dates, and highlights inconsistencies or missing items.
+                  Potential compliance issues are flagged automatically, and the
+                  findings are explained in clear, plain English so anyone can
+                  understand what’s there—and what’s not.
                 </p>
               </div>
 
@@ -417,15 +414,15 @@ export default function Landing() {
                   <span className="text-2xl font-bold text-white">3</span>
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                  Actionable Legal Insights
+                  Actionable Insights
                 </h3>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Review comprehensive, easy-to-share legal reports, ask
+                  Review comprehensive, easy-to-share reports, ask
                   natural-language questions, and move forward with confidence.
-                  You receive actionable guidance on legal obligations, risks,
-                  what to follow up on, and which compliance requirements
-                  may be triggered—presented in plain language with clear next
-                  steps to drive legal decisions and strategy.
+                  You receive actionable guidance on what you can and cannot do
+                  with the property, what to follow up on, and which approvals
+                  may be required—presented in plain language with clear next
+                  steps to drive decisions.
                 </p>
               </div>
             </div>
@@ -436,10 +433,10 @@ export default function Landing() {
         <section className="py-20 bg-primary">
           <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-              Ready to Transform Your Legal Workflow?
+              Ready to Transform Your Document Workflow?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join hundreds of legal professionals who trust Altosera to
+              Join hundreds of real estate professionals who trust Altosera to
               streamline their document analysis and reduce risk.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -454,20 +451,21 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Pricing Section */}
+        {/* Trial Period Section */}
         <section id="pricing" className="py-20 bg-slate-50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
               Simple, transparent pricing
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-12">
-              Choose the perfect plan for your legal document analysis needs
+              Choose the perfect plan for your real estate document analysis
+              needs
             </p>
 
             {/* Trial Notice */}
             <div className="bg-yellow-200 rounded-3xl px-8 py-4 inline-block mb-8">
               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                Tade-Altosera is under trial period
+                Altosera is under trial period
               </h3>
             </div>
 
@@ -521,8 +519,61 @@ export default function Landing() {
                           <Zap className="w-7 h-7 text-white animate-pulse" />
                         </div>
 
+                        {/* Orbiting Discovery Elements */}
+                        <div
+                          className="absolute inset-0 animate-spin"
+                          style={{ animationDuration: "8s" }}
+                        >
+                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-yellow-300 rounded-full shadow-lg">
+                            <span className="text-xs">🔍</span>
+                          </div>
+                        </div>
+
+                        <div
+                          className="absolute inset-0 animate-spin"
+                          style={{
+                            animationDuration: "6s",
+                            animationDirection: "reverse",
+                          }}
+                        >
+                          <div className="absolute top-1/2 -right-1 transform -translate-y-1/2 w-3 h-3 bg-emerald-300 rounded-full shadow-lg">
+                            <span className="text-xs">📊</span>
+                          </div>
+                        </div>
+
+                        <div
+                          className="absolute inset-0 animate-spin"
+                          style={{ animationDuration: "10s" }}
+                        >
+                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-purple-300 rounded-full shadow-lg">
+                            <span className="text-xs">💎</span>
+                          </div>
+                        </div>
+
                         {/* Pulsing Discovery Waves */}
                         <div className="absolute inset-0 rounded-full bg-blue-300 animate-ping opacity-30"></div>
+                        <div
+                          className="absolute -inset-2 rounded-full bg-blue-200 animate-ping opacity-20"
+                          style={{ animationDelay: "0.5s" }}
+                        ></div>
+                        <div
+                          className="absolute -inset-4 rounded-full bg-indigo-200 animate-ping opacity-15"
+                          style={{ animationDelay: "1s" }}
+                        ></div>
+
+                        {/* Discovery Sparkles */}
+                        <div
+                          className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                        <div
+                          className="absolute -bottom-2 -right-2 w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.8s" }}
+                        ></div>
+                        <div
+                          className="absolute -top-2 -right-2 w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "1.2s" }}
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -545,11 +596,17 @@ export default function Landing() {
                             <div className="w-10 h-1 bg-green-200 rounded"></div>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                            <div
+                              className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.3s" }}
+                            ></div>
                             <div className="w-8 h-1 bg-yellow-200 rounded"></div>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                            <div
+                              className="w-2 h-2 bg-red-400 rounded-full animate-pulse"
+                              style={{ animationDelay: "0.6s" }}
+                            ></div>
                             <div className="w-6 h-1 bg-red-200 rounded"></div>
                           </div>
                         </div>
@@ -579,8 +636,24 @@ export default function Landing() {
 
                         <div className="space-y-1">
                           <div className="w-12 h-1 bg-purple-300 rounded animate-pulse"></div>
-                          <div className="w-10 h-1 bg-purple-200 rounded animate-pulse"></div>
-                          <div className="w-14 h-1 bg-purple-300 rounded animate-pulse"></div>
+                          <div
+                            className="w-10 h-1 bg-purple-200 rounded animate-pulse"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                          <div
+                            className="w-14 h-1 bg-purple-300 rounded animate-pulse"
+                            style={{ animationDelay: "0.4s" }}
+                          ></div>
+                        </div>
+
+                        {/* Insight Bubbles */}
+                        <div
+                          className="absolute -bottom-1 -left-1 w-4 h-4 bg-purple-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.5s" }}
+                        >
+                          <span className="text-xs text-white flex items-center justify-center h-full">
+                            💡
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -631,9 +704,39 @@ export default function Landing() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Floating Action Items */}
+                      <div
+                        className="absolute -bottom-1 -left-2 w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center animate-bounce shadow-lg"
+                        style={{ animationDelay: "1s" }}
+                      >
+                        <span className="text-xs text-white">📋</span>
+                      </div>
+
+                      <div
+                        className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce shadow-lg"
+                        style={{ animationDelay: "1.5s" }}
+                      >
+                        <span className="text-xs">⚡</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Ambient Floating Elements */}
+                <div className="absolute top-8 left-12 w-3 h-3 bg-blue-300 rounded-full animate-ping opacity-40"></div>
+                <div
+                  className="absolute bottom-16 right-16 w-4 h-4 bg-emerald-300 rounded-full animate-ping opacity-30"
+                  style={{ animationDelay: "2s" }}
+                ></div>
+                <div
+                  className="absolute top-12 right-20 w-2 h-2 bg-purple-300 rounded-full animate-ping opacity-50"
+                  style={{ animationDelay: "1s" }}
+                ></div>
+                <div
+                  className="absolute bottom-20 left-20 w-3 h-3 bg-yellow-300 rounded-full animate-ping opacity-35"
+                  style={{ animationDelay: "3s" }}
+                ></div>
 
                 {/* Background Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-purple-50/20 to-emerald-50/20 rounded-3xl -z-10"></div>
@@ -653,9 +756,10 @@ export default function Landing() {
           <div className="text-center">
             <p className="text-sm text-slate-500">
               © 2025 Altosera. All rights reserved. Altosera provides
-              AI-generated summaries and insights based on user-uploaded legal documents.
-              It does not offer legal advice. Users should consult
-              qualified legal professionals before making any legal decisions.
+              AI-generated summaries and insights based on publicly disclosed or
+              user-uploaded HOA documents. It does not offer legal, financial,
+              or real estate advice. Buyers, sellers, and agents should consult
+              qualified professionals before making any decisions.
             </p>
           </div>
         </div>
