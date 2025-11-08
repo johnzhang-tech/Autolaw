@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuthSimple as useAuth } from "@/hooks/useAuthSimple";
+import Landing from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import Home from "@/pages/home";
 import Create from "@/pages/create";
@@ -27,33 +28,34 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
   
-  // Check auth on mount
+  // Check auth on mount (only for authenticated routes)
   useEffect(() => {
-    checkAuth();
+    if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+      checkAuth();
+    }
   }, []);
-
-  // Show loading spinner during auth check
-  if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <Switch>
+      {/* Public routes - accessible without authentication */}
+      <Route path="/" component={Landing} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/billing" component={PaymentSimple} />
       
-      {!isAuthenticated ? (
-        // When not authenticated, redirect all routes to login
+      {/* Protected routes - require authentication */}
+      {isLoading ? (
+        <Route>
+          <div className="h-screen flex items-center justify-center bg-white">
+            <div className="text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </Route>
+      ) : !isAuthenticated ? (
         <Route component={LoginPage} />
       ) : (
         <>
-          <Route path="/" component={Home} />
           <Route path="/home" component={Home} />
           <Route path="/create" component={Create} />
           <Route path="/documents" component={Documents} />

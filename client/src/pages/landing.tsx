@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AuthModal } from "@/components/AuthModal";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import {
   FileText,
@@ -23,7 +22,6 @@ export default function Landing() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { login } = useAuth();
 
   // Scroll navigation handlers - completely isolated from router
   const scrollToSection = (sectionId: string) => {
