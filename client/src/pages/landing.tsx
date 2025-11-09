@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { AuthModal } from "@/components/AuthModal";
 import { Link } from "wouter";
 import {
@@ -121,13 +126,27 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
-                      <Link href="/product/legal-document-insight" className="cursor-pointer">
-                        Legal Document Insight
+                      <Link
+                        href="/product/medichron-agent"
+                        className="cursor-pointer"
+                      >
+                        MediChron Agent
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/product/medical-record-review" className="cursor-pointer">
-                        Medical Record Review
+                      <Link
+                        href="/product/knowledge-agent"
+                        className="cursor-pointer"
+                      >
+                        Knowledge Agent
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/product/draft-agent"
+                        className="cursor-pointer"
+                      >
+                        Draft Agent
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -140,26 +159,35 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem asChild>
-                      <Link href="/solutions/contract-litigation" className="cursor-pointer">
+                      <Link
+                        href="/solutions/contract-litigation"
+                        className="cursor-pointer"
+                      >
                         Contract & Litigation
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/solutions/corporate-real-estate" className="cursor-pointer">
+                      <Link
+                        href="/solutions/corporate-real-estate"
+                        className="cursor-pointer"
+                      >
                         Corporate & Real Estate
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <button 
-                  onClick={() => scrollToSection('pricing')}
+                <button
+                  onClick={() => scrollToSection("pricing")}
                   className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
                 >
                   Pricing
                 </button>
 
-                <Link href="/contact" className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-slate-600 hover:text-slate-900 px-3 py-2 text-sm font-medium transition-colors"
+                >
                   Contact
                 </Link>
               </div>
@@ -185,33 +213,52 @@ export default function Landing() {
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                   <nav className="flex flex-col space-y-4 mt-8">
                     <div className="space-y-2">
-                      <div className="text-slate-900 py-2 text-base font-semibold">Product</div>
-                      <Link href="/product/legal-document-insight" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Legal Document Insight
+                      <div className="text-slate-900 py-2 text-base font-semibold">
+                        Product
+                      </div>
+                      <Link
+                        href="/product/MediChron-agent"
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      >
+                        MediChron Agent
                       </Link>
-                      <Link href="/product/medical-record-review" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
-                        Medical Record Review
+                      <Link
+                        href="/product/Knowledge-agent"
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      >
+                        Knowledge Agent
                       </Link>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      <div className="text-slate-900 py-2 text-base font-semibold">Solutions</div>
-                      <Link href="/solutions/contract-litigation" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                      <div className="text-slate-900 py-2 text-base font-semibold">
+                        Solutions
+                      </div>
+                      <Link
+                        href="/solutions/contract-litigation"
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      >
                         Contract & Litigation
                       </Link>
-                      <Link href="/solutions/corporate-real-estate" className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4">
+                      <Link
+                        href="/solutions/corporate-real-estate"
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      >
                         Corporate & Real Estate
                       </Link>
                     </div>
 
-                    <button 
-                      onClick={() => scrollToSection('pricing')}
+                    <button
+                      onClick={() => scrollToSection("pricing")}
                       className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium text-left"
                     >
                       Pricing
                     </button>
 
-                    <Link href="/contact" className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium">
+                    <Link
+                      href="/contact"
+                      className="text-slate-600 hover:text-slate-900 py-2 text-base font-medium"
+                    >
                       Contact
                     </Link>
 
@@ -247,9 +294,11 @@ export default function Landing() {
 
               {/* Tagline */}
               <p className="mt-8 max-w-3xl mx-auto text-xl text-slate-600 leading-relaxed">
-                Altosera reads legal documents—contracts, litigation files, corporate agreements, medical records—and
-                highlights what matters: obligations, deadlines, risks, liabilities, and compliance requirements,
-                so attorneys and legal professionals can review with confidence.
+                Altosera reads legal documents—contracts, litigation files,
+                corporate agreements, medical records—and highlights what
+                matters: obligations, deadlines, risks, liabilities, and
+                compliance requirements, so attorneys and legal professionals
+                can review with confidence.
               </p>
 
               {/* CTA Buttons */}
@@ -295,9 +344,9 @@ export default function Landing() {
                 </span>
               </h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                Our intelligent platform transforms complex legal
-                documents into actionable insights, saving you time and reducing
-                risk with precision AI analysis.
+                Our intelligent platform transforms complex legal documents into
+                actionable insights, saving you time and reducing risk with
+                precision AI analysis.
               </p>
             </div>
 
@@ -321,7 +370,7 @@ export default function Landing() {
                     </h3>
                     <div className="text-base text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
                       {(() => {
-                        const parts = feature.description.split(' Example: ');
+                        const parts = feature.description.split(" Example: ");
                         return (
                           <>
                             <span>{parts[0]}</span>
@@ -380,13 +429,14 @@ export default function Landing() {
                   Upload Legal Documents
                 </h3>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Drag-and-drop your legal documents or import them from
-                  your existing case management systems—fast and secure. We accept PDFs,
-                  Microsoft Word, Excel/CSV, and image formats (JPG/PNG/TIFF).
-                  Our pipeline handles complex legal layouts, tables, multi-document
-                  batches, and very large case files. Even decades-old scanned
-                  documents are processed with high-accuracy
-                  OCR and reconstructed structure—no special prep required.
+                  Drag-and-drop your legal documents or import them from your
+                  existing case management systems—fast and secure. We accept
+                  PDFs, Microsoft Word, Excel/CSV, and image formats
+                  (JPG/PNG/TIFF). Our pipeline handles complex legal layouts,
+                  tables, multi-document batches, and very large case files.
+                  Even decades-old scanned documents are processed with
+                  high-accuracy OCR and reconstructed structure—no special prep
+                  required.
                 </p>
               </div>
 
@@ -399,13 +449,14 @@ export default function Landing() {
                   AI Legal Analysis
                 </h3>
                 <p className="text-base text-slate-600 leading-relaxed">
-                  Our advanced AI reads every page to identify the key obligations,
-                  restrictions, and legal requirements that matter. It classifies
-                  content across multiple legal dimensions, extracts critical dates,
-                  payment terms, and deadlines, and highlights inconsistencies or missing clauses.
-                  Potential compliance issues and legal risks are flagged automatically, and the
-                  findings are explained in clear, plain language so anyone can
-                  understand what's there—and what's not.
+                  Our advanced AI reads every page to identify the key
+                  obligations, restrictions, and legal requirements that matter.
+                  It classifies content across multiple legal dimensions,
+                  extracts critical dates, payment terms, and deadlines, and
+                  highlights inconsistencies or missing clauses. Potential
+                  compliance issues and legal risks are flagged automatically,
+                  and the findings are explained in clear, plain language so
+                  anyone can understand what's there—and what's not.
                 </p>
               </div>
 
@@ -421,9 +472,9 @@ export default function Landing() {
                   Review comprehensive, easy-to-share legal reports, ask
                   natural-language questions, and move forward with confidence.
                   You receive actionable guidance on legal obligations, risks,
-                  what to follow up on, and which compliance requirements
-                  may be triggered—presented in plain language with clear next
-                  steps to drive legal decisions and strategy.
+                  what to follow up on, and which compliance requirements may be
+                  triggered—presented in plain language with clear next steps to
+                  drive legal decisions and strategy.
                 </p>
               </div>
             </div>
@@ -651,8 +702,8 @@ export default function Landing() {
           <div className="text-center">
             <p className="text-sm text-slate-500">
               © 2025 Altosera. All rights reserved. Altosera provides
-              AI-generated summaries and insights based on user-uploaded legal documents.
-              It does not offer legal advice. Users should consult
+              AI-generated summaries and insights based on user-uploaded legal
+              documents. It does not offer legal advice. Users should consult
               qualified legal professionals before making any legal decisions.
             </p>
           </div>
