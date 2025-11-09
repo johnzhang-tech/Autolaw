@@ -19,7 +19,7 @@ import {
   Users,
   Code,
 } from "lucide-react";
-import altoseraLogo from "@assets/Altosera_Two_Toned_Logo (1)_1753162846233.png";
+import autolawLogo from "@assets/Altosera_Two_Toned_Logo (1)_1753162846233.png";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -109,8 +109,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
         {!collapsed && (
           <div className="flex items-center space-x-2">
             <img 
-              src={altoseraLogo} 
-              alt="Altosera Logo" 
+              src={autolawLogo} 
+              alt="AutoLaw Logo" 
               className="h-8 w-auto object-contain" 
             />
           </div>
@@ -118,8 +118,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
         {collapsed && (
           <div className="flex items-center justify-center w-full">
             <img 
-              src={altoseraLogo} 
-              alt="Altosera Logo" 
+              src={autolawLogo} 
+              alt="AutoLaw Logo" 
               className="h-6 w-auto object-contain" 
             />
           </div>

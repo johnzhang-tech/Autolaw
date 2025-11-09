@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tade-Altosera</title>
+    <title>AutoLaw</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -56,13 +56,13 @@
     <div id="root">
       <div class="loading">
         <div class="spinner"></div>
-        <h2>Loading Tade-Altosera...</h2>
+        <h2>Loading AutoLaw...</h2>
         <p>Initializing React application...</p>
       </div>
     </div>
     
     <div id="error-fallback" class="error-fallback">
-      <h1>Tade-Altosera</h1>
+      <h1>AutoLaw</h1>
       <p>The React app couldn't load due to development environment conflicts.</p>
       <p>Your server is working perfectly - this is a known Vite plugin issue.</p>
       <a href="/test.html" class="button">View Working Test Page</a>
@@ -72,14 +72,14 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <script>
-      console.log("Tade-Altosera HTML loaded successfully");
+      console.log("AutoLaw HTML loaded successfully");
       
       // Show fallback if React doesn't load within 8 seconds
       setTimeout(() => {
         const root = document.getElementById('root');
         const fallback = document.getElementById('error-fallback');
         
-        if (root && root.innerHTML.includes('Loading Tade-Altosera')) {
+        if (root && root.innerHTML.includes('Loading AutoLaw')) {
           console.warn("React didn't load - showing fallback interface");
           root.style.display = 'none';
           fallback.style.display = 'block';
@@ -89,7 +89,7 @@
       // Monitor for React success
       const checkReactLoaded = () => {
         const root = document.getElementById('root');
-        if (root && !root.innerHTML.includes('Loading Tade-Altosera')) {
+        if (root && !root.innerHTML.includes('Loading AutoLaw')) {
           console.log("React loaded successfully!");
           return true;
         }

@@ -1,8 +1,8 @@
-# Tade-Altosera - Intelligent Real Estate Document Analysis
+# AutoLaw - Intelligent Legal Document Analysis
 
 ## Overview
 
-Tade-Altosera is a full-stack web application designed for real estate professionals to analyze documents using AI-powered tools. The application provides intelligent document review, automated analysis, and Q&A capabilities to streamline real estate workflows.
+AutoLaw is a full-stack web application designed for legal professionals to analyze documents using AI-powered tools. The application provides intelligent document review, automated analysis, and Q&A capabilities to streamline legal workflows.
 
 **Database Separation**: July 22, 2025 - Completely separated from original DocuAI database. Fresh PostgreSQL database with zero data mixing.
 
@@ -369,14 +369,14 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Zero Breaking Changes**: Fixed UI upload without disrupting existing API or N8N functionality
   - **Complete Solution**: Users can upload via web interface, external systems via API, and N8N workflows with preserved filenames
 - July 22, 2025. **COMPLETE DATABASE AND BRANDING SEPARATION FROM DOCUAI COMPLETED**
-  - **Database Separation**: Created completely separate PostgreSQL database for Tade-Altosera with zero data mixing from original DocuAI
-  - **Object Storage Migration**: Changed bucket name from "HomeDocsInterfaces" to "TadeAltosera" for complete storage separation
-  - **Clean Database State**: Fresh database with 1 admin user (admin@tade-altosera.com), 0 transactions, 0 documents
+  - **Database Separation**: Created completely separate PostgreSQL database for AutoLaw with zero data mixing from original DocuAI
+  - **Object Storage Migration**: Changed bucket name from "HomeDocsInterfaces" to "AutoLaw" for complete storage separation
+  - **Clean Database State**: Fresh database with 1 admin user (admin@autolaw.com), 0 transactions, 0 documents
   - **Sidebar Navigation Fixes**: Resolved JavaScript routing error preventing full dashboard display with sidebar navigation
-  - **Complete Branding Update**: Replaced DocuAI logo with Altosera two-toned logo throughout application
+  - **Complete Branding Update**: Replaced DocuAI logo with AutoLaw logo throughout application
   - **Payment Section Removal**: Removed payment/billing navigation from sidebar as requested by user
-  - **HTML Title Update**: Updated browser title from "DocuAI" to "Tade-Altosera" for complete rebranding
-  - **Admin Credentials**: admin@tade-altosera.com / TadeAltosera2025! for accessing clean system
+  - **HTML Title Update**: Updated browser title from "DocuAI" to "AutoLaw" for complete rebranding
+  - **Admin Credentials**: admin@autolaw.com / AutoLaw2025! for accessing clean system
   - **Authentication Working**: JWT token authentication fully functional with new database
   - **Sidebar Navigation Restored**: Full sidebar with Create, Home, Documents, Q&A, Settings sections
   - **Dashboard Removal**: Removed Dashboard section from sidebar navigation per user request
@@ -389,7 +389,15 @@ Tade-Altosera is a full-stack web application designed for real estate professio
   - **Backend Service Updates**: Updated queue.ts, routes-simple.ts, and openai.ts with legal terminology
   - **Documentation Updates**: Complete replit.md update reflecting legal platform focus and expertise
   - **TypeScript Error Resolution**: Fixed all type safety issues in queue processing and document handling
-  - **Platform Identity**: Tade-Altosera now fully positioned as AI-powered legal document analysis platform
+  - **Platform Identity**: AutoLaw now fully positioned as AI-powered legal document analysis platform
+- November 9, 2025. **COMPLETE REBRANDING TO AUTOLAW**
+  - **Brand Name Change**: Renamed application from "Tade-Altosera" to "AutoLaw" across entire codebase
+  - **Landing Page Update**: Beautiful legal-focused landing page now displays "AutoLaw" branding
+  - **HTML Title**: Browser title updated from "Tade-Altosera" to "AutoLaw"
+  - **Sidebar Logo**: Updated logo references from Altosera to AutoLaw throughout interface
+  - **Documentation**: Complete replit.md documentation updated with new AutoLaw branding
+  - **Admin Credentials**: Updated admin email to admin@autolaw.com / AutoLaw2025!
+  - **Footer**: Copyright and legal disclaimers now reference AutoLaw brand
 - July 22, 2025. **RAGFLOW AGENTS INTEGRATION: DUAL IFRAME EMBEDDED AGENT SYSTEM**
   - **Two-Tab Agent Interface**: Created dedicated /agents page with tabbed navigation for multiple Ragflow agents
   - **Contract Analysis Agent**: Specialized iframe embed for contract terms, obligations, and legal risk analysis

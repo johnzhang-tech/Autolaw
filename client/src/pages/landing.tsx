@@ -105,8 +105,8 @@ export default function Landing() {
             <div className="flex items-center">
               <div className="flex-shrink-0 flex items-center">
                 <img
-                  src="/altosera-logo.png"
-                  alt="Altosera"
+                  src="/autolaw-logo.png"
+                  alt="AutoLaw"
                   className="h-10 w-auto"
                   onError={(e) => {
                     console.error("Logo failed to load on landing page");
@@ -294,7 +294,7 @@ export default function Landing() {
 
               {/* Tagline */}
               <p className="mt-8 max-w-3xl mx-auto text-xl text-slate-600 leading-relaxed">
-                Altosera reads legal documents—contracts, litigation files,
+                AutoLaw reads legal documents—contracts, litigation files,
                 corporate agreements, medical records—and highlights what
                 matters: obligations, deadlines, risks, liabilities, and
                 compliance requirements, so attorneys and legal professionals
@@ -488,7 +488,7 @@ export default function Landing() {
               Ready to Transform Your Legal Workflow?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join hundreds of legal professionals who trust Altosera to
+              Join hundreds of legal professionals who trust AutoLaw to
               streamline their document analysis and reduce risk.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -516,7 +516,7 @@ export default function Landing() {
             {/* Trial Notice */}
             <div className="bg-yellow-200 rounded-3xl px-8 py-4 inline-block mb-8">
               <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                Tade-Altosera is under trial period
+                AutoLaw is under trial period
               </h3>
             </div>
 
@@ -701,7 +701,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm text-slate-500">
-              © 2025 Altosera. All rights reserved. Altosera provides
+              © 2025 AutoLaw. All rights reserved. AutoLaw provides
               AI-generated summaries and insights based on user-uploaded legal
               documents. It does not offer legal advice. Users should consult
               qualified legal professionals before making any legal decisions.
