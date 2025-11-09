@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -28,31 +28,36 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading, checkAuth } = useAuth();
   
-  // Check auth on mount (only for authenticated routes)
+  // Check auth on mount
   useEffect(() => {
-    if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
-      checkAuth();
-    }
+    checkAuth();
   }, []);
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Switch>
-      {/* Public routes - accessible without authentication */}
-      <Route path="/" component={Landing} />
+      {/* Root route - redirect based on authentication */}
+      <Route path="/">
+        {isAuthenticated ? <Redirect to="/home" /> : <Landing />}
+      </Route>
+      
+      {/* Public routes */}
       <Route path="/login" component={LoginPage} />
       <Route path="/billing" component={PaymentSimple} />
       
       {/* Protected routes - require authentication */}
-      {isLoading ? (
-        <Route>
-          <div className="h-screen flex items-center justify-center bg-white">
-            <div className="text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading...</p>
-            </div>
-          </div>
-        </Route>
-      ) : !isAuthenticated ? (
+      {!isAuthenticated ? (
         <Route component={LoginPage} />
       ) : (
         <>
