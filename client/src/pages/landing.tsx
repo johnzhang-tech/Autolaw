@@ -153,21 +153,8 @@ export default function Landing() {
                     Solutions <ChevronDown className="ml-1 h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/solutions/contract-litigation"
-                        className="cursor-pointer"
-                      >
-                        Contract & Litigation
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/solutions/corporate-real-estate"
-                        className="cursor-pointer"
-                      >
-                        Corporate & Real Estate
-                      </Link>
+                    <DropdownMenuItem className="cursor-default">
+                      One Agentic foundation for Personal Injury and Patent Law
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
