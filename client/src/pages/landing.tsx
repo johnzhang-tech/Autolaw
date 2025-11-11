@@ -358,7 +358,7 @@ export default function Landing() {
                   Knowledge Agent
                 </span>
                 <br />
-                <span className="text-slate-900">— Your firm's private, case-trained ChatGPT.</span>
+                <span className="text-slate-900"> Your firm's private, case-trained ChatGPT </span>
               </h2>
 
               {/* Knowledge Agent Description */}
