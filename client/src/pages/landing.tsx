@@ -32,11 +32,10 @@ export default function Landing() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // For the contact/CTA section, scroll to center, otherwise scroll to start
-      const scrollPosition = sectionId === "contact" ? "center" : "start";
+      // Scroll to center of section for better viewing
       element.scrollIntoView({
         behavior: "smooth",
-        block: scrollPosition,
+        block: "center",
       });
     }
     setIsMobileMenuOpen(false);
