@@ -32,10 +32,16 @@ export default function Landing() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // Calculate position to center the section in viewport
+      // Account for sticky header (h-16 = 64px)
+      const headerOffset = 64;
+      
+      // Calculate position to center the section in viewport, accounting for header
       const elementRect = element.getBoundingClientRect();
       const absoluteElementTop = elementRect.top + window.pageYOffset;
-      const middle = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
+      
+      // Position element in center of visible viewport (below header)
+      const visibleViewportHeight = window.innerHeight - headerOffset;
+      const middle = absoluteElementTop - headerOffset - (visibleViewportHeight / 2) + (elementRect.height / 2);
       
       window.scrollTo({
         top: middle,
