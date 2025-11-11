@@ -138,19 +138,28 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
-                      onClick={() => scrollToSection("hero")}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        scrollToSection("hero");
+                      }}
                       className="cursor-pointer"
                     >
                       MediChron Agent
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => scrollToSection("features")}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        scrollToSection("features");
+                      }}
                       className="cursor-pointer"
                     >
                       Knowledge Agent
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => scrollToSection("draft-agent")}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        scrollToSection("draft-agent");
+                      }}
                       className="cursor-pointer"
                     >
                       Draft Agent
@@ -165,7 +174,10 @@ export default function Landing() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
-                      onClick={() => scrollToSection("solutions")}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        scrollToSection("solutions");
+                      }}
                       className="cursor-pointer"
                     >
                       One Agentic foundation for Personal Injury and Patent Law
