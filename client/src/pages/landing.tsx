@@ -419,7 +419,7 @@ export default function Landing() {
                   Draft Agent
                 </span>
                 <br />
-                <span className="text-slate-900">– AI drafting assistant for PI & patent legal documents</span>
+                <span className="text-slate-900">AI drafting assistant for PI & patent legal documents</span>
               </h2>
 
               {/* Draft Agent Description */}
