@@ -128,16 +128,21 @@ export default function LoginPage() {
       {/* Right Panel - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-12 bg-white">
         <div className="w-full max-w-md space-y-8">
-          {/* Altosera Brand Logo */}
+          {/* AutoLaw Brand Logo */}
           <div className="text-center">
-            <img 
-              src={altoseraBrandPath}
-              alt="Altosera"
-              className="h-8 mx-auto mb-6"
-            />
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <img 
+                src="/autolaw-logo.png"
+                alt="AutoLaw"
+                className="h-12 w-12 object-contain"
+              />
+              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                AutoLaw
+              </span>
+            </div>
             <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Access your legal document platform
+              Access your legal automation platform
             </p>
           </div>
 
