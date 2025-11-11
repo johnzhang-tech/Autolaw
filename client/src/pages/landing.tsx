@@ -130,7 +130,7 @@ export default function Landing() {
                         href="/product/medichron-agent"
                         className="cursor-pointer"
                       >
-                        MediChron Agent — Automatic medical-chronology & gap-flagging for PI cases
+                        MediChron Agent
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -284,12 +284,11 @@ export default function Landing() {
             <div className="text-center">
               {/* Main heading */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="text-slate-900 bg-transparent">Turn </span>
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Legal Documents
+                  MediChron Agent
                 </span>
                 <br />
-                <span className="text-slate-900">into Clear Insights—Fast</span>
+                <span className="text-slate-900">Precise Medical Timeline & Gap Detection for PI Claims</span>
               </h1>
 
               {/* MediChron Agent Description */}
