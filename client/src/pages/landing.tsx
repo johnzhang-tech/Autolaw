@@ -345,70 +345,66 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Knowledge Agent Section */}
         <section
           id="features"
           className="py-24 bg-gradient-to-b from-white to-slate-50"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
-                <Zap className="w-4 h-4 mr-2" />
-                Powered by Advanced AI
-              </div>
+            <div className="text-center">
+              {/* Knowledge Agent heading */}
               <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                Transform Legal
-                <br />
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Document Analysis
+                  Knowledge Agent
                 </span>
+                <br />
+                <span className="text-slate-900">— Your firm's private, case-trained ChatGPT.</span>
               </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                Our intelligent platform transforms complex legal documents into
-                actionable insights, saving you time and reducing risk with
-                precision AI analysis.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="group bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 hover:border-blue-200 relative overflow-hidden"
-                >
-                  {/* Background gradient on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              {/* Knowledge Agent Description */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <p className="text-xl text-slate-700 leading-relaxed mb-6">
+                  Knowledge Agent learns from your firm's past wins, losses, filings, and internal documents, then answers questions with grounded, citation-backed insights. Attorneys can ask anything—case patterns, strategy examples, prior arguments—and get instant, firm-specific guidance that reflects real outcomes, not generic legal text.
+                </p>
 
-                  <div className="relative z-10">
-                    <div
-                      className={`w-16 h-16 ${feature.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                    >
-                      <feature.icon className="w-7 h-7" />
+                <div className="text-left bg-slate-50 rounded-2xl p-8 mt-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6">Key differentiators:</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Powered by your own cases.</span> Trains on your filings, motions, demand letters, and outcomes—not public data.
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4 group-hover:text-blue-700 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <div className="text-base text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
-                      {(() => {
-                        const parts = feature.description.split(" Example: ");
-                        return (
-                          <>
-                            <span>{parts[0]}</span>
-                            {parts[1] && (
-                              <span className="block mt-3 text-sm italic text-slate-500">
-                                <em>Example: {parts[1]}</em>
-                              </span>
-                            )}
-                          </>
-                        );
-                      })()}
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Grounded and verifiable.</span> Every answer includes citations back to your documents.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Surface what works (and what failed).</span> Reveals patterns from successful strategies and flags approaches that underperformed.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Instant institutional memory.</span> New attorneys gain years of internal knowledge from day one.
+                        </p>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Decorative corner element */}
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-bl-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
