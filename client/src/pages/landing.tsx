@@ -130,7 +130,7 @@ export default function Landing() {
                         href="/product/medichron-agent"
                         className="cursor-pointer"
                       >
-                        MediChron Agent
+                        MediChron Agent — Automatic medical-chronology & gap-flagging for PI cases
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -292,14 +292,42 @@ export default function Landing() {
                 <span className="text-slate-900">into Clear Insights—Fast</span>
               </h1>
 
-              {/* Tagline */}
-              <p className="mt-8 max-w-3xl mx-auto text-xl text-slate-600 leading-relaxed">
-                AutoLaw reads legal documents—contracts, litigation files,
-                corporate agreements, medical records—and highlights what
-                matters: obligations, deadlines, risks, liabilities, and
-                compliance requirements, so attorneys and legal professionals
-                can review with confidence.
-              </p>
+              {/* MediChron Agent Description */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <p className="text-xl text-slate-700 leading-relaxed mb-6">
+                  Upload hundreds of pages of medical records and bills and MediChron Agent instantly ingests, sequences, and summarizes them in clean chronological order. It flags treatment gaps, inconsistent codes, and missing documents so your team can act early. Manual review that normally takes tens of hours—and is prone to error—now takes under a minute.
+                </p>
+
+                <div className="text-left bg-slate-50 rounded-2xl p-8 mt-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6">Key differentiators:</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">End-to-end agentic automation.</span> Ingests large record sets, structures them, and surfaces insights without manual sorting.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Clear timeline + actionable flags.</span> Highlights gaps, inconsistencies, and high-value procedures.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Scales your team instantly.</span> Cuts hours of error-prone review down to a minute, freeing attorneys for strategy instead of paperwork.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* CTA Buttons */}
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
