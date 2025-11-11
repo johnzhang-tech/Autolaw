@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthModal } from "@/components/AuthModal";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import {
   FileText,
   AlertTriangle,
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -52,8 +53,7 @@ export default function Landing() {
   };
 
   const openSignInModal = () => {
-    setAuthMode("signin");
-    setIsAuthModalOpen(true);
+    setLocation("/login");
   };
 
   const openSignUpModal = () => {
