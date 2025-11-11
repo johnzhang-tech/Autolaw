@@ -409,6 +409,67 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Draft Agent Section */}
+        <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              {/* Draft Agent heading */}
+              <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Draft Agent
+                </span>
+                <br />
+                <span className="text-slate-900">– AI drafting assistant for PI & patent legal documents</span>
+              </h2>
+
+              {/* Draft Agent Description */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <p className="text-xl text-slate-700 leading-relaxed mb-6">
+                  Draft Agent uses your firm's case facts, past templates and style to generate ready-to-review documents—whether a demand letter, complaint or patent specification—for both personal-injury and patent law firms.
+                </p>
+
+                <div className="text-left bg-slate-50 rounded-2xl p-8 mt-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6">Key differentiators:</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Large-context intelligence.</span> Pulls facts from your case file and your firm's knowledge base so drafts reflect full context—not just generic content.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Firm-personalized tone & structure.</span> Learns your firm's voice, layout and document structure so outputs feel like you wrote them.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">PI & patent capable.</span> Handles demand letters, complaints, responses and discovery in personal-injury, and patent drafts, specifications and responses in patent law.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-4"></div>
+                      <div>
+                        <p className="text-lg text-slate-700">
+                          <span className="font-semibold">Citation-backed accuracy.</span> Every fact is traceable to its source in your case file, reducing rework and risk.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* How It Works Section */}
         <section
           id="how-it-works"
