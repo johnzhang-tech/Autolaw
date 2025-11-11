@@ -331,14 +331,7 @@ export default function Landing() {
 
               {/* CTA Buttons */}
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button
-                  size="lg"
-                  onClick={openSignUpModal}
-                  className="inline-flex items-center px-10 py-4 text-lg font-semibold rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                >
-                  <Play className="w-5 h-5 mr-3" />
-                  Get Started Free
-                </Button>
+
               </div>
 
               {/* Trust indicators */}
