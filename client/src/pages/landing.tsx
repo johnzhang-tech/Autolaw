@@ -125,29 +125,23 @@ export default function Landing() {
                     Product <ChevronDown className="ml-1 h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/product/medichron-agent"
-                        className="cursor-pointer"
-                      >
-                        MediChron Agent
-                      </Link>
+                    <DropdownMenuItem
+                      onClick={() => scrollToSection("hero")}
+                      className="cursor-pointer"
+                    >
+                      MediChron Agent
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/product/knowledge-agent"
-                        className="cursor-pointer"
-                      >
-                        Knowledge Agent
-                      </Link>
+                    <DropdownMenuItem
+                      onClick={() => scrollToSection("features")}
+                      className="cursor-pointer"
+                    >
+                      Knowledge Agent
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/product/draft-agent"
-                        className="cursor-pointer"
-                      >
-                        Draft Agent
-                      </Link>
+                    <DropdownMenuItem
+                      onClick={() => scrollToSection("draft-agent")}
+                      className="cursor-pointer"
+                    >
+                      Draft Agent
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -216,18 +210,24 @@ export default function Landing() {
                       <div className="text-slate-900 py-2 text-base font-semibold">
                         Product
                       </div>
-                      <Link
-                        href="/product/MediChron-agent"
-                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      <button
+                        onClick={() => scrollToSection("hero")}
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4 text-left w-full"
                       >
                         MediChron Agent
-                      </Link>
-                      <Link
-                        href="/product/Knowledge-agent"
-                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      </button>
+                      <button
+                        onClick={() => scrollToSection("features")}
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4 text-left w-full"
                       >
                         Knowledge Agent
-                      </Link>
+                      </button>
+                      <button
+                        onClick={() => scrollToSection("draft-agent")}
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4 text-left w-full"
+                      >
+                        Draft Agent
+                      </button>
                     </div>
 
                     <div className="space-y-2">
@@ -278,8 +278,8 @@ export default function Landing() {
       </header>
 
       <main className="overflow-hidden">
-        {/* Hero Section */}
-        <section className="relative pt-16 pb-12 sm:pt-20 sm:pb-16 lg:pt-24 lg:pb-20 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        {/* Hero Section - MediChron Agent */}
+        <section id="hero" className="relative pt-16 pb-12 sm:pt-20 sm:pb-16 lg:pt-24 lg:pb-20 bg-gradient-to-br from-slate-50 via-white to-blue-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               {/* Main heading */}
@@ -410,7 +410,7 @@ export default function Landing() {
         </section>
 
         {/* Draft Agent Section */}
-        <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
+        <section id="draft-agent" className="py-24 bg-gradient-to-b from-slate-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               {/* Draft Agent heading */}
