@@ -608,8 +608,7 @@ export default function Landing() {
               Ready to Transform Your Legal Workflow?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join hundreds of legal professionals who trust AutoLaw to
-              streamline their document analysis and reduce risk.
+              Join other legal professionals using AutoLaw’s agentic AI agents to achieve faster, more accurate document analysis with lower operational risk.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
