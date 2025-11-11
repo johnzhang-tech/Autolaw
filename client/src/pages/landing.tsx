@@ -153,7 +153,10 @@ export default function Landing() {
                     Solutions <ChevronDown className="ml-1 h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem className="cursor-default">
+                    <DropdownMenuItem
+                      onClick={() => scrollToSection("solutions")}
+                      className="cursor-pointer"
+                    >
                       One Agentic foundation for Personal Injury and Patent Law
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -222,18 +225,12 @@ export default function Landing() {
                       <div className="text-slate-900 py-2 text-base font-semibold">
                         Solutions
                       </div>
-                      <Link
-                        href="/solutions/contract-litigation"
-                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
+                      <button
+                        onClick={() => scrollToSection("solutions")}
+                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4 text-left w-full"
                       >
-                        Contract & Litigation
-                      </Link>
-                      <Link
-                        href="/solutions/corporate-real-estate"
-                        className="text-slate-600 hover:text-slate-900 py-1 text-sm block pl-4"
-                      >
-                        Corporate & Real Estate
-                      </Link>
+                        One Agentic foundation for Personal Injury and Patent Law
+                      </button>
                     </div>
 
                     <button
@@ -453,6 +450,41 @@ export default function Landing() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Solutions Section */}
+        <section
+          id="solutions"
+          className="py-24 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden"
+        >
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-20 right-10 w-32 h-32 bg-cyan-200 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-20 left-10 w-40 h-40 bg-blue-200 rounded-full blur-2xl"></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-100 to-blue-100 text-blue-700 rounded-full text-sm font-medium mb-6">
+                <Shield className="w-4 h-4 mr-2" />
+                Unified Agentic Foundation
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+                <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                  One Agentic Foundation
+                </span>
+                <br />
+                <span className="text-slate-900">for Personal Injury and Patent Law</span>
+              </h2>
+
+              {/* Solutions Description */}
+              <div className="mt-8 max-w-4xl mx-auto">
+                <p className="text-xl text-slate-700 leading-relaxed">
+                  AutoLaw.ai provides a unified agentic foundation for personal-injury and patent law, delivering end-to-end automation across document review, drafting, and knowledge retrieval. Our agents handle the full lifecycle of case work—from ingesting large medical or technical records, to generating chronologies and gap detection, to drafting demand letters, complaints, or patent specifications, all grounded in your firm's own documents and prior outcomes. By combining large-context analysis, verifiable citations, and firm-specific tone and structure, the system eliminates hours of repetitive work, improves accuracy, and preserves institutional knowledge. Firms get faster turnaround, higher consistency, and automation that actually understands the domain, not generic legal text.
+                </p>
               </div>
             </div>
           </div>
