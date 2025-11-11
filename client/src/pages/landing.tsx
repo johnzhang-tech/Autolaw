@@ -32,10 +32,14 @@ export default function Landing() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // Scroll to center of section for better viewing
-      element.scrollIntoView({
+      // Calculate position to center the section in viewport
+      const elementRect = element.getBoundingClientRect();
+      const absoluteElementTop = elementRect.top + window.pageYOffset;
+      const middle = absoluteElementTop - (window.innerHeight / 2) + (elementRect.height / 2);
+      
+      window.scrollTo({
+        top: middle,
         behavior: "smooth",
-        block: "center",
       });
     }
     setIsMobileMenuOpen(false);
