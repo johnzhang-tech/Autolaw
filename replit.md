@@ -223,7 +223,7 @@ AutoLaw is a full-stack web application designed for legal professionals to anal
   - **Stable User Experience**: Application now loads landing page correctly instead of infinite loading spinner
   - **Error Boundary Protection**: Added proper error handling for authentication failures without cascading effects
   - **Performance Improvement**: Reduced server load from thousands of 401 requests per second to single authentication checks
-  - **User Credentials Updated**: Both demo@docuai.com (admin) and legalai@altosera.com (user) now use password "Ztop123!"
+  - **User Credentials Updated**: Credentials updated (redacted).
   - **Session Management Fixed**: Corrected session storage format for local authentication to properly persist login state
   - **Login Success Verification**: Both admin and user accounts confirmed working with proper session handling and data isolation
 - July 7, 2025. **COMPLETE JWT TOKEN AUTHENTICATION MIGRATION: Eliminated Cross-Origin Cookie Issues**
@@ -376,7 +376,7 @@ AutoLaw is a full-stack web application designed for legal professionals to anal
   - **Complete Branding Update**: Replaced DocuAI logo with AutoLaw logo throughout application
   - **Payment Section Removal**: Removed payment/billing navigation from sidebar as requested by user
   - **HTML Title Update**: Updated browser title from "DocuAI" to "AutoLaw" for complete rebranding
-  - **Admin Credentials**: admin@autolaw.com / AutoLaw2025! for accessing clean system
+  - **Admin Credentials**: Stored privately (redacted).
   - **Authentication Working**: JWT token authentication fully functional with new database
   - **Sidebar Navigation Restored**: Full sidebar with Create, Home, Documents, Q&A, Settings sections
   - **Dashboard Removal**: Removed Dashboard section from sidebar navigation per user request
@@ -396,7 +396,7 @@ AutoLaw is a full-stack web application designed for legal professionals to anal
   - **HTML Title**: Browser title updated from "Tade-Altosera" to "AutoLaw"
   - **Sidebar Logo**: Updated logo references from Altosera to AutoLaw throughout interface
   - **Documentation**: Complete replit.md documentation updated with new AutoLaw branding
-  - **Admin Credentials**: Updated admin email to admin@autolaw.com / AutoLaw2025!
+  - **Admin Credentials**: Stored privately (redacted).
   - **Footer**: Copyright and legal disclaimers now reference AutoLaw brand
 - July 22, 2025. **RAGFLOW AGENTS INTEGRATION: DUAL IFRAME EMBEDDED AGENT SYSTEM**
   - **Two-Tab Agent Interface**: Created dedicated /agents page with tabbed navigation for multiple Ragflow agents

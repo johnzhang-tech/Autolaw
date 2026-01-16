@@ -8,14 +8,23 @@ async function testAPIUpload() {
   try {
     // First, get a JWT token by logging in
     console.log('Step 1: Getting JWT token...');
+    const email = process.env.TEST_LOGIN_EMAIL || 'demo@docuai.com';
+    const password = process.env.TEST_LOGIN_PASSWORD || '';
+    const apiKey = process.env.TEST_API_KEY || 'docuai_demo_key_123';
+    if (!password) {
+      throw new Error(
+        'Missing TEST_LOGIN_PASSWORD. Set TEST_LOGIN_EMAIL/TEST_LOGIN_PASSWORD (and optionally TEST_API_KEY) before running.'
+      );
+    }
+
     const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        email: 'demo@docuai.com',
-        password: 'Ztop123!'
+        email,
+        password
       })
     });
     
@@ -78,7 +87,7 @@ async function testAPIUpload() {
     const apiKeyResponse = await fetch('http://localhost:5000/api/upload', {
       method: 'POST',
       headers: {
-        'X-API-Key': 'docuai_demo_key_123',
+        'X-API-Key': apiKey,
         ...form2.getHeaders()
       },
       body: form2

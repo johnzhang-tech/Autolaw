@@ -19,8 +19,8 @@ export default function TestApi() {
   const [loading, setLoading] = useState(false);
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginEmail, setLoginEmail] = useState("demo@docuai.com");
-  const [loginPassword, setLoginPassword] = useState("Ztop123!");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -334,7 +334,7 @@ export default function TestApi() {
           {!isLoggedIn && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Quick Login:</strong> Use demo@docuai.com (admin) or legalai@altosera.com (user) with password "Ztop123!" 
+                <strong>Quick Login:</strong> Use a valid account from your environment.
               </p>
               <p className="text-sm text-blue-600 mt-1">
                 Authentication is required for all API endpoints. Log in to access the test interface.
