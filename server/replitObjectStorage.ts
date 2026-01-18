@@ -16,12 +16,26 @@ interface ReplitObjectStorageConfig {
 
 class ReplitObjectStorageService {
   private bucketName: string;
-  public client: Client; // Make client public for direct access in routes
+  public client?: Client; // Optional outside Replit
 
   constructor(config?: ReplitObjectStorageConfig) {
     this.bucketName = config?.bucketName || 'default';
-    // Official Replit Object Storage client with default bucket
-    this.client = new Client();
+    const hasReplitEnv =
+      !!process.env.REPL_ID ||
+      !!process.env.REPLIT_DOMAINS ||
+      !!process.env.REPLIT_OBJECT_STORAGE_TOKEN;
+
+    if (hasReplitEnv) {
+      // Official Replit Object Storage client with default bucket
+      this.client = new Client();
+    }
+  }
+
+  private getClient(): Client {
+    if (!this.client) {
+      throw new Error("Replit Object Storage not configured for this environment");
+    }
+    return this.client;
   }
 
   /**
@@ -75,7 +89,7 @@ class ReplitObjectStorageService {
       // WORKAROUND: Use uploadFromText with base64 encoding due to SDK bug
       console.log(`Encoding buffer as base64 to work around SDK bug...`);
       const base64Content = buffer.toString('base64');
-      const result = await this.client.uploadFromText(objectKey, base64Content);
+      const result = await this.getClient().uploadFromText(objectKey, base64Content);
       console.log(`client.uploadFromText result: ok=${result.ok}, error=${result.error}`);
       
       if (!result.ok) {
@@ -103,7 +117,7 @@ class ReplitObjectStorageService {
       console.log(`Generating download URL for object key: ${objectKey}`);
       
       // Check if file exists first by attempting to download
-      const result = await this.client.downloadAsBytes(objectKey);
+      const result = await this.getClient().downloadAsBytes(objectKey);
       
       if (!result.ok) {
         console.error('Replit Object Storage file not found:', result.error);
@@ -129,7 +143,7 @@ class ReplitObjectStorageService {
       console.log(`Deleting file from storage: ${objectKey}`);
       
       // Use official Replit Object Storage SDK
-      const result = await this.client.delete(objectKey);
+      const result = await this.getClient().delete(objectKey);
       
       if (!result.ok) {
         console.error('Delete operation failed:', result.error);
@@ -150,7 +164,7 @@ class ReplitObjectStorageService {
   async listObjects(prefix?: string): Promise<any[]> {
     try {
       // Use official Replit Object Storage SDK
-      const result = await this.client.list({ prefix });
+      const result = await this.getClient().list({ prefix });
       
       if (!result.ok) {
         console.error('Failed to list objects:', result.error);
@@ -245,11 +259,15 @@ class ReplitObjectStorageService {
   async testConnection(): Promise<boolean> {
     try {
       // Test connection by trying to list objects (should work even if empty)
-      const result = await this.client.list({ maxResults: 1 });
+      const result = await this.getClient().list({ maxResults: 1 });
       return result.ok;
     } catch {
       return false;
     }
+  }
+
+  async downloadAsText(objectKey: string) {
+    return this.getClient().downloadAsText(objectKey);
   }
 }
 

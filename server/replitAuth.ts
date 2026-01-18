@@ -13,10 +13,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
-
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -87,39 +83,46 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Replit Auth Setup
-  const config = await getOidcConfig();
+  // Replit Auth Setup (optional for non-Replit deployments)
+  if (process.env.REPLIT_DOMAINS && process.env.REPL_ID) {
+    const config = await getOidcConfig();
 
-  const replitVerify: VerifyFunction = async (
-    tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
-  ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims(), 'replit');
-    verified(null, user);
-  };
+    const replitVerify: VerifyFunction = async (
+      tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
+      verified: passport.AuthenticateCallback
+    ) => {
+      const user = {};
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims(), 'replit');
+      verified(null, user);
+    };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      replitVerify,
-    );
-    passport.use(strategy);
+    for (const domain of process.env.REPLIT_DOMAINS.split(",")) {
+      const strategy = new Strategy(
+        {
+          name: `replitauth:${domain}`,
+          config,
+          scope: "openid email profile offline_access",
+          callbackURL: `https://${domain}/api/callback`,
+        },
+        replitVerify,
+      );
+      passport.use(strategy);
+    }
   }
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     // Determine the callback URL based on environment
-    const callbackURL = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/auth/google/callback`
-      : `https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'your-domain.replit.app'}/api/auth/google/callback`;
+    const baseUrl =
+      process.env.APP_BASE_URL ||
+      (process.env.REPLIT_DOMAINS
+        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+        : "");
+    const callbackURL =
+      process.env.NODE_ENV === "development" || !baseUrl
+        ? "http://localhost:5000/api/auth/google/callback"
+        : `${baseUrl}/api/auth/google/callback`;
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,

@@ -2129,7 +2129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // WORKAROUND: Download as text since we stored as base64 due to SDK bug
       console.log('Calling client.downloadAsText (base64 workaround)...');
-      const result = await replitObjectStorage.client.downloadAsText(objectKey);
+      const result = await replitObjectStorage.downloadAsText(objectKey);
       console.log('downloadAsText result:', { ok: result.ok, hasValue: !!result.value });
       
       if (!result.ok) {

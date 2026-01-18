@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import "dotenv/config";
 import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -60,24 +61,27 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Use NODE_ENV directly to avoid Express defaulting to development in prod.
+  const isDev = process.env.NODE_ENV === "development";
+  if (isDev) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  // Use Cloud Run PORT when available, fallback to 5000 for local dev.
+  const port = Number(process.env.PORT) || 5000;
+  const host =
+    process.env.HOST ||
+    (process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1");
+
+  server.listen(
+    {
+      port,
+      host,
+    },
+    () => {
+      log(`serving on ${host}:${port}`);
+    },
+  );
 })();
