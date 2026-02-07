@@ -10,8 +10,8 @@ import imgLogo5 from "figma:asset/262ae2257b7f47685a1fd90f0f27d6372a2bca23.png";
 import imgHeroImage from "figma:asset/9f17e02c9fa201a3bf7d9d380f6bdeb469073e56.png";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
 
-const LOGIN_URL = "https://app.autolaw.ai";
-const CONTACT_EMAIL = "hello@autolaw.ai";
+const LOGIN_URL = "https://case-app-1055716306475.us-central1.run.app/login";
+const CONTACT_EMAIL = "test@autolaw.ai";
 
 // Helper function for smooth scrolling to sections
 const scrollToSection = (sectionId: string) => {
