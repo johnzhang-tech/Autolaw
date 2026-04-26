@@ -19,3 +19,5 @@ attached_assets/*.txt
 # Local uploads / sample docs
 uploads/
 *.pdf
+
+.env
