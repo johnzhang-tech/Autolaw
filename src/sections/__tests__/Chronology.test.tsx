@@ -10,7 +10,7 @@ describe('Chronology', () => {
     // string, so an unscoped query matches the spine label too — and would pass even
     // if the detail panel were showing the wrong event.
     const detail = screen.getByTestId('chronology-detail');
-    expect(within(detail).getByText(/employer incident report/i)).toBeInTheDocument();
+    expect(within(detail).getByText(/DWC-1 claim form/i)).toBeInTheDocument();
   });
 
   it('reveals document, page and the cited sentence when an event is selected', async () => {
