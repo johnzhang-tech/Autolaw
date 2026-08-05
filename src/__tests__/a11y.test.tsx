@@ -195,16 +195,22 @@ describe('landmarks and identifiers', () => {
   it('exposes exactly one landmark of each page-level kind', () => {
     render(<App />);
     expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getAllByRole('banner')).toHaveLength(1);
     expect(screen.getAllByRole('contentinfo')).toHaveLength(1);
     expect(screen.getAllByRole('navigation')).toHaveLength(1);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   });
 
+  it('makes the site header the banner, with navigation nested inside it', () => {
+    render(<App />);
+    expect(screen.getByRole('banner')).toContainElement(screen.getByRole('navigation'));
+  });
+
   /*
-   * There is no banner landmark on this page and that is fine — banner is optional, and
-   * the site header here is the <nav>, which must stay a navigation landmark. What is
-   * not fine is a *second* one appearing inside <main>, which is what happens the moment
-   * anyone reaches for <header> to wrap a section.
+   * The banner is the site header, and the navigation lives inside it — the conventional
+   * pairing, and what gives the skip link a region to actually skip. What is not fine is a
+   * *second* banner or contentinfo appearing inside <main>, which is what happens the
+   * moment anyone reaches for <header> to wrap a section.
    *
    * Worth knowing why this is asserted with .closest('main') rather than trusted to the
    * spec: HTML-AAM scopes <header>/<footer> to generic when they are inside
