@@ -1,0 +1,13 @@
+.al-conv { background: var(--al-navy); color: var(--al-ink-inverse); }
+.al-conv__inner { max-width: 720px; text-align: center; }
+.al-conv__title {
+  font-size: var(--al-text-h2); font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug); letter-spacing: var(--al-tracking-display);
+  margin: 0 0 var(--al-space-3); text-wrap: balance;
+}
+.al-conv__sub {
+  font-size: var(--al-text-body-lg); color: var(--al-ink-inverse-muted);
+  margin: 0 0 var(--al-space-5); line-height: var(--al-leading-normal);
+}
+.al-conv__ctas { display: flex; gap: var(--al-space-3); justify-content: center; flex-wrap: wrap; margin-bottom: var(--al-space-4); }
+.al-conv__fine { font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin: 0; }

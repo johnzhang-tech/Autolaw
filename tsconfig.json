@@ -21,11 +21,5 @@
     "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "vitest.config.ts", "vite.config.ts"],
-
-  // Figma Make leftovers, all deleted in Task 13 of the site rebuild plan. They are
-  // excluded rather than fixed because they cannot type-check by design: they import
-  // "package@version" specifiers that resolve only through vite.config.ts's alias map,
-  // which TypeScript does not consult. Delete these three lines along with the files.
-  "exclude": ["src/App.tsx", "src/imports", "src/components/ui", "src/components/figma"]
+  "include": ["src", "vitest.config.ts", "vite.config.ts"]
 }
