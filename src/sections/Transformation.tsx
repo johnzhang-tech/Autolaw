@@ -1,16 +1,23 @@
 import { Section } from '../components/primitives/Section';
 import './Transformation.css';
 
+/*
+ * This explainer is shared by both practices and PI is the default tab, so the list has
+ * to name PI documents as well as comp ones. It previously named only comp records — a PI
+ * attorney reading it saw someone else's file.
+ */
 const INPUTS = [
-  'Intake calls', 'QME / AME reports', 'PTP reports', 'Imaging', 'Billing',
-  'Wage records', 'Subpoenaed records', 'Prior claims', 'Correspondence',
+  'Intake calls', 'Police and incident reports', 'ER and hospital records',
+  'Treating physician reports', 'QME/AME reports', 'PTP reports', 'Imaging',
+  'Billing and liens', 'Wage records', 'Subpoenaed records', 'Prior claims',
+  'Correspondence',
 ];
 
 const BRAIN = [
   { text: 'Every fact cited to document, page, sentence', tone: 'verified' },
-  { text: 'Normalized across providers and dates', tone: 'verified' },
+  { text: 'One timeline across every provider and every date', tone: 'verified' },
   { text: 'Conflicts surfaced, never auto-resolved', tone: 'conflict' },
-  { text: 'Gaps identified — what is missing', tone: 'conflict' },
+  { text: 'Records referenced in the file but never produced', tone: 'conflict' },
   { text: 'Attorney confirms before it becomes truth', tone: 'verified' },
 ] as const;
 

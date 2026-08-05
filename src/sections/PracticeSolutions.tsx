@@ -5,7 +5,7 @@ import './PracticeSolutions.css';
 
 const AREAS: Array<{ key: PracticeArea; label: string }> = [
   { key: 'PI', label: 'Personal Injury' },
-  { key: 'WC', label: "Workers' Compensation" },
+  { key: 'WC', label: 'Workers’ Compensation' },
 ];
 
 export function PracticeSolutions() {
@@ -24,12 +24,17 @@ export function PracticeSolutions() {
     refs.current[next.key]?.focus();
   }
 
+  /*
+   * `intro` and the WC tab label carry a literal curly apostrophe rather than &rsquo;.
+   * Both are JSX *string attributes*, where an HTML entity is not decoded and would
+   * reach the reader as the characters "&rsquo;".
+   */
   return (
     <Section
       id="solutions"
       eyebrow="Solutions"
       heading="Two practices, two products"
-      intro="Personal injury and workers' compensation are isolated in the application at the route, navigation, and data layer — so each practice sees its own case, not a relabelled version of the other."
+      intro="Personal injury and workers’ compensation are separate products, not one product with the labels swapped. Each has its own intake, its own screens, and its own outputs."
     >
       <div className="al-seg" role="tablist" aria-label="Practice area" onKeyDown={onKeyDown}>
         {AREAS.map((a) => (
