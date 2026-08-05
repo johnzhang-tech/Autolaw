@@ -1,0 +1,17 @@
+.al-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  padding: 5px 11px;
+  border-radius: var(--al-radius-pill);
+  border: 1px solid transparent;
+}
+.al-chip__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+
+.al-chip--verified { background: var(--al-teal-wash); color: var(--al-teal-text); border-color: rgba(14, 124, 112, 0.18); }
+.al-chip--conflict { background: var(--al-amber-wash); color: var(--al-amber-text); border-color: rgba(154, 78, 39, 0.2); }
+.al-chip--blocker { background: var(--al-amber-text); color: #fff; }
+.al-chip--unreviewed { background: transparent; color: var(--al-ink-muted); border-color: var(--al-hairline-strong); }
+.al-chip--uncited { background: transparent; color: var(--al-amber-text); border-color: var(--al-amber); border-style: dashed; }
