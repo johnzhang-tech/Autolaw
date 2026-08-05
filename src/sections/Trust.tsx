@@ -2,21 +2,26 @@ import { Section } from '../components/primitives/Section';
 import { CUSTOMER_LOGOS, CERTIFICATIONS } from '../config';
 import './Trust.css';
 
+/*
+ * Written for a practising attorney, so no vendor vocabulary: "tenant isolation" names a
+ * lease to this reader, "deep-linked" and "separate lane" name nothing at all, and
+ * "extraction" is our word for our own component. Each claim below states what happens.
+ */
 const CONTROLS = [
   { title: 'Your data does not train models', body: 'Case content is never used to train or fine-tune any model, ours or a vendor’s.' },
-  { title: 'Tenant isolation', body: 'Every case, document, and job is scoped to your firm end-to-end, enforced server-side.' },
+  { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
   { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
-  { title: 'Human confirmation required', body: 'Extraction proposes; it never writes case truth. An attorney confirms before a value becomes fact.' },
+  { title: 'Human confirmation required', body: 'Autolaw proposes. It never writes case truth on its own. An attorney confirms each value before it counts as a fact.' },
 ];
 
 const ROWS: Array<[string, string, string]> = [
-  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the exact sentence — deep-linked'],
+  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the exact sentence — one click opens it'],
   ['Two documents disagree', 'Picks one, silently', 'Surfaced as a conflict with both sources and dates'],
-  ['A fact with no support', 'Reads identically to a supported one', 'Held in a separate lane and never grouped with cited facts'],
+  ['A fact with no support', 'Reads identically to a supported one', 'Kept apart from cited facts and labeled uncited'],
   ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and drafts the request'],
   ['Becoming case truth', 'Output is the answer', 'Proposes only; an attorney confirms before anything is recorded'],
-  ['Practice fit', 'Generic', 'PI and WC isolated at the route, navigation, and data layer'],
-  ['Your data', 'Consumer terms; retention varies', 'Tenant-isolated, auditable, never used to train models'],
+  ['Practice fit', 'Generic', 'Separate PI and workers’ comp products, each with its own intake and outputs'],
+  ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every access logged, never used to train models'],
 ];
 
 function Cross() {
@@ -39,7 +44,7 @@ export function Trust() {
     <Section
       id="trust"
       eyebrow="Trust"
-      heading="Why not simply upload the file to a chatbot"
+      heading="Why not just upload the file to a chatbot?"
       intro="Every row below is a behavior implemented in the application, not an adjective."
     >
       <div className="al-trust__badges">
@@ -88,8 +93,10 @@ export function Trust() {
           aria-label="Comparison table, scrollable"
         >
           <table>
+            {/* Count derived, not written out: a hardcoded "seven" goes stale silently
+                the first time a row is added, and only a screen-reader user hears it. */}
             <caption className="al-visually-hidden">
-              Comparison of a general-purpose chatbot and Autolaw across seven requirements
+              Comparison of a general-purpose chatbot and Autolaw across {ROWS.length} requirements
             </caption>
             <thead>
               <tr>
