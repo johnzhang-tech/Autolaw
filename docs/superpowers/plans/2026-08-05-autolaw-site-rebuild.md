@@ -2127,7 +2127,18 @@ export function Trust() {
       </div>
 
       <div className="al-cmp">
-        <div className="al-cmp__scroller" data-testid="comparison-scroller" tabIndex={0}>
+        {/*
+          Focusable so keyboard users can scroll the table horizontally. That makes it an
+          interactive control, so it needs a role and a name of its own — otherwise a screen
+          reader announces nothing on arrival.
+        */}
+        <div
+          className="al-cmp__scroller"
+          data-testid="comparison-scroller"
+          tabIndex={0}
+          role="region"
+          aria-label="Comparison table, scrollable"
+        >
           <table>
             <caption className="al-visually-hidden">
               Comparison of a general-purpose chatbot and Autolaw across seven requirements
@@ -2198,6 +2209,18 @@ export function Trust() {
   border-radius: var(--al-radius-panel); overflow: hidden;
 }
 .al-cmp__scroller { overflow-x: auto; }
+
+/*
+ * Inset ring, deliberately. .al-cmp needs overflow:hidden to clip the table's square
+ * corners to the panel radius, and the scroller's border box coincides exactly with
+ * that clip region — so the global outset ring paints entirely outside it and every
+ * pixel is clipped away. A keyboard user could focus and scroll the table with no
+ * visible indicator at all. Inset is not clipped.
+ */
+.al-cmp__scroller:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--al-teal-text);
+  border-radius: var(--al-radius-panel);
+}
 .al-cmp table { border-collapse: collapse; width: 100%; min-width: 620px; }
 .al-cmp th, .al-cmp td {
   text-align: left; padding: var(--al-space-3) var(--al-space-4);
