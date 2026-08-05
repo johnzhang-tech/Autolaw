@@ -19,8 +19,17 @@ function Tick() {
 }
 
 export function Hero() {
+  /*
+   * Deliberately a <div>, not a <header>. Hero sits inside <main>, where HTML-AAM maps
+   * <header> to generic rather than banner — but only in implementations that apply the
+   * element-scoping constraint. @testing-library/dom 10.4.1 does not (aria-query 5.3.0
+   * declares the constraint; the role resolver builds its selector from the element name
+   * and attributes only), so a <header> here is reported as a second banner landmark
+   * sitting inside main. The tag bought nothing — every style here is class-based and no
+   * landmark is wanted for the lead content — so the ambiguity is not worth carrying.
+   */
   return (
-    <header className="al-section al-hero">
+    <div className="al-section al-hero">
       <div className="al-container al-hero__grid">
         <div>
           <p className="al-hero__eyebrow">
@@ -50,6 +59,6 @@ export function Hero() {
         </div>
         <SignalCockpit />
       </div>
-    </header>
+    </div>
   );
 }
