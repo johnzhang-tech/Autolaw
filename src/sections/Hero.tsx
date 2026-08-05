@@ -3,11 +3,16 @@ import { SignalCockpit } from './SignalCockpit';
 import { TRIAL_URL, WALKTHROUGH_URL } from '../config';
 import './Hero.css';
 
+/*
+ * "SOC 2 Type II & HIPAA" put the two on one line as if they were the same kind of thing.
+ * SOC 2 Type II is an audited attestation; HIPAA has no certifying body, and what a firm
+ * can actually receive is a signed BAA. See the note on CERTIFICATIONS in config.ts.
+ */
 const TRUST = [
   'Source-linked evidence',
-  'Human review controls',
+  'Attorney confirms every fact',
   'Auditable access',
-  'SOC 2 Type II & HIPAA',
+  'SOC 2 Type II · BAA on request',
 ];
 
 function Tick() {

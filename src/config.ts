@@ -22,10 +22,21 @@ export const CONTACT_EMAIL = 'hello@autolaw.ai';
  */
 export const CUSTOMER_LOGOS: ReadonlyArray<{ name: string; src: string }> = [];
 
-/** `mark` is the short text inside the badge disc — never derive it by splitting `label`. */
+/**
+ * `mark` is the short text inside the badge disc — never derive it by splitting `label`.
+ *
+ * The owner confirmed on 2026-08-05 that the SOC 2 Type II attestation and HIPAA
+ * compliance are both real and may be displayed. This is recorded so the next engineer
+ * does not have to re-litigate whether these badges are allowed on the page.
+ *
+ * The wording is not interchangeable, though. SOC 2 Type II is an audited attestation by
+ * a named firm, so it can be claimed as a certification. HIPAA has no certifying body —
+ * "HIPAA certified" is a claim nobody can issue, and an attorney knows it. What a firm
+ * can actually be given is safeguards plus a signed BAA, so that is what is offered.
+ */
 export const CERTIFICATIONS: ReadonlyArray<{ mark: string; label: string; detail: string }> = [
   { mark: 'SOC 2', label: 'SOC 2 Type II', detail: 'Report available under NDA' },
-  { mark: 'HIPAA', label: 'HIPAA attested', detail: 'BAA available' },
+  { mark: 'HIPAA', label: 'HIPAA safeguards', detail: 'BAA signed on request' },
 ];
 
 /** Set to a real URL to reveal the secondary hero CTA. */
