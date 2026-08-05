@@ -56,6 +56,9 @@
   --al-leading-tight: 1.05;
   --al-leading-snug: 1.25;
   --al-leading-normal: 1.55;
+  /* Record excerpts set in --al-font-record. Source Serif 4 has a taller x-height than
+     Manrope at the same size, so it needs a touch more leading to stay comfortable. */
+  --al-leading-record: 1.6;
   --al-tracking-display: -0.022em;
   --al-tracking-eyebrow: 0.08em;
 

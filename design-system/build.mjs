@@ -43,6 +43,37 @@ function parseTokens(css) {
 }
 
 /*
+ * A translucent fill has no colour of its own. What a reader sees is the fill composited
+ * over whatever surface happens to be behind it — and the same fill on two surfaces is two
+ * different backgrounds with two different ratios. `over()` names that composite so it can
+ * be declared and verified like any other pair, rather than asserted in a comment beside
+ * the CSS and quietly invalidated the next time the surface changes.
+ */
+const over = (token, percent, surface) => ({ token, percent, surface });
+const isMix = (ref) => typeof ref === "object";
+
+function composite(fgHex, bgHex, percent) {
+  const channel = (hex, i) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const a = percent / 100;
+  const mixed = [0, 1, 2].map((i) =>
+    Math.round(a * channel(fgHex, i) + (1 - a) * channel(bgHex, i))
+  );
+  return `#${mixed.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Resolve one side of a pair to a hex, or undefined if it names a token that is gone. */
+function resolve(ref, tokens) {
+  if (!isMix(ref)) return tokens[ref];
+  const fg = tokens[ref.token];
+  const bg = tokens[ref.surface];
+  return fg && bg ? composite(fg, bg, ref.percent) : undefined;
+}
+
+const short = (name) => name.replace("--al-", "");
+const label = (ref) =>
+  isMix(ref) ? `${short(ref.token)} ${ref.percent}% on ${short(ref.surface)}` : short(ref);
+
+/*
  * Declared requirements. `min` is the ratio the pair must meet.
  *   4.5 = AA normal text · 3.0 = AA large text and non-text UI
  * A pair marked `mustFail` documents a deliberate constraint: it records WHY a token is
@@ -64,6 +95,19 @@ const PAIRS = [
   { fg: "--al-teal", bg: "--al-navy-raised", min: 3.0, use: "teal on raised navy (non-text)" },
   { fg: "--al-ink-inverse", bg: "--al-navy-raised", min: 4.5, use: "text on raised navy" },
   { fg: "--al-amber", bg: "--al-navy", min: 3.0, use: "conflict indicator on navy" },
+  /*
+   * The timeline's conflict flag. Amber-on-amber-wash is the light-surface pairing; over
+   * navy the chip inverts, because amber text on its own 30% fill reads 2.99:1 on the
+   * panel and 2.59:1 once the row is hovered or selected. Both surfaces are declared —
+   * the hover state was the worse of the two and the one nobody had measured.
+   */
+  { fg: "--al-amber-wash", bg: over("--al-amber", 30, "--al-navy"), min: 4.5, use: "conflict flag chip on navy" },
+  {
+    fg: "--al-amber-wash",
+    bg: over("--al-amber", 30, "--al-navy-raised"),
+    min: 4.5,
+    use: "conflict flag chip, row hovered or selected",
+  },
   {
     fg: "--al-teal",
     bg: "--al-canvas",
@@ -78,10 +122,10 @@ const results = [];
 let failed = 0;
 
 for (const pair of PAIRS) {
-  const fg = tokens[pair.fg];
-  const bg = tokens[pair.bg];
+  const fg = resolve(pair.fg, tokens);
+  const bg = resolve(pair.bg, tokens);
   if (!fg || !bg) {
-    console.error(`MISSING TOKEN: ${pair.fg} or ${pair.bg}`);
+    console.error(`MISSING TOKEN: ${label(pair.fg)} or ${label(pair.bg)}`);
     failed++;
     continue;
   }
@@ -89,7 +133,7 @@ for (const pair of PAIRS) {
   const passes = ratio >= pair.min;
   const ok = pair.mustFail ? !passes : passes;
   if (!ok) failed++;
-  results.push({ ...pair, fg, bg, ratio, ok });
+  results.push({ ...pair, fg: label(pair.fg), bg: label(pair.bg), ratio, ok });
 }
 
 const pad = (s, n) => String(s).padEnd(n);
@@ -98,10 +142,10 @@ for (const r of results) {
   const mark = r.ok ? "  ok  " : " FAIL ";
   const note = r.mustFail ? `(must stay under ${r.min})` : `(needs ${r.min})`;
   console.log(
-    `${mark} ${pad(r.fg.replace("--al-", ""), 18)} on ${pad(
-      r.bg.replace("--al-", ""),
-      14
-    )} ${pad(r.ratio.toFixed(2) + ":1", 9)} ${pad(note, 22)} ${r.use}`
+    `${mark} ${pad(r.fg, 18)} on ${pad(r.bg, 26)} ${pad(r.ratio.toFixed(2) + ":1", 9)} ${pad(
+      note,
+      22
+    )} ${r.use}`
   );
 }
 
