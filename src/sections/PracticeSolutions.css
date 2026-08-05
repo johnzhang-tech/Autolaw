@@ -24,7 +24,19 @@
 .al-practice h3 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
 .al-practice > p { margin: 0 0 var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-sm); max-width: 62ch; }
 
-.al-practice__outs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--al-space-2); }
+/*
+ * Explicit counts, because auto-fit picked whatever fit and repeatedly stranded one card
+ * alone on a row: five-across then a lone sixth for WC between 1044px and 1231px, and
+ * three-across then a lone fourth for PI between 668px and 855px.
+ *
+ * Four, not three. Three divides the six WC outputs evenly but leaves PI — four outputs,
+ * and the tab that is open on arrival — permanently 3+1, which is the exact defect being
+ * removed. Four is clean for PI and gives WC a 4+2 that reads as a block rather than an
+ * orphan, at 276px a card instead of auto-fit's 181px.
+ */
+.al-practice__outs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--al-space-2); }
+@media (max-width: 860px) { .al-practice__outs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .al-practice__outs { grid-template-columns: minmax(0, 1fr); } }
 .al-practice__out {
   background: var(--al-navy-raised); border-radius: var(--al-radius-card);
   padding: var(--al-space-3); border-left: 3px solid var(--al-teal);

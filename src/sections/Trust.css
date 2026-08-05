@@ -4,10 +4,12 @@
   background: var(--al-surface); border: 1px solid var(--al-hairline);
   border-radius: var(--al-radius-card); padding: var(--al-space-3) var(--al-space-4);
 }
+/* 40/9, not 38/10: "HIPAA" set bold at 10px measures about 31px, which left barely 3px of
+   clearance inside a 38px disc and none at all once a font fell back. */
 .al-badge__mark {
-  width: 38px; height: 38px; border-radius: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
   background: var(--al-navy); color: var(--al-teal);
-  display: grid; place-items: center; font-size: 10px;
+  display: grid; place-items: center; font-size: 9px;
   font-weight: var(--al-weight-bold); flex: none;
 }
 .al-badge b { display: block; font-size: var(--al-text-sm); }
@@ -20,17 +22,25 @@
 }
 .al-trust__wall img { height: 40px; width: auto; object-fit: contain; opacity: 0.75; }
 
+/*
+ * Four cards, so four columns then two then one — never three. auto-fit picked whatever
+ * count happened to fit, and between 800px and 1055px that was three, leaving the fourth
+ * control stranded alone on a second row. Explicit counts that divide four cannot do that.
+ */
 .al-trust__controls {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--al-space-3); margin-bottom: var(--al-space-6);
 }
+@media (max-width: 1024px) { .al-trust__controls { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .al-trust__controls { grid-template-columns: minmax(0, 1fr); } }
+
 .al-ctrl {
   background: var(--al-surface); border: 1px solid var(--al-hairline);
   border-left: 3px solid var(--al-teal-text); border-radius: var(--al-radius-card);
   padding: var(--al-space-4);
 }
 .al-ctrl b { display: block; font-size: var(--al-text-sm); margin-bottom: var(--al-space-1); }
-.al-ctrl p { margin: 0; font-size: var(--al-text-xs); color: var(--al-ink-muted); line-height: 1.5; }
+.al-ctrl p { margin: 0; font-size: var(--al-text-xs); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
 
 .al-cmp {
   background: var(--al-surface); border: 1px solid var(--al-hairline);
@@ -56,14 +66,27 @@
 }
 .al-cmp thead th {
   background: var(--al-canvas); font-size: var(--al-text-xs);
-  text-transform: uppercase; letter-spacing: 0.06em;
+  text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow);
   color: var(--al-ink-muted); font-weight: var(--al-weight-bold);
 }
-.al-cmp thead th:last-child { background: var(--al-navy); color: var(--al-teal); }
+/*
+ * The accent edge runs the full height of the Autolaw column, header included. Without it
+ * on the header the column heading sat 2px to the left of every cell beneath it — the kind
+ * of misalignment you feel before you can name it. 3px matches every other accent rule on
+ * the site; this was the only 2px one. The tint is mixed from the token so it cannot drift
+ * away from --al-teal the way a retyped rgba() does.
+ */
+.al-cmp thead th:last-child {
+  background: var(--al-navy); color: var(--al-teal);
+  border-left: 3px solid var(--al-teal);
+}
 .al-cmp tbody tr:last-child th, .al-cmp tbody tr:last-child td { border-bottom: 0; }
 .al-cmp tbody th { font-weight: var(--al-weight-semibold); width: 34%; }
 .al-cmp td:nth-child(2) { color: var(--al-ink-muted); }
-.al-cmp td:last-child { background: rgba(24, 169, 153, 0.05); border-left: 2px solid var(--al-teal-text); }
+.al-cmp td:last-child {
+  background: color-mix(in srgb, var(--al-teal) 5%, var(--al-surface));
+  border-left: 3px solid var(--al-teal-text);
+}
 
 .al-mk { display: inline-flex; align-items: center; margin-right: 6px; vertical-align: -2px; }
 .al-mk--yes { color: var(--al-teal-text); }
