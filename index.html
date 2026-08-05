@@ -1,17 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Autolaw turns intake calls, medical records, and expert reports into a source-linked Case Brain for personal injury and workers' compensation firms. Every fact cites its document, page, and sentence." />
+    <meta name="description" content="Autolaw builds source-linked case chronologies for personal injury and workers&rsquo; compensation firms. Every fact cites its document, page, and sentence." />
     <meta name="theme-color" content="#0C2238" />
     <title>Autolaw — Turn case complexity into legal advantage</title>
 
     <meta property="og:title" content="Autolaw — Turn case complexity into legal advantage" />
-    <meta property="og:description" content="Source-linked case intelligence for personal injury and workers' compensation firms." />
+    <meta property="og:description" content="Source-linked case intelligence for personal injury and workers&rsquo; compensation firms." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.autolaw.ai/" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:site_name" content="Autolaw" />
+    <!--
+      twitter:card is "summary", not "summary_large_image", because no share image
+      exists. summary_large_image reserves a 1200x630 panel and fills it with nothing
+      when og:image is absent or 404s — so the link renders as a blank slab, which is
+      the worst possible artifact at the moment one attorney forwards this to another.
+      "summary" renders correctly with only a title and description, which is what is
+      actually true today.
+
+      To upgrade: add a real 1200x630 asset at public/og-card.png, add og:image
+      pointing at https://www.autolaw.ai/og-card.png together with og:image:alt, then
+      switch this back to summary_large_image — in that order, and not before the file
+      exists. (The tag is described rather than written out here so a commented-out
+      meta element cannot be scraped as a live one.)
+    -->
+    <meta name="twitter:card" content="summary" />
 
     <link rel="canonical" href="https://www.autolaw.ai/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
