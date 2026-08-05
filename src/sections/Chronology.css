@@ -8,20 +8,44 @@
 .al-chron__note { margin: 0; color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
 
 .al-chron__body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--al-space-4); }
-@media (max-width: 860px) { .al-chron__body { grid-template-columns: 1fr; } }
+/* minmax(0, …), not a bare 1fr: a bare 1fr floors at min-content, which the detail card's
+   110px/value rows blow past on a narrow phone and push the whole panel wide. */
+@media (max-width: 860px) { .al-chron__body { grid-template-columns: minmax(0, 1fr); } }
 
 .al-chron__spine { list-style: none; margin: 0; padding: 0 0 0 var(--al-space-4); position: relative; }
-.al-chron__spine::before {
-  content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px;
-  width: 2px; background: var(--al-hairline-inverse);
-}
 
 .al-ev { position: relative; margin-bottom: 2px; }
+
+/*
+ * Dot and rail share one centre line, and the arithmetic is the whole point.
+ *
+ * The ul's 24px padding-left puts an .al-ev's padding box at x=24, so a 10px dot at
+ * left:-19px spans x=5..15 — centre 10. The rail used to live on the ul at left:5px,
+ * width 2px: centre 6. It ran four pixels to the left of every dot it was supposed to
+ * thread, for the entire height of the timeline. At left:-15px the rail spans x=9..11,
+ * centre 10, and the two finally agree.
+ *
+ * Vertically the dot now sits at top:20px — centre 25 — against a date line box that runs
+ * 17..34 (1px button border + 16px padding + 11px x 1.55 leading) and centres at 25.5.
+ *
+ * The rail is drawn per event rather than once on the ul because only the event knows
+ * where its own dot is. A single ul-level rail has to guess the last item's height in
+ * order to stop at the last dot, guesses wrong the moment a title wraps, and either
+ * overshoots into empty space or falls short. This version runs from the bottom edge of
+ * one dot (y=30) to the top edge of the next (2px row gap + the next dot's 20px offset,
+ * hence bottom:-22px) and cannot drift.
+ */
 .al-ev::before {
-  content: ""; position: absolute; left: -19px; top: 15px;
+  content: ""; position: absolute; left: -19px; top: 20px;
   width: 10px; height: 10px; border-radius: 50%;
   background: var(--al-state-neutral); border: 2px solid var(--al-navy);
 }
+.al-ev::after {
+  content: ""; position: absolute; left: -15px; top: 30px; bottom: -22px;
+  width: 2px; background: var(--al-hairline-inverse);
+}
+.al-ev:last-child::after { content: none; }
+
 .al-ev--verified::before { background: var(--al-teal); }
 .al-ev--conflict::before { background: var(--al-amber); }
 
@@ -40,9 +64,17 @@
 .al-ev__provider { display: block; font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 3px; }
 /* Chip renders the flag; this only positions it and lifts it onto the navy surface. */
 .al-ev__flag { display: inline-block; margin-top: 6px; }
+/*
+ * Inverted against the default chip on purpose. Amber-on-amber-wash is the light-surface
+ * pairing; over navy the same fill composites to #313139 and amber text lands at 3.43:1 —
+ * and at 2.94:1 once the row is hovered or selected and the surface becomes navy-raised.
+ * Ten-pixel text needs 4.5. Amber-wash as the foreground reads 9.80:1 and 8.49:1 against
+ * the two composites, both verified in design-system/build.mjs. The fill is mixed from
+ * the token rather than retyped as rgba so it cannot drift away from --al-amber.
+ */
 .al-ev__flag .al-chip--conflict {
-  background: rgba(199, 107, 59, 0.2);
-  color: var(--al-amber);
+  background: color-mix(in srgb, var(--al-amber) 30%, transparent);
+  color: var(--al-amber-wash);
   border-color: transparent;
   font-size: 10px;
   padding: 2px 8px;
@@ -69,16 +101,26 @@
 .al-detail__warn b { display: block; }
 
 .al-detail__quote {
-  font-family: var(--al-font-record); font-size: var(--al-text-body); line-height: 1.6;
+  font-family: var(--al-font-record); font-size: var(--al-text-body);
+  line-height: var(--al-leading-record);
   border-left: 3px solid var(--al-teal-text); padding-left: var(--al-space-3);
   margin: 0 0 var(--al-space-3);
 }
 .al-detail__quote mark { background: var(--al-teal-wash); color: inherit; border-radius: 3px; padding: 1px 2px; }
 
-.al-detail__meta { display: grid; gap: 5px; font-size: var(--al-text-xs); margin: 0 0 var(--al-space-3); }
-.al-detail__meta > div { display: grid; grid-template-columns: 110px 1fr; gap: var(--al-space-3); }
+.al-detail__meta { display: grid; gap: var(--al-space-1); font-size: var(--al-text-xs); margin: 0 0 var(--al-space-3); }
+.al-detail__meta > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: var(--al-space-3); }
 .al-detail__meta dt { color: var(--al-ink-muted); }
 .al-detail__meta dd { margin: 0; font-weight: var(--al-weight-medium); }
+/*
+ * 110px label + 16px gap + the confidence bar's unbreakable 83px is 209px of min-content
+ * against a 200px content box at a 360px viewport. Stacking the pair gives the value the
+ * full width instead of forcing the card wider than the phone.
+ */
+@media (max-width: 520px) {
+  .al-detail__meta { gap: var(--al-space-2); }
+  .al-detail__meta > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
 
 .al-conf {
   display: inline-block; width: 52px; height: 5px; border-radius: 3px;
@@ -87,10 +129,22 @@
 .al-conf__fill { display: block; height: 100%; background: var(--al-teal-text); }
 
 .al-detail__actions { display: flex; gap: var(--al-space-2); flex-wrap: wrap; }
+/*
+ * .al-mini is .al-btn--sm at this scale — same font, same pill, same padding — so it uses
+ * the button's 8px/14px rather than an off-by-one 7px/13px of its own. It also carries
+ * cursor:pointer, so it needs to actually respond to the pointer; it had no hover state at
+ * all, which reads as a disabled control.
+ */
 .al-mini {
   font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold);
-  padding: 7px 13px; border-radius: var(--al-radius-pill);
+  padding: 8px 14px; border-radius: var(--al-radius-pill);
   border: 1px solid var(--al-hairline-strong); background: transparent;
   cursor: pointer; font-family: var(--al-font-ui);
+  transition:
+    background-color var(--al-duration-fast) var(--al-ease),
+    border-color var(--al-duration-fast) var(--al-ease),
+    color var(--al-duration-fast) var(--al-ease);
 }
+.al-mini:hover { border-color: var(--al-ink); background: color-mix(in srgb, var(--al-ink) 3%, transparent); }
 .al-mini--go { background: var(--al-navy); color: #fff; border-color: transparent; }
+.al-mini--go:hover { background: var(--al-navy-raised); border-color: transparent; }
