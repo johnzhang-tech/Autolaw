@@ -13,8 +13,20 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const SRC = join(process.cwd(), 'src');
+
+/**
+ * Files that ship to a visitor.
+ *
+ * `__tests__` is excluded for a specific reason: this file necessarily contains the
+ * literal strings it searches for ("logoipsum", "shutterstock"), so a scanner that
+ * included itself could never reach zero offenders no matter how clean the site got.
+ * Test files are not served, so scanning them adds no protection — only a permanent
+ * false positive that would train someone to ignore a failing guard.
+ */
 const sourceFiles = () =>
-  walk(SRC).filter((f) => /\.(tsx?|css|html)$/.test(f));
+  walk(SRC)
+    .filter((f) => !f.includes('__tests__'))
+    .filter((f) => /\.(tsx?|css|html)$/.test(f));
 
 describe('credibility guards', () => {
   it('ships no placeholder customer logos', () => {
