@@ -26,6 +26,15 @@ button { font: inherit; color: inherit; }
 
 .al-on-navy :focus-visible { box-shadow: var(--al-focus-ring-inverse); }
 
+/*
+ * Escape hatch for a light panel nested inside a navy one — the chronology detail
+ * card, the body-explorer info card. CSS descendant selectors cannot tell that the
+ * background flipped back to white, so those controls would inherit the inverse ring
+ * and render a teal halo on white at 2.74:1. Mark the light panel and the correct
+ * ring is restored for everything inside it.
+ */
+.al-on-canvas :focus-visible { box-shadow: var(--al-focus-ring); }
+
 .al-container {
   width: 100%;
   max-width: var(--al-max-width);

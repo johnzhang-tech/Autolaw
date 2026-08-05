@@ -1285,7 +1285,12 @@ import { Chronology } from '../Chronology';
 describe('Chronology', () => {
   it('shows the first event detail on mount', () => {
     render(<Chronology />);
-    expect(screen.getByText(/employer incident report/i)).toBeInTheDocument();
+    // Scoped to the detail panel: event 0's provider and source are the same string
+    // ("Employer incident report"), because the incident report genuinely is both the
+    // reporting party and the cited document. An unscoped query matches two elements,
+    // and would pass off the spine label alone even if the panel rendered the wrong event.
+    const detail = screen.getByTestId('chronology-detail');
+    expect(within(detail).getByText(/employer incident report/i)).toBeInTheDocument();
   });
 
   it('reveals document, page and the cited sentence when an event is selected', async () => {
@@ -1379,7 +1384,11 @@ export function Chronology() {
           ))}
         </ul>
 
-        <div className="al-chron__detail" data-testid="chronology-detail" aria-live="polite">
+        <div
+          className="al-chron__detail al-on-canvas"
+          data-testid="chronology-detail"
+          aria-live="polite"
+        >
           <div className="al-detail__head">
             <span className="al-detail__src">{event.source}</span>
             <span className="al-detail__pg">{event.page}</span>

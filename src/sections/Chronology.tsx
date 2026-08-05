@@ -36,7 +36,11 @@ export function Chronology() {
           ))}
         </ul>
 
-        <div className="al-chron__detail" data-testid="chronology-detail" aria-live="polite">
+        <div
+          className="al-chron__detail al-on-canvas"
+          data-testid="chronology-detail"
+          aria-live="polite"
+        >
           <div className="al-detail__head">
             <span className="al-detail__src">{event.source}</span>
             <span className="al-detail__pg">{event.page}</span>
