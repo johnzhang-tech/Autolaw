@@ -121,7 +121,8 @@ describe('keyboard reachability', () => {
 
     // CTAs, wherever they appear
     screen.getAllByRole('link', { name: /analyze one case/i }).forEach(reachable);
-    reachable(screen.getByRole('link', { name: /talk to us/i }));
+    // "Email us" since the secondary CTA is a mailto:, not a scheduling link.
+    reachable(screen.getByRole('link', { name: /email us/i }));
 
     // Chronology events — every one, not just the selected one
     const events = screen.getAllByRole('button', { expanded: false })
