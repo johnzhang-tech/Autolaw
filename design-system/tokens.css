@@ -79,6 +79,9 @@
   --al-max-width: 1240px;
   --al-gutter: 24px;
   --al-columns: 12;
+  /* Sticky nav height. Referenced by the nav itself and by scroll-padding-top, so an
+     in-page anchor cannot land underneath the bar. */
+  --al-nav-height: 64px;
 
   /* ---- Shape ---- */
   --al-radius-sm: 8px;

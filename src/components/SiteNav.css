@@ -4,7 +4,7 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--al-hairline);
 }
-.al-nav__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--al-space-4); height: 68px; }
+.al-nav__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--al-space-4); height: var(--al-nav-height); }
 
 .al-nav__brand {
   font-size: 1.25rem; font-weight: var(--al-weight-bold);

@@ -1,64 +1,92 @@
 @import './tokens.css';
 
-*, *::before, *::after { box-sizing: border-box; }
+/*
+ * Everything here lives in @layer base so component stylesheets always win, regardless
+ * of the order Vite happens to concatenate them in.
+ *
+ * This is not theoretical. base.css was previously imported after App in main.tsx, so it
+ * landed last in the bundle and every equal-specificity (0,1,0) tie resolved the wrong
+ * way: .al-container's 1240px beat .al-conv__inner's 720px, so the closing CTA rendered
+ * at full width; .al-container's `margin: 0 auto` zeroed .al-footer__inner's bottom
+ * margin; and the focus rule's border-radius squared off every pill button the moment it
+ * received focus. Unlayered rules beat layered ones no matter where they sit, so import
+ * order can no longer decide any of this.
+ */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; }
 
-body {
-  margin: 0;
-  background: var(--al-canvas);
-  color: var(--al-ink);
-  font-family: var(--al-font-ui);
-  font-size: var(--al-text-body);
-  line-height: var(--al-leading-normal);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /*
+   * The nav is sticky, so an in-page anchor would otherwise scroll its target underneath
+   * it. Below 780px .al-section padding drops to 48px — less than the bar's height — so
+   * without this every nav tap on mobile clips the section eyebrow.
+   */
+  html { scroll-padding-top: calc(var(--al-nav-height) + var(--al-space-4)); }
+
+  body {
+    margin: 0;
+    background: var(--al-canvas);
+    color: var(--al-ink);
+    font-family: var(--al-font-ui);
+    font-size: var(--al-text-body);
+    line-height: var(--al-leading-normal);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  img, svg { max-width: 100%; display: block; }
+  button { font: inherit; color: inherit; }
+
+  /*
+   * No border-radius here — box-shadow already follows the element's own radius, and
+   * setting it flattened pills to 8px on focus.
+   *
+   * The ring is chosen by an inherited custom property rather than descendant selectors,
+   * so the nearest marked ancestor wins whatever the nesting order. .al-on-navy and
+   * .al-on-canvas as plain descendant rules were order-dependent and would have silently
+   * inverted the day a navy panel was nested inside a light one.
+   */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--al-ring, var(--al-focus-ring));
+  }
+
+  .al-container {
+    width: 100%;
+    max-width: var(--al-max-width);
+    margin: 0 auto;
+    padding-inline: var(--al-gutter);
+  }
+
+  .al-section { padding-block: var(--al-space-8); }
+  @media (max-width: 780px) { .al-section { padding-block: var(--al-space-6); } }
+
+  .al-skip {
+    position: absolute;
+    left: -9999px;
+    top: var(--al-space-2);
+    background: var(--al-navy);
+    color: var(--al-ink-inverse);
+    padding: var(--al-space-2) var(--al-space-3);
+    border-radius: var(--al-radius-sm);
+    z-index: 100;
+  }
+  .al-skip:focus { left: var(--al-space-3); }
+
+  .al-visually-hidden {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 }
-
-img, svg { max-width: 100%; display: block; }
-button { font: inherit; color: inherit; }
-
-:focus-visible {
-  outline: none;
-  box-shadow: var(--al-focus-ring);
-  border-radius: var(--al-radius-sm);
-}
-
-.al-on-navy :focus-visible { box-shadow: var(--al-focus-ring-inverse); }
 
 /*
- * Escape hatch for a light panel nested inside a navy one — the chronology detail
- * card, the body-explorer info card. CSS descendant selectors cannot tell that the
- * background flipped back to white, so those controls would inherit the inverse ring
- * and render a teal halo on white at 2.74:1. Mark the light panel and the correct
- * ring is restored for everything inside it.
+ * Surface markers, deliberately unlayered so a component cannot accidentally out-specify
+ * them. .al-on-canvas is for a light panel nested inside a navy one — the chronology
+ * detail card, the body-explorer info card — where the inverse ring would otherwise
+ * paint teal on white at 2.74:1. Its inner band is --al-surface, not --al-canvas,
+ * because those panels are white.
  */
-.al-on-canvas :focus-visible { box-shadow: var(--al-focus-ring); }
-
-.al-container {
-  width: 100%;
-  max-width: var(--al-max-width);
-  margin: 0 auto;
-  padding-inline: var(--al-gutter);
-}
-
-.al-section { padding-block: var(--al-space-8); }
-@media (max-width: 768px) { .al-section { padding-block: var(--al-space-6); } }
-
-.al-skip {
-  position: absolute;
-  left: -9999px;
-  top: var(--al-space-2);
-  background: var(--al-navy);
-  color: #fff;
-  padding: var(--al-space-2) var(--al-space-3);
-  border-radius: var(--al-radius-sm);
-  z-index: 100;
-}
-.al-skip:focus { left: var(--al-space-3); }
-
-.al-visually-hidden {
-  position: absolute; width: 1px; height: 1px;
-  padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-}
+.al-on-navy { --al-ring: var(--al-focus-ring-inverse); }
+.al-on-canvas { --al-ring: 0 0 0 2px var(--al-surface), 0 0 0 4px var(--al-teal-text); }
