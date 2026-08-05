@@ -1,0 +1,30 @@
+.al-sec--navy { background: var(--al-navy); color: var(--al-ink-inverse); }
+
+.al-sec__eyebrow {
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-teal-text);
+  margin: 0 0 var(--al-space-3);
+}
+.al-sec--navy .al-sec__eyebrow { color: var(--al-teal); }
+
+.al-sec__heading {
+  font-size: var(--al-text-h2);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+  letter-spacing: var(--al-tracking-display);
+  margin: 0 0 var(--al-space-3);
+  max-width: 20ch;
+  text-wrap: balance;
+}
+
+.al-sec__intro {
+  font-size: var(--al-text-body-lg);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+  margin: 0 0 var(--al-space-6);
+  max-width: 62ch;
+}
+.al-sec--navy .al-sec__intro { color: var(--al-ink-inverse-muted); }
