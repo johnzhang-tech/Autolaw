@@ -26,7 +26,10 @@ const SRC = join(process.cwd(), 'src');
 const sourceFiles = () =>
   walk(SRC)
     .filter((f) => !f.includes('__tests__'))
-    .filter((f) => /\.(tsx?|css|html)$/.test(f));
+    // .md is included because the Figma export shipped an Attributions.md crediting
+    // Unsplash photography and shadcn/ui long after both were gone. A stale claim in
+    // a doc is the same credibility problem as one in markup.
+    .filter((f) => /\.(tsx?|css|html|md)$/.test(f));
 
 describe('credibility guards', () => {
   it('ships no placeholder customer logos', () => {
