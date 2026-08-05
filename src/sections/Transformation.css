@@ -26,27 +26,33 @@
 
 .al-tf__t { font-size: var(--al-text-h3); font-weight: var(--al-weight-semibold); margin: 0 0 var(--al-space-3); }
 
-.al-tf__docs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+/*
+ * Three lists sitting side by side in three equal-height cards, so their row rhythms are
+ * read against each other whether or not anyone means them to be. They were on 4px/9px,
+ * 8px/10px and 9px/11px — three hand-picked values, none of them on the spacing scale.
+ * The two block lists now share one padding step and the chips take the one below it.
+ */
+.al-tf__docs { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
 .al-tf__docs li {
-  font-size: 11px; padding: 4px 9px; border-radius: var(--al-radius-pill);
+  font-size: 11px; padding: var(--al-space-1) var(--al-space-2); border-radius: var(--al-radius-pill);
   background: var(--al-canvas); border: 1px solid var(--al-hairline); color: var(--al-ink-muted);
 }
 
-.al-tf__rows { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.al-tf__rows { display: grid; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
 .al-tf__row {
   display: flex; align-items: center; gap: var(--al-space-2);
   background: var(--al-navy-raised); border-radius: var(--al-radius-sm);
-  padding: 8px 10px; font-size: 11px; color: var(--al-ink-inverse-muted);
+  padding: var(--al-space-2) var(--al-space-3); font-size: 11px; color: var(--al-ink-inverse-muted);
 }
 .al-tf__row i { width: 5px; height: 5px; border-radius: 50%; background: var(--al-teal); flex: none; }
 .al-tf__row--conflict i { background: var(--al-amber); }
 
-.al-tf__outs { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.al-tf__outs { display: grid; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
 .al-tf__outs li {
   border-left: 3px solid var(--al-teal-text);
   background: var(--al-canvas);
   border-radius: var(--al-radius-sm);
-  padding: 9px 11px;
+  padding: var(--al-space-2) var(--al-space-3);
   font-size: var(--al-text-sm);
 }
 

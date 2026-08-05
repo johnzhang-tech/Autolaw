@@ -8,14 +8,8 @@
   .al-hero__grid { grid-template-columns: 1fr; gap: var(--al-space-5); }
 }
 
-.al-hero__eyebrow {
-  font-size: var(--al-text-xs);
-  font-weight: var(--al-weight-bold);
-  letter-spacing: var(--al-tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--al-teal-text);
-  margin: 0 0 var(--al-space-3);
-}
+/* The eyebrow is .al-sec__eyebrow from Section.css. It used to be duplicated here, byte
+   for byte, which is one declaration to change and two places to remember. */
 
 .al-hero__title {
   font-size: var(--al-text-display);
@@ -37,9 +31,9 @@
 .al-hero__ctas { display: flex; gap: var(--al-space-3); flex-wrap: wrap; margin-bottom: var(--al-space-5); }
 
 .al-hero__strip {
-  display: flex; flex-wrap: wrap; gap: 6px var(--al-space-4);
+  display: flex; flex-wrap: wrap; gap: var(--al-space-2) var(--al-space-4);
   font-size: var(--al-text-xs); color: var(--al-ink-muted);
   list-style: none; margin: 0; padding: 0;
 }
-.al-hero__strip li { display: inline-flex; align-items: center; gap: 5px; }
+.al-hero__strip li { display: inline-flex; align-items: center; gap: var(--al-space-1); }
 .al-hero__tick { width: 11px; height: 11px; color: var(--al-teal-text); flex: none; }

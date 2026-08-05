@@ -37,7 +37,7 @@ export function Hero() {
     <div className="al-section al-hero">
       <div className="al-container al-hero__grid">
         <div>
-          <p className="al-hero__eyebrow">
+          <p className="al-sec__eyebrow">
             AI-native case intelligence for personal injury &amp; workers&rsquo; compensation firms
           </p>
           <h1 className="al-hero__title">Turn case complexity into legal advantage.</h1>

@@ -1,7 +1,7 @@
 .al-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--al-space-1);
   font-size: var(--al-text-xs);
   font-weight: var(--al-weight-semibold);
   padding: 5px 11px;

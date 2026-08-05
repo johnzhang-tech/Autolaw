@@ -1,7 +1,9 @@
+/* --al-space-5, like every other --al-radius-panel surface on the site. This was the one
+   panel padded a step tighter, and it showed next to the hero copy beside it. */
 .al-cockpit {
   background: var(--al-navy);
   border-radius: var(--al-radius-panel);
-  padding: var(--al-space-4);
+  padding: var(--al-space-5);
   box-shadow: var(--al-shadow-card);
 }
 .al-cockpit__top {
@@ -14,8 +16,8 @@
 .al-cockpit__case { color: #fff; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
 .al-cockpit__meta { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
 .al-cockpit__live {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  display: inline-flex; align-items: center; gap: var(--al-space-1);
+  font-size: 10px; text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow);
   color: var(--al-teal); font-weight: var(--al-weight-bold); white-space: nowrap;
 }
 .al-cockpit__pulse {
@@ -42,4 +44,4 @@
 }
 .al-tile--verified .al-tile__n { color: var(--al-teal); }
 .al-tile--conflict .al-tile__n { color: var(--al-amber); }
-.al-tile__l { font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 6px; line-height: 1.35; }
+.al-tile__l { font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 6px; line-height: var(--al-leading-snug); }
