@@ -68,9 +68,15 @@ export function Chronology() {
                 <dd>{v}</dd>
               </div>
             ))}
+            {/*
+              Named "Extraction confidence", not "Confidence". A bare percentage sitting
+              next to a Confirm button reads as the machine's view of whether the fact is
+              true, which competes with the promise that only an attorney makes it one.
+              The label says what the number actually measures.
+            */}
             {event.confidence !== null && (
               <div>
-                <dt>Confidence</dt>
+                <dt>Extraction confidence</dt>
                 <dd>
                   <span className="al-conf">
                     <span className="al-conf__fill" style={{ width: `${event.confidence}%` }} />
@@ -82,9 +88,14 @@ export function Chronology() {
           </dl>
 
           <div className="al-detail__actions">
+            {/*
+              "Confirm" and "Flag" are unambiguous beside the fact they act on and
+              meaningless read out of context, which is how a screen reader reaches them.
+              The accessible names say what is confirmed and that nothing is recorded.
+            */}
             <button type="button" className="al-mini al-mini--go">{event.action}</button>
-            <button type="button" className="al-mini">Confirm</button>
-            <button type="button" className="al-mini">Flag</button>
+            <button type="button" className="al-mini" aria-label="Confirm this fact (demonstration only)">Confirm</button>
+            <button type="button" className="al-mini" aria-label="Flag this fact for review (demonstration only)">Flag</button>
           </div>
         </div>
       </div>
