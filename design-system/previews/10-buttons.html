@@ -1,0 +1,62 @@
+<!-- @dsCard group="Components" name="Buttons & links" subtitle="Primary, secondary, ghost, inverse — 3 sizes, all states" -->
+<style>
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--al-space-2); font-family: var(--al-font-ui); font-weight: var(--al-weight-semibold); border-radius: var(--al-radius-pill); border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: background-color var(--al-duration-fast) var(--al-ease), border-color var(--al-duration-fast) var(--al-ease), color var(--al-duration-fast) var(--al-ease), transform var(--al-duration-fast) var(--al-ease); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled, .btn[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+
+  .btn-lg { font-size: var(--al-text-body); padding: 14px 26px; }
+  .btn-md { font-size: var(--al-text-sm); padding: 11px 20px; }
+  .btn-sm { font-size: var(--al-text-xs); padding: 8px 14px; }
+
+  .btn-primary { background: var(--al-navy); color: var(--al-ink-inverse); }
+  .btn-primary:hover { background: #16344f; }
+  .btn-secondary { background: transparent; color: var(--al-ink); border-color: var(--al-hairline-strong); }
+  .btn-secondary:hover { border-color: var(--al-ink); background: rgba(19,34,46,0.03); }
+  .btn-ghost { background: transparent; color: var(--al-teal-text); padding-left: 8px; padding-right: 8px; }
+  .btn-ghost:hover { background: var(--al-teal-wash); }
+
+  .inv { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); }
+  .btn-inverse { background: var(--al-teal); color: var(--al-navy); }
+  .btn-inverse:hover { background: #1ec0ae; }
+  .btn-inverse-secondary { background: transparent; color: var(--al-ink-inverse); border-color: var(--al-hairline-inverse); }
+  .btn-inverse-secondary:hover { border-color: var(--al-teal); color: var(--al-teal); }
+  .inv :focus-visible { box-shadow: var(--al-focus-ring-inverse); }
+
+  .row { display: flex; gap: var(--al-space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--al-space-5); }
+  .lnk { color: var(--al-teal-text); font-weight: var(--al-weight-semibold); text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+  .lnk:hover { color: var(--al-ink); }
+  .caret { width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Primary &mdash; one per screen</p>
+  <div class="row">
+    <a href="#" class="btn btn-primary btn-lg">Analyze one case <i class="caret"></i></a>
+    <a href="#" class="btn btn-primary btn-md">Analyze one case</a>
+    <button class="btn btn-primary btn-sm">Start</button>
+    <button class="btn btn-primary btn-md" disabled>Disabled</button>
+  </div>
+
+  <p class="ds-title">Secondary &amp; ghost</p>
+  <div class="row">
+    <a href="#" class="btn btn-secondary btn-lg">Watch a 3-minute walkthrough</a>
+    <a href="#" class="btn btn-secondary btn-md">Book a demo</a>
+    <button class="btn btn-ghost btn-md">See how citations work <i class="caret"></i></button>
+    <a href="#" class="lnk">Read the security overview</a>
+  </div>
+
+  <p class="ds-title">Inverse &mdash; on navy panels</p>
+  <div class="inv">
+    <div class="row" style="margin-bottom:0">
+      <a href="#" class="btn btn-inverse btn-lg">Analyze one case <i class="caret"></i></a>
+      <a href="#" class="btn btn-inverse-secondary btn-lg">Talk to us</a>
+      <button class="btn btn-inverse btn-sm">Open citation</button>
+    </div>
+  </div>
+
+  <p style="max-width: 62ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: var(--al-space-5) 0 0;">
+    Primary is navy on light surfaces and teal on navy &mdash; the accent is only ever the
+    call to action where it passes contrast. Buttons never use amber: amber means conflict,
+    and a conflict is not something a visitor clicks.
+  </p>
+</div>

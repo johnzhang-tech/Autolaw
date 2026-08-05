@@ -1,0 +1,112 @@
+<!-- @dsCard group="Patterns" name="Interactive chronology" subtitle="Select an event to reveal document, page, and the exact sentence" -->
+<style>
+  .chron { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); }
+  .ch-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--al-space-3); flex-wrap: wrap; margin-bottom: var(--al-space-4); }
+  .ch-head h3 { margin: 0; color: #fff; font-size: var(--al-text-h3); }
+  .ch-head p { margin: 0; color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
+
+  .ch-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--al-space-4); }
+  @media (max-width: 860px) { .ch-body { grid-template-columns: 1fr; } }
+
+  .spine { list-style: none; margin: 0; padding: 0 0 0 var(--al-space-4); position: relative; }
+  .spine::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: var(--al-hairline-inverse); }
+  .ev { position: relative; margin-bottom: 2px; }
+  .ev::before { content: ""; position: absolute; left: -19px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--al-state-neutral); border: 2px solid var(--al-navy); }
+  .ev.is-v::before { background: var(--al-teal); }
+  .ev.is-c::before { background: var(--al-amber); }
+  .ev button { width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--al-radius-card); padding: var(--al-space-3); cursor: pointer; font-family: var(--al-font-ui); color: #fff; transition: background-color var(--al-duration-fast) var(--al-ease), border-color var(--al-duration-fast) var(--al-ease); }
+  .ev button:hover { background: var(--al-navy-raised); }
+  .ev button[aria-expanded="true"] { background: var(--al-navy-raised); border-color: var(--al-teal); }
+  .ev-d { font-size: 11px; color: var(--al-ink-inverse-muted); font-variant-numeric: tabular-nums; }
+  .ev-t { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); margin-top: 2px; }
+  .ev-m { font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 3px; }
+  .ev-flag { display: inline-block; font-size: 10px; font-weight: var(--al-weight-bold); padding: 2px 7px; border-radius: var(--al-radius-pill); margin-top: 6px; }
+  .f-c { background: rgba(199,107,59,0.2); color: var(--al-amber); }
+  .f-g { background: rgba(199,107,59,0.2); color: var(--al-amber); }
+  .ev :focus-visible { box-shadow: var(--al-focus-ring-inverse); }
+
+  .detail { background: var(--al-surface); border-radius: var(--al-radius-card); padding: var(--al-space-4); align-self: start; position: sticky; top: var(--al-space-4); }
+  .dt-h { display: flex; justify-content: space-between; gap: var(--al-space-3); align-items: baseline; border-bottom: 1px solid var(--al-hairline); padding-bottom: var(--al-space-2); margin-bottom: var(--al-space-3); }
+  .dt-src { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+  .dt-pg { font-size: var(--al-text-xs); color: var(--al-ink-muted); white-space: nowrap; }
+  .dt-q { font-family: var(--al-font-record); font-size: var(--al-text-body); line-height: 1.6; border-left: 3px solid var(--al-teal-text); padding-left: var(--al-space-3); margin: 0 0 var(--al-space-3); }
+  .dt-q mark { background: var(--al-teal-wash); border-radius: 3px; padding: 1px 2px; }
+  .dt-m { display: grid; grid-template-columns: auto 1fr; gap: 5px var(--al-space-3); font-size: var(--al-text-xs); margin: 0 0 var(--al-space-3); }
+  .dt-m dt { color: var(--al-ink-muted); } .dt-m dd { margin: 0; font-weight: var(--al-weight-medium); }
+  .conf-bar { display: inline-block; width: 52px; height: 5px; border-radius: 3px; background: var(--al-hairline); overflow: hidden; vertical-align: middle; margin-right: 6px; }
+  .conf-fill { display: block; height: 100%; background: var(--al-teal-text); }
+  .low .conf-fill { background: var(--al-amber); }
+  .dt-act { display: flex; gap: var(--al-space-2); flex-wrap: wrap; }
+  .mini { font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold); padding: 7px 13px; border-radius: var(--al-radius-pill); border: 1px solid var(--al-hairline-strong); background: transparent; cursor: pointer; font-family: var(--al-font-ui); }
+  .mini-go { background: var(--al-navy); color: #fff; border-color: transparent; }
+  .dt-warn { background: var(--al-amber-wash); color: var(--al-amber-text); border-radius: var(--al-radius-sm); padding: var(--al-space-3); font-size: var(--al-text-xs); margin-bottom: var(--al-space-3); }
+  .dt-warn b { display: block; }
+</style>
+
+<div class="ds-shell">
+  <div class="chron">
+    <div class="ch-head">
+      <h3>Medical chronology</h3>
+      <p>Demonstration data &middot; select any event</p>
+    </div>
+    <div class="ch-body">
+      <ul class="spine" id="spine">
+        <li class="ev is-v"><button aria-expanded="true" data-i="0"><span class="ev-d">2025&#8209;01&#8209;18</span><span class="ev-t">Date of injury &mdash; lifting incident</span><span class="ev-m">Employer incident report</span></button></li>
+        <li class="ev is-v"><button aria-expanded="false" data-i="1"><span class="ev-d">2025&#8209;01&#8209;22</span><span class="ev-t">Initial evaluation &mdash; PTP</span><span class="ev-m">Dr. L. Okafor &middot; occupational medicine</span></button></li>
+        <li class="ev is-c"><button aria-expanded="false" data-i="2"><span class="ev-d">2025&#8209;03&#8209;14</span><span class="ev-t">MRI lumbar spine</span><span class="ev-m">Valley Imaging</span><span class="ev-flag f-c">Referenced but not produced</span></button></li>
+        <li class="ev"><button aria-expanded="false" data-i="3"><span class="ev-d">2025&#8209;04&#8209;02</span><span class="ev-t">Released to modified duty</span><span class="ev-m">PTP report</span><span class="ev-flag f-g">Conflicts with QME</span></button></li>
+        <li class="ev is-v"><button aria-expanded="false" data-i="4"><span class="ev-d">2025&#8209;04&#8209;18</span><span class="ev-t">QME evaluation</span><span class="ev-m">Dr. A. Reyes &middot; orthopedic surgery</span></button></li>
+      </ul>
+
+      <div class="detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p style="max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: var(--al-space-5) 0 0;">
+    This is the section that <em>proves</em> the claim instead of asserting it. Note the third
+    event: a study every other document references but which was never produced. Finding what
+    is missing is harder, and more valuable, than summarizing what is present.
+  </p>
+</div>
+
+<script>
+  (function () {
+    var DATA = [
+      { src: "Employer incident report", pg: "page 1", q: ["Employee states he felt a sharp pull in the low back while ", "lifting a container estimated at 60 pounds from floor level", "."], meta: [["Reported", "2025-01-18"], ["Body part", "Lumbar spine"], ["Witness", "Named on p.2"]], conf: 97 },
+      { src: "PTP report — Dr. L. Okafor", pg: "page 2", q: ["Examination reveals paraspinal tenderness and reduced lumbar flexion. ", "Assessment: lumbar strain with radicular symptoms into the left lower extremity", "."], meta: [["Provider", "L. Okafor, DO"], ["Diagnosis", "Lumbar strain, radiculopathy"], ["Date of service", "2025-01-22"]], conf: 92 },
+      { src: "Not in the record", pg: "—", q: null, meta: [["Referenced by", "QME p.14, PTP p.5"], ["Facility", "Valley Imaging"], ["Status", "Not produced"]], conf: null,
+        warn: ["Referenced but never produced.", "Two documents cite an MRI dated 03/14. No imaging report exists in the file. Autolaw flags the gap and drafts the records request rather than inferring the findings."] },
+      { src: "PTP report — Dr. L. Okafor", pg: "page 3", q: ["Patient ", "may return to modified duty with no lifting over 15 pounds", " effective 04/02."], meta: [["Work status", "Modified duty"], ["Restriction", "No lifting > 15 lb"], ["Date of service", "2025-04-02"]], conf: 48,
+        warn: ["Unresolved conflict.", "The QME dated 04/18 states the claimant remains temporarily totally disabled. Both sources stay visible with their dates. Autolaw does not pick a winner — an attorney resolves it."] },
+      { src: "QME report — Dr. A. Reyes", pg: "page 14", q: ["Claimant reports persistent low back pain radiating into the left lower extremity. ", "MRI dated 03/14 demonstrates a 4mm disc protrusion at L4–L5 with mild foraminal narrowing", "."], meta: [["Provider", "A. Reyes, MD"], ["Finding", "Disc protrusion, L4–L5"], ["Date of service", "2025-04-18"]], conf: 94 }
+    ];
+
+    var detail = document.getElementById("detail");
+    var buttons = Array.prototype.slice.call(document.querySelectorAll("#spine button"));
+
+    function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+
+    function render(i) {
+      var d = DATA[i];
+      var html = '<div class="dt-h"><span class="dt-src">' + esc(d.src) + '</span><span class="dt-pg">' + esc(d.pg) + "</span></div>";
+      if (d.warn) html += '<div class="dt-warn"><b>' + esc(d.warn[0]) + "</b>" + esc(d.warn[1]) + "</div>";
+      if (d.q) html += '<p class="dt-q">' + esc(d.q[0]) + "<mark>" + esc(d.q[1]) + "</mark>" + esc(d.q[2]) + "</p>";
+      html += '<dl class="dt-m">';
+      d.meta.forEach(function (m) { html += "<dt>" + esc(m[0]) + "</dt><dd>" + esc(m[1]) + "</dd>"; });
+      if (d.conf !== null) {
+        html += "<dt>Confidence</dt><dd" + (d.conf < 60 ? ' class="low"' : "") + '><span class="conf-bar"><span class="conf-fill" style="width:' + d.conf + '%"></span></span>' + (d.conf < 60 ? "unresolved" : d.conf + "%") + "</dd>";
+      }
+      html += "</dl><div class='dt-act'>" + (d.q ? '<button class="mini mini-go">Open ' + esc(d.pg) + "</button>" : '<button class="mini mini-go">Draft records request</button>') + '<button class="mini">Confirm</button><button class="mini">Flag</button></div>';
+      detail.innerHTML = html;
+    }
+
+    buttons.forEach(function (b, i) {
+      b.addEventListener("click", function () {
+        buttons.forEach(function (o) { o.setAttribute("aria-expanded", "false"); });
+        b.setAttribute("aria-expanded", "true");
+        render(i);
+      });
+    });
+    render(0);
+  })();
+</script>

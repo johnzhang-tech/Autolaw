@@ -1,0 +1,77 @@
+<!-- @dsCard group="Patterns" name="Trust comparison" subtitle="Why not simply upload the file to a general-purpose chatbot" -->
+<style>
+  .cmp { background: var(--al-surface); border: 1px solid var(--al-hairline); border-radius: var(--al-radius-panel); overflow: hidden; margin-bottom: var(--al-space-5); }
+  .scroller { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; }
+  th, td { text-align: left; padding: var(--al-space-3) var(--al-space-4); border-bottom: 1px solid var(--al-hairline); font-size: var(--al-text-sm); vertical-align: top; }
+  thead th { background: var(--al-canvas); font-size: var(--al-text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--al-ink-muted); font-weight: var(--al-weight-bold); position: sticky; top: 0; }
+  thead th:last-child { background: var(--al-navy); color: var(--al-teal); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: var(--al-weight-semibold); width: 34%; }
+  td:nth-child(2) { color: var(--al-ink-muted); }
+  td:last-child { background: rgba(24,169,153,0.05); border-left: 2px solid var(--al-teal-text); }
+  .mk { display: inline-flex; align-items: center; gap: 6px; font-weight: var(--al-weight-semibold); }
+  .yes { color: var(--al-teal-text); } .no { color: var(--al-amber-text); }
+  .mk svg { width: 13px; height: 13px; flex: none; }
+  .note { max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Why not simply upload the file to a chatbot</p>
+
+  <div class="cmp">
+    <div class="scroller">
+      <table>
+        <caption class="ds-title" style="text-align:left; padding: var(--al-space-4) var(--al-space-4) 0; margin: 0;">General-purpose AI vs. Autolaw</caption>
+        <thead>
+          <tr><th scope="col">Requirement</th><th scope="col">General-purpose chatbot</th><th scope="col">Autolaw</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Where a fact came from</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Summarizes; sources approximate or absent</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Document, page, and the exact sentence &mdash; deep-linked</td>
+          </tr>
+          <tr>
+            <td>Two documents disagree</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Picks one, silently</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Surfaced as a conflict with both sources and dates</td>
+          </tr>
+          <tr>
+            <td>A fact with no support</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Reads identically to a supported one</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Held in a separate lane and never grouped with cited facts</td>
+          </tr>
+          <tr>
+            <td>What is missing from the file</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Cannot know what it was never given</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Detects referenced-but-absent records and drafts the request</td>
+          </tr>
+          <tr>
+            <td>Becoming case truth</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Output is the answer</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Proposes only; an attorney confirms before anything is recorded</td>
+          </tr>
+          <tr>
+            <td>Practice fit</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Generic</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> PI and WC isolated at the route, navigation, and data layer</td>
+          </tr>
+          <tr>
+            <td>Your data</td>
+            <td><span class="mk no"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7m0-7l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Consumer terms; retention varies</td>
+            <td><span class="mk yes"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Tenant-isolated, auditable, never used to train models</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>Every row is a behavior, not an adjective.</strong> The table earns its place only
+    because each Autolaw column entry corresponds to something implemented in the application
+    &mdash; which is also the standard any new row has to meet before it can be added.
+    The table scrolls inside its own container so the page never scrolls sideways.
+  </p>
+</div>

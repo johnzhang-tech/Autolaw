@@ -1,0 +1,67 @@
+<!-- @dsCard group="Foundations" name="Typography" subtitle="Manrope UI scale; Source Serif 4 as a semantic signal" -->
+<style>
+  .ty-row { border-top: 1px solid var(--al-hairline); padding: var(--al-space-4) 0; display: grid; grid-template-columns: 160px 1fr; gap: var(--al-space-4); align-items: baseline; }
+  @media (max-width: 720px) { .ty-row { grid-template-columns: 1fr; gap: var(--al-space-2); } }
+  .ty-label { font-size: var(--al-text-xs); color: var(--al-ink-muted); font-variant-numeric: tabular-nums; }
+  .ty-label code { display: block; color: var(--al-ink); font-size: 11px; }
+
+  .eyebrow { font-size: var(--al-text-xs); font-weight: var(--al-weight-bold); letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase; color: var(--al-teal-text); }
+  .display { font-size: var(--al-text-display); font-weight: var(--al-weight-bold); line-height: var(--al-leading-tight); letter-spacing: var(--al-tracking-display); margin: 0; }
+  .h2 { font-size: var(--al-text-h2); font-weight: var(--al-weight-bold); line-height: var(--al-leading-snug); letter-spacing: var(--al-tracking-display); margin: 0; }
+  .h3 { font-size: var(--al-text-h3); font-weight: var(--al-weight-semibold); line-height: var(--al-leading-snug); margin: 0; }
+  .body-lg { font-size: var(--al-text-body-lg); line-height: var(--al-leading-normal); color: var(--al-ink-muted); margin: 0; max-width: 62ch; }
+  .body { font-size: var(--al-text-body); line-height: var(--al-leading-normal); margin: 0; max-width: 68ch; }
+  .meta { font-size: var(--al-text-sm); color: var(--al-ink-muted); margin: 0; }
+
+  .record-demo { background: var(--al-surface); border: 1px solid var(--al-hairline); border-left: 3px solid var(--al-teal-text); border-radius: var(--al-radius-card); padding: var(--al-space-4); max-width: 62ch; }
+  .record { font-family: var(--al-font-record); font-size: var(--al-text-body-lg); line-height: 1.6; margin: 0 0 var(--al-space-3); }
+  .record mark { background: var(--al-teal-wash); color: var(--al-ink); padding: 1px 2px; border-radius: 3px; }
+  .cite { font-size: var(--al-text-xs); color: var(--al-ink-muted); font-family: var(--al-font-ui); display: flex; gap: var(--al-space-2); flex-wrap: wrap; }
+  .cite strong { color: var(--al-teal-text); font-weight: var(--al-weight-semibold); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Two typefaces, one rule</p>
+  <p class="body" style="margin-bottom: var(--al-space-6); color: var(--al-ink-muted);">
+    <strong style="color: var(--al-ink)">Manrope</strong> sets everything the interface says.
+    <strong style="color: var(--al-ink)">Source Serif 4</strong> is reserved for what the <em>record</em> says &mdash; verbatim
+    excerpts and case narrative, never decoration. A reader learns within one screen that serif
+    means &ldquo;these are the document&rsquo;s words, not ours.&rdquo;
+  </p>
+
+  <div class="ty-row">
+    <div class="ty-label">Eyebrow<code>--al-text-xs / bold</code></div>
+    <div class="eyebrow">AI-native case intelligence</div>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Display<code>clamp(2.5&ndash;4.25rem)</code></div>
+    <h1 class="display">Turn case complexity into legal advantage.</h1>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Heading 2<code>clamp(1.875&ndash;3rem)</code></div>
+    <h2 class="h2">From scattered evidence to case intelligence</h2>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Heading 3<code>clamp(1.25&ndash;1.5rem)</code></div>
+    <h3 class="h3">Conflicting sources are surfaced, never silently resolved</h3>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Body large<code>1.125rem</code></div>
+    <p class="body-lg">Autolaw transforms intake calls, medical records, expert reports, and case files into a living, source-linked Case Brain.</p>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Body<code>1rem / 1.55</code></div>
+    <p class="body">Every fact the platform surfaces carries a citation to the document, the page, and the sentence it came from. Facts arriving without one are never grouped with those that do.</p>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Meta<code>0.875rem</code></div>
+    <p class="meta">QME report &middot; p.14 &middot; reviewed 3 days ago</p>
+  </div>
+  <div class="ty-row">
+    <div class="ty-label">Record<code>Source Serif 4</code></div>
+    <div class="record-demo">
+      <p class="record">Claimant reports persistent low back pain radiating into the left lower extremity. <mark>MRI dated 03/14 demonstrates a 4mm disc protrusion at L4&ndash;L5 with mild foraminal narrowing.</mark></p>
+      <div class="cite"><strong>QME report</strong><span>&middot;</span><span>page 14</span><span>&middot;</span><span>Dr. A. Reyes, orthopedic</span></div>
+    </div>
+  </div>
+</div>

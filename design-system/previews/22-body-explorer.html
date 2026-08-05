@@ -1,0 +1,130 @@
+<!-- @dsCard group="Patterns" name="Body explorer" subtitle="Select a region for symptoms, imaging, treatment, restrictions, evidence" -->
+<style>
+  .bx { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); }
+  .bx h3 { margin: 0 0 var(--al-space-1); color: #fff; font-size: var(--al-text-h3); }
+  .bx > p { margin: 0 0 var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
+  .bx-body { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: var(--al-space-5); align-items: start; }
+  @media (max-width: 780px) { .bx-body { grid-template-columns: 1fr; } }
+
+  .fig { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); }
+  .fig svg { width: 100%; height: auto; display: block; }
+  .region { fill: var(--al-state-neutral); opacity: .45; cursor: pointer; transition: opacity var(--al-duration-fast) var(--al-ease), fill var(--al-duration-fast) var(--al-ease); }
+  .region:hover { opacity: .8; }
+  .region.on { fill: var(--al-teal); opacity: 1; }
+  .region.claimed { fill: var(--al-teal); opacity: .6; }
+  .region.claimed.on { opacity: 1; }
+  .region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
+  .body-base { fill: #1d3d59; }
+
+  .legend { display: flex; gap: var(--al-space-3); flex-wrap: wrap; font-size: 10px; color: var(--al-ink-inverse-muted); margin-top: var(--al-space-2); }
+  .legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+  .info { background: var(--al-surface); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
+  .info h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
+  .info .plain { margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: 1.55; }
+  .rows { display: grid; gap: var(--al-space-2); }
+  .r { border-left: 3px solid var(--al-teal-text); background: var(--al-canvas); border-radius: var(--al-radius-sm); padding: var(--al-space-3); }
+  .r.warn { border-left-color: var(--al-amber); }
+  .r b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--al-ink-muted); margin-bottom: 3px; }
+  .r span { font-size: var(--al-text-sm); }
+  .r cite { display: block; font-style: normal; font-size: 11px; color: var(--al-teal-text); margin-top: 4px; font-weight: var(--al-weight-semibold); }
+  .r.warn cite { color: var(--al-amber-text); }
+</style>
+
+<div class="ds-shell">
+  <div class="bx">
+    <h3>Body explorer</h3>
+    <p>Demonstration data &middot; teal marks a claimed region &middot; use arrow keys or click</p>
+    <div class="bx-body">
+      <div>
+        <div class="fig">
+          <svg viewBox="0 0 120 260" role="group" aria-label="Body region selector">
+            <g class="body-base">
+              <circle cx="60" cy="22" r="15"/>
+              <rect x="46" y="38" width="28" height="10" rx="4"/>
+              <rect x="36" y="48" width="48" height="66" rx="12"/>
+              <rect x="38" y="112" width="44" height="40" rx="8"/>
+              <rect x="20" y="52" width="14" height="62" rx="7"/><rect x="86" y="52" width="14" height="62" rx="7"/>
+              <rect x="22" y="112" width="12" height="40" rx="6"/><rect x="86" y="112" width="12" height="40" rx="6"/>
+              <rect x="42" y="152" width="16" height="60" rx="8"/><rect x="62" y="152" width="16" height="60" rx="8"/>
+              <rect x="42" y="212" width="16" height="36" rx="8"/><rect x="62" y="212" width="16" height="36" rx="8"/>
+            </g>
+            <rect class="region" data-k="cervical" tabindex="0" role="button" aria-label="Cervical spine" x="47" y="37" width="26" height="13" rx="5"/>
+            <rect class="region claimed" data-k="shoulder" tabindex="0" role="button" aria-label="Left shoulder, claimed" x="18" y="50" width="20" height="20" rx="8"/>
+            <rect class="region claimed on" data-k="lumbar" tabindex="0" role="button" aria-label="Lumbar spine, claimed, selected" x="44" y="96" width="32" height="26" rx="7"/>
+            <rect class="region" data-k="knee" tabindex="0" role="button" aria-label="Right knee" x="61" y="196" width="18" height="18" rx="7"/>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--al-teal)"></i>Claimed</span>
+            <span><i style="background:var(--al-state-neutral)"></i>Not claimed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info" id="info" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p style="max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: var(--al-space-5) 0 0;">
+    Everything reads in plain English &mdash; &ldquo;a disc in the low back is pressing on a
+    nerve&rdquo; rather than a diagnosis code &mdash; because the person evaluating this page is
+    a lawyer, not a radiologist. Each line still carries its citation.
+  </p>
+</div>
+
+<script>
+  (function () {
+    var DATA = {
+      lumbar: { t: "Lumbar spine", plain: "A disc in the low back is pressing on a nerve, which is why pain travels down the left leg.",
+        rows: [["Symptoms", "Low back pain radiating into the left lower extremity", "PTP report p.2", 0],
+               ["Imaging", "4mm disc protrusion at L4–L5, mild foraminal narrowing", "QME report p.14", 0],
+               ["Treatment", "Conservative care, 12 physical therapy visits, epidural injection 05/2025", "Billing summary p.7", 0],
+               ["Restrictions", "No lifting over 15 lb — disputed by QME", "PTP p.3 / QME p.22", 1],
+               ["Missing", "MRI report referenced by two documents, never produced", "Records request drafted", 1]] },
+      shoulder: { t: "Left shoulder", plain: "The rotator cuff is partially torn. Surgery has been recommended but not yet authorized.",
+        rows: [["Symptoms", "Pain with overhead reach, night pain, weakness", "PTP report p.4", 0],
+               ["Imaging", "Partial-thickness supraspinatus tear", "MRI report p.1", 0],
+               ["Treatment", "Injection 06/2025; arthroscopic repair recommended", "QME report p.18", 0],
+               ["Authorization", "Utilization review denial 07/2025, IMR appeal pending", "UR letter p.1", 1]] },
+      cervical: { t: "Cervical spine", plain: "Not part of the claim. Autolaw found records referencing it, so the region stays visible rather than hidden.",
+        rows: [["Claim status", "Not an accepted body part", "Claims administrator notice p.2", 1],
+               ["Prior history", "Treatment in 2019, predates the injury", "Prior claim records p.11", 1]] },
+      knee: { t: "Right knee", plain: "Not part of the claim and no records mention it.",
+        rows: [["Claim status", "Not an accepted body part", "Claims administrator notice p.2", 1],
+               ["Records", "No documents reference this region", "—", 1]] }
+    };
+
+    var info = document.getElementById("info");
+    var regions = Array.prototype.slice.call(document.querySelectorAll(".region"));
+
+    function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+
+    function render(k) {
+      var d = DATA[k];
+      var html = "<h4>" + esc(d.t) + '</h4><p class="plain">' + esc(d.plain) + '</p><div class="rows">';
+      d.rows.forEach(function (r) {
+        html += '<div class="r' + (r[3] ? " warn" : "") + '"><b>' + esc(r[0]) + "</b><span>" + esc(r[1]) + "</span><cite>" + esc(r[2]) + "</cite></div>";
+      });
+      info.innerHTML = html + "</div>";
+    }
+
+    function select(el) {
+      regions.forEach(function (r) { r.classList.remove("on"); });
+      el.classList.add("on");
+      render(el.dataset.k);
+    }
+
+    regions.forEach(function (el, i) {
+      el.addEventListener("click", function () { select(el); });
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(el); return; }
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+        e.preventDefault();
+        var fwd = e.key === "ArrowRight" || e.key === "ArrowDown";
+        var next = regions[(i + (fwd ? 1 : regions.length - 1)) % regions.length];
+        next.focus(); select(next);
+      });
+    });
+    render("lumbar");
+  })();
+</script>

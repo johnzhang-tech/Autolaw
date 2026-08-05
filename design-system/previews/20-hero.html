@@ -1,0 +1,84 @@
+<!-- @dsCard group="Patterns" name="Hero" subtitle="Eyebrow, outcome headline, dual CTA, trust strip, live cockpit" -->
+<style>
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--al-space-7); align-items: center; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: var(--al-space-5); } }
+
+  .eyebrow { font-size: var(--al-text-xs); font-weight: var(--al-weight-bold); letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase; color: var(--al-teal-text); margin: 0 0 var(--al-space-3); }
+  .hero h1 { font-size: var(--al-text-display); font-weight: var(--al-weight-bold); line-height: var(--al-leading-tight); letter-spacing: var(--al-tracking-display); margin: 0 0 var(--al-space-4); text-wrap: balance; }
+  .sub { font-size: var(--al-text-body-lg); line-height: var(--al-leading-normal); color: var(--al-ink-muted); margin: 0 0 var(--al-space-5); max-width: 54ch; }
+  .ctas { display: flex; gap: var(--al-space-3); flex-wrap: wrap; margin-bottom: var(--al-space-5); }
+  .btn { display: inline-flex; align-items: center; gap: var(--al-space-2); font-family: var(--al-font-ui); font-weight: var(--al-weight-semibold); font-size: var(--al-text-body); padding: 14px 26px; border-radius: var(--al-radius-pill); border: 1px solid transparent; text-decoration: none; cursor: pointer; transition: background-color var(--al-duration-fast) var(--al-ease), border-color var(--al-duration-fast) var(--al-ease); }
+  .btn-primary { background: var(--al-navy); color: #fff; }
+  .btn-primary:hover { background: #16344f; }
+  .btn-secondary { color: var(--al-ink); border-color: var(--al-hairline-strong); }
+  .btn-secondary:hover { border-color: var(--al-ink); }
+  .caret { width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); }
+  .play { width: 16px; height: 16px; }
+
+  .strip { display: flex; flex-wrap: wrap; gap: 6px var(--al-space-4); font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+  .strip span { display: inline-flex; align-items: center; gap: 5px; }
+  .tick { width: 11px; height: 11px; color: var(--al-teal-text); flex: none; }
+
+  /* cockpit */
+  .cockpit { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-4); box-shadow: var(--al-shadow-card); }
+  .cp-top { display: flex; align-items: center; justify-content: space-between; gap: var(--al-space-3); padding-bottom: var(--al-space-3); border-bottom: 1px solid var(--al-hairline-inverse); margin-bottom: var(--al-space-3); }
+  .cp-case { color: #fff; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+  .cp-sub { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
+  .cp-live { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--al-teal); font-weight: var(--al-weight-bold); }
+  .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--al-teal); animation: pulse 2.4s var(--al-ease) infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+
+  .cp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2); }
+  @media (max-width: 520px) { .cp-tiles { grid-template-columns: repeat(2, 1fr); } }
+  .t { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); border-left: 3px solid var(--al-state-neutral); }
+  .t-v { border-left-color: var(--al-teal); } .t-c { border-left-color: var(--al-amber); }
+  .t-n { font-size: 1.6rem; font-weight: var(--al-weight-bold); line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+  .t-v .t-n { color: var(--al-teal); } .t-c .t-n { color: var(--al-amber); }
+  .t-l { font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 6px; line-height: 1.35; }
+</style>
+
+<div class="ds-shell">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">AI-native case intelligence for personal injury &amp; workers&rsquo; compensation firms</p>
+      <h1>Turn case complexity into legal advantage.</h1>
+      <p class="sub">Autolaw transforms intake calls, medical records, expert reports, and case files into a living, source-linked Case Brain &mdash; helping your team understand the case, uncover missing evidence, and prepare stronger work product faster.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#">Analyze one case <i class="caret"></i></a>
+        <a class="btn btn-secondary" href="#"><svg class="play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5l7 4.5-7 4.5z" fill="currentColor"/></svg> Watch a 3-minute case walkthrough</a>
+      </div>
+      <div class="strip">
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Source-linked evidence</span>
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Human review controls</span>
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Auditable access</span>
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Type II &amp; HIPAA</span>
+      </div>
+    </div>
+
+    <div class="cockpit" role="img" aria-label="Case signal cockpit showing 3 missing records, 2 conflicting facts, 1 treatment gap, 41 verified facts, 6 work restrictions and 4 next actions for a demonstration case.">
+      <div class="cp-top">
+        <div>
+          <div class="cp-case">Demo case &mdash; lumbar &amp; left shoulder</div>
+          <div class="cp-sub">Workers&rsquo; comp &middot; 214 documents &middot; 1,880 pages</div>
+        </div>
+        <span class="cp-live"><i class="pulse"></i>Live</span>
+      </div>
+      <div class="cp-tiles">
+        <div class="t t-c"><div class="t-n">3</div><div class="t-l">Missing records</div></div>
+        <div class="t t-c"><div class="t-n">2</div><div class="t-l">Conflicting facts</div></div>
+        <div class="t t-c"><div class="t-n">1</div><div class="t-l">Treatment gap</div></div>
+        <div class="t t-v"><div class="t-n">41</div><div class="t-l">Verified facts</div></div>
+        <div class="t t-v"><div class="t-n">6</div><div class="t-l">Work restrictions</div></div>
+        <div class="t"><div class="t-n">4</div><div class="t-l">Next actions</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p style="max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: var(--al-space-6) 0 0;">
+    The headline is capped by <code>clamp()</code> so it never outgrows the product panel beside
+    it &mdash; the specific failure of the current site, where a 160px display line dominates the
+    screenshot. Signal counts are real product semantics, not generic analytics, and the whole
+    panel carries one descriptive label for screen readers rather than 18 unlabelled numbers.
+  </p>
+</div>

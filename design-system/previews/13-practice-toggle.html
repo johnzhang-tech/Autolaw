@@ -1,0 +1,83 @@
+<!-- @dsCard group="Components" name="Practice toggle" subtitle="PI / WC segmented control — swaps content wholesale, not labels" -->
+<style>
+  .seg { display: inline-flex; background: var(--al-canvas); border: 1px solid var(--al-hairline-strong); border-radius: var(--al-radius-pill); padding: 4px; gap: 2px; margin-bottom: var(--al-space-4); }
+  .seg button { font-family: var(--al-font-ui); font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); color: var(--al-ink-muted); background: transparent; border: 0; padding: 9px 20px; border-radius: var(--al-radius-pill); cursor: pointer; transition: background-color var(--al-duration-fast) var(--al-ease), color var(--al-duration-fast) var(--al-ease); white-space: nowrap; }
+  .seg button[aria-selected="true"] { background: var(--al-navy); color: #fff; }
+  .seg button:hover[aria-selected="false"] { color: var(--al-ink); }
+
+  .panel { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); color: var(--al-ink-inverse); }
+  .panel[hidden] { display: none; }
+  .panel h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
+  .panel > p { margin: 0 0 var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-sm); max-width: 62ch; }
+  .outs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--al-space-2); }
+  .out { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); border-left: 3px solid var(--al-teal); }
+  .out b { display: block; font-size: var(--al-text-sm); margin-bottom: 2px; }
+  .out span { font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); }
+  .fade { animation: fade var(--al-duration-base) var(--al-ease); }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
+  .note { max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin-top: var(--al-space-4); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <div class="seg" role="tablist" aria-label="Practice area">
+    <button role="tab" id="t-pi" aria-controls="p-pi" aria-selected="true">Personal Injury</button>
+    <button role="tab" id="t-wc" aria-controls="p-wc" aria-selected="false">Workers&rsquo; Compensation</button>
+  </div>
+
+  <div class="panel fade" id="p-pi" role="tabpanel" aria-labelledby="t-pi" tabindex="0">
+    <h4>Built for the demand</h4>
+    <p>Liability, causation, and damages assembled from the record &mdash; every figure traceable to a bill or a report.</p>
+    <div class="outs">
+      <div class="out"><b>Causation chain</b><span>Mechanism to diagnosis, gaps flagged</span></div>
+      <div class="out"><b>Treatment gaps</b><span>Breaks in care, with dates</span></div>
+      <div class="out"><b>Medical specials</b><span>Billed vs. paid, reconciled</span></div>
+      <div class="out"><b>Demand narrative</b><span>Source-linked, firm-formatted</span></div>
+    </div>
+  </div>
+
+  <div class="panel fade" id="p-wc" role="tabpanel" aria-labelledby="t-wc" tabindex="0" hidden>
+    <h4>Built for the claim</h4>
+    <p>A separate product surface, not PI copy with the words swapped &mdash; PI and WC are isolated at the route, navigation, and data layer.</p>
+    <div class="outs">
+      <div class="out"><b>QME/AME vs PTP</b><span>Where the opinions diverge</span></div>
+      <div class="out"><b>Work status &amp; restrictions</b><span>Current and historical</span></div>
+      <div class="out"><b>MMI / P&amp;S</b><span>Date and supporting opinion</span></div>
+      <div class="out"><b>Apportionment</b><span>Per body part, per source</span></div>
+      <div class="out"><b>UR / IMR history</b><span>Denials and appeals</span></div>
+      <div class="out"><b>Unresolved conflicts</b><span>Surfaced, never auto-resolved</span></div>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>The toggle swaps the argument, not the vocabulary.</strong> Competitors present
+    workers&rsquo; comp as a tab inside a personal-injury product. Autolaw isolates the two
+    practices in the application itself, so this control demonstrates a real boundary rather
+    than describing one. Arrow keys move between tabs; the selected panel is focusable.
+  </p>
+</div>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+    function select(tab) {
+      tabs.forEach(function (t) {
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        var on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        panel.hidden = !on;
+        if (on) { panel.classList.remove('fade'); void panel.offsetWidth; panel.classList.add('fade'); }
+      });
+    }
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { select(tab); });
+      tab.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        var next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        next.focus(); select(next);
+      });
+    });
+  })();
+</script>

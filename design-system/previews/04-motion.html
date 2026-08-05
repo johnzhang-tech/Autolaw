@@ -1,0 +1,53 @@
+<!-- @dsCard group="Foundations" name="Motion" subtitle="180–240ms, one easing curve, reduced-motion parity" -->
+<style>
+  .mo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--al-space-3); margin-bottom: var(--al-space-6); }
+  .mo { background: var(--al-surface); border: 1px solid var(--al-hairline); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
+  .mo h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-sm); }
+  .mo p { margin: 0 0 var(--al-space-3); font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+  .track { height: 34px; background: var(--al-canvas); border-radius: var(--al-radius-sm); position: relative; overflow: hidden; }
+  .dot { position: absolute; top: 7px; left: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--al-teal-text); }
+  .mo:hover .dot, .mo:focus-within .dot { transform: translateX(calc(100% + 100px)); }
+  .d-fast .dot { transition: transform var(--al-duration-fast) var(--al-ease); }
+  .d-base .dot { transition: transform var(--al-duration-base) var(--al-ease); }
+  .d-slow .dot { transition: transform var(--al-duration-slow) var(--al-ease); }
+
+  .rm { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); color: var(--al-ink-inverse); }
+  .rm h4 { margin: 0 0 var(--al-space-2); font-size: var(--al-text-h3); }
+  .rm p { margin: 0; color: var(--al-ink-inverse-muted); font-size: var(--al-text-sm); max-width: 62ch; }
+  .rm code { color: var(--al-teal); }
+  .status { display: inline-flex; align-items: center; gap: var(--al-space-2); margin-top: var(--al-space-4); font-size: var(--al-text-sm); background: var(--al-navy-raised); padding: var(--al-space-2) var(--al-space-3); border-radius: var(--al-radius-pill); }
+  .status b { color: var(--al-teal); }
+  .live-off { display: none; }
+  @media (prefers-reduced-motion: reduce) { .live-on { display: none; } .live-off { display: inline; } }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Durations &mdash; hover or focus a card</p>
+  <div class="mo-grid">
+    <div class="mo d-fast" tabindex="0"><h4>fast &mdash; 180ms</h4><p>Chips, tooltips, focus rings, hover states.</p><div class="track"><div class="dot"></div></div></div>
+    <div class="mo d-base" tabindex="0"><h4>base &mdash; 220ms</h4><p>Panel swaps, citation cards, toggle transitions.</p><div class="track"><div class="dot"></div></div></div>
+    <div class="mo d-slow" tabindex="0"><h4>slow &mdash; 240ms</h4><p>Scroll-triggered section reveals. The ceiling.</p><div class="track"><div class="dot"></div></div></div>
+  </div>
+
+  <p class="ds-title">Easing</p>
+  <p style="font-size: var(--al-text-sm); color: var(--al-ink-muted); max-width: 62ch; margin: 0 0 var(--al-space-6);">
+    One curve everywhere: <code>cubic-bezier(0.2, 0.7, 0.3, 1)</code>. Fast departure, soft
+    arrival. No bounce, no spring, no stagger longer than 60ms. Motion in this product exists
+    to show <em>where a thing came from</em> &mdash; a citation card rising out of the timeline
+    row that produced it &mdash; never to entertain.
+  </p>
+
+  <div class="rm">
+    <h4>Reduced motion is a parity requirement, not a fallback</h4>
+    <p>
+      Under <code>prefers-reduced-motion: reduce</code> the token durations collapse to
+      <code>1ms</code> at the <code>:root</code> level, so every transition in the system is
+      suppressed at once and no component needs its own opt-out. Nothing is hidden and no
+      information is conveyed by movement alone &mdash; a signal that animates in also carries
+      its state in text and color.
+    </p>
+    <span class="status">
+      Your current setting: <b class="live-on">motion enabled</b><b class="live-off">reduced motion &mdash; transitions suppressed</b>
+    </span>
+  </div>
+</div>

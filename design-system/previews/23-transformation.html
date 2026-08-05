@@ -1,0 +1,80 @@
+<!-- @dsCard group="Patterns" name="Transformation flow" subtitle="Documents → Case Brain → work product" -->
+<style>
+  .tf { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: var(--al-space-4); align-items: stretch; margin-bottom: var(--al-space-5); }
+  @media (max-width: 900px) { .tf { grid-template-columns: 1fr; } .arrow { transform: rotate(90deg); justify-self: center; } }
+
+  .stage { background: var(--al-surface); border: 1px solid var(--al-hairline); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
+  .stage.brain { background: var(--al-navy); border-color: transparent; }
+  .st-n { font-size: 11px; font-weight: var(--al-weight-bold); letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase; color: var(--al-ink-muted); margin: 0 0 var(--al-space-2); }
+  .brain .st-n { color: var(--al-teal); }
+  .st-t { font-size: var(--al-text-h3); font-weight: var(--al-weight-semibold); margin: 0 0 var(--al-space-3); }
+  .brain .st-t { color: #fff; }
+
+  .docs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .doc { font-size: 11px; padding: 4px 9px; border-radius: var(--al-radius-pill); background: var(--al-canvas); border: 1px solid var(--al-hairline); color: var(--al-ink-muted); }
+
+  .brain-rows { display: grid; gap: 6px; }
+  .br { display: flex; align-items: center; gap: var(--al-space-2); background: var(--al-navy-raised); border-radius: var(--al-radius-sm); padding: 8px 10px; font-size: 11px; color: var(--al-ink-inverse-muted); }
+  .br i { width: 5px; height: 5px; border-radius: 50%; background: var(--al-teal); flex: none; }
+  .br.c i { background: var(--al-amber); }
+
+  .outs { display: grid; gap: 6px; }
+  .o { border-left: 3px solid var(--al-teal-text); background: var(--al-canvas); border-radius: var(--al-radius-sm); padding: 9px 11px; font-size: var(--al-text-sm); }
+
+  .arrow { display: grid; place-items: center; color: var(--al-hairline-strong); }
+  .arrow svg { width: 22px; height: 22px; }
+
+  .note { max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">From scattered evidence to case intelligence</p>
+
+  <div class="tf">
+    <div class="stage">
+      <p class="st-n">Step 1</p>
+      <h4 class="st-t">What arrives</h4>
+      <div class="docs">
+        <span class="doc">Intake calls</span><span class="doc">QME / AME reports</span><span class="doc">PTP reports</span>
+        <span class="doc">Imaging</span><span class="doc">Billing</span><span class="doc">Wage records</span>
+        <span class="doc">Subpoenaed records</span><span class="doc">Prior claims</span><span class="doc">Correspondence</span>
+      </div>
+    </div>
+
+    <div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15m0 0l-5-5m5 5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="stage brain">
+      <p class="st-n">Step 2</p>
+      <h4 class="st-t">Case Brain</h4>
+      <div class="brain-rows">
+        <div class="br"><i></i>Every fact cited to document, page, sentence</div>
+        <div class="br"><i></i>Normalized across providers and dates</div>
+        <div class="br c"><i></i>Conflicts surfaced, never auto-resolved</div>
+        <div class="br c"><i></i>Gaps identified &mdash; what is missing</div>
+        <div class="br"><i></i>Attorney confirms before it becomes truth</div>
+      </div>
+    </div>
+
+    <div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h15m0 0l-5-5m5 5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="stage">
+      <p class="st-n">Step 3</p>
+      <h4 class="st-t">What you get</h4>
+      <div class="outs">
+        <div class="o">Source-linked chronology</div>
+        <div class="o">Missing-evidence checklist</div>
+        <div class="o">Issue map &amp; conflicts</div>
+        <div class="o">QME/AME analysis</div>
+        <div class="o">Demand-ready narrative</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>The middle stage is the product.</strong> The current site&rsquo;s three steps end at
+    &ldquo;let the AI agents do the work,&rdquo; which shows a visitor nothing. Naming the five
+    things the Case Brain actually does &mdash; and ending on five recognizable deliverables
+    &mdash; converts a process diagram into an argument.
+  </p>
+</div>

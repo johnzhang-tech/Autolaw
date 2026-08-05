@@ -1,0 +1,72 @@
+<!-- @dsCard group="Foundations" name="Color" subtitle="Palette, semantic states, and the teal-on-navy rule" -->
+<style>
+  .sw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--al-space-3); margin-bottom: var(--al-space-6); }
+  .sw { border: 1px solid var(--al-hairline); border-radius: var(--al-radius-card); overflow: hidden; background: var(--al-surface); }
+  .sw-chip { height: 72px; }
+  .sw-meta { padding: var(--al-space-2) var(--al-space-3) var(--al-space-3); }
+  .sw-name { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+  .sw-val { font-size: var(--al-text-xs); color: var(--al-ink-muted); font-variant-numeric: tabular-nums; }
+  .sw-ratio { font-size: var(--al-text-xs); color: var(--al-teal-text); font-weight: var(--al-weight-semibold); }
+
+  .rule { display: grid; grid-template-columns: 1fr 1fr; gap: var(--al-space-3); margin-bottom: var(--al-space-6); }
+  @media (max-width: 720px) { .rule { grid-template-columns: 1fr; } }
+  .rule-panel { border-radius: var(--al-radius-panel); padding: var(--al-space-5); }
+  .rule-panel h4 { margin: 0 0 var(--al-space-2); font-size: var(--al-text-sm); }
+  .rule-panel p { margin: 0; font-size: var(--al-text-sm); }
+  .rule-pass { background: var(--al-navy); }
+  .rule-pass h4, .rule-pass .demo { color: var(--al-teal); }
+  .rule-pass p { color: var(--al-ink-inverse-muted); }
+  .rule-fail { background: var(--al-canvas); border: 1px dashed var(--al-hairline-strong); }
+  .rule-fail .demo { color: var(--al-teal); }
+  .rule-fail p { color: var(--al-ink-muted); }
+  .demo { font-size: var(--al-text-h3); font-weight: var(--al-weight-bold); display: block; margin-bottom: var(--al-space-2); }
+  .verdict { display: inline-block; font-size: var(--al-text-xs); font-weight: var(--al-weight-bold); letter-spacing: 0.04em; padding: 2px 8px; border-radius: var(--al-radius-pill); margin-bottom: var(--al-space-3); }
+  .verdict-ok { background: rgba(24,169,153,0.16); color: var(--al-teal); }
+  .verdict-no { background: var(--al-amber-wash); color: var(--al-amber-text); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">The governing rule</p>
+  <div class="rule">
+    <div class="rule-panel rule-pass">
+      <span class="verdict verdict-ok">{{ratio:--al-teal|--al-navy}} &middot; passes AA</span>
+      <span class="demo">Source-linked evidence</span>
+      <h4>Teal on navy</h4>
+      <p>Every live product visualization sits on a navy panel. Teal reads as signal here, and only here.</p>
+    </div>
+    <div class="rule-panel rule-fail">
+      <span class="verdict verdict-no">{{ratio:--al-teal|--al-canvas}} &middot; fails AA</span>
+      <span class="demo">Source-linked evidence</span>
+      <h4>Teal on canvas</h4>
+      <p>Never do this. Use <code>--al-teal-text</code> (<strong>{{ratio:--al-teal-text|--al-canvas}}</strong>) for interactive text on light surfaces.</p>
+    </div>
+  </div>
+
+  <p class="ds-title">Text &amp; surface</p>
+  <div class="sw-grid">
+    <div class="sw"><div class="sw-chip" style="background:var(--al-ink)"></div><div class="sw-meta"><div class="sw-name">ink</div><div class="sw-val">#13222E</div><div class="sw-ratio">{{ratio:--al-ink|--al-canvas}} on canvas</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-ink-muted)"></div><div class="sw-meta"><div class="sw-name">ink-muted</div><div class="sw-val">#4A5A66</div><div class="sw-ratio">{{ratio:--al-ink-muted|--al-canvas}} on canvas</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-canvas); box-shadow: inset 0 0 0 1px var(--al-hairline)"></div><div class="sw-meta"><div class="sw-name">canvas</div><div class="sw-val">#F7F8F4</div><div class="sw-ratio">page background</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-surface); box-shadow: inset 0 0 0 1px var(--al-hairline)"></div><div class="sw-meta"><div class="sw-name">surface</div><div class="sw-val">#FFFFFF</div><div class="sw-ratio">cards</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-navy)"></div><div class="sw-meta"><div class="sw-name">navy</div><div class="sw-val">#0C2238</div><div class="sw-ratio">{{ratio:--al-ink-inverse|--al-navy}} with white</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-navy-raised)"></div><div class="sw-meta"><div class="sw-name">navy-raised</div><div class="sw-val">#14304A</div><div class="sw-ratio">panel on navy</div></div></div>
+  </div>
+
+  <p class="ds-title">Accent &amp; semantic state</p>
+  <div class="sw-grid">
+    <div class="sw"><div class="sw-chip" style="background:var(--al-teal)"></div><div class="sw-meta"><div class="sw-name">teal</div><div class="sw-val">#18A999</div><div class="sw-ratio">navy surfaces only</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-teal-text)"></div><div class="sw-meta"><div class="sw-name">teal-text</div><div class="sw-val">#0E7C70</div><div class="sw-ratio">{{ratio:--al-teal-text|--al-canvas}} on canvas</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-amber)"></div><div class="sw-meta"><div class="sw-name">amber</div><div class="sw-val">#C76B3B</div><div class="sw-ratio">non-text only</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-amber-text)"></div><div class="sw-meta"><div class="sw-name">amber-text</div><div class="sw-val">#9A4E27</div><div class="sw-ratio">{{ratio:--al-amber-text|--al-canvas}} on canvas</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-state-neutral)"></div><div class="sw-meta"><div class="sw-name">state-neutral</div><div class="sw-val">#7C8B98</div><div class="sw-ratio">unreviewed</div></div></div>
+    <div class="sw"><div class="sw-chip" style="background:var(--al-hairline)"></div><div class="sw-meta"><div class="sw-name">hairline</div><div class="sw-val">#E4E6DF</div><div class="sw-ratio">1px borders</div></div></div>
+  </div>
+
+  <p class="ds-title">Semantics</p>
+  <p style="max-width: 62ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: 0;">
+    Color carries one meaning throughout the product and the site.
+    <strong style="color: var(--al-teal-text)">Teal is verified</strong> &mdash; a fact with a citation to document, page, and excerpt.
+    <strong style="color: var(--al-amber-text)">Amber is conflict or blocker</strong> &mdash; two sources disagree, or a required value is missing.
+    <strong style="color: var(--al-ink-muted)">Slate is unreviewed</strong>. Nothing else is colored.
+  </p>
+</div>

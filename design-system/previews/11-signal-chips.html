@@ -1,0 +1,52 @@
+<!-- @dsCard group="Components" name="Signal chips & tiles" subtitle="Verified / conflict / blocker / unreviewed — the case state vocabulary" -->
+<style>
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold); padding: 5px 11px; border-radius: var(--al-radius-pill); border: 1px solid transparent; }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+  .chip-verified { background: var(--al-teal-wash); color: var(--al-teal-text); border-color: rgba(14,124,112,0.18); }
+  .chip-conflict { background: var(--al-amber-wash); color: var(--al-amber-text); border-color: rgba(154,78,39,0.2); }
+  .chip-blocker { background: var(--al-amber-text); color: #fff; }
+  .chip-unreviewed { background: transparent; color: var(--al-ink-muted); border-color: var(--al-hairline-strong); }
+  .chip-uncited { background: transparent; color: var(--al-amber-text); border-color: var(--al-amber); border-style: dashed; }
+
+  .row { display: flex; gap: var(--al-space-2); flex-wrap: wrap; align-items: center; margin-bottom: var(--al-space-5); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--al-space-3); background: var(--al-navy); padding: var(--al-space-4); border-radius: var(--al-radius-panel); margin-bottom: var(--al-space-5); }
+  .tile { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); border-left: 3px solid var(--al-state-neutral); }
+  .tile-v { border-left-color: var(--al-teal); }
+  .tile-c { border-left-color: var(--al-amber); }
+  .tile-n { color: var(--al-ink-inverse); font-size: 2rem; font-weight: var(--al-weight-bold); line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile-v .tile-n { color: var(--al-teal); }
+  .tile-c .tile-n { color: var(--al-amber); }
+  .tile-l { color: var(--al-ink-inverse); font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); margin-top: var(--al-space-2); }
+  .tile-s { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
+
+  .note { max-width: 62ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Chips &mdash; state vocabulary</p>
+  <div class="row">
+    <span class="chip chip-verified"><i class="dot"></i>Verified &middot; QME p.14</span>
+    <span class="chip chip-conflict"><i class="dot"></i>2 sources conflict</span>
+    <span class="chip chip-blocker">Blocker &middot; confirm date of injury</span>
+    <span class="chip chip-unreviewed"><i class="dot"></i>Unreviewed</span>
+    <span class="chip chip-uncited">No citation</span>
+  </div>
+
+  <p class="ds-title">Signal tiles &mdash; on navy</p>
+  <div class="tiles">
+    <div class="tile tile-c"><div class="tile-n">3</div><div class="tile-l">Missing records</div><div class="tile-s">2 providers, 1 imaging study</div></div>
+    <div class="tile tile-c"><div class="tile-n">2</div><div class="tile-l">Conflicting facts</div><div class="tile-s">Work status, date of injury</div></div>
+    <div class="tile tile-v"><div class="tile-n">41</div><div class="tile-l">Verified facts</div><div class="tile-s">Each cited to page</div></div>
+    <div class="tile"><div class="tile-n">7</div><div class="tile-l">Awaiting review</div><div class="tile-s">Queued for an attorney</div></div>
+  </div>
+
+  <p class="note">
+    <strong>&ldquo;No citation&rdquo; is a state, not an absence.</strong> It renders as a dashed
+    amber chip and is never merged into a group of supported facts &mdash; the product keeps
+    uncited findings visible on purpose, and the design system carries that decision rather
+    than smoothing it over. Every count above is also announced to assistive technology
+    through a live region when it changes.
+  </p>
+</div>

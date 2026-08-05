@@ -1,0 +1,66 @@
+<!-- @dsCard group="Components" name="Trust signals & logo wall" subtitle="Certification badges, control statements, empty-until-real logo slots" -->
+<style>
+  .strip { display: flex; flex-wrap: wrap; gap: var(--al-space-2) var(--al-space-4); align-items: center; padding: var(--al-space-3) 0; border-top: 1px solid var(--al-hairline); border-bottom: 1px solid var(--al-hairline); margin-bottom: var(--al-space-6); font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+  .strip span { display: inline-flex; align-items: center; gap: 6px; }
+  .tick { width: 12px; height: 12px; flex: none; color: var(--al-teal-text); }
+
+  .badges { display: flex; gap: var(--al-space-3); flex-wrap: wrap; margin-bottom: var(--al-space-6); }
+  .badge { display: flex; align-items: center; gap: var(--al-space-3); background: var(--al-surface); border: 1px solid var(--al-hairline); border-radius: var(--al-radius-card); padding: var(--al-space-3) var(--al-space-4); }
+  .badge-mark { width: 38px; height: 38px; border-radius: 50%; background: var(--al-navy); color: var(--al-teal); display: grid; place-items: center; font-size: 10px; font-weight: var(--al-weight-bold); letter-spacing: 0.02em; flex: none; }
+  .badge b { display: block; font-size: var(--al-text-sm); }
+  .badge span { font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+
+  .wall-label { font-size: var(--al-text-xs); color: var(--al-ink-muted); margin: 0 0 var(--al-space-3); }
+  .wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--al-space-3); margin-bottom: var(--al-space-3); }
+  .slot { height: 64px; border: 1px dashed var(--al-hairline-strong); border-radius: var(--al-radius-sm); display: grid; place-items: center; font-size: 11px; color: var(--al-ink-muted); background: repeating-linear-gradient(45deg, transparent, transparent 7px, rgba(19,34,46,0.02) 7px, rgba(19,34,46,0.02) 14px); }
+
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--al-space-3); }
+  .ctrl { background: var(--al-surface); border: 1px solid var(--al-hairline); border-left: 3px solid var(--al-teal-text); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
+  .ctrl b { display: block; font-size: var(--al-text-sm); margin-bottom: var(--al-space-1); }
+  .ctrl p { margin: 0; font-size: var(--al-text-xs); color: var(--al-ink-muted); line-height: 1.5; }
+  .note { max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin-top: var(--al-space-5); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Hero trust strip</p>
+  <div class="strip">
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Source-linked evidence</span>
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Human review controls</span>
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Auditable access</span>
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Type II</span>
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>HIPAA</span>
+    <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Dropbox integration</span>
+  </div>
+
+  <p class="ds-title">Certification badges</p>
+  <div class="badges">
+    <div class="badge"><span class="badge-mark">SOC 2</span><div><b>SOC 2 Type II</b><span>Report available under NDA</span></div></div>
+    <div class="badge"><span class="badge-mark">HIPAA</span><div><b>HIPAA attested</b><span>BAA available</span></div></div>
+  </div>
+
+  <p class="ds-title">Customer wall</p>
+  <p class="wall-label">Trusted by:</p>
+  <div class="wall">
+    <div class="slot">awaiting logo</div><div class="slot">awaiting logo</div><div class="slot">awaiting logo</div>
+    <div class="slot">awaiting logo</div><div class="slot">awaiting logo</div><div class="slot">awaiting logo</div>
+  </div>
+  <p style="font-size: var(--al-text-xs); color: var(--al-amber-text); margin: 0 0 var(--al-space-6);">
+    Slots render <em>nothing at all</em> in production until real, permissioned assets are supplied. The dashed state is authoring-only.
+  </p>
+
+  <p class="ds-title">Control statements &mdash; what the badges actually mean</p>
+  <div class="controls">
+    <div class="ctrl"><b>Your data does not train models</b><p>Case content is never used to train or fine-tune any model, ours or a vendor&rsquo;s.</p></div>
+    <div class="ctrl"><b>Tenant isolation</b><p>Every case, document, and job is scoped to your firm end-to-end, enforced server-side.</p></div>
+    <div class="ctrl"><b>Auditable access</b><p>Who opened which document, and when, is recorded and reviewable.</p></div>
+    <div class="ctrl"><b>Human confirmation required</b><p>Extraction proposes; it never writes case truth. An attorney confirms before a value becomes fact.</p></div>
+  </div>
+
+  <p class="note">
+    <strong>Badges assert, controls explain.</strong> A buyer&rsquo;s security reviewer does not
+    stop at a logo &mdash; the four statements are what survives a questionnaire. They are
+    written as plain claims a diligence team can verify, and every one corresponds to
+    behavior implemented in the application.
+  </p>
+</div>

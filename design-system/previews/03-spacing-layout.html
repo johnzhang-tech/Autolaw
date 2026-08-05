@@ -1,0 +1,61 @@
+<!-- @dsCard group="Foundations" name="Spacing, layout & shape" subtitle="8px scale, 12-column 1240px grid, radii, one shadow" -->
+<style>
+  .sp-list { display: flex; flex-direction: column; gap: var(--al-space-2); margin-bottom: var(--al-space-6); }
+  .sp-item { display: grid; grid-template-columns: 90px 1fr; gap: var(--al-space-3); align-items: center; font-size: var(--al-text-xs); }
+  .sp-key { color: var(--al-ink-muted); font-variant-numeric: tabular-nums; }
+  .sp-bar { height: 14px; background: var(--al-teal-text); border-radius: 3px; }
+
+  .grid-demo { position: relative; border: 1px solid var(--al-hairline); border-radius: var(--al-radius-panel); background: var(--al-surface); padding: var(--al-space-4); margin-bottom: var(--al-space-6); }
+  .grid-cols { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--al-gutter); }
+  .grid-cols span { height: 56px; background: var(--al-teal-wash); border-radius: 4px; }
+  .grid-note { font-size: var(--al-text-xs); color: var(--al-ink-muted); margin-top: var(--al-space-3); }
+  @media (max-width: 720px) { .grid-cols { grid-template-columns: repeat(4, 1fr); } .grid-cols span:nth-child(n+5) { display: none; } }
+
+  .shape-row { display: flex; gap: var(--al-space-3); flex-wrap: wrap; margin-bottom: var(--al-space-6); }
+  .shape { background: var(--al-surface); border: 1px solid var(--al-hairline); padding: var(--al-space-4); min-width: 150px; font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+  .shape strong { display: block; color: var(--al-ink); font-size: var(--al-text-sm); margin-bottom: 2px; }
+  .r-sm { border-radius: var(--al-radius-sm); }
+  .r-card { border-radius: var(--al-radius-card); }
+  .r-panel { border-radius: var(--al-radius-panel); }
+  .r-pill { border-radius: var(--al-radius-pill); }
+  .elev { box-shadow: var(--al-shadow-card); border-color: transparent; }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Spacing &mdash; 8px base</p>
+  <div class="sp-list">
+    <div class="sp-item"><span class="sp-key">space-1 &middot; 4</span><div class="sp-bar" style="width:4px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-2 &middot; 8</span><div class="sp-bar" style="width:8px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-3 &middot; 16</span><div class="sp-bar" style="width:16px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-4 &middot; 24</span><div class="sp-bar" style="width:24px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-5 &middot; 32</span><div class="sp-bar" style="width:32px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-6 &middot; 48</span><div class="sp-bar" style="width:48px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-7 &middot; 64</span><div class="sp-bar" style="width:64px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-8 &middot; 96</span><div class="sp-bar" style="width:96px"></div></div>
+    <div class="sp-item"><span class="sp-key">space-9 &middot; 128</span><div class="sp-bar" style="width:128px"></div></div>
+  </div>
+
+  <p class="ds-title">Grid &mdash; 12 columns, 1240px max, 24px gutter</p>
+  <div class="grid-demo">
+    <div class="grid-cols">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p class="grid-note">Collapses to 4 columns below 720px. Section rhythm is <code>space-8</code> (96px) desktop, <code>space-6</code> (48px) mobile.</p>
+  </div>
+
+  <p class="ds-title">Shape &amp; elevation</p>
+  <div class="shape-row">
+    <div class="shape r-sm"><strong>8px</strong>radius-sm &mdash; inputs, chips</div>
+    <div class="shape r-card"><strong>14px</strong>radius-card &mdash; cards</div>
+    <div class="shape r-panel"><strong>16px</strong>radius-panel &mdash; product panels</div>
+    <div class="shape r-pill"><strong>999px</strong>radius-pill &mdash; buttons, tags</div>
+    <div class="shape r-card elev"><strong>One level</strong>shadow-card &mdash; the only elevation</div>
+  </div>
+
+  <p style="max-width: 62ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); margin: 0;">
+    Depth is carried by the navy/canvas surface change, not by stacked shadows. A second
+    elevation level exists only for popovers, because a citation card must visibly float
+    above the timeline it came from.
+  </p>
+</div>

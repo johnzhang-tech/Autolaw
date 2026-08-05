@@ -1,0 +1,77 @@
+<!-- @dsCard group="Components" name="Citation card" subtitle="Document · page · verbatim excerpt · provider · confidence" -->
+<style>
+  .wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--al-space-4); margin-bottom: var(--al-space-5); }
+
+  .cc { background: var(--al-surface); border: 1px solid var(--al-hairline); border-radius: var(--al-radius-card); box-shadow: var(--al-shadow-popover); overflow: hidden; }
+  .cc-head { display: flex; align-items: center; justify-content: space-between; gap: var(--al-space-3); padding: var(--al-space-3) var(--al-space-4); border-bottom: 1px solid var(--al-hairline); background: var(--al-canvas); }
+  .cc-src { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+  .cc-pg { font-size: var(--al-text-xs); color: var(--al-ink-muted); font-variant-numeric: tabular-nums; }
+  .cc-body { padding: var(--al-space-4); }
+  .cc-quote { font-family: var(--al-font-record); font-size: var(--al-text-body); line-height: 1.6; margin: 0 0 var(--al-space-3); border-left: 3px solid var(--al-teal-text); padding-left: var(--al-space-3); }
+  .cc-quote mark { background: var(--al-teal-wash); color: inherit; padding: 1px 2px; border-radius: 3px; }
+  .cc-meta { display: grid; grid-template-columns: auto 1fr; gap: 6px var(--al-space-3); font-size: var(--al-text-xs); }
+  .cc-meta dt { color: var(--al-ink-muted); }
+  .cc-meta dd { margin: 0; font-weight: var(--al-weight-medium); }
+  .cc-foot { display: flex; gap: var(--al-space-2); padding: var(--al-space-3) var(--al-space-4); border-top: 1px solid var(--al-hairline); flex-wrap: wrap; }
+  .mini { font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold); padding: 6px 12px; border-radius: var(--al-radius-pill); border: 1px solid var(--al-hairline-strong); background: transparent; cursor: pointer; font-family: var(--al-font-ui); }
+  .mini-go { background: var(--al-navy); color: #fff; border-color: transparent; }
+
+  .conf { display: flex; align-items: center; gap: 6px; }
+  .conf-bar { width: 54px; height: 5px; border-radius: 3px; background: var(--al-hairline); overflow: hidden; }
+  .conf-fill { height: 100%; background: var(--al-teal-text); }
+  .conf-low .conf-fill { background: var(--al-amber); }
+
+  .cc-conflict { border-color: var(--al-amber); }
+  .cc-conflict .cc-head { background: var(--al-amber-wash); }
+  .cc-versus { text-align: center; font-size: var(--al-text-xs); font-weight: var(--al-weight-bold); color: var(--al-amber-text); letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase; margin: var(--al-space-3) 0; }
+  .cc-resolve { background: var(--al-amber-wash); border-radius: var(--al-radius-sm); padding: var(--al-space-3); font-size: var(--al-text-xs); color: var(--al-amber-text); }
+  .cc-resolve strong { display: block; margin-bottom: 2px; }
+  .note { max-width: 64ch; color: var(--al-ink-muted); font-size: var(--al-text-sm); }
+  .note strong { color: var(--al-ink); }
+</style>
+
+<div class="ds-shell">
+  <p class="ds-title">Verified fact</p>
+  <div class="wrap">
+    <div class="cc">
+      <div class="cc-head"><span class="cc-src">QME report &mdash; Dr. A. Reyes</span><span class="cc-pg">page 14</span></div>
+      <div class="cc-body">
+        <p class="cc-quote">Claimant reports persistent low back pain radiating into the left lower extremity. <mark>MRI dated 03/14 demonstrates a 4mm disc protrusion at L4&ndash;L5 with mild foraminal narrowing.</mark></p>
+        <dl class="cc-meta">
+          <dt>Provider</dt><dd>A. Reyes, MD &mdash; orthopedic surgery</dd>
+          <dt>Finding</dt><dd>Disc protrusion, L4&ndash;L5</dd>
+          <dt>Date of service</dt><dd>2025&#8209;03&#8209;14</dd>
+          <dt>Confidence</dt><dd><span class="conf"><span class="conf-bar"><span class="conf-fill" style="width:94%"></span></span> 94%</span></dd>
+        </dl>
+      </div>
+      <div class="cc-foot">
+        <button class="mini mini-go">Open page 14</button>
+        <button class="mini">Confirm</button>
+        <button class="mini">Flag</button>
+      </div>
+    </div>
+
+    <div class="cc cc-conflict">
+      <div class="cc-head"><span class="cc-src">Conflict &mdash; work status</span><span class="cc-pg">2 sources</span></div>
+      <div class="cc-body">
+        <p class="cc-quote">&hellip; <mark>patient may return to modified duty with no lifting over 15 pounds</mark> effective 04/02.</p>
+        <dl class="cc-meta"><dt>Source</dt><dd>PTP report &middot; p.3 &middot; 2025&#8209;04&#8209;02</dd></dl>
+        <div class="cc-versus">conflicts with</div>
+        <p class="cc-quote" style="border-left-color: var(--al-amber)"><mark>Claimant remains temporarily totally disabled</mark> and is not released to any work at this time.</p>
+        <dl class="cc-meta"><dt>Source</dt><dd>QME report &middot; p.22 &middot; 2025&#8209;04&#8209;18</dd>
+          <dt>Confidence</dt><dd><span class="conf conf-low"><span class="conf-bar"><span class="conf-fill" style="width:52%"></span></span> unresolved</span></dd>
+        </dl>
+        <div class="cc-resolve"><strong>Autolaw does not pick a winner.</strong> Both sources stay visible with their dates until an attorney resolves the conflict.</div>
+      </div>
+      <div class="cc-foot"><button class="mini mini-go">Compare sources</button><button class="mini">Assign for review</button></div>
+    </div>
+  </div>
+
+  <p class="note">
+    <strong>This component is the product's whole argument.</strong> Anyone can summarize a
+    medical record; the claim that matters is that every fact traces back to a document, a
+    page, and the exact sentence &mdash; and that when two documents disagree, the disagreement
+    is surfaced rather than averaged away. The card is keyboard reachable, dismissed with
+    <kbd>Esc</kbd>, and returns focus to the row that opened it.
+  </p>
+</div>
