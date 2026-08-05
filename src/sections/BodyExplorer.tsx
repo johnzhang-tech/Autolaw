@@ -4,10 +4,15 @@ import './BodyExplorer.css';
 
 /** Hit-area rectangles, matched to the figure drawn below. */
 const HITS: Record<string, { x: number; y: number; w: number; h: number; r: number }> = {
-  cervical: { x: 47, y: 37, w: 26, h: 13, r: 5 },
+  // The figure is 120 units wide in a 178px box, so one unit is 1.483 CSS px on desktop
+  // and every target has to be at least 17 units tall to clear the 24px minimum.
+  // Centred on the neck rect (y 38..48); was h 13, which rendered 19px tall.
+  cervical: { x: 47, y: 34, w: 26, h: 18, r: 5 },
   shoulder: { x: 18, y: 50, w: 20, h: 20, r: 8 },
   lumbar: { x: 44, y: 96, w: 32, h: 26, r: 7 },
-  knee: { x: 61, y: 196, w: 18, h: 18, r: 7 },
+  // Thigh ends and shin begins at y 212, so that is where the knee is. Was y 196,
+  // centring the target at 205 — a full 10px up the thigh at desktop scale.
+  knee: { x: 61, y: 203, w: 18, h: 18, r: 7 },
 };
 
 /** Ordered to match visual top-to-bottom so arrow keys feel physical. */

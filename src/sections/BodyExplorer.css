@@ -3,18 +3,40 @@
 .al-bx__note { margin: 0 0 var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
 
 .al-bx__body { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: var(--al-space-5); align-items: start; }
-@media (max-width: 780px) { .al-bx__body { grid-template-columns: 1fr; } }
 
-.al-bx__fig { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); }
+/*
+ * Sunken well, raised silhouette. The body used to be filled #1d3d59 — a fourth navy that
+ * appears in no token file — sitting 1.20:1 from the panel behind it, so the figure barely
+ * read as a body at all. Both values now come from the palette, and the step between them
+ * is roughly twice the perceptual one it replaces.
+ */
+.al-bx__fig { background: var(--al-navy-sunken); border-radius: var(--al-radius-card); padding: var(--al-space-3); }
 .al-bx__fig svg { width: 100%; height: auto; display: block; }
-.al-bx__base { fill: #1d3d59; }
+.al-bx__base { fill: var(--al-navy-raised); }
+
+/*
+ * The SVG is viewBox="0 0 120 260" with height:auto, so it renders 2.167x as tall as it is
+ * wide. Once .al-bx__body collapses to one column the figure was handed the whole panel —
+ * 636px at a 780px viewport — and drew itself 1378px tall: a full screen of empty body
+ * above the information anyone came here to read. Capped, it stays near the 178x386 it
+ * occupies on desktop.
+ */
+@media (max-width: 780px) {
+  .al-bx__body { grid-template-columns: minmax(0, 1fr); }
+  .al-bx__fig { max-width: 240px; margin-inline: auto; }
+}
 
 .al-bx__region {
   fill: var(--al-state-neutral); opacity: 0.45; cursor: pointer;
   transition: opacity var(--al-duration-fast) var(--al-ease), fill var(--al-duration-fast) var(--al-ease);
 }
 .al-bx__region:hover { opacity: 0.8; }
-.al-bx__region.is-claimed { fill: var(--al-teal); opacity: 0.6; }
+/*
+ * 0.75, not 0.6. Teal at 0.6 composites to 2.61:1 against the body it sits on — under the
+ * 3:1 non-text minimum, in the one graphic whose caption is "teal marks a claimed region".
+ * 0.75 clears it at 3.27:1 and still reads as unselected next to .is-on at full strength.
+ */
+.al-bx__region.is-claimed { fill: var(--al-teal); opacity: 0.75; }
 .al-bx__region.is-on { fill: var(--al-teal); opacity: 1; }
 .al-bx__region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
 
@@ -23,7 +45,10 @@
 
 .al-bx__info { background: var(--al-surface); color: var(--al-ink); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
 .al-bx__info h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
-.al-bx__plain { margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: 1.55; }
+.al-bx__plain {
+  margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm);
+  color: var(--al-ink-muted); line-height: var(--al-leading-normal); max-width: 62ch;
+}
 
 .al-bx__rows { display: grid; gap: var(--al-space-2); }
 .al-bx__row {
@@ -33,7 +58,7 @@
 .al-bx__row.is-warn { border-left-color: var(--al-amber); }
 .al-bx__row b {
   display: block; font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--al-ink-muted); margin-bottom: 3px;
+  letter-spacing: var(--al-tracking-eyebrow); color: var(--al-ink-muted); margin-bottom: 3px;
 }
 .al-bx__row span { font-size: var(--al-text-sm); }
 .al-bx__row cite {

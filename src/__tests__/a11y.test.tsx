@@ -434,10 +434,19 @@ describe('shipped stylesheet', () => {
         .map((r) => r.body)
         .join(';');
 
-    expect(at(900, '.al-hero__grid')).toMatch(/grid-template-columns:\s*1fr/);
+    /*
+     * One column, written either way. A bare `1fr` is `minmax(auto, 1fr)`, so the track
+     * still floors at min-content and a wide child pushes the grid past the viewport;
+     * `minmax(0, 1fr)` is the same single column that is also allowed to shrink. What
+     * this assertion is protecting is the collapse, not which of the two spellings a
+     * given grid needs.
+     */
+    const ONE_COLUMN = /grid-template-columns:\s*(?:minmax\(\s*0\s*,\s*1fr\s*\)|1fr)\s*(?:;|$)/;
+
+    expect(at(900, '.al-hero__grid')).toMatch(ONE_COLUMN);
     expect(at(520, '.al-cockpit__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
-    expect(at(860, '.al-chron__body')).toMatch(/grid-template-columns:\s*1fr/);
-    expect(at(780, '.al-bx__body')).toMatch(/grid-template-columns:\s*1fr/);
+    expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
+    expect(at(780, '.al-bx__body')).toMatch(ONE_COLUMN);
   });
 
   it('keeps the comparison table scrolling inside its own container', () => {
