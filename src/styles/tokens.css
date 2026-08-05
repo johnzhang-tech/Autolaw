@@ -1,0 +1,110 @@
+/*
+ * Autolaw design system — tokens
+ * Single source of truth. Consumed by the marketing site (src/styles/tokens.css is
+ * generated from this file) and published to Claude Design as Foundations.
+ *
+ * Contrast rule: --teal fails WCAG AA on --canvas (2.7:1). It is a DARK-SURFACE accent
+ * and reaches 5.6:1 on --navy. Use --teal-text for interactive text on light surfaces.
+ * Run `node design-system/build.mjs` to re-verify every pair numerically.
+ */
+
+:root {
+  /* ---- Color: text ---- */
+  --al-ink: #13222E;
+  --al-ink-muted: #4A5A66;
+  --al-ink-inverse: #FFFFFF;
+  --al-ink-inverse-muted: #A7BACB;
+
+  /* ---- Color: surface ---- */
+  --al-canvas: #F7F8F4;
+  --al-surface: #FFFFFF;
+  --al-navy: #0C2238;
+  --al-navy-raised: #14304A;
+  --al-navy-sunken: #081A2B;
+
+  /* ---- Color: accent ---- */
+  --al-teal: #18A999;          /* graphics on navy ONLY */
+  --al-teal-text: #0E7C70;     /* interactive text on light surfaces */
+  --al-teal-wash: #E6F5F2;
+  --al-amber: #C76B3B;         /* chip fills, borders, non-text indicators */
+  --al-amber-text: #9A4E27;    /* conflict + warning copy */
+  --al-amber-wash: #FBEDE4;
+
+  /* ---- Color: line ---- */
+  --al-hairline: #E4E6DF;
+  --al-hairline-strong: #CFD3C8;
+  --al-hairline-inverse: rgba(255, 255, 255, 0.14);
+
+  /* ---- Color: state (semantic, maps to signal tiles) ---- */
+  --al-state-verified: var(--al-teal);
+  --al-state-conflict: var(--al-amber);
+  --al-state-neutral: #7C8B98;
+
+  /* ---- Typography ---- */
+  --al-font-ui: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --al-font-record: "Source Serif 4", ui-serif, Georgia, serif;
+
+  /* Fluid display scale. Capped so the headline never dominates the product visual. */
+  --al-text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
+  --al-text-h2: clamp(1.875rem, 1.35rem + 2.1vw, 3rem);
+  --al-text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --al-text-body-lg: 1.125rem;
+  --al-text-body: 1rem;
+  --al-text-sm: 0.875rem;
+  --al-text-xs: 0.75rem;
+
+  --al-leading-tight: 1.05;
+  --al-leading-snug: 1.25;
+  --al-leading-normal: 1.55;
+  --al-tracking-display: -0.022em;
+  --al-tracking-eyebrow: 0.08em;
+
+  --al-weight-regular: 400;
+  --al-weight-medium: 500;
+  --al-weight-semibold: 600;
+  --al-weight-bold: 700;
+
+  /* ---- Spacing: 8px base ---- */
+  --al-space-1: 4px;
+  --al-space-2: 8px;
+  --al-space-3: 16px;
+  --al-space-4: 24px;
+  --al-space-5: 32px;
+  --al-space-6: 48px;
+  --al-space-7: 64px;
+  --al-space-8: 96px;
+  --al-space-9: 128px;
+
+  /* ---- Layout ---- */
+  --al-max-width: 1240px;
+  --al-gutter: 24px;
+  --al-columns: 12;
+
+  /* ---- Shape ---- */
+  --al-radius-sm: 8px;
+  --al-radius-card: 14px;
+  --al-radius-panel: 16px;
+  --al-radius-pill: 999px;
+
+  /* ---- Elevation: one level, minimal ---- */
+  --al-shadow-card: 0 1px 2px rgba(19, 34, 46, 0.04), 0 8px 24px rgba(19, 34, 46, 0.06);
+  --al-shadow-popover: 0 2px 4px rgba(19, 34, 46, 0.06), 0 16px 40px rgba(19, 34, 46, 0.14);
+
+  /* ---- Motion ---- */
+  --al-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --al-duration-fast: 180ms;
+  --al-duration-base: 220ms;
+  --al-duration-slow: 240ms;
+
+  /* ---- Focus ---- */
+  --al-focus-ring: 0 0 0 2px var(--al-canvas), 0 0 0 4px var(--al-teal-text);
+  --al-focus-ring-inverse: 0 0 0 2px var(--al-navy), 0 0 0 4px var(--al-teal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --al-duration-fast: 1ms;
+    --al-duration-base: 1ms;
+    --al-duration-slow: 1ms;
+  }
+}
