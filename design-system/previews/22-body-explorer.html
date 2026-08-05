@@ -4,28 +4,38 @@
   .bx h3 { margin: 0 0 var(--al-space-1); color: #fff; font-size: var(--al-text-h3); }
   .bx > p { margin: 0 0 var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
   .bx-body { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: var(--al-space-5); align-items: start; }
-  @media (max-width: 780px) { .bx-body { grid-template-columns: 1fr; } }
+  /* The SVG is 120x260 with height:auto, so it draws 2.167x as tall as it is wide. Given
+     the full panel in one column it rendered 636x1378 — a screen of empty body above the
+     information. Capped, it stays near the 178x386 it occupies on desktop. */
+  @media (max-width: 780px) {
+    .bx-body { grid-template-columns: minmax(0, 1fr); }
+    .fig { max-width: 240px; margin-inline: auto; }
+  }
 
-  .fig { background: var(--al-navy-raised); border-radius: var(--al-radius-card); padding: var(--al-space-3); }
+  /* Sunken well, raised silhouette — both from the palette. The body was filled #1d3d59,
+     a fourth navy that exists in no token file, 1.20:1 from the panel behind it. */
+  .fig { background: var(--al-navy-sunken); border-radius: var(--al-radius-card); padding: var(--al-space-3); }
   .fig svg { width: 100%; height: auto; display: block; }
   .region { fill: var(--al-state-neutral); opacity: .45; cursor: pointer; transition: opacity var(--al-duration-fast) var(--al-ease), fill var(--al-duration-fast) var(--al-ease); }
   .region:hover { opacity: .8; }
   .region.on { fill: var(--al-teal); opacity: 1; }
-  .region.claimed { fill: var(--al-teal); opacity: .6; }
+  /* .75, not .6: at .6 the claimed teal composites to 2.61:1 against the body it sits on,
+     under the 3:1 non-text minimum, in the graphic captioned "teal marks a claimed region". */
+  .region.claimed { fill: var(--al-teal); opacity: .75; }
   .region.claimed.on { opacity: 1; }
   .region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
-  .body-base { fill: #1d3d59; }
+  .body-base { fill: var(--al-navy-raised); }
 
   .legend { display: flex; gap: var(--al-space-3); flex-wrap: wrap; font-size: 10px; color: var(--al-ink-inverse-muted); margin-top: var(--al-space-2); }
   .legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 4px; }
 
   .info { background: var(--al-surface); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
   .info h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
-  .info .plain { margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: 1.55; }
+  .info .plain { margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); max-width: 62ch; }
   .rows { display: grid; gap: var(--al-space-2); }
   .r { border-left: 3px solid var(--al-teal-text); background: var(--al-canvas); border-radius: var(--al-radius-sm); padding: var(--al-space-3); }
   .r.warn { border-left-color: var(--al-amber); }
-  .r b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--al-ink-muted); margin-bottom: 3px; }
+  .r b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow); color: var(--al-ink-muted); margin-bottom: 3px; }
   .r span { font-size: var(--al-text-sm); }
   .r cite { display: block; font-style: normal; font-size: 11px; color: var(--al-teal-text); margin-top: 4px; font-weight: var(--al-weight-semibold); }
   .r.warn cite { color: var(--al-amber-text); }
@@ -49,10 +59,13 @@
               <rect x="42" y="152" width="16" height="60" rx="8"/><rect x="62" y="152" width="16" height="60" rx="8"/>
               <rect x="42" y="212" width="16" height="36" rx="8"/><rect x="62" y="212" width="16" height="36" rx="8"/>
             </g>
-            <rect class="region" data-k="cervical" tabindex="0" role="button" aria-label="Cervical spine" x="47" y="37" width="26" height="13" rx="5"/>
+            <!-- Targets are sized in viewBox units: 120 units across a 178px box makes one
+                 unit 1.483px, so nothing under 17 units tall clears the 24px minimum. -->
+            <rect class="region" data-k="cervical" tabindex="0" role="button" aria-label="Cervical spine" x="47" y="34" width="26" height="18" rx="5"/>
             <rect class="region claimed" data-k="shoulder" tabindex="0" role="button" aria-label="Left shoulder, claimed" x="18" y="50" width="20" height="20" rx="8"/>
             <rect class="region claimed on" data-k="lumbar" tabindex="0" role="button" aria-label="Lumbar spine, claimed, selected" x="44" y="96" width="32" height="26" rx="7"/>
-            <rect class="region" data-k="knee" tabindex="0" role="button" aria-label="Right knee" x="61" y="196" width="18" height="18" rx="7"/>
+            <!-- Thigh ends and shin begins at y 212, so that is where the knee is. -->
+            <rect class="region" data-k="knee" tabindex="0" role="button" aria-label="Right knee" x="61" y="203" width="18" height="18" rx="7"/>
           </svg>
           <div class="legend">
             <span><i style="background:var(--al-teal)"></i>Claimed</span>

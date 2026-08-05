@@ -6,12 +6,17 @@
   .ch-head p { margin: 0; color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); }
 
   .ch-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--al-space-4); }
-  @media (max-width: 860px) { .ch-body { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) { .ch-body { grid-template-columns: minmax(0, 1fr); } }
 
   .spine { list-style: none; margin: 0; padding: 0 0 0 var(--al-space-4); position: relative; }
-  .spine::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: var(--al-hairline-inverse); }
   .ev { position: relative; margin-bottom: 2px; }
-  .ev::before { content: ""; position: absolute; left: -19px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--al-state-neutral); border: 2px solid var(--al-navy); }
+  /* Dot and rail share centre x=10: the ul's 24px padding puts .ev at x=24, so a 10px dot
+     at left:-19px spans 5..15 and a 2px rail at left:-15px spans 9..11. The rail used to
+     sit on the ul at left:5px — centre 6 — four pixels clear of every dot. It is drawn per
+     event so it can stop at the next dot instead of guessing the last row's height. */
+  .ev::before { content: ""; position: absolute; left: -19px; top: 20px; width: 10px; height: 10px; border-radius: 50%; background: var(--al-state-neutral); border: 2px solid var(--al-navy); }
+  .ev::after { content: ""; position: absolute; left: -15px; top: 30px; bottom: -22px; width: 2px; background: var(--al-hairline-inverse); }
+  .ev:last-child::after { content: none; }
   .ev.is-v::before { background: var(--al-teal); }
   .ev.is-c::before { background: var(--al-amber); }
   .ev button { width: 100%; text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--al-radius-card); padding: var(--al-space-3); cursor: pointer; font-family: var(--al-font-ui); color: #fff; transition: background-color var(--al-duration-fast) var(--al-ease), border-color var(--al-duration-fast) var(--al-ease); }
@@ -20,25 +25,32 @@
   .ev-d { font-size: 11px; color: var(--al-ink-inverse-muted); font-variant-numeric: tabular-nums; }
   .ev-t { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); margin-top: 2px; }
   .ev-m { font-size: 11px; color: var(--al-ink-inverse-muted); margin-top: 3px; }
-  .ev-flag { display: inline-block; font-size: 10px; font-weight: var(--al-weight-bold); padding: 2px 7px; border-radius: var(--al-radius-pill); margin-top: 6px; }
-  .f-c { background: rgba(199,107,59,0.2); color: var(--al-amber); }
-  .f-g { background: rgba(199,107,59,0.2); color: var(--al-amber); }
+  .ev-flag { display: inline-block; font-size: 10px; font-weight: var(--al-weight-bold); padding: 2px 8px; border-radius: var(--al-radius-pill); margin-top: 6px; }
+  /* Inverted against the light-surface conflict chip. Amber on its own translucent fill
+     misses AA on this panel and misses it further once a row is hovered onto navy-raised;
+     amber-wash on the same fill clears it on both. Mixed from the token rather than
+     retyped as rgba, and both composites are verified in design-system/build.mjs. */
+  .f-c, .f-g { background: color-mix(in srgb, var(--al-amber) 30%, transparent); color: var(--al-amber-wash); }
   .ev :focus-visible { box-shadow: var(--al-focus-ring-inverse); }
 
   .detail { background: var(--al-surface); border-radius: var(--al-radius-card); padding: var(--al-space-4); align-self: start; position: sticky; top: var(--al-space-4); }
   .dt-h { display: flex; justify-content: space-between; gap: var(--al-space-3); align-items: baseline; border-bottom: 1px solid var(--al-hairline); padding-bottom: var(--al-space-2); margin-bottom: var(--al-space-3); }
   .dt-src { font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
   .dt-pg { font-size: var(--al-text-xs); color: var(--al-ink-muted); white-space: nowrap; }
-  .dt-q { font-family: var(--al-font-record); font-size: var(--al-text-body); line-height: 1.6; border-left: 3px solid var(--al-teal-text); padding-left: var(--al-space-3); margin: 0 0 var(--al-space-3); }
+  .dt-q { font-family: var(--al-font-record); font-size: var(--al-text-body); line-height: var(--al-leading-record); border-left: 3px solid var(--al-teal-text); padding-left: var(--al-space-3); margin: 0 0 var(--al-space-3); }
   .dt-q mark { background: var(--al-teal-wash); border-radius: 3px; padding: 1px 2px; }
-  .dt-m { display: grid; grid-template-columns: auto 1fr; gap: 5px var(--al-space-3); font-size: var(--al-text-xs); margin: 0 0 var(--al-space-3); }
+  .dt-m { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--al-space-1) var(--al-space-3); font-size: var(--al-text-xs); margin: 0 0 var(--al-space-3); }
   .dt-m dt { color: var(--al-ink-muted); } .dt-m dd { margin: 0; font-weight: var(--al-weight-medium); }
   .conf-bar { display: inline-block; width: 52px; height: 5px; border-radius: 3px; background: var(--al-hairline); overflow: hidden; vertical-align: middle; margin-right: 6px; }
   .conf-fill { display: block; height: 100%; background: var(--al-teal-text); }
   .low .conf-fill { background: var(--al-amber); }
   .dt-act { display: flex; gap: var(--al-space-2); flex-wrap: wrap; }
-  .mini { font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold); padding: 7px 13px; border-radius: var(--al-radius-pill); border: 1px solid var(--al-hairline-strong); background: transparent; cursor: pointer; font-family: var(--al-font-ui); }
+  /* Same 8px/14px as .al-btn--sm — it is the small button at this scale, not a near-copy
+     of it — and it responds to the pointer it already shows a pointer cursor for. */
+  .mini { font-size: var(--al-text-xs); font-weight: var(--al-weight-semibold); padding: 8px 14px; border-radius: var(--al-radius-pill); border: 1px solid var(--al-hairline-strong); background: transparent; cursor: pointer; font-family: var(--al-font-ui); transition: background-color var(--al-duration-fast) var(--al-ease), border-color var(--al-duration-fast) var(--al-ease), color var(--al-duration-fast) var(--al-ease); }
+  .mini:hover { border-color: var(--al-ink); background: color-mix(in srgb, var(--al-ink) 3%, transparent); }
   .mini-go { background: var(--al-navy); color: #fff; border-color: transparent; }
+  .mini-go:hover { background: var(--al-navy-raised); border-color: transparent; }
   .dt-warn { background: var(--al-amber-wash); color: var(--al-amber-text); border-radius: var(--al-radius-sm); padding: var(--al-space-3); font-size: var(--al-text-xs); margin-bottom: var(--al-space-3); }
   .dt-warn b { display: block; }
 </style>
