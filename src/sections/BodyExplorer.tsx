@@ -37,8 +37,13 @@ export function BodyExplorer() {
   return (
     <div className="al-bx al-on-navy">
       <h3 className="al-bx__title">Body explorer</h3>
+      {/*
+        The note no longer instructs by colour. "Teal marks..." is unreadable to a
+        screen-reader user and unreliable for a colourblind one; the status each region
+        carries is now in its own accessible name instead.
+      */}
       <p className="al-bx__note">
-        Demonstration data &middot; teal marks a claimed region &middot; use arrow keys or click
+        Demonstration data &middot; highlighted regions are accepted body parts &middot; use arrow keys or click
       </p>
 
       <div className="al-bx__body">
@@ -71,7 +76,7 @@ export function BodyExplorer() {
                   tabIndex={0}
                   role="button"
                   aria-pressed={on}
-                  aria-label={`${meta.label}${meta.claimed ? ', claimed' : ''}`}
+                  aria-label={`${meta.label}, ${meta.claimed ? 'accepted body part' : 'not an accepted body part'}`}
                   onClick={() => setActiveKey(key)}
                   onKeyDown={(e) => onKeyDown(e, key)}
                 />
@@ -79,8 +84,8 @@ export function BodyExplorer() {
             })}
           </svg>
           <div className="al-bx__legend">
-            <span><i style={{ background: 'var(--al-teal)' }} />Claimed</span>
-            <span><i style={{ background: 'var(--al-state-neutral)' }} />Not claimed</span>
+            <span><i style={{ background: 'var(--al-teal)' }} />Accepted</span>
+            <span><i style={{ background: 'var(--al-state-neutral)' }} />Not accepted</span>
           </div>
         </div>
 
