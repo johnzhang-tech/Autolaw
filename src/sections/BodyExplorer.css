@@ -33,7 +33,8 @@
 .al-bx__region:hover { opacity: 0.8; }
 /*
  * 0.75, not 0.6. Teal at 0.6 composites to 2.61:1 against the body it sits on — under the
- * 3:1 non-text minimum, in the one graphic whose caption is "teal marks a claimed region".
+ * 3:1 non-text minimum, in the one graphic whose legend distinguishes accepted body parts
+ * from unaccepted ones by exactly this colour.
  * 0.75 clears it at 3.27:1 and still reads as unselected next to .is-on at full strength.
  */
 .al-bx__region.is-claimed { fill: var(--al-teal); opacity: 0.75; }

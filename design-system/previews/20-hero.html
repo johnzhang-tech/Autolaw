@@ -1,4 +1,4 @@
-<!-- @dsCard group="Patterns" name="Hero" subtitle="Eyebrow, outcome headline, dual CTA, trust strip, live cockpit" -->
+<!-- @dsCard group="Patterns" name="Hero" subtitle="Eyebrow, outcome headline, dual CTA, trust strip, signal cockpit" -->
 <style>
   .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--al-space-7); align-items: center; }
   @media (max-width: 900px) { .hero { grid-template-columns: 1fr; gap: var(--al-space-5); } }
@@ -24,10 +24,10 @@
   .cp-top { display: flex; align-items: center; justify-content: space-between; gap: var(--al-space-3); padding-bottom: var(--al-space-3); border-bottom: 1px solid var(--al-hairline-inverse); margin-bottom: var(--al-space-3); }
   .cp-case { color: #fff; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
   .cp-sub { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
-  .cp-live { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--al-teal); font-weight: var(--al-weight-bold); }
-  .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--al-teal); animation: pulse 2.4s var(--al-ease) infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
-  @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+  /* Muted, not teal: this labels the data as fictional, and teal means "verified"
+     everywhere else in the system. It replaced a pulsing "Live" badge that animated
+     over static demo data — a manufactured signal of activity that was not there. */
+  .cp-live { font-size: 10px; text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow); color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-bold); white-space: nowrap; }
 
   .cp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2); }
   @media (max-width: 520px) { .cp-tiles { grid-template-columns: repeat(2, 1fr); } }
@@ -50,25 +50,25 @@
       </div>
       <div class="strip">
         <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Source-linked evidence</span>
-        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Human review controls</span>
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Attorney confirms every fact</span>
         <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Auditable access</span>
-        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Type II &amp; HIPAA</span>
+        <span><svg class="tick" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 Type II &middot; BAA on request</span>
       </div>
     </div>
 
-    <div class="cockpit" role="img" aria-label="Case signal cockpit showing 3 missing records, 2 conflicting facts, 1 treatment gap, 41 verified facts, 6 work restrictions and 4 next actions for a demonstration case.">
+    <div class="cockpit" role="img" aria-label="Case signal cockpit showing 3 missing records, 2 conflicting facts, 1 treatment gap, 41 confirmed facts, 6 work restrictions and 4 next actions for a demonstration case.">
       <div class="cp-top">
         <div>
           <div class="cp-case">Demo case &mdash; lumbar &amp; left shoulder</div>
           <div class="cp-sub">Workers&rsquo; comp &middot; 214 documents &middot; 1,880 pages</div>
         </div>
-        <span class="cp-live"><i class="pulse"></i>Live</span>
+        <span class="cp-live">Sample data</span>
       </div>
       <div class="cp-tiles">
         <div class="t t-c"><div class="t-n">3</div><div class="t-l">Missing records</div></div>
         <div class="t t-c"><div class="t-n">2</div><div class="t-l">Conflicting facts</div></div>
         <div class="t t-c"><div class="t-n">1</div><div class="t-l">Treatment gap</div></div>
-        <div class="t t-v"><div class="t-n">41</div><div class="t-l">Verified facts</div></div>
+        <div class="t t-v"><div class="t-n">41</div><div class="t-l">Confirmed facts</div></div>
         <div class="t t-v"><div class="t-n">6</div><div class="t-l">Work restrictions</div></div>
         <div class="t"><div class="t-n">4</div><div class="t-l">Next actions</div></div>
       </div>

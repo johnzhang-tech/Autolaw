@@ -20,7 +20,7 @@
   .region:hover { opacity: .8; }
   .region.on { fill: var(--al-teal); opacity: 1; }
   /* .75, not .6: at .6 the claimed teal composites to 2.61:1 against the body it sits on,
-     under the 3:1 non-text minimum, in the graphic captioned "teal marks a claimed region". */
+     under the 3:1 non-text minimum, in the graphic captioned "highlighted regions are accepted body parts". */
   .region.claimed { fill: var(--al-teal); opacity: .75; }
   .region.claimed.on { opacity: 1; }
   .region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
@@ -44,7 +44,7 @@
 <div class="ds-shell">
   <div class="bx">
     <h3>Body explorer</h3>
-    <p>Demonstration data &middot; teal marks a claimed region &middot; use arrow keys or click</p>
+    <p>Demonstration data &middot; highlighted regions are accepted body parts &middot; use arrow keys or click</p>
     <div class="bx-body">
       <div>
         <div class="fig">
@@ -61,15 +61,15 @@
             </g>
             <!-- Targets are sized in viewBox units: 120 units across a 178px box makes one
                  unit 1.483px, so nothing under 17 units tall clears the 24px minimum. -->
-            <rect class="region" data-k="cervical" tabindex="0" role="button" aria-label="Cervical spine" x="47" y="34" width="26" height="18" rx="5"/>
-            <rect class="region claimed" data-k="shoulder" tabindex="0" role="button" aria-label="Left shoulder, claimed" x="18" y="50" width="20" height="20" rx="8"/>
-            <rect class="region claimed on" data-k="lumbar" tabindex="0" role="button" aria-label="Lumbar spine, claimed, selected" x="44" y="96" width="32" height="26" rx="7"/>
+            <rect class="region" data-k="cervical" tabindex="0" role="button" aria-label="Cervical spine, not an accepted body part" x="47" y="34" width="26" height="18" rx="5"/>
+            <rect class="region claimed" data-k="shoulder" tabindex="0" role="button" aria-label="Left shoulder, accepted body part" x="18" y="50" width="20" height="20" rx="8"/>
+            <rect class="region claimed on" data-k="lumbar" tabindex="0" role="button" aria-label="Lumbar spine, accepted body part, selected" x="44" y="96" width="32" height="26" rx="7"/>
             <!-- Thigh ends and shin begins at y 212, so that is where the knee is. -->
-            <rect class="region" data-k="knee" tabindex="0" role="button" aria-label="Right knee" x="61" y="203" width="18" height="18" rx="7"/>
+            <rect class="region" data-k="knee" tabindex="0" role="button" aria-label="Right knee, not an accepted body part" x="61" y="203" width="18" height="18" rx="7"/>
           </svg>
           <div class="legend">
-            <span><i style="background:var(--al-teal)"></i>Claimed</span>
-            <span><i style="background:var(--al-state-neutral)"></i>Not claimed</span>
+            <span><i style="background:var(--al-teal)"></i>Accepted</span>
+            <span><i style="background:var(--al-state-neutral)"></i>Not accepted</span>
           </div>
         </div>
       </div>

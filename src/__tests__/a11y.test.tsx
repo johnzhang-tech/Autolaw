@@ -364,8 +364,10 @@ describe('shipped stylesheet', () => {
     const names = [...css.matchAll(/@keyframes\s+([\w-]+)/g)].map((m) => m[1]);
 
     // Guard against a vacuous pass: if the parser found no animations, the loop below
-    // would assert nothing at all.
-    expect(names).toEqual(expect.arrayContaining(['al-pulse', 'al-fade']));
+    // would assert nothing at all. al-fade is the site's only @keyframes — al-pulse went
+    // with the fabricated "Live" badge, and the loop's own "defined but never used" check
+    // is what stops a dead keyframe from lingering here again.
+    expect(names).toEqual(expect.arrayContaining(['al-fade']));
 
     const disabled = new Set(
       rulesInside(rules, isReducedMotion)

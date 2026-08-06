@@ -18,14 +18,10 @@
 .al-cockpit__live {
   display: inline-flex; align-items: center; gap: var(--al-space-1);
   font-size: 10px; text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow);
-  color: var(--al-teal); font-weight: var(--al-weight-bold); white-space: nowrap;
+  /* Muted, not teal. This is a disclaimer that the data is fictional; teal means
+     "verified" everywhere else in the system and would read as the opposite. */
+  color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-bold); white-space: nowrap;
 }
-.al-cockpit__pulse {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--al-teal);
-  animation: al-pulse 2.4s var(--al-ease) infinite;
-}
-@keyframes al-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-@media (prefers-reduced-motion: reduce) { .al-cockpit__pulse { animation: none; } }
 
 .al-cockpit__tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2); }
 @media (max-width: 520px) { .al-cockpit__tiles { grid-template-columns: repeat(2, 1fr); } }
