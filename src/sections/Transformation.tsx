@@ -57,7 +57,7 @@ export function Transformation() {
 
         <div className="al-tf__stage al-tf__stage--brain al-on-navy">
           <p className="al-tf__n">Step 2</p>
-          <h3 className="al-tf__t">Case Brain</h3>
+          <h3 className="al-tf__t">One connected case file</h3>
           <ul className="al-tf__rows">
             {BRAIN.map((r) => (
               <li key={r.text} className={`al-tf__row al-tf__row--${r.tone}`}>

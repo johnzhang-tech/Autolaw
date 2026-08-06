@@ -40,11 +40,13 @@ export function Hero() {
           <p className="al-sec__eyebrow">
             AI-native case intelligence for personal injury &amp; workers&rsquo; compensation firms
           </p>
-          <h1 className="al-hero__title">Turn case complexity into legal advantage.</h1>
+          <h1 className="al-hero__title">
+            Turn case complexity into legal advantage. Know where every fact came from.
+          </h1>
           <p className="al-hero__sub">
-            Autolaw transforms intake calls, medical records, expert reports, and case files
-            into a living, source-linked Case Brain &mdash; helping your team understand the
-            case, uncover missing evidence, and prepare stronger work product faster.
+            Autolaw reads the intake calls, medical records, and expert reports in a file and
+            builds one connected case file &mdash; every fact citing its document, page, and
+            sentence. Where two records disagree, you see both.
           </p>
           <div className="al-hero__ctas">
             <Button href={TRIAL_URL} variant="primary" size="lg" withCaret>
