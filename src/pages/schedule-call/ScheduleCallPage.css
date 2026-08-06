@@ -40,6 +40,16 @@
   .al-sched__layout { grid-template-columns: minmax(0, 1fr); gap: var(--al-space-5); }
 }
 
+/*
+ * max-width is a measure, not decoration. Without it the form is 506.8px beside the aside
+ * and 852.0px the instant the layout stacks at 900px — the same five fields, suddenly at
+ * a width where the eye loses the start of the next label. 720px holds the wider state to
+ * something readable and never binds in the two-column one.
+ *
+ * --al-ring is set per panel because the default ring's inner 2px band is --al-canvas,
+ * and this panel is --al-surface: on a white form the band paints a ring of page
+ * background around the control, which reads as a rendering fault rather than as focus.
+ */
 .al-sched__form {
   background: var(--al-surface);
   border: 1px solid var(--al-hairline);
@@ -47,12 +57,16 @@
   padding: var(--al-space-5);
   display: grid;
   gap: var(--al-space-5);
+  max-width: 720px;
+  --al-ring: 0 0 0 2px var(--al-surface), 0 0 0 4px var(--al-teal-text);
 }
 
 /*
  * The error summary is amber-on-amber-wash, the pairing verified at 4.5:1 in
  * design-system/build.mjs. Colour is the last signal here, not the only one: the summary
  * names each field and repeats the browser's own message.
+ *
+ * It takes focus after a rejected submit, so its own ring has to sit on its own wash.
  */
 .al-sched__summary {
   background: var(--al-amber-wash);
@@ -60,6 +74,7 @@
   border-radius: var(--al-radius-card);
   padding: var(--al-space-4);
   color: var(--al-amber-text);
+  --al-ring: 0 0 0 2px var(--al-amber-wash), 0 0 0 4px var(--al-teal-text);
 }
 .al-sched__summary b { display: block; font-size: var(--al-text-body); margin-bottom: var(--al-space-2); }
 .al-sched__summary ul { margin: 0; padding-left: var(--al-space-4); display: grid; gap: var(--al-space-1); }
@@ -88,32 +103,47 @@
 }
 
 .al-sched__radios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--al-space-2); }
-@media (max-width: 620px) { .al-sched__radios { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 720px) { .al-sched__radios { grid-template-columns: minmax(0, 1fr); } }
 
 /*
  * The whole tile is the hit area: the label fills it, so the target is the card rather
  * than a 13px disc. The border, not a background tint, carries selection — a tint alone
  * would be colour as the only signal, and the radio itself stays visible either way.
+ *
+ * Flex, not absolute positioning. Grid stretches all three tiles to the height of the
+ * tallest, but an absolutely positioned radio with a block label left the label at its
+ * own content height: when "Workers' compensation" wrapped to two lines, the bottom fifth
+ * of "Both" was tile but not label — unclickable, and its text top-aligned against two
+ * centred neighbours. align-items: center on the label makes the label the tile, so the
+ * hit area is the whole card at every wrap, and align-self: center on the input puts the
+ * disc on the first line's optical centre instead of ~4.3px above it.
  */
 .al-sched__radio {
-  position: relative;
+  display: flex;
+  gap: var(--al-space-2);
+  padding-left: var(--al-space-3);
   border: 1px solid var(--al-hairline-strong);
   border-radius: var(--al-radius-card);
   transition: border-color var(--al-duration-fast) var(--al-ease);
 }
 .al-sched__radio:hover { border-color: var(--al-ink-muted); }
 .al-sched__radio:has(input:checked) { border-color: var(--al-teal-text); box-shadow: inset 0 0 0 1px var(--al-teal-text); }
-.al-sched__radio input { position: absolute; top: var(--al-space-3); left: var(--al-space-3); margin: 0; }
+.al-sched__radio input { flex: none; margin: 0; align-self: center; }
 .al-sched__radio label {
-  display: block;
-  padding: var(--al-space-3) var(--al-space-3) var(--al-space-3) var(--al-space-5);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: var(--al-space-3) var(--al-space-3) var(--al-space-3) 0;
   font-size: var(--al-text-sm);
   font-weight: var(--al-weight-semibold);
   cursor: pointer;
 }
 
 .al-sched__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--al-space-4); }
-@media (max-width: 620px) { .al-sched__row { grid-template-columns: minmax(0, 1fr); } }
+/* 720, the same step the radios take. 620 was the only breakpoint in this file outside
+   the site's set of 900/860/780/720/520, and it bought a 241.5px minimum input where 720
+   leaves 291.5px — half a firm name's difference at the width it matters. */
+@media (max-width: 720px) { .al-sched__row { grid-template-columns: minmax(0, 1fr); } }
 
 .al-sched__field { display: grid; gap: var(--al-space-2); align-content: start; }
 .al-sched__field > label {
@@ -146,11 +176,14 @@
 }
 .al-sched__fine a { color: var(--al-teal-text); }
 
+/* Takes focus the moment it appears, so — like the summary — its ring's inner band is
+   its own wash rather than the page canvas underneath the form. */
 .al-sched__ready {
   border: 1px solid var(--al-teal-text);
   border-radius: var(--al-radius-card);
   background: var(--al-teal-wash);
   padding: var(--al-space-4);
+  --al-ring: 0 0 0 2px var(--al-teal-wash), 0 0 0 4px var(--al-teal-text);
 }
 .al-sched__ready h3 { margin: 0 0 var(--al-space-2); font-size: var(--al-text-h3); line-height: var(--al-leading-snug); }
 .al-sched__ready > p { margin: 0 0 var(--al-space-3); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
@@ -171,6 +204,28 @@
   word-break: break-word;
 }
 .al-sched__ready-ctas { display: grid; gap: var(--al-space-3); justify-items: start; }
+
+/*
+ * The booking embed. max-width matches the form's measure so the two states of this page
+ * occupy the same column and the layout does not shift when BOOKING_URL is set.
+ *
+ * The height is fixed rather than aspect-ratio'd: the framed page is Google's, it scrolls
+ * internally, and there is no way to read its content height from outside the frame.
+ * 700px clears the month grid and the slot list together at the widths this column takes.
+ */
+.al-sched__booking {
+  display: grid;
+  gap: var(--al-space-3);
+  max-width: 720px;
+}
+.al-sched__embed {
+  display: block;
+  width: 100%;
+  height: 700px;
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-panel);
+  background: var(--al-surface);
+}
 
 .al-sched__aside {
   background: var(--al-navy);

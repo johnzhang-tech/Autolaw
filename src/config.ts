@@ -102,3 +102,22 @@ export const WALKTHROUGH_URL: string | null = null;
  * which means the endpoint must respond with a confirmation page, not a bare 200.
  */
 export const CONTACT_ENDPOINT: string | null = null;
+
+/**
+ * Google Calendar appointment schedule booking page.
+ *
+ * null renders the fallback below instead — never a broken or empty embed.
+ *
+ * To create it (free personal Google account is enough):
+ *   Google Calendar → Create → Appointment schedule → set duration and availability →
+ *   Booking form → "Add an item" → add a required question "Which do you practice?"
+ *   with options Personal injury / Workers' compensation / Both → Save → Share →
+ *   copy the booking page link.
+ *
+ * Paste the link here. For the embeddable version append ?gv=true.
+ *
+ * Known limits on the free tier, both fixable by upgrading:
+ *   - no "Require email verification", so spam bookings are possible
+ *   - no automatic reminder emails to the invitee
+ */
+export const BOOKING_URL: string | null = null;
