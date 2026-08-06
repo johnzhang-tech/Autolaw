@@ -1,0 +1,118 @@
+/* Certification badges under the page lead. Same shape as the ones in Trust, restated
+   here rather than imported from Trust.css: this page must not break because a section
+   stylesheet it does not own gets reorganised. */
+.al-secp__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-3);
+  list-style: none;
+  margin: var(--al-space-5) 0 0;
+  padding: 0;
+}
+.al-secp__badge {
+  display: flex;
+  align-items: center;
+  gap: var(--al-space-3);
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-3) var(--al-space-4);
+}
+/* 40/9 matches Trust's badge disc: "HIPAA" set bold at 10px measures about 31px and
+   leaves no clearance in a smaller disc once a font falls back. */
+.al-secp__mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--al-navy);
+  color: var(--al-teal);
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: var(--al-weight-bold);
+  flex: none;
+}
+.al-secp__badge-text { display: grid; }
+.al-secp__badge-text b { font-size: var(--al-text-sm); }
+.al-secp__badge-text span { font-size: var(--al-text-xs); color: var(--al-ink-muted); }
+
+/*
+ * Two columns, then one. Explicit counts rather than auto-fit, for the reason recorded in
+ * Trust.css: auto-fit picks whatever happens to fit and strands the last card alone.
+ */
+.al-secp__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--al-space-3);
+}
+.al-secp__grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) {
+  .al-secp__grid, .al-secp__grid--three { grid-template-columns: minmax(0, 1fr); }
+}
+
+.al-secp__card {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-left: 3px solid var(--al-teal-text);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+}
+.al-secp__card h3 {
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-bold);
+  margin: 0 0 var(--al-space-2);
+}
+.al-secp__card p {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+}
+
+/* On navy the accent edge switches to --al-teal: --al-teal-text is the light-surface
+   variant and disappears against the panel. */
+.al-secp__card--navy {
+  background: var(--al-navy-raised);
+  border-color: var(--al-hairline-inverse);
+  border-left-color: var(--al-teal);
+  color: var(--al-ink-inverse);
+}
+.al-secp__card--navy p { color: var(--al-ink-inverse-muted); }
+
+.al-secp__why {
+  margin: var(--al-space-4) 0 0;
+  padding-left: var(--al-space-4);
+  border-left: 3px solid var(--al-amber);
+  font-size: var(--al-text-body);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-inverse-muted);
+  max-width: 76ch;
+}
+
+.al-secp__ask {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--al-space-6);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .al-secp__ask { grid-template-columns: minmax(0, 1fr); gap: var(--al-space-5); }
+}
+
+.al-secp__asks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--al-space-4); }
+.al-secp__asks li {
+  display: grid;
+  gap: var(--al-space-1);
+  padding-bottom: var(--al-space-4);
+  border-bottom: 1px solid var(--al-hairline);
+}
+.al-secp__asks li:last-child { padding-bottom: 0; border-bottom: 0; }
+.al-secp__asks b { font-size: var(--al-text-body); }
+.al-secp__asks span { font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
+
+.al-secp__ctas { display: flex; flex-direction: column; gap: var(--al-space-3); align-items: stretch; }
+.al-secp__ctas .al-btn { width: 100%; }
+@media (max-width: 900px) {
+  .al-secp__ctas { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .al-secp__ctas .al-btn { width: auto; }
+}

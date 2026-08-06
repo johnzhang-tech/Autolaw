@@ -1,0 +1,101 @@
+/*
+ * Explicit column counts rather than auto-fit, for the reason recorded in Trust.css:
+ * auto-fit picks whatever happens to fit and strands the last card alone on a row.
+ */
+.al-about__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--al-space-3);
+}
+.al-about__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--al-space-3);
+}
+@media (max-width: 900px) {
+  .al-about__grid, .al-about__pair { grid-template-columns: minmax(0, 1fr); }
+}
+
+.al-about__card {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-left: 3px solid var(--al-teal-text);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+}
+.al-about__card h3 {
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-bold);
+  margin: 0 0 var(--al-space-2);
+}
+.al-about__card p {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+}
+
+.al-about__note {
+  margin: var(--al-space-4) 0 0;
+  font-size: var(--al-text-body);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+  max-width: 76ch;
+}
+
+/* The principle, set in the record serif rather than the UI face — it is the sentence the
+   rest of the product is an argument for, and it reads as a statement, not a feature. */
+.al-about__lede {
+  font-family: var(--al-font-record);
+  font-size: var(--al-text-body-lg);
+  line-height: var(--al-leading-record);
+  margin: 0 0 var(--al-space-4);
+  max-width: 68ch;
+}
+.al-about__lede--muted { color: var(--al-ink-inverse-muted); }
+.al-about__more { margin: var(--al-space-5) 0 0; }
+
+.al-about__story {
+  max-width: 68ch;
+  font-size: var(--al-text-body-lg);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+}
+.al-about__story p { margin: 0 0 var(--al-space-4); }
+.al-about__story p:last-child { margin-bottom: 0; }
+
+.al-about__team {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--al-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (max-width: 900px) { .al-about__team { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .al-about__team { grid-template-columns: minmax(0, 1fr); } }
+.al-about__team li {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+  display: grid;
+  gap: var(--al-space-1);
+}
+.al-about__team b { font-size: var(--al-text-body); }
+.al-about__team span { font-size: var(--al-text-sm); color: var(--al-ink-muted); }
+
+.al-about__roles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--al-space-3); }
+.al-about__roles li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--al-space-3);
+  padding-bottom: var(--al-space-3);
+  border-bottom: 1px solid var(--al-hairline);
+}
+.al-about__roles li:last-child { padding-bottom: 0; border-bottom: 0; }
+.al-about__roles a { color: var(--al-teal-text); font-weight: var(--al-weight-semibold); }
+.al-about__roles span { font-size: var(--al-text-sm); color: var(--al-ink-muted); }
+
+.al-about__ctas { display: flex; gap: var(--al-space-3); flex-wrap: wrap; }

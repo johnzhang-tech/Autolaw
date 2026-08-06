@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -16,11 +16,26 @@ const ROOT = process.cwd();
 const SRC = join(ROOT, 'src');
 
 /**
- * Files that ship to a visitor.
+ * Every HTML file Vite ships, read back out of the build config instead of listed here.
  *
- * index.html is included explicitly. It is the file that literally ships, and it holds
- * <link rel="canonical"> and og:url — the two likeliest places for a wrong host to
- * reappear — yet a scan of src/ alone never looks at it.
+ * index.html used to be named on its own, and naming it was the right instinct: it is a
+ * file that literally ships, it holds <link rel="canonical"> and og:url — the two
+ * likeliest places for a wrong host to reappear — and a scan of src/ alone never looks at
+ * it. The site now has four of them, one per page, each with its own canonical and og:url.
+ *
+ * Deriving the list from vite.config.ts rather than repeating it means a page added later
+ * is scanned the moment it is buildable, rather than the moment someone remembers this
+ * file exists. The guard below asserts the list is non-empty and that every path resolves,
+ * because a regex that quietly stops matching would turn every check in this file green.
+ */
+const htmlEntries = (): string[] => {
+  const config = readFileSync(join(ROOT, 'vite.config.ts'), 'utf8');
+  const inputs = config.slice(config.indexOf('rollupOptions'));
+  return [...inputs.matchAll(/__dirname,\s*['"]([^'"]+\.html)['"]/g)].map((m) => join(ROOT, m[1]));
+};
+
+/**
+ * Files that ship to a visitor.
  *
  * `__tests__` is excluded for a specific reason: this file necessarily contains the
  * literal strings it searches for ("logoipsum", "shutterstock"), so a scanner that
@@ -36,10 +51,27 @@ const sourceFiles = () =>
       // Unsplash photography and shadcn/ui long after both were gone. A stale claim in
       // a doc is the same credibility problem as one in markup.
       .filter((f) => /\.(tsx?|css|html|md)$/.test(f)),
-    join(ROOT, 'index.html'),
+    ...htmlEntries(),
   ];
 
 describe('credibility guards', () => {
+  /*
+   * Runs first because every other guard in this file depends on it. If the entry regex
+   * stops matching — someone reformats vite.config.ts, or switches to a helper that builds
+   * the input map — the scan silently covers nothing but src/, and the four files most
+   * likely to carry a wrong hostname stop being checked while the suite stays green.
+   */
+  it('scans every HTML page the build ships', () => {
+    const entries = htmlEntries();
+    expect(entries.map((f) => f.replace(`${ROOT}/`, ''))).toEqual([
+      'index.html',
+      'security/index.html',
+      'about/index.html',
+      'schedule-call/index.html',
+    ]);
+    entries.forEach((f) => expect(existsSync(f), `${f} is a build entry but does not exist`).toBe(true));
+  });
+
   it('ships no placeholder customer logos', () => {
     const offenders = sourceFiles().filter((f) =>
       /logoipsum/i.test(readFileSync(f, 'utf8'))

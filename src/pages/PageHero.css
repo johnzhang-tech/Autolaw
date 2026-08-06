@@ -1,0 +1,25 @@
+/*
+ * Standalone pages open on the canvas, not on a navy slab. The home page earns its dark
+ * hero by putting the product visual in it; a security or about page opening the same way
+ * would be decoration, and it would push the first sentence a reviewer came for below the
+ * fold.
+ */
+.al-phero { padding-block: var(--al-space-7) var(--al-space-6); }
+.al-phero__inner { max-width: 760px; }
+
+.al-phero__title {
+  font-size: var(--al-text-h2);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+  letter-spacing: var(--al-tracking-display);
+  margin: 0 0 var(--al-space-3);
+  text-wrap: balance;
+}
+
+.al-phero__sub {
+  font-size: var(--al-text-body-lg);
+  line-height: var(--al-leading-normal);
+  color: var(--al-ink-muted);
+  margin: 0;
+  max-width: 62ch;
+}

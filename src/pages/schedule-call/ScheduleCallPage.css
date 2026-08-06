@@ -1,0 +1,188 @@
+.al-sched__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--al-space-3);
+  counter-reset: al-step;
+}
+@media (max-width: 900px) { .al-sched__steps { grid-template-columns: minmax(0, 1fr); } }
+
+.al-sched__steps li {
+  counter-increment: al-step;
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+  display: grid;
+  gap: var(--al-space-1);
+}
+/* The number is generated content, so it is decorative by construction and cannot be read
+   out as a stray "1" before the step's own text. */
+.al-sched__steps li::before {
+  content: counter(al-step);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  color: var(--al-teal-text);
+}
+.al-sched__steps b { font-size: var(--al-text-body); }
+.al-sched__steps span { font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
+
+.al-sched__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--al-space-6);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .al-sched__layout { grid-template-columns: minmax(0, 1fr); gap: var(--al-space-5); }
+}
+
+.al-sched__form {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-panel);
+  padding: var(--al-space-5);
+  display: grid;
+  gap: var(--al-space-5);
+}
+
+/*
+ * The error summary is amber-on-amber-wash, the pairing verified at 4.5:1 in
+ * design-system/build.mjs. Colour is the last signal here, not the only one: the summary
+ * names each field and repeats the browser's own message.
+ */
+.al-sched__summary {
+  background: var(--al-amber-wash);
+  border: 1px solid var(--al-amber);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+  color: var(--al-amber-text);
+}
+.al-sched__summary b { display: block; font-size: var(--al-text-body); margin-bottom: var(--al-space-2); }
+.al-sched__summary ul { margin: 0; padding-left: var(--al-space-4); display: grid; gap: var(--al-space-1); }
+.al-sched__summary a { color: inherit; font-size: var(--al-text-sm); }
+
+.al-sched__fieldset { border: 0; margin: 0; padding: 0; }
+.al-sched__fieldset legend {
+  padding: 0;
+  font-size: var(--al-text-h3);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+  margin-bottom: var(--al-space-2);
+}
+
+.al-sched__hint {
+  margin: 0 0 var(--al-space-3);
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+.al-sched__error {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+  color: var(--al-amber-text);
+}
+
+.al-sched__radios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--al-space-2); }
+@media (max-width: 620px) { .al-sched__radios { grid-template-columns: minmax(0, 1fr); } }
+
+/*
+ * The whole tile is the hit area: the label fills it, so the target is the card rather
+ * than a 13px disc. The border, not a background tint, carries selection — a tint alone
+ * would be colour as the only signal, and the radio itself stays visible either way.
+ */
+.al-sched__radio {
+  position: relative;
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-card);
+  transition: border-color var(--al-duration-fast) var(--al-ease);
+}
+.al-sched__radio:hover { border-color: var(--al-ink-muted); }
+.al-sched__radio:has(input:checked) { border-color: var(--al-teal-text); box-shadow: inset 0 0 0 1px var(--al-teal-text); }
+.al-sched__radio input { position: absolute; top: var(--al-space-3); left: var(--al-space-3); margin: 0; }
+.al-sched__radio label {
+  display: block;
+  padding: var(--al-space-3) var(--al-space-3) var(--al-space-3) var(--al-space-5);
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+  cursor: pointer;
+}
+
+.al-sched__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--al-space-4); }
+@media (max-width: 620px) { .al-sched__row { grid-template-columns: minmax(0, 1fr); } }
+
+.al-sched__field { display: grid; gap: var(--al-space-2); align-content: start; }
+.al-sched__field > label {
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+}
+.al-sched__field .al-sched__hint, .al-sched__field .al-sched__error { margin: 0; }
+
+.al-sched__field input, .al-sched__field select {
+  font: inherit;
+  font-size: var(--al-text-body);
+  color: var(--al-ink);
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-sm);
+  padding: 10px var(--al-space-3);
+  width: 100%;
+  transition: border-color var(--al-duration-fast) var(--al-ease);
+}
+.al-sched__field input:hover, .al-sched__field select:hover { border-color: var(--al-ink-muted); }
+.al-sched__field [aria-invalid='true'] { border-color: var(--al-amber-text); }
+
+.al-sched__actions { display: grid; gap: var(--al-space-3); justify-items: start; }
+.al-sched__fine {
+  margin: 0;
+  font-size: var(--al-text-xs);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+  max-width: 62ch;
+}
+.al-sched__fine a { color: var(--al-teal-text); }
+
+.al-sched__ready {
+  border: 1px solid var(--al-teal-text);
+  border-radius: var(--al-radius-card);
+  background: var(--al-teal-wash);
+  padding: var(--al-space-4);
+}
+.al-sched__ready h3 { margin: 0 0 var(--al-space-2); font-size: var(--al-text-h3); line-height: var(--al-leading-snug); }
+.al-sched__ready > p { margin: 0 0 var(--al-space-3); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
+
+/* The exact text that will be sent, shown rather than described. Scrolls in its own box
+   so a long firm name cannot push the page sideways. */
+.al-sched__preview {
+  margin: 0 0 var(--al-space-3);
+  padding: var(--al-space-3);
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-sm);
+  font-family: var(--al-font-record);
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-record);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.al-sched__ready-ctas { display: grid; gap: var(--al-space-3); justify-items: start; }
+
+.al-sched__aside {
+  background: var(--al-navy);
+  color: var(--al-ink-inverse);
+  border-radius: var(--al-radius-panel);
+  padding: var(--al-space-5);
+  display: grid;
+  gap: var(--al-space-3);
+  justify-items: start;
+}
+.al-sched__aside h3 { margin: 0; font-size: var(--al-text-h3); line-height: var(--al-leading-snug); }
+.al-sched__aside p { margin: 0; font-size: var(--al-text-sm); color: var(--al-ink-inverse-muted); line-height: var(--al-leading-normal); }
+/* The button here is the inverse-secondary variant rather than a local override of
+   secondary: --al-ink on navy is unreadable, and the variant already exists. */
+.al-sched__aside-note { font-size: var(--al-text-xs); }
