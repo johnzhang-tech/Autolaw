@@ -15,13 +15,70 @@
 }
 .al-nav__brand:hover { color: var(--al-teal-text); }
 
-.al-nav__links { display: flex; gap: var(--al-space-4); list-style: none; margin: 0; padding: 0; }
+/* The row stretches to the full bar height so a dropdown positioned at `top: 100%` hangs
+   from the bar's own edge, not from the middle of a 20px-tall label. */
+.al-nav__links { display: flex; align-self: stretch; gap: var(--al-space-4); list-style: none; margin: 0; padding: 0; }
+.al-nav__links > li { display: flex; align-items: center; }
 .al-nav__links a {
   font-size: var(--al-text-sm); font-weight: var(--al-weight-medium);
   color: var(--al-ink-muted); text-decoration: none;
   transition: color var(--al-duration-fast) var(--al-ease);
 }
 .al-nav__links a:hover { color: var(--al-ink); }
+
+/* ---- dropdown ---- */
+
+.al-nav__menu { position: relative; }
+.al-nav__trigger {
+  display: inline-flex; align-items: center; gap: var(--al-space-1);
+  background: transparent; border: 0; padding: 0; cursor: pointer;
+  font-size: var(--al-text-sm); font-weight: var(--al-weight-medium);
+  color: var(--al-ink-muted);
+  transition: color var(--al-duration-fast) var(--al-ease);
+}
+.al-nav__trigger:hover,
+.al-nav__menu[data-open] .al-nav__trigger { color: var(--al-ink); }
+
+.al-nav__chev {
+  width: 5px; height: 5px; margin-top: -2px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--al-duration-fast) var(--al-ease);
+}
+.al-nav__menu[data-open] .al-nav__chev { transform: rotate(-135deg); margin-top: 2px; }
+
+/* White, not the translucent bar fill: the panel sits over page content, and a 90% canvas
+   would let the words underneath show through the links. */
+.al-nav__panel {
+  position: absolute; top: calc(100% + var(--al-space-1)); left: 0; z-index: 50;
+  min-width: 280px;
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  box-shadow: var(--al-shadow-popover);
+  padding: var(--al-space-2);
+}
+.al-nav__panel ul { list-style: none; margin: 0; padding: 0; }
+.al-nav__panel a {
+  display: block; padding: var(--al-space-2) var(--al-space-3);
+  border-radius: var(--al-radius-sm);
+  text-decoration: none;
+  transition: background-color var(--al-duration-fast) var(--al-ease);
+}
+.al-nav__panel a:hover { background: var(--al-teal-wash); }
+.al-nav__panel-label {
+  display: block;
+  font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold);
+  color: var(--al-ink);
+}
+.al-nav__panel-desc {
+  display: block; margin-top: 2px;
+  font-size: var(--al-text-xs); font-weight: var(--al-weight-regular);
+  color: var(--al-ink-muted);
+}
+
+/* ---- actions ---- */
 
 .al-nav__actions { display: flex; align-items: center; gap: var(--al-space-3); }
 .al-nav__login {
@@ -33,6 +90,8 @@
 
 .al-nav__toggle { display: none; background: transparent; border: 0; cursor: pointer; padding: 8px; }
 
+/* ---- mobile drawer ---- */
+
 .al-nav__mobile { border-top: 1px solid var(--al-hairline); padding: var(--al-space-3) var(--al-gutter) var(--al-space-4); }
 .al-nav__mobile ul { list-style: none; margin: 0 0 var(--al-space-3); padding: 0; }
 .al-nav__mobile a {
@@ -40,6 +99,13 @@
   border-bottom: 1px solid var(--al-hairline);
   color: var(--al-ink); text-decoration: none;
   font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold);
+}
+/* Each menu is already open here — the label is a heading for its links, not a control. */
+.al-nav__mobile-label {
+  margin: 0 0 var(--al-space-1);
+  font-size: var(--al-text-xs); font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase;
+  color: var(--al-ink-muted);
 }
 
 @media (max-width: 860px) {

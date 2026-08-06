@@ -1,3 +1,4 @@
+import { AnnouncementBanner } from './components/AnnouncementBanner';
 import { SiteNav } from './components/SiteNav';
 import { SiteFooter } from './components/SiteFooter';
 import { Hero } from './sections/Hero';
@@ -12,6 +13,9 @@ export default function App() {
     <>
       <a className="al-skip" href="#main">Skip to content</a>
       <div id="top" />
+      {/* Above the sticky bar and outside it, so the bar's height — and therefore
+          scroll-padding-top — is unchanged. Renders nothing while ANNOUNCEMENT is null. */}
+      <AnnouncementBanner />
       <SiteNav />
       {/*
         tabIndex={-1} so the skip link actually moves focus. Chrome and Firefox set the

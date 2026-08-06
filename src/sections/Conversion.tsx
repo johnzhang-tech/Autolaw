@@ -1,5 +1,5 @@
 import { Button } from '../components/primitives/Button';
-import { TRIAL_URL, CONTACT_EMAIL } from '../config';
+import { TRIAL_URL, SCHEDULE_URL } from '../config';
 import './Conversion.css';
 
 export function Conversion() {
@@ -20,9 +20,10 @@ export function Conversion() {
         </p>
         <div className="al-conv__ctas">
           <Button href={TRIAL_URL} variant="inverse" size="lg" withCaret>Analyze one case</Button>
-          {/* "Email us", not "Talk to us": the link opens a mail client, and this buyer
-              would rather be told that than discover it. */}
-          <Button href={`mailto:${CONTACT_EMAIL}`} variant="inverse-secondary" size="lg">Email us</Button>
+          {/* The same pair the hero and the nav offer, so a visitor who scrolled the whole
+              page is not asked to go back up to find the other lane. The mailto that used
+              to sit here is in the footer, where a link that opens a mail client belongs. */}
+          <Button href={SCHEDULE_URL} variant="inverse-secondary" size="lg">Schedule a call</Button>
         </div>
         <p className="al-conv__fine">
           Personal injury and workers&rsquo; compensation are set up separately &mdash; tell us

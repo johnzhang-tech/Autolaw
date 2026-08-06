@@ -113,20 +113,36 @@ describe('keyboard reachability', () => {
      * loop then passes over a shorter list and reports nothing.
      */
 
-    // Nav links: brand, four section links, log in, and the header CTA
+    // Nav links: brand, three section links, log in, and the header CTA. The two dropdown
+    // menus are buttons, not links, and their items are not in the DOM until one opens.
     const nav = screen.getByRole('navigation', { name: /primary/i });
     const navLinks = within(nav).getAllByRole('link');
-    expect(navLinks.length).toBe(7);
+    expect(navLinks.length).toBe(6);
     navLinks.forEach(reachable);
 
-    // CTAs, wherever they appear
-    screen.getAllByRole('link', { name: /analyze one case/i }).forEach(reachable);
-    // "Email us" since the secondary CTA is a mailto:, not a scheduling link.
-    reachable(screen.getByRole('link', { name: /email us/i }));
+    /*
+     * Resources and About. Asserted as buttons on purpose: a hover-only dropdown built on
+     * a <span> or an <a href="#"> is exactly the regression this catches, and it is
+     * unreachable by keyboard the moment it happens. The mobile toggle is display:none at
+     * this width, so it is not among them.
+     */
+    const menuTriggers = within(nav).getAllByRole('button', { expanded: false });
+    expect(menuTriggers.length).toBe(2);
+    menuTriggers.forEach(reachable);
 
-    // Chronology events — every one, not just the selected one
+    // CTAs, wherever they appear. Both halves of the split are live, so both are checked.
+    screen.getAllByRole('link', { name: /analyze one case/i }).forEach(reachable);
+    // Nav, hero, closing CTA, footer. The count is exact for the reason given above.
+    const schedule = screen.getAllByRole('link', { name: /schedule a call/i });
+    expect(schedule.length).toBe(4);
+    schedule.forEach(reachable);
+
+    // Chronology events — every one, not just the selected one. Filtered to outside the
+    // banner because the nav's disclosure triggers carry aria-expanded too.
+    const banner = screen.getByRole('banner');
     const events = screen.getAllByRole('button', { expanded: false })
-      .concat(screen.getAllByRole('button', { expanded: true }));
+      .concat(screen.getAllByRole('button', { expanded: true }))
+      .filter((el) => !banner.contains(el));
     expect(events.length).toBe(CHRONOLOGY.length);
     events.forEach(reachable);
 
@@ -149,10 +165,10 @@ describe('keyboard reachability', () => {
     // Comparison scroller — focusable so a keyboard user can scroll it
     reachable(screen.getByTestId('comparison-scroller'));
 
-    // Footer links: four section links, log in, and contact
+    // Footer links: three section links, security, about, schedule a call, log in, contact
     const footer = screen.getByRole('contentinfo');
     const footerLinks = within(footer).getAllByRole('link');
-    expect(footerLinks.length).toBe(6);
+    expect(footerLinks.length).toBe(8);
     footerLinks.forEach(reachable);
   });
 

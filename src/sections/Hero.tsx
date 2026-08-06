@@ -1,6 +1,6 @@
 import { Button } from '../components/primitives/Button';
 import { SignalCockpit } from './SignalCockpit';
-import { TRIAL_URL, WALKTHROUGH_URL } from '../config';
+import { TRIAL_URL, SCHEDULE_URL, WALKTHROUGH_URL } from '../config';
 import './Hero.css';
 
 /*
@@ -51,6 +51,13 @@ export function Hero() {
           <div className="al-hero__ctas">
             <Button href={TRIAL_URL} variant="primary" size="lg" withCaret>
               Analyze one case
+            </Button>
+            {/*
+              Both lanes, side by side: self-serve for the firm that wants to try it
+              tonight, sales-assisted for the one that wants to be walked through it.
+            */}
+            <Button href={SCHEDULE_URL} variant="secondary" size="lg">
+              Schedule a call
             </Button>
             {WALKTHROUGH_URL && (
               <Button href={WALKTHROUGH_URL} variant="secondary" size="lg">

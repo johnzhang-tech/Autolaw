@@ -1,0 +1,60 @@
+/*
+ * Deliberately not sticky, and deliberately above .al-nav in normal flow.
+ *
+ * html { scroll-padding-top } is calc(--al-nav-height + space-4) — one fixed number, and
+ * the only thing keeping an in-page anchor from landing under the bar. A banner that stuck
+ * to the top would add its own height to that offset, and since it is dismissible the
+ * offset would not even be constant. Letting it scroll away keeps that number true and
+ * leaves the sticky nav exactly where it was.
+ *
+ * Navy, so --al-teal is the correct accent here: 5.6:1 on this surface, against 2.68:1 on
+ * the canvas. .al-on-navy switches the focus ring to its inverse for the same reason.
+ */
+.al-banner {
+  background: var(--al-navy);
+  color: var(--al-ink-inverse);
+  font-size: var(--al-text-sm);
+}
+
+/* Three tracks so the text is centred on the strip itself, not on whatever space the
+   close button leaves behind. */
+.al-banner__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--al-space-2);
+  min-height: 40px;
+  padding-block: var(--al-space-2);
+}
+
+.al-banner__link {
+  grid-column: 2;
+  display: inline-flex; align-items: center; gap: var(--al-space-2);
+  color: var(--al-ink-inverse); text-decoration: none;
+  font-weight: var(--al-weight-semibold);
+  text-align: center; text-wrap: balance;
+  transition: color var(--al-duration-fast) var(--al-ease);
+}
+.al-banner__link:hover { color: var(--al-teal); }
+
+.al-banner__caret {
+  width: 6px; height: 6px; flex: none;
+  border-right: 2px solid var(--al-teal);
+  border-bottom: 2px solid var(--al-teal);
+  transform: rotate(-45deg);
+}
+
+.al-banner__close {
+  grid-column: 3; justify-self: end;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  background: transparent; border: 0; border-radius: var(--al-radius-sm);
+  color: var(--al-ink-inverse-muted); cursor: pointer;
+  transition:
+    color var(--al-duration-fast) var(--al-ease),
+    background-color var(--al-duration-fast) var(--al-ease);
+}
+.al-banner__close:hover {
+  color: var(--al-ink-inverse);
+  background: color-mix(in srgb, var(--al-ink-inverse) 12%, transparent);
+}
