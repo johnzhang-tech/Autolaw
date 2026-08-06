@@ -38,7 +38,7 @@ const ACCESS = [
   },
   {
     title: 'Document access is recorded',
-    body: 'Who opened which document, and when, is recorded and reviewable — so "who opened this file" has an answer rather than an assumption.',
+    body: 'Who opened which document, and when, is recorded and reviewable — so “who opened this file” has an answer rather than an assumption.',
   },
 ];
 
