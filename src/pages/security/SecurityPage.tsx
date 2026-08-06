@@ -44,8 +44,8 @@ const ACCESS = [
 
 const LIMITS = [
   {
-    title: 'Extraction proposes; an attorney confirms',
-    body: 'Autolaw reads a document and proposes a value. An attorney confirms it before it counts as a fact in the case. Nothing the model produces becomes case truth on its own.',
+    title: 'Autolaw proposes; a person confirms',
+    body: 'Autolaw reads a document and proposes a value. Someone at your firm confirms it before it counts as a fact in the case. Nothing the model produces becomes case truth on its own.',
   },
   {
     title: 'Conflicts are surfaced, never silently resolved',
@@ -76,7 +76,7 @@ export function SecurityPage() {
           </>
         }
       >
-        <ul className="al-secp__badges" aria-label="Certifications">
+        <ul className="al-secp__badges" aria-label="Attestations and safeguards">
           {CERTIFICATIONS.map((c) => (
             <li key={c.label} className="al-secp__badge">
               <span className="al-secp__mark" aria-hidden="true">{c.mark}</span>
@@ -126,7 +126,7 @@ export function SecurityPage() {
         tone="navy"
         eyebrow="Model limits"
         heading="What the model is not allowed to do"
-        intro="The constraint below is legal before it is technical, which is why it is a property of the product rather than a setting."
+        intro="The constraints below are legal before they are technical, which is why none of them is offered as a preference to be turned off."
       >
         <div className="al-secp__grid al-secp__grid--three">
           {LIMITS.map((c) => (
@@ -140,21 +140,21 @@ export function SecurityPage() {
           Why a person has to confirm: date of injury, employer, and claim status carry
           statute-of-limitations and jurisdictional consequences. A value that decides whether
           a claim is still alive, and where it can be brought, is not something a model gets to
-          assert on its own. So extraction proposes, and an attorney confirms.
+          assert on its own. So Autolaw proposes, and a person at your firm confirms.
         </p>
       </Section>
 
       <Section
         id="certifications"
-        eyebrow="Certifications"
-        heading="What we have been audited against"
+        eyebrow="Attestations and agreements"
+        heading="What we have been audited against, and what has no audit"
         intro="Two different things are often listed side by side as if they were the same. They are not, so they are described separately here."
       >
         <div className="al-secp__grid">
           <div className="al-secp__card">
             <h3>SOC 2 Type II</h3>
             <p>
-              Autolaw is SOC&nbsp;2 Type&nbsp;II certified &mdash; an audited attestation, issued
+              Autolaw holds a SOC&nbsp;2 Type&nbsp;II report &mdash; an audited attestation, issued
               by an outside firm, covering a period of operation rather than a point in time. The
               report is available under NDA, and it is the right place to send a reviewer whose
               questions go past this page.

@@ -24,7 +24,7 @@ describe('AboutPage — what it says', () => {
   it('states the human-confirmation principle and its legal reason', () => {
     render(<AboutPage />);
     const principle = within(
-      screen.getByRole('region', { name: /extraction proposes\. an attorney confirms\./i })
+      screen.getByRole('region', { name: /autolaw proposes\. an attorney confirms\./i })
     );
     expect(principle.getByText(/never writes case truth on its own/i)).toBeInTheDocument();
     expect(principle.getByText(/statute-of-limitations and jurisdictional consequences/i)).toBeInTheDocument();

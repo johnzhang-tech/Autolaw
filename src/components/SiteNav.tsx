@@ -109,13 +109,29 @@ export function NavMenu({ id, label, items, open, onToggle, onClose }: NavMenuPr
       case 'Escape': e.preventDefault(); closeToTrigger(); break;
       // Tabbing past the last item leaves the panel behind; close it, but let the
       // browser move focus wherever it was going.
-      case 'Tab': onClose(); break;
       default: break;
     }
   }
 
   return (
-    <li className="al-nav__menu" data-menu={id} data-open={open || undefined}>
+    /*
+     * Closing on focusout rather than on Tab. A `case 'Tab': onClose()` in the item handler
+     * fired on every Tab, not only past the last item, so the panel unmounted underneath a
+     * keyboard user moving from item one to item two — latent only because both menus
+     * currently ship a single item. focusout also covers Shift+Tab back off the trigger,
+     * which the key handler never saw. relatedTarget is null when focus leaves the document
+     * entirely (window blur), and the panel should stay put for that.
+     */
+    <li
+      className="al-nav__menu"
+      data-menu={id}
+      data-open={open || undefined}
+      onBlur={(e) => {
+        if (!open) return;
+        const next = e.relatedTarget as Node | null;
+        if (next && !e.currentTarget.contains(next)) onClose();
+      }}
+    >
       <button
         ref={triggerRef}
         type="button"

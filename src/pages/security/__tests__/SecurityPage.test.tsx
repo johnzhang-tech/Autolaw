@@ -32,7 +32,7 @@ describe('SecurityPage — the controls it claims', () => {
     expect(main.getByText(/never used to train or fine-tune any model/i)).toBeInTheDocument();
 
     // Human confirmation, and the legal reason for it
-    expect(main.getByText(/an attorney confirms it before it counts as a fact/i)).toBeInTheDocument();
+    expect(main.getByText(/someone at your firm confirms it before it counts as a fact/i)).toBeInTheDocument();
     expect(main.getByText(/statute-of-limitations and jurisdictional consequences/i)).toBeInTheDocument();
 
     // Conflicts and uncited findings
@@ -47,7 +47,7 @@ describe('SecurityPage — the controls it claims', () => {
     render(<SecurityPage />);
     // Scoped to the badge list: the same labels appear again in the certifications
     // section below, and an unscoped query would pass on either one.
-    const badges = within(screen.getByRole('list', { name: 'Certifications' }));
+    const badges = within(screen.getByRole('list', { name: 'Attestations and safeguards' }));
     expect(CERTIFICATIONS.length).toBeGreaterThan(0);
     CERTIFICATIONS.forEach((c) => {
       expect(badges.getByText(c.label)).toBeInTheDocument();

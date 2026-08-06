@@ -49,6 +49,10 @@
 
   /* Fluid display scale. Capped so the headline never dominates the product visual. */
   --al-text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem);
+  /* Page-level h1 on the standalone pages. Without a step here, PageHero's title and the
+     first section heading under it resolved to the same size, weight, and leading — so the
+     pages rendered with no hierarchy at all. Sits between h2 and display. */
+  --al-text-h1: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
   --al-text-h2: clamp(1.875rem, 1.35rem + 2.1vw, 3rem);
   --al-text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
   --al-text-body-lg: 1.125rem;

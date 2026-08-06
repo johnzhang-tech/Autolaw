@@ -45,11 +45,11 @@ const PRINCIPLES = [
   },
   {
     title: 'Disagreements stay visible',
-    body: 'When two records disagree, both stay on the page with their dates and sources. Picking one silently is the failure mode that makes a tool unusable for a file that will be deposed.',
+    body: 'When two records disagree, both stay on the page with their dates and sources. Picking one silently is the failure mode that makes a tool unusable for a chronology a defense expert will be deposed on.',
   },
   {
     title: 'A finding with no source stays separate',
-    body: 'Anything without support in the record is kept apart from what has it, and labelled. Mixing the two is how an unsupported line ends up in a demand letter.',
+    body: 'Anything without support in the record is kept apart from what has it, and labeled. Mixing the two is how an unsupported line ends up in a demand letter.',
   },
 ];
 
@@ -73,7 +73,7 @@ export function AboutPage() {
         id="how"
         eyebrow="What we build"
         heading="A case file you can check"
-        intro="Three commitments describe the product more precisely than any adjective, because each one is a behaviour you can watch it perform."
+        intro="Three commitments describe the product more precisely than any adjective, because each one is a behavior you can watch it perform."
       >
         <div className="al-about__grid">
           {PRINCIPLES.map((p) => (
@@ -95,7 +95,7 @@ export function AboutPage() {
           <div className="al-about__card">
             <h3>Personal injury</h3>
             <p>
-              A liability case built out of treatment history, causation, and damages. The
+              A case built on liability, causation, and damages, assembled out of the treatment history. The
               chronology has to survive a defense expert reading it line by line.
             </p>
           </div>
@@ -119,7 +119,7 @@ export function AboutPage() {
         id="principle"
         tone="navy"
         eyebrow="The principle"
-        heading="Extraction proposes. An attorney confirms."
+        heading="Autolaw proposes. An attorney confirms."
         intro="This is the one design decision everything else in Autolaw follows from, so it is worth stating plainly."
       >
         <p className="al-about__lede">

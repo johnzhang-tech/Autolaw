@@ -17,7 +17,7 @@ const CONTROLS = [
    * model itself is the differentiator: record-review vendors bill per page, and a firm
    * that has been quoted per-page reads this line and immediately knows the difference.
    */
-  { title: 'Priced on work product, never per page', body: 'No per-document or per-page fees. You pay for what is delivered, so a thousand-page file costs what it is worth to you rather than what it costs to scan.' },
+  { title: 'No per-page or per-document fees', body: 'A thousand-page file does not cost more to review than a hundred-page one. Record-review vendors bill by the page; Autolaw does not, so the size of a file never decides whether it is worth analysing.' },
 ];
 
 const ROWS: Array<[string, string, string]> = [

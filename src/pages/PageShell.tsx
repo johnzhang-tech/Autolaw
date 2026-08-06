@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { SiteNav } from '../components/SiteNav';
 import { SiteFooter } from '../components/SiteFooter';
 
@@ -14,6 +15,10 @@ export function PageShell({ children }: { children: ReactNode }) {
   return (
     <>
       <a className="al-skip" href="#main">Skip to content</a>
+      {/* Site-wide means all four pages. The first real announcement's example href is
+          /security/ — an announcement that showed on the home page and vanished on the
+          page it pointed at would be worse than none. */}
+      <AnnouncementBanner />
       <SiteNav />
       {/*
         tabIndex={-1} for the same reason as App.tsx: Safari does not set the

@@ -162,7 +162,7 @@ export function ScheduleCallPage() {
         id="request"
         eyebrow="Your details"
         heading="Five questions"
-        intro="Everything here is used to prepare the call and nothing else."
+        intro="Everything here is used to prepare the call."
       >
         <div className="al-sched__layout">
           <form

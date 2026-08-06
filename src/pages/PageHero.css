@@ -5,10 +5,18 @@
  * fold.
  */
 .al-phero { padding-block: var(--al-space-7) var(--al-space-6); }
-.al-phero__inner { max-width: 760px; }
+@media (max-width: 780px) { .al-phero { padding-block: var(--al-space-6); } }
+/*
+ * No max-width here. .al-phero__inner also carries .al-container, and an unlayered
+ * 760px beat the layered 1240px while .al-container's `margin: 0 auto` survived — so the
+ * whole block centred and the h1 started 240px right of the nav brand, every section
+ * heading, and the footer at 1440px. Cap the children instead, which is what
+ * Section.css does.
+ */
 
 .al-phero__title {
-  font-size: var(--al-text-h2);
+  max-width: 20ch;
+  font-size: var(--al-text-h1);
   font-weight: var(--al-weight-bold);
   line-height: var(--al-leading-snug);
   letter-spacing: var(--al-tracking-display);

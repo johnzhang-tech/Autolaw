@@ -202,3 +202,63 @@ describe('SiteNav', () => {
     expect(within(drawer).getByRole('link', { name: /schedule a call/i })).toHaveAttribute('href', SCHEDULE_URL);
   });
 });
+
+/*
+ * Regression: the panel used to close on every Tab, not just past the last item, so a
+ * keyboard user could never reach item two — the panel unmounted underneath them. Latent
+ * while both menus ship one item, and it would have activated the moment a second shipped.
+ *
+ * The harness is stateful on purpose. With `open` hardcoded true and `onClose` a no-op,
+ * calling onClose() changes nothing and the assertion passes against the very bug it is
+ * meant to catch — verified by restoring `case 'Tab': onClose()` and watching it stay green.
+ * Only a parent that actually closes reproduces what a user experiences.
+ */
+describe('NavMenu — Tab moves between items rather than closing the panel', () => {
+  const THREE = [
+    { label: 'One', href: '/one/' },
+    { label: 'Two', href: '/two/' },
+    { label: 'Three', href: '/three/' },
+  ];
+
+  function Harness() {
+    const [open, setOpen] = useState(true);
+    return (
+      <ul>
+        <NavMenu
+          id="probe"
+          label="Probe"
+          items={THREE}
+          open={open}
+          onToggle={() => setOpen((v) => !v)}
+          onClose={() => setOpen(false)}
+        />
+      </ul>
+    );
+  }
+
+  it('keeps the panel open while focus moves from the first item to the second', async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+
+    screen.getAllByRole('link')[0].focus();
+    await user.tab();
+
+    expect(screen.getByRole('button', { name: /probe/i })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getAllByRole('link')[1]).toHaveFocus();
+  });
+
+  it('closes once focus leaves the menu entirely', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <Harness />
+        <a href="/elsewhere/">Elsewhere</a>
+      </>
+    );
+
+    screen.getAllByRole('link')[2].focus(); // last item
+    await user.tab();
+
+    expect(screen.getByRole('button', { name: /probe/i })).toHaveAttribute('aria-expanded', 'false');
+  });
+});
