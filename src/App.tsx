@@ -13,7 +13,13 @@ export default function App() {
       <a className="al-skip" href="#main">Skip to content</a>
       <div id="top" />
       <SiteNav />
-      <main id="main">
+      {/*
+        tabIndex={-1} so the skip link actually moves focus. Chrome and Firefox set the
+        sequential-focus starting point on a non-focusable fragment target; Safari does
+        not, so without this the link scrolls the page and leaves focus in the nav — the
+        next Tab drops the user back where they started.
+      */}
+      <main id="main" tabIndex={-1}>
         <Hero />
         <Transformation />
         <ProductExperience />

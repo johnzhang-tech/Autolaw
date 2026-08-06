@@ -43,7 +43,14 @@ describe('Chronology', () => {
 
     const detail = screen.getByTestId('chronology-detail');
     expect(within(detail).getByText(/referenced but never produced/i)).toBeInTheDocument();
-    expect(within(detail).getByRole('button', { name: /draft records request/i })).toBeInTheDocument();
+    /*
+     * Asserted as text, not as a button. The offer is a label here — rendering it as a
+     * control made it focusable, announced as a button, and completely inert, which is
+     * the opposite of what this section is arguing. What matters is that the panel offers
+     * a records request instead of a page link, because there is no page to link to.
+     */
+    expect(within(detail).getByText(/draft records request/i)).toBeInTheDocument();
+    expect(within(detail).queryByText(/^Open page/i)).not.toBeInTheDocument();
   });
 
   it('marks exactly one event as selected', async () => {

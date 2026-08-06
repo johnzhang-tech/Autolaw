@@ -74,6 +74,10 @@
   }
   .al-skip:focus { left: var(--al-space-3); }
 
+  /* main[tabindex="-1"] takes focus from the skip link but is not a control — a ring
+     around the entire page body is noise, and the scroll is the feedback. */
+  #main:focus { outline: none; box-shadow: none; }
+
   .al-visually-hidden {
     position: absolute; width: 1px; height: 1px;
     padding: 0; margin: -1px; overflow: hidden;

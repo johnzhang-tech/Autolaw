@@ -128,7 +128,27 @@
 }
 .al-conf__fill { display: block; height: 100%; background: var(--al-teal-text); }
 
-.al-detail__actions { display: flex; gap: var(--al-space-2); flex-wrap: wrap; }
+.al-detail__actions {
+  display: flex; gap: var(--al-space-3); flex-wrap: wrap;
+  align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--al-hairline);
+  padding-top: var(--al-space-3);
+}
+
+/* Labels for what the product offers on a fact — deliberately not buttons, since on this
+   page they do nothing. Styled as quiet metadata so they never read as clickable. */
+.al-detail__offers {
+  display: flex; gap: var(--al-space-2); flex-wrap: wrap;
+  list-style: none; margin: 0; padding: 0;
+  font-size: var(--al-text-xs); color: var(--al-ink-muted);
+}
+.al-detail__offers li { display: inline-flex; align-items: center; }
+.al-detail__offers li + li::before {
+  content: "·";
+  margin-right: var(--al-space-2);
+  color: var(--al-hairline-strong);
+}
+.al-detail__actions .al-mini { text-decoration: none; }
 /*
  * .al-mini is .al-btn--sm at this scale — same font, same pill, same padding — so it uses
  * the button's 8px/14px rather than an off-by-one 7px/13px of its own. It also carries

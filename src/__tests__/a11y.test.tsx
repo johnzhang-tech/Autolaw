@@ -231,6 +231,51 @@ describe('landmarks and identifiers', () => {
     expect(nested).toEqual([]);
   });
 
+  /*
+   * Both assertions below close the same blind spot, and it is a real one — each was
+   * demonstrated by breaking the app and watching the whole suite stay green.
+   *
+   * Drop a Section's `id` and it loses its heading reference, loses its accessible name,
+   * and therefore drops *out of* role="region" — so any test that loops over
+   * getAllByRole('region') just iterates a shorter list and reports nothing. Point a nav
+   * link at a section that no longer exists and nothing notices either.
+   *
+   * In this codebase `id` does double duty: it labels the landmark and it is the nav
+   * anchor target. So one missing attribute breaks navigation and accessibility at once,
+   * silently. Counting regions and resolving every in-page href is the cheap way to catch
+   * it — cheaper than either bug.
+   */
+  it('exposes one labelled region per content section', () => {
+    const { container } = render(<App />);
+
+    /*
+     * Checked by id rather than by count, so this fails with the name of whatever went
+     * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
+     * a <header> there would read as a second banner landmark.
+     */
+    const SECTIONS = ['transformation', 'products', 'solutions', 'trust', 'contact'];
+    const unlabelled = SECTIONS.filter((id) => {
+      const el = container.querySelector(`section[id="${id}"]`);
+      if (!el) return true;
+      const labelledBy = el.getAttribute('aria-labelledby');
+      return !labelledBy || !container.querySelector(`[id="${labelledBy}"]`);
+    });
+    expect(unlabelled).toEqual([]);
+  });
+
+  it('resolves every in-page anchor to an element that exists', () => {
+    const { container } = render(<App />);
+    const anchors = [...container.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    expect(anchors.length).toBeGreaterThan(5);
+
+    const broken = anchors
+      .map((a) => a.getAttribute('href')!)
+      .filter((href) => href !== '#')
+      .filter((href) => !container.querySelector(`[id="${href.slice(1)}"]`));
+
+    expect([...new Set(broken)]).toEqual([]);
+  });
+
   it('emits no duplicate element ids', () => {
     const { container } = render(<App />);
     const ids = [...container.querySelectorAll('[id]')].map((el) => el.id);

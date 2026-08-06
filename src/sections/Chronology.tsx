@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Chip } from '../components/primitives/Chip';
 import { CHRONOLOGY } from '../data/demoCase';
+import { TRIAL_URL } from '../config';
 import './Chronology.css';
 
 export function Chronology() {
@@ -87,15 +88,22 @@ export function Chronology() {
             )}
           </dl>
 
+          {/*
+            These name the actions the product offers on a fact; on this page they are
+            labels, not controls. Rendering them as <button> made them focusable, announced
+            as buttons, and completely inert — a dead "Draft records request" on the section
+            whose whole argument is that it demonstrates rather than asserts. The one live
+            action is the trial link, which is the thing a visitor can actually do next.
+          */}
           <div className="al-detail__actions">
-            {/*
-              "Confirm" and "Flag" are unambiguous beside the fact they act on and
-              meaningless read out of context, which is how a screen reader reaches them.
-              The accessible names say what is confirmed and that nothing is recorded.
-            */}
-            <button type="button" className="al-mini al-mini--go">{event.action}</button>
-            <button type="button" className="al-mini" aria-label="Confirm this fact (demonstration only)">Confirm</button>
-            <button type="button" className="al-mini" aria-label="Flag this fact for review (demonstration only)">Flag</button>
+            <ul className="al-detail__offers">
+              <li>{event.action}</li>
+              <li>Confirm</li>
+              <li>Flag</li>
+            </ul>
+            <a className="al-mini al-mini--go" href={TRIAL_URL}>
+              Try this on your own case
+            </a>
           </div>
         </div>
       </div>

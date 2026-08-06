@@ -12,10 +12,15 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const SRC = join(process.cwd(), 'src');
+const ROOT = process.cwd();
+const SRC = join(ROOT, 'src');
 
 /**
  * Files that ship to a visitor.
+ *
+ * index.html is included explicitly. It is the file that literally ships, and it holds
+ * <link rel="canonical"> and og:url — the two likeliest places for a wrong host to
+ * reappear — yet a scan of src/ alone never looks at it.
  *
  * `__tests__` is excluded for a specific reason: this file necessarily contains the
  * literal strings it searches for ("logoipsum", "shutterstock"), so a scanner that
@@ -24,12 +29,15 @@ const SRC = join(process.cwd(), 'src');
  * false positive that would train someone to ignore a failing guard.
  */
 const sourceFiles = () =>
-  walk(SRC)
-    .filter((f) => !f.includes('__tests__'))
-    // .md is included because the Figma export shipped an Attributions.md crediting
-    // Unsplash photography and shadcn/ui long after both were gone. A stale claim in
-    // a doc is the same credibility problem as one in markup.
-    .filter((f) => /\.(tsx?|css|html|md)$/.test(f));
+  [
+    ...walk(SRC)
+      .filter((f) => !f.includes('__tests__'))
+      // .md is included because the Figma export shipped an Attributions.md crediting
+      // Unsplash photography and shadcn/ui long after both were gone. A stale claim in
+      // a doc is the same credibility problem as one in markup.
+      .filter((f) => /\.(tsx?|css|html|md)$/.test(f)),
+    join(ROOT, 'index.html'),
+  ];
 
 describe('credibility guards', () => {
   it('ships no placeholder customer logos', () => {
@@ -53,9 +61,16 @@ describe('credibility guards', () => {
     expect(offenders).toEqual([]);
   });
 
+  /*
+   * Matches any .run.app host, not the shape of the one that used to be here. The earlier
+   * pattern required a >=10-digit project number, so it only ever caught
+   * case-app-1055716306475.us-central1.run.app — Cloud Run's newer
+   * service-hash-region.a.run.app format sailed straight through. No legitimate .run.app
+   * host belongs on the marketing site, so the broad pattern carries no false-positive risk.
+   */
   it('exposes no raw Cloud Run hostname to visitors', () => {
     const offenders = sourceFiles().filter((f) =>
-      /[a-z-]+-\d{10,}\.[a-z0-9-]+\.run\.app/i.test(readFileSync(f, 'utf8'))
+      /\.run\.app/i.test(readFileSync(f, 'utf8'))
     );
     expect(offenders).toEqual([]);
   });
