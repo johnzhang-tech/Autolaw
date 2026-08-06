@@ -7,10 +7,15 @@ import './SiteNav.css';
  * Product leads. The information architecture states what the thing is before it argues
  * about who it is for or how it works, which is the order the owner asked for.
  */
+/*
+ * Root-relative, not bare fragments. The nav and footer render on /security/, /about/,
+ * and /schedule-call/ too, where "#products" resolves to nothing on the current page and
+ * the link silently does nothing. "/#products" navigates home and then scrolls.
+ */
 const LINKS = [
-  { href: '#products', label: 'Product' },
-  { href: '#solutions', label: 'Solution' },
-  { href: '#transformation', label: 'How it works' },
+  { href: '/#products', label: 'Product' },
+  { href: '/#solutions', label: 'Solution' },
+  { href: '/#transformation', label: 'How it works' },
 ];
 
 /*
@@ -186,7 +191,7 @@ export function SiteNav() {
     <header className="al-nav">
       <nav className="al-nav__nav" aria-label="Primary" ref={navRef}>
         <div className="al-container al-nav__inner">
-          <a className="al-nav__brand" href="#top">Autolaw</a>
+          <a className="al-nav__brand" href="/">Autolaw</a>
 
           <ul className="al-nav__links">
             {LINKS.map((l) => (

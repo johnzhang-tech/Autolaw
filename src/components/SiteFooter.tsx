@@ -11,9 +11,9 @@ import './SiteFooter.css';
  * conversion path, and the schedule page is what replaced it up there.
  */
 const SECTION_LINKS = [
-  { href: '#products', label: 'Product' },
-  { href: '#solutions', label: 'Solution' },
-  { href: '#transformation', label: 'How it works' },
+  { href: '/#products', label: 'Product' },
+  { href: '/#solutions', label: 'Solution' },
+  { href: '/#transformation', label: 'How it works' },
 ];
 
 export function SiteFooter() {

@@ -12,6 +12,12 @@ const CONTROLS = [
   { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
   { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
   { title: 'Human confirmation required', body: 'Autolaw proposes. It never writes case truth on its own. An attorney confirms each value before it counts as a fact.' },
+  /*
+   * The pricing model, not a price. No one in this category publishes numbers, but the
+   * model itself is the differentiator: record-review vendors bill per page, and a firm
+   * that has been quoted per-page reads this line and immediately knows the difference.
+   */
+  { title: 'Priced on work product, never per page', body: 'No per-document or per-page fees. You pay for what is delivered, so a thousand-page file costs what it is worth to you rather than what it costs to scan.' },
 ];
 
 const ROWS: Array<[string, string, string]> = [

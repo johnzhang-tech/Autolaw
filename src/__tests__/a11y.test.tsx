@@ -281,12 +281,20 @@ describe('landmarks and identifiers', () => {
 
   it('resolves every in-page anchor to an element that exists', () => {
     const { container } = render(<App />);
-    const anchors = [...container.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+
+    /*
+     * Both forms count. The nav and footer use "/#products" because they also render on
+     * /security/, /about/, and /schedule-call/, where a bare "#products" would resolve to
+     * nothing. On this page both must still land on a real element — matching only
+     * a[href^="#"] would have left every nav link unchecked.
+     */
+    const anchors = [...container.querySelectorAll<HTMLAnchorElement>('a[href^="#"], a[href^="/#"]')];
     expect(anchors.length).toBeGreaterThan(5);
 
     const broken = anchors
       .map((a) => a.getAttribute('href')!)
-      .filter((href) => href !== '#')
+      .map((href) => href.replace(/^\//, ''))
+      .filter((href) => href !== '#' && href.startsWith('#'))
       .filter((href) => !container.querySelector(`[id="${href.slice(1)}"]`));
 
     expect([...new Set(broken)]).toEqual([]);

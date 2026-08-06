@@ -112,7 +112,12 @@ describe('SiteNav', () => {
     const hrefs = within(nav)
       .getAllByRole('link')
       .map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['#top', '#products', '#solutions', '#transformation', LOGIN_URL, SCHEDULE_URL]);
+    /*
+     * Root-relative, not bare fragments. This same nav renders on /security/, /about/,
+     * and /schedule-call/, where "#products" would resolve to nothing on the current
+     * page and the link would silently do nothing.
+     */
+    expect(hrefs).toEqual(['/', '/#products', '/#solutions', '/#transformation', LOGIN_URL, SCHEDULE_URL]);
   });
 
   /*

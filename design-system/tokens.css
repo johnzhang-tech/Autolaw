@@ -16,7 +16,10 @@
   --al-ink-inverse-muted: #A7BACB;
 
   /* ---- Color: surface ---- */
-  --al-canvas: #F7F8F4;
+  /* Warm paper, not cool grey. The page reads as the document and the navy panels as
+     the thing reading it — the composition is the brand signature, more than any single
+     hue. It also separates us from Eve, whose #f6f6f3 canvas was almost identical. */
+  --al-canvas: #F7F5EF;
   --al-surface: #FFFFFF;
   --al-navy: #0C2238;
   --al-navy-raised: #14304A;

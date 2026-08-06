@@ -9,9 +9,10 @@ describe('SiteFooter', () => {
     render(<SiteFooter />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual([
-      '#products',
-      '#solutions',
-      '#transformation',
+      // Root-relative so they work from the subpages this footer also renders on.
+      '/#products',
+      '/#solutions',
+      '/#transformation',
       ...RESOURCE_MENU.map((i) => i.href),
       ...ABOUT_MENU.map((i) => i.href),
       SCHEDULE_URL,

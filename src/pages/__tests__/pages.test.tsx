@@ -116,3 +116,28 @@ describe.each(PAGES)('%s', (_path, element) => {
     container.querySelectorAll('img').forEach((img) => expect(img).toHaveAttribute('alt'));
   });
 });
+
+/*
+ * The nav and footer render on every subpage, and their section links were bare fragments
+ * ("#products"), which resolve to nothing anywhere except the home page — seven silently
+ * dead links per page. Root-relative "/#products" fixes it. This asserts the property
+ * rather than the spelling: no link on a subpage may point at a fragment that does not
+ * exist on that page.
+ */
+describe('subpage link integrity', () => {
+  const SUBPAGES: Array<[string, () => ReactElement]> = [
+    ['security', () => <SecurityPage />],
+    ['about', () => <AboutPage />],
+    ['schedule-call', () => <ScheduleCallPage />],
+  ];
+
+  it.each(SUBPAGES)('has no dead same-page fragment links on /%s/', (_name, Page) => {
+    const { container } = render(<Page />);
+    const dead = [...container.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
+      .map((a) => a.getAttribute('href')!)
+      .filter((href) => href !== '#')
+      .filter((href) => !container.querySelector(`[id="${href.slice(1)}"]`));
+
+    expect([...new Set(dead)]).toEqual([]);
+  });
+});
