@@ -226,7 +226,7 @@
   border-radius: var(--al-radius-card); padding: var(--al-space-3);
   font-size: var(--al-text-sm); line-height: var(--al-leading-normal); color: #fff;
 }
-.al-ask__answer sup { color: var(--al-teal); font-weight: var(--al-weight-bold); font-size: 0.75em; margin-left: 2px; }
+.al-ask__answer sup { color: var(--al-teal); font-weight: var(--al-weight-bold); font-size: var(--al-text-xs); line-height: 1; margin-left: 2px; }
 
 .al-ask__chips { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
 .al-ask__chips li {
