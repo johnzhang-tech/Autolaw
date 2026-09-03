@@ -1061,7 +1061,9 @@ describe('ChronologyState', () => {
     const user = userEvent.setup();
     render(<ChronologyState phase="connected" />);
     const card = screen.getByTestId('citation-card');
-    expect(within(card).getByText(/employer incident report/i)).toBeInTheDocument();
+    // Event 0's source is the DWC-1 claim form (the demo data was corrected on 2026-08-05
+    // to claim no more than its own sources say).
+    expect(within(card).getByText(/DWC-1 claim form/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /qme evaluation/i }));
     expect(within(card).getByText(/4mm disc protrusion at L4–L5/)).toBeInTheDocument();
     expect(screen.getAllByRole('button', { expanded: true })).toHaveLength(1);
