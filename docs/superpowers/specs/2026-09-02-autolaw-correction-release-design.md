@@ -1,7 +1,7 @@
 # Autolaw.ai correction release — design
 
 **Date:** 2026-09-02
-**Status:** approved, in progress
+**Status:** implemented on `site-redesign` (commits 76335cd, 40b140d); awaiting deploy
 **Scope:** the `site-redesign` branch as reviewed on 2026-09-02, corrected so it can replace
 the live `www.autolaw.ai` build. The full refresh (pinned story, Ask AL, silhouette figure,
 practice-specific conversion) is a separate spec that follows this release.
