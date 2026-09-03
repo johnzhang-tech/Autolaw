@@ -3,7 +3,8 @@ import { Signals } from './states/Signals';
 import { Arrival } from './states/Arrival';
 import { ChronologyState, phaseFor } from './states/ChronologyState';
 import { AskPreview } from './states/AskPreview';
-import { SAMPLE_MARK } from '../data/demoCase';
+import { Review } from './states/Review';
+import { Output } from './states/Output';
 import './Stage.css';
 
 interface StageProps {
@@ -42,14 +43,6 @@ export function InlineState({ chapter }: { chapter: ChapterIndex }) {
   );
 }
 
-function Placeholder({ name }: { name: string }) {
-  return (
-    <div className="al-state" data-testid={`state-${name}`}>
-      <div className="al-state__top"><span className="al-state__mark">{SAMPLE_MARK}</span></div>
-    </div>
-  );
-}
-
 export function StageState({ chapter }: { chapter: ChapterIndex }) {
   switch (chapter) {
     case 0: return <Signals />;
@@ -58,7 +51,7 @@ export function StageState({ chapter }: { chapter: ChapterIndex }) {
     case 3:
     case 4: return <ChronologyState key="chronology" phase={phaseFor(chapter)} />;
     case 5: return <AskPreview />;
-    case 6: return <Placeholder name="review" />;
-    case 7: return <Placeholder name="output" />;
+    case 6: return <Review />;
+    case 7: return <Output />;
   }
 }
