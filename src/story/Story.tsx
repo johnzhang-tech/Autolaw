@@ -46,6 +46,7 @@ export function Story() {
                 data-chapter={c.index}
                 data-active={pinned && active === c.index ? '' : undefined}
                 className="al-chapter"
+                tabIndex={-1}
               >
                 <p className="al-chapter__n">Chapter {c.index}</p>
                 <h3 className="al-chapter__h">{c.heading}</h3>

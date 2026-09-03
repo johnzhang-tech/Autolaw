@@ -17,7 +17,7 @@ describe('ChronologyState', () => {
     const events = screen.getAllByRole('button', { expanded: false }).concat(screen.getAllByRole('button', { expanded: true }));
     expect(events).toHaveLength(CHRONOLOGY.length);
     CHRONOLOGY.forEach((e) => {
-      expect(screen.getByText(`${e.source} · ${e.page}`)).toBeInTheDocument();
+      expect(screen.getByText(`${e.date} · ${e.source} · ${e.page}`)).toBeInTheDocument();
     });
   });
 

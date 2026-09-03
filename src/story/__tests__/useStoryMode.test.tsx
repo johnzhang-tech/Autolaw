@@ -24,6 +24,7 @@ describe('useStoryMode', () => {
 
   it('asks for both conditions in one query', () => {
     expect(PINNED_QUERY).toContain('min-width: 900px');
+    expect(PINNED_QUERY).toContain('min-height: 720px');
     expect(PINNED_QUERY).toContain('prefers-reduced-motion: no-preference');
   });
 });

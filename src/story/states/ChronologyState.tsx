@@ -26,9 +26,8 @@ export function Spine({ selected, onSelect, phase }: SpineProps) {
       {CHRONOLOGY.map((e, i) => (
         <li key={e.date + e.title} className={`al-ev al-ev--${e.tone}`}>
           <button type="button" aria-expanded={i === selected} onClick={() => onSelect(i)}>
-            <span className="al-ev__date">{e.date}</span>
             <span className="al-ev__title">{e.title}</span>
-            <span className="al-ev__cite">{e.source} · {e.page}</span>
+            <span className="al-ev__cite">{e.date} · {e.source} · {e.page}</span>
             {e.flag && (
               <span className="al-ev__flag"><Chip tone="conflict">{e.flag}</Chip></span>
             )}
@@ -68,7 +67,7 @@ export function CitationCard({ event, phase }: { event: ChronologyEvent; phase: 
       {event.warning && (
         <div className="al-cite__warn">
           <b>{event.warning.title}</b>
-          {event.warning.body}
+          <span>{event.warning.body}</span>
         </div>
       )}
 

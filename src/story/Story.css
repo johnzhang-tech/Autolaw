@@ -1,10 +1,11 @@
-/* Focus lands here from "See how it works" and the skip-to-chapter links; the scroll is
-   the feedback, a ring around the whole section is noise. */
+/* Focus lands on a chapter block ("See how it works" points at #story-arrives) or, from
+   the chapter list's Start link, here on #story; the scroll is the feedback, a ring
+   around the whole section is noise. */
 #story:focus { outline: none; box-shadow: none; }
 
 .al-story__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 55%);
   gap: var(--al-space-7);
   align-items: start;
 }
@@ -14,16 +15,16 @@
 /*
  * The pinned column. Sticky, not fixed: it scrolls with the page until it reaches the
  * offset, holds while its grid area is taller than it, and leaves with the grid. Nothing
- * intercepts the wheel. The 55% cap is the spec's: the stage never dominates the copy.
+ * intercepts the wheel. The 55% cap is the spec's, and it is enforced above, by the grid's
+ * second track (`.al-story__grid`'s `minmax(0, 55%)`) — not here.
  */
 .al-story__stage {
   position: sticky;
-  top: calc(var(--al-nav-height) + var(--al-space-4));
+  top: calc(var(--al-nav-height) + var(--al-space-3));
   align-self: start;
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: var(--al-space-3);
-  max-width: 55vw;
 }
 
 .al-story__copy > .al-hero { padding-bottom: var(--al-space-8); }

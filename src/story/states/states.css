@@ -101,7 +101,6 @@
 .al-spine[data-phase="conflict"] .al-ev:nth-child(4) button,
 .al-spine[data-phase="conflict"] .al-ev:nth-child(5) button { border-color: var(--al-amber); }
 
-.al-ev__date { display: block; font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); font-variant-numeric: tabular-nums; }
 .al-ev__title { display: block; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); margin-top: 2px; }
 .al-ev__cite { display: block; font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin-top: 3px; text-decoration: underline dotted; text-underline-offset: 3px; }
 .al-ev__flag { display: inline-block; margin-top: 6px; }
@@ -287,3 +286,13 @@
 .al-output__export { display: flex; align-items: center; gap: var(--al-space-3); flex-wrap: wrap; }
 .al-output__export .al-review__btn--go { opacity: 0.55; }
 .al-output__export p { margin: 0; font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); }
+
+/* ---- Live-stage compaction: the pinned stage must fit under the fold ---- */
+.al-stage--live .al-chron .al-ev button { padding: 6px 10px; }
+.al-stage--live .al-chron .al-ev { margin-bottom: 0; }
+.al-stage--live .al-cite { padding: var(--al-space-3); }
+/* Secondary detail the chapter copy already carries; the stacked layout shows it all. */
+.al-stage--live .al-cite__meta,
+.al-stage--live .al-cite__offers,
+.al-stage--live .al-page__rules,
+.al-stage--live .al-cite__warn span { display: none; }
