@@ -26,7 +26,7 @@ export function Review() {
           <span className="al-conf al-conf--inverse"><span className="al-conf__fill" style={{ width: `${REVIEW_ITEM.confidence}%` }} /></span>
           <span>{REVIEW_ITEM.confidence}%</span>
         </div>
-        <div className="al-review__actions" aria-label="What the reviewer can do">
+        <div className="al-review__actions" role="group" aria-label="What the reviewer can do">
           <span className="al-review__btn al-review__btn--go">Confirm</span>
           <span className="al-review__btn">Dismiss</span>
         </div>

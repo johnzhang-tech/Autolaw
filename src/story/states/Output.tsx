@@ -23,7 +23,7 @@ export function Output() {
       </ul>
 
       <div className="al-output__export">
-        <span className="al-review__btn al-review__btn--go" aria-hidden="true">Export DOCX</span>
+        <span className="al-review__btn al-review__btn--go" aria-disabled="true">Export DOCX</span>
         <p>{EXPORT_RULE}</p>
       </div>
     </div>

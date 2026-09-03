@@ -14,6 +14,7 @@ describe('Review', () => {
     expect(screen.getByText('Confirm')).toBeInTheDocument();
     expect(screen.getByText('Dismiss')).toBeInTheDocument();
     expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.getByRole('group', { name: /what the reviewer can do/i })).toBeInTheDocument();
   });
 
   it('labels the confidence as extraction confidence, with the number', () => {
@@ -32,5 +33,6 @@ describe('Output', () => {
     });
     expect(screen.getByText(EXPORT_RULE)).toBeInTheDocument();
     expect(screen.queryAllByRole('button')).toEqual([]);
+    expect(screen.getByText('Export DOCX')).toHaveAttribute('aria-disabled', 'true');
   });
 });
