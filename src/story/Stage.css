@@ -1,0 +1,18 @@
+.al-stage {
+  background: var(--al-navy);
+  border-radius: var(--al-radius-panel);
+  padding: var(--al-space-5);
+  box-shadow: var(--al-shadow-card);
+  min-height: 440px;
+}
+
+/*
+ * Entry transition, only on the live (pinned) stage. Duration and easing are tokens, so
+ * reduced motion collapses this to 1ms at :root without a per-component opt-out — the
+ * pinned stage does not render under reduced motion anyway, but the rule holds.
+ */
+.al-stage--live .al-state { animation: al-state-in var(--al-duration-slow) var(--al-ease) both; }
+@keyframes al-state-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}

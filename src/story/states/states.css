@@ -1,0 +1,41 @@
+/* ---- Shared by every stage state ---- */
+
+.al-state { color: var(--al-ink-inverse); }
+
+.al-state__top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--al-space-3);
+  padding-bottom: var(--al-space-3);
+  border-bottom: 1px solid var(--al-hairline-inverse);
+  margin-bottom: var(--al-space-3);
+}
+.al-state__case { color: #fff; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+.al-state__meta { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
+/* Muted, not teal: teal means "verified" everywhere else and this is a disclaimer. */
+.al-state__mark {
+  font-size: var(--al-text-xs); text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow);
+  color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-bold); white-space: nowrap;
+}
+.al-state__title { margin: 0 0 var(--al-space-3); color: #fff; font-size: var(--al-text-h3); }
+
+/* ---- Signals (state 0) ---- */
+
+.al-signals__tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2); }
+@media (max-width: 520px) { .al-signals__tiles { grid-template-columns: repeat(2, 1fr); } }
+
+.al-tile {
+  background: var(--al-navy-raised);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-3);
+  border-left: 3px solid var(--al-state-neutral);
+}
+.al-tile--verified { border-left-color: var(--al-teal); }
+.al-tile--conflict { border-left-color: var(--al-amber); }
+.al-tile__n {
+  font-size: 1.6rem; font-weight: var(--al-weight-bold); line-height: 1;
+  color: #fff; font-variant-numeric: tabular-nums;
+}
+.al-tile--verified .al-tile__n { color: var(--al-teal); }
+.al-tile--conflict .al-tile__n { color: var(--al-amber); }
+/* 12px floor: the old tiles used 11px labels. */
+.al-tile__l { font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin-top: 6px; line-height: var(--al-leading-snug); }
