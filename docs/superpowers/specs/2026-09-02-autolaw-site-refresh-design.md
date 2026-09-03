@@ -127,17 +127,19 @@ After chapter 7 the stage unpins and normal scrolling resumes.
   beside the stage, `role="list"` with links to each chapter anchor. It is the keyboard
   path: Tab reaches it, Enter follows the anchor, and the observer then selects the state.
   It also shows progress.
-- **Fallbacks.** Below 900 px, and whenever `prefers-reduced-motion: reduce` matches, the
-  stage does not pin and does not receive a `chapter` prop; instead each chapter block
+- **Fallbacks.** Below 900 px wide or 720 px tall, and whenever `prefers-reduced-motion: reduce`
+  matches, the stage does not pin and does not receive a `chapter` prop; instead each chapter block
   renders its own state inline beneath its heading, static. This is the same eight
   components with no transitions. The hero keeps state 0. Nothing is hidden and nothing is
   conveyed by movement alone.
-- **Accessibility.** In state 0 the stage keeps its `role="img"` and descriptive label, as
-  the signal panel has today, so the hero's summary is announced. From chapter 1 onward the
-  pinned stage is `aria-hidden`, because each state's content is stated in text by the
-  chapter beside it and announcing every transition would be noise. In the stacked fallback
-  each inline state is visible to assistive tech, labelled by its chapter heading, and
-  static.
+- **Accessibility.** The pinned stage is a labelled region (`role="region"`, "Demonstration
+  of one matter") and is never `aria-hidden`: the chronology states hold real buttons, and
+  hidden focusable content is an accessibility failure. It has no live region, so
+  transitions are not announced; the chapter text beside it is the narrative in reading
+  order. State 0 keeps its `role="img"` and descriptive label so the hero's summary is
+  announced. In the stacked fallback each inline state is visible to assistive tech,
+  labelled by its chapter heading, and static. (Decided during implementation, 2026-09-03;
+  supersedes the earlier `aria-hidden` wording.)
 
 ---
 
@@ -289,7 +291,10 @@ One spec, two implementation sequences with a review checkpoint between them, be
 story engine is where the risk is and it should be reviewed before the rest is built on it:
 
 1. **Story:** demo data extension, `Stage` and the eight states, the scroll engine, the
-   chapter list, fallbacks, hero rebalance, nav change, tests.
+   chapter list, fallbacks, hero rebalance, nav change, tests. Implemented in
+   `docs/superpowers/plans/2026-09-02-autolaw-story-engine.md` (2026-09-03). On the pinned
+   stage the chronology card hides its secondary rows (meta, offers, page rules, warning
+   body) so the stage fits under the fold; the stacked layout shows them all.
 2. **Sections and polish:** Ask AL, Solutions with the silhouette, lifted practice state and
    conversion, `/privacy/` and `/terms/` slots, security additions, call-page query, fonts,
    share card, ESLint, guards.
