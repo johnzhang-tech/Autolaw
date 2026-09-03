@@ -3,6 +3,7 @@ import { PageHero } from '../PageHero';
 import { Section } from '../../components/primitives/Section';
 import { Button } from '../../components/primitives/Button';
 import { CERTIFICATIONS, CONTACT_EMAIL, SCHEDULE_URL } from '../../config';
+import { CITATION_KINDS } from '../../data/demoCase';
 import './SecurityPage.css';
 
 /*
@@ -28,6 +29,10 @@ const DATA = [
   {
     title: 'Documents can come from where they already are',
     body: 'Autolaw connects to Dropbox, so a matter can be built from the case documents your firm already stores there.',
+  },
+  {
+    title: 'Retention',
+    body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, or earlier on request. That is what the privacy policy states, and it is all it states.',
   },
 ];
 
@@ -95,7 +100,7 @@ export function SecurityPage() {
         heading="What we do with your case data"
         intro="Two things decide whether a case file can go anywhere near a vendor: what happens to the content, and where the documents come from."
       >
-        <div className="al-secp__grid">
+        <div className="al-secp__grid al-secp__grid--three">
           {DATA.map((c) => (
             <div key={c.title} className="al-secp__card">
               <h3>{c.title}</h3>
@@ -142,6 +147,12 @@ export function SecurityPage() {
           a claim is still alive, and where it can be brought, is not something a model gets to
           assert on its own. So Autolaw proposes, and a person at your firm confirms.
         </p>
+        <div className="al-secp__kinds">
+          <p>Grounding takes one of seven concrete forms. Every citation the assistant gives is one of these, and each opens the source:</p>
+          <ul>
+            {CITATION_KINDS.map((k) => <li key={k}>{k}</li>)}
+          </ul>
+        </div>
       </Section>
 
       <Section

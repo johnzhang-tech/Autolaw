@@ -89,6 +89,10 @@
   max-width: 76ch;
 }
 
+.al-secp__kinds { margin-top: var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-sm); }
+.al-secp__kinds ul { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: var(--al-space-2) 0 0; padding: 0; }
+.al-secp__kinds li { border: 1px solid var(--al-hairline-inverse); border-radius: var(--al-radius-pill); padding: 4px 10px; color: var(--al-ink-inverse); font-size: var(--al-text-xs); }
+
 .al-secp__ask {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);

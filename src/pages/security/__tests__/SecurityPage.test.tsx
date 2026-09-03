@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { SecurityPage } from '../SecurityPage';
 import { CERTIFICATIONS } from '../../../config';
+import { CITATION_KINDS } from '../../../data/demoCase';
 import { renderedText } from '../../__tests__/renderedText';
 
 /*
@@ -53,6 +54,19 @@ describe('SecurityPage — the controls it claims', () => {
       expect(badges.getByText(c.label)).toBeInTheDocument();
       expect(badges.getByText(c.detail)).toBeInTheDocument();
     });
+  });
+
+  it('states retention as the in-app policy states it, and nothing more specific', () => {
+    render(<SecurityPage />);
+    const data = within(screen.getByRole('region', { name: /what we do with your case data/i }));
+    expect(data.getByRole('heading', { name: /retention/i })).toBeInTheDocument();
+    expect(data.getByText(/deleted within 90 days of an account ending/i)).toBeInTheDocument();
+  });
+
+  it('lists the seven citation kinds as the form grounding takes', () => {
+    render(<SecurityPage />);
+    const limits = within(screen.getByRole('region', { name: /what the model is not allowed to do/i }));
+    CITATION_KINDS.forEach((k) => expect(limits.getByText(k)).toBeInTheDocument());
   });
 
   it('routes a reviewer to a person, for the report and for a BAA', () => {
@@ -117,12 +131,14 @@ describe('SecurityPage — the HIPAA wording', () => {
  * So the vocabulary of unverified claims is banned outright. If one of these becomes real
  * — an actual retention policy, an actual pen-test cadence — delete its line here in the
  * same commit that adds the copy, and the deletion is the record that someone checked.
+ *
+ * retention and the 90-day window were removed on 2026-09-03: the in-app privacy policy §6
+ * states them, so they are now on the verified list.
  */
 const UNVERIFIED: Array<[string, RegExp]> = [
   ['encryption specifics', /\bencrypt/i],
   ['transport or storage crypto', /\bTLS\b|\bAES\b|\bat rest\b|\bin transit\b/i],
   ['penetration testing', /\bpen(etration)?[\s-]?test/i],
-  ['retention or deletion windows', /\bretention\b|\bretain(s|ed|ing)?\b|\bdeletion\b|\bdeleted?\b/i],
   ['named sub-processors', /\bsub[\s-]?processor/i],
   ['a hosting provider or region', /\bAWS\b|\bGoogle Cloud\b|\bAzure\b|\bdata residency\b|\bregion\b/i],
   ['service levels', /\bSLA\b|\buptime\b|\b99\.\d/],
@@ -132,7 +148,6 @@ const UNVERIFIED: Array<[string, RegExp]> = [
   ['incident commitments', /\bincident response\b|\bbreach notification\b/i],
   ['staffing controls', /\bbackground check|\bsecurity training\b/i],
   ['marketing absolutes', /\bbank[\s-]?level\b|\bmilitary[\s-]?grade\b|\bunhackable\b|\b100% secure\b/i],
-  ['a time-bound promise', /\b\d+\s*-?\s*(day|hour|week|month|year)s?\b/i],
 ];
 
 describe('SecurityPage — claims not on the verified list', () => {
