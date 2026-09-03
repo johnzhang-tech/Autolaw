@@ -21,12 +21,18 @@ export function useActiveChapter(
   enabled: boolean,
 ): ChapterIndex {
   const [active, setActive] = useState<ChapterIndex>(0);
+  const [wasEnabled, setWasEnabled] = useState(enabled);
+
+  // Reset to chapter 0 the moment `enabled` goes false, adjusted during render (React's
+  // documented pattern) rather than in the effect below, so there is no extra render
+  // between the flag flipping and the reset taking effect.
+  if (enabled !== wasEnabled) {
+    setWasEnabled(enabled);
+    if (!enabled) setActive(0);
+  }
 
   useEffect(() => {
-    if (!enabled) {
-      setActive(0);
-      return;
-    }
+    if (!enabled) return;
     const root = container.current;
     if (!root || typeof IntersectionObserver === 'undefined') return;
 

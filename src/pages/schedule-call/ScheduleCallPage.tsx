@@ -382,7 +382,9 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
                 value={value}
                 required
                 defaultChecked={preset === i}
-                aria-invalid={errors.practice ? true : undefined}
+                // No aria-invalid here: unlike the other fields' roles, the ARIA "radio"
+                // role does not support aria-invalid (only "radiogroup" does). The error
+                // is still announced via aria-describedby below and the alert summary above.
                 aria-describedby={describedBy('practice', true)}
                 onInvalid={onInvalid}
                 onChange={onFieldChange}

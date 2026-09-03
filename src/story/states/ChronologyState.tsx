@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Chip } from '../../components/primitives/Chip';
 import { CHRONOLOGY, SAMPLE_MARK, type ChronologyEvent } from '../../data/demoCase';
 import { SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL } from '../../config';
@@ -127,11 +127,16 @@ export function CitationCard({ event, phase }: { event: ChronologyEvent; phase: 
  * selection; a click moves it again. The phase does not fight the reader afterwards.
  */
 export function ChronologyState({ phase }: { phase: Phase }) {
+  const [renderedPhase, setRenderedPhase] = useState(phase);
   const [selected, setSelected] = useState(PHASE_EVENT[phase]);
 
-  useEffect(() => {
+  // A phase change moves the selection. Adjusted during render (React's documented
+  // pattern for resetting state from a changed prop) rather than in an effect, so there
+  // is no extra render between the phase changing and the selection following it.
+  if (phase !== renderedPhase) {
+    setRenderedPhase(phase);
     setSelected(PHASE_EVENT[phase]);
-  }, [phase]);
+  }
 
   const event = CHRONOLOGY[selected];
 

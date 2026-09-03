@@ -100,11 +100,14 @@ export function Trust() {
         {/*
           Focusable so keyboard users can scroll the table horizontally. That makes it an
           interactive control, so it needs a role and a name of its own — otherwise a screen
-          reader announces nothing on arrival.
+          reader announces nothing on arrival. This is the standard WCAG 2.1.1 technique for
+          keyboard access to scrollable regions (role="region" + tabIndex={0} + a name); the
+          rule below doesn't know that pattern and treats "region" as always non-interactive.
         */}
         <div
           className="al-cmp__scroller"
           data-testid="comparison-scroller"
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={0}
           role="region"
           aria-label="Comparison table, scrollable"

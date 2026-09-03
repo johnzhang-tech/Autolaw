@@ -63,6 +63,9 @@ export function AskAl() {
           <span className="al-askal__mark">{SAMPLE_MARK}</span>
         </div>
 
+        {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving-tabindex
+            pattern: onKeyDown delegates arrow keys to the child role="tab" buttons, which
+            already carry tabIndex 0/-1; the tablist wrapper itself is never a tab stop. */}
         <div className="al-askal__questions" role="tablist" aria-label="Questions" onKeyDown={onKeyDown}>
           {ASK_AL_QA.map((item, i) => (
             <button

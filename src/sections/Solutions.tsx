@@ -24,6 +24,9 @@ function TabStrip({ name, tabs, active, onChange }: { name: string; tabs: Readon
     refs.current[next.id]?.focus();
   }
   return (
+    // Roving-tabindex pattern: onKeyDown delegates arrow keys to the child role="tab"
+    // buttons, which already carry tabIndex 0/-1 — the tablist wrapper is never a tab stop.
+    // eslint-disable-next-line jsx-a11y/interactive-supports-focus
     <div className="al-sol__tabs" role="tablist" aria-label={name} onKeyDown={onKeyDown}>
       {tabs.map((t) => (
         <button
@@ -160,6 +163,9 @@ export function Solutions() {
       heading="Two practices, two workflows"
       intro="Personal injury and workers’ compensation run as separate workflows on one engine, not one workflow with the labels swapped. These are the screens each one opens."
     >
+      {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving-tabindex
+          pattern: onKeyDown delegates arrow keys to the child role="tab" buttons, which
+          already carry tabIndex 0/-1; the tablist wrapper itself is never a tab stop. */}
       <div className="al-seg" role="tablist" aria-label="Practice area" onKeyDown={onKeyDown}>
         {AREAS.map((a) => (
           <button
