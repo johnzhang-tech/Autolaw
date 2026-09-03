@@ -167,6 +167,7 @@ export const CHRONOLOGY: ChronologyEvent[] = [
 export interface BodyRegion {
   key: string;
   label: string;
+  side?: 'left' | 'right';
   /**
    * Accepted by the claims administrator — not merely pled by the applicant. The two
    * differ, and the gap between them is where comp cases are litigated, so every label
@@ -194,6 +195,7 @@ export const BODY_REGIONS: BodyRegion[] = [
   {
     key: 'shoulder',
     label: 'Left shoulder',
+    side: 'left',
     claimed: true,
     plain: 'The rotator cuff is partially torn. Surgery was recommended, denied at utilization review, and is now on appeal to IMR.',
     rows: [
@@ -218,11 +220,43 @@ export const BODY_REGIONS: BodyRegion[] = [
   {
     key: 'knee',
     label: 'Right knee',
+    side: 'right',
     claimed: false,
     plain: 'Not an accepted body part, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
       { label: 'Records', value: 'No documents reference this region', cite: 'no source', warn: true },
+    ],
+  },
+  {
+    key: 'shoulder-right', label: 'Right shoulder', side: 'right', claimed: false,
+    plain: 'Not part of the claim, and no document in the file mentions it.',
+    rows: [
+      { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
+      { label: 'Records', value: 'No documents reference this region', cite: 'no source', warn: true },
+    ],
+  },
+  {
+    key: 'hand-left', label: 'Left hand', side: 'left', claimed: false,
+    plain: 'Not part of the claim, and no document in the file mentions it.',
+    rows: [
+      { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
+      { label: 'Records', value: 'No documents reference this region', cite: 'no source', warn: true },
+    ],
+  },
+  {
+    key: 'hand-right', label: 'Right hand', side: 'right', claimed: false,
+    plain: 'Not part of the claim, and no document in the file mentions it.',
+    rows: [
+      { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
+      { label: 'Records', value: 'No documents reference this region', cite: 'no source', warn: true },
+    ],
+  },
+  {
+    key: 'knee-left', label: 'Left knee', side: 'left', claimed: false,
+    plain: 'Not part of the claim, and no document in the file mentions it.',
+    rows: [
+      { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
     ],
   },
 ];
@@ -324,3 +358,145 @@ export const OUTPUT_ROWS: ReadonlyArray<{ label: string; value: string }> = [
 
 /** The product's own export tooltip, verbatim. */
 export const EXPORT_RULE = 'A human-approved event is required before exporting.';
+
+/* ---- Ask AL section ---- */
+
+export interface Citation extends CitationChip {
+  excerpt: string;
+  reviewStatus: 'Needs review' | 'Approved';
+}
+
+export interface AskAlQuestion {
+  id: string;
+  question: string;
+  answer: ReadonlyArray<AnswerSentence>;
+  citations: ReadonlyArray<Citation>;
+  /** True when the answer is the product's refusal: the figure is not in its context. */
+  refusal: boolean;
+}
+
+/**
+ * Three questions. The first two are grounded; the third is the refusal the product gives
+ * for a settlement or demand value — its money-lane rule never states a figure that is
+ * not in its context and points to the Damages screen.
+ */
+export const ASK_AL_QA: ReadonlyArray<AskAlQuestion> = [
+  {
+    id: 'restrictions',
+    question: 'What are the current work restrictions?',
+    answer: [
+      { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1 },
+      { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2 },
+      { text: 'The two opinions conflict and are flagged for review.', cite: null },
+    ],
+    citations: [
+      { n: 1, kind: 'Workers’ Comp fact', document: 'PTP report', page: 3, excerpt: 'Patient may return to modified duty with no lifting over 15 pounds effective 04/02.', reviewStatus: 'Needs review' },
+      { n: 2, kind: 'Document excerpt', document: 'QME report', page: 22, excerpt: 'On examination the claimant remains temporarily totally disabled pending orthopedic consultation.', reviewStatus: 'Approved' },
+    ],
+    refusal: false,
+  },
+  {
+    id: 'missing',
+    question: 'What is missing from the file?',
+    answer: [
+      { text: 'An MRI of the lumbar spine dated 03/14/2025 is cited by the QME', cite: 1 },
+      { text: 'and by the PTP', cite: 2 },
+      { text: 'but no imaging report is in the file. It is listed as needed.', cite: null },
+    ],
+    citations: [
+      { n: 1, kind: 'Document excerpt', document: 'QME report', page: 14, excerpt: 'MRI dated 03/14 demonstrates a 4mm disc protrusion at L4–L5 with mild foraminal narrowing.', reviewStatus: 'Approved' },
+      { n: 2, kind: 'Document excerpt', document: 'PTP report', page: 5, excerpt: 'MRI lumbar spine ordered; results reviewed 03/14, see imaging.', reviewStatus: 'Needs review' },
+    ],
+    refusal: false,
+  },
+  {
+    id: 'settlement',
+    question: 'What is the settlement value?',
+    answer: [
+      { text: 'A settlement or demand value is not in my context. Open the Damages screen for that figure.', cite: null },
+    ],
+    citations: [],
+    refusal: true,
+  },
+];
+
+/* ---- Solutions section ---- */
+
+export interface PanelTab { id: string; label: string }
+
+/** The PI Overview's tabs and what each shows, in the application's own words. */
+export const PI_PANEL = {
+  tabs: [
+    { id: 'medical', label: 'Medical' },
+    { id: 'liability', label: 'Liability & Incident' },
+    { id: 'damages', label: 'Damages & Demand' },
+  ] as ReadonlyArray<PanelTab>,
+  evidenceTiers: ['Imaging-backed', 'Diagnosis only — no objective finding', 'Symptom-reported only'] as const,
+  medical: [
+    { label: 'Injuries claimed', value: 'Lumbar spine; left shoulder', tier: 'Imaging-backed' },
+    { label: 'Objective findings', value: 'Paraspinal tenderness, reduced lumbar flexion', tier: 'Diagnosis only — no objective finding' },
+    { label: 'Treatment progression', value: 'Conservative care, 12 PT visits, epidural injection 05/06/2025', tier: 'Imaging-backed' },
+  ],
+  liability: [
+    { component: 'Liability Evidence', state: 'Complete' },
+    { component: 'Medical Chronology Completeness', state: '1 open' },
+    { component: 'Medical Bills Completeness', state: 'Complete' },
+  ],
+  wage: [
+    { label: 'Pre-injury baseline', value: '10/2024 to 01/2025 (13 weeks before the date of loss)' },
+    { label: 'Combined average weekly wage', value: '$1,140/week' },
+    { label: 'Claimed past wage loss', value: '$1,140/week × 11 weeks' },
+  ],
+  outputs: ['Source-linked chronology', 'Causation and treatment-gap findings', 'Specials and liens', 'Demand package'],
+} as const;
+
+/** The WC Intelligence tabs and the readiness cards, in the application's own words. */
+export const WC_PANEL = {
+  tabs: [
+    { id: 'summary', label: 'Summary' },
+    { id: 'injury', label: 'Injury & Work Status' },
+    { id: 'benefits', label: 'Benefits & Wages' },
+    { id: 'disputes', label: 'Medical-Legal & Disputes' },
+  ] as ReadonlyArray<PanelTab>,
+  readiness: [
+    { label: 'Wage basis', value: '$1,140/wk', detail: 'From 12 wage records' },
+    { label: 'Medical-legal report', value: '1', detail: 'QME report on file' },
+    { label: 'PTP vs QME/AME conflicts', value: '1 open', detail: 'Work status' },
+    { label: 'Missing records', value: '1 gap', detail: 'Needed: imaging report' },
+  ],
+  benefits: [
+    { label: 'AWW', value: '$1,140' },
+    { label: 'TTD weekly rate', value: '$760' },
+    { label: 'Weeks off (concluded)', value: '11' },
+  ],
+  conflict: {
+    severity: 'high',
+    category: 'work restrictions',
+    title: 'Work status: modified duty vs temporarily totally disabled',
+    explanation: 'The PTP released the claimant to modified duty on 04/02/2025; the QME on 04/18/2025 finds temporary total disability. Both remain on file with their dates.',
+    status: 'Needs review',
+  },
+  missing: {
+    type: 'Missing diagnostic report',
+    title: 'MRI lumbar spine, 03/14/2025',
+    summary: 'Referenced by the QME (p.14) and the PTP (p.5); no imaging report in the file.',
+    needed: 'Needed: imaging report',
+    status: 'Needs review',
+  },
+  outputs: ['Claim timeline', 'Injury and work status', 'PTP vs QME/AME differences', 'Claim readiness export'],
+} as const;
+
+/* ---- Closing section ---- */
+
+export const PRACTICE_CLOSING = {
+  PI: {
+    heading: 'Prove it on one of your matters.',
+    body: 'Bring a personal injury matter you already know. We walk through it in the PI workflow — Medical, Liability & Incident, Damages & Demand — and you judge the chronology, the causation findings, and the specials against what you know is in the file.',
+    href: '/schedule-call/?practice=pi',
+  },
+  WC: {
+    heading: 'Prove it on one of your claims.',
+    body: 'Bring a workers’ compensation claim you already know. We walk through it in the WC workflow — work status, PTP versus QME/AME, benefits, missing records — and you judge the findings against what you know is in the file.',
+    href: '/schedule-call/?practice=wc',
+  },
+} as const;

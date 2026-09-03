@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import App from '../App';
-import { CHRONOLOGY, BODY_REGIONS } from '../data/demoCase';
+import { CHRONOLOGY } from '../data/demoCase';
 
 describe('page accessibility', () => {
   it('has exactly one h1', () => {
@@ -145,7 +145,8 @@ describe('keyboard reachability', () => {
     // Body explorer regions
     const regions = screen.getAllByRole('button', { pressed: false })
       .concat(screen.getAllByRole('button', { pressed: true }));
-    expect(regions.length).toBe(BODY_REGIONS.length);
+    // the old body explorer draws four; Task 4 replaces it
+    expect(regions.length).toBe(4);
     regions.forEach(reachable);
 
     // Practice tabs: roving tabindex means only the selected one is a stop, but both
