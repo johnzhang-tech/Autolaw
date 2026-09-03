@@ -133,11 +133,13 @@ describe('keyboard reachability', () => {
     schedule.forEach(reachable);
 
     // Chronology events — every one, not just the selected one. Filtered to outside the
-    // banner because the nav's mobile toggle carries aria-expanded too.
+    // banner because the nav's mobile toggle carries aria-expanded too, and outside Ask
+    // AL because its citation chips carry aria-expanded as well.
     const banner = screen.getByRole('banner');
+    const askAl = container.querySelector('#ask-al');
     const events = screen.getAllByRole('button', { expanded: false })
       .concat(screen.getAllByRole('button', { expanded: true }))
-      .filter((el) => !banner.contains(el));
+      .filter((el) => !banner.contains(el) && !(askAl && askAl.contains(el)));
     // One chronology per chapter 2–4 in the stacked layout the suite renders.
     expect(events.length).toBe(CHRONOLOGY.length * 3);
     events.forEach(reachable);
@@ -150,8 +152,9 @@ describe('keyboard reachability', () => {
     regions.forEach(reachable);
 
     // Practice tabs: roving tabindex means only the selected one is a stop, but both
-    // must be able to hold focus once an arrow key moves to them.
-    const tabs = screen.getAllByRole('tab');
+    // must be able to hold focus once an arrow key moves to them. Scoped to the practice
+    // tablist because Ask AL's questions are also role="tab" elements on the page.
+    const tabs = within(screen.getByRole('tablist', { name: /practice area/i })).getAllByRole('tab');
     expect(tabs.length).toBe(2);
     expect(tabs.filter((t) => stops.includes(t)).length).toBe(1);
     tabs.forEach((t) => {
@@ -194,7 +197,10 @@ describe('keyboard reachability', () => {
   it('keeps exactly one practice tab in the tab sequence as selection moves', async () => {
     const user = userEvent.setup();
     render(<App />);
-    const inSequence = () => screen.getAllByRole('tab').filter((t) => t.tabIndex === 0);
+    const inSequence = () =>
+      within(screen.getByRole('tablist', { name: /practice area/i }))
+        .getAllByRole('tab')
+        .filter((t) => t.tabIndex === 0);
 
     expect(inSequence()).toHaveLength(1);
     expect(inSequence()[0]).toHaveAccessibleName(/personal injury/i);
@@ -267,7 +273,7 @@ describe('landmarks and identifiers', () => {
      * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
      * a <header> there would read as a second banner landmark.
      */
-    const SECTIONS = ['story', 'products', 'solutions', 'trust', 'contact'];
+    const SECTIONS = ['story', 'ask-al', 'products', 'solutions', 'trust', 'contact'];
     const unlabelled = SECTIONS.filter((id) => {
       const el = container.querySelector(`section[id="${id}"]`);
       if (!el) return true;
@@ -570,7 +576,7 @@ describe('shipped stylesheet', () => {
     const storyPrefixes = [
       '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
       '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
-      '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story',
+      '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story', '.al-askal',
     ];
     const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
 

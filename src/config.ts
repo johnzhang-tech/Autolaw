@@ -94,6 +94,13 @@ export const CERTIFICATIONS: ReadonlyArray<{ mark: string; label: string; detail
 export const WALKTHROUGH_URL: string | null = null;
 
 /**
+ * A kill switch, not a launch gate. Ask AL ships in every case today. If it is ever pulled
+ * from the product, this hides the section; the story's chapter 5 stays, because grounded
+ * answering is what it demonstrates and that behaviour is not what would be pulled.
+ */
+export const ASK_AL_ENABLED = true;
+
+/**
  * Where the schedule-a-call form submits. There is no form backend yet, so this is null,
  * and null is not a placeholder to be filled in with a guess — it is the switch that
  * decides how the form behaves.
