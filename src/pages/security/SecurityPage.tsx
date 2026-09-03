@@ -32,7 +32,7 @@ const DATA = [
   },
   {
     title: 'Retention',
-    body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, or earlier on request. That is what the privacy policy states, and it is all it states.',
+    body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, or earlier on request, except where retention is required by law. That is what the privacy policy states, and it is all it states.',
   },
 ];
 
@@ -141,18 +141,18 @@ export function SecurityPage() {
             </div>
           ))}
         </div>
-        <p className="al-secp__why">
-          Why a person has to confirm: date of injury, employer, and claim status carry
-          statute-of-limitations and jurisdictional consequences. A value that decides whether
-          a claim is still alive, and where it can be brought, is not something a model gets to
-          assert on its own. So Autolaw proposes, and a person at your firm confirms.
-        </p>
         <div className="al-secp__kinds">
           <p>Grounding takes one of seven concrete forms. Every citation the assistant gives is one of these, and each opens the source:</p>
           <ul>
             {CITATION_KINDS.map((k) => <li key={k}>{k}</li>)}
           </ul>
         </div>
+        <p className="al-secp__why">
+          Why a person has to confirm: date of injury, employer, and claim status carry
+          statute-of-limitations and jurisdictional consequences. A value that decides whether
+          a claim is still alive, and where it can be brought, is not something a model gets to
+          assert on its own. So Autolaw proposes, and a person at your firm confirms.
+        </p>
       </Section>
 
       <Section
