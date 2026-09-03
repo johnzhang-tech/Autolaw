@@ -1,0 +1,47 @@
+.al-sil { background: var(--al-navy); border-radius: var(--al-radius-panel); padding: var(--al-space-5); color: var(--al-ink-inverse); }
+.al-sil__head { display: flex; justify-content: space-between; align-items: center; gap: var(--al-space-3); padding-bottom: var(--al-space-3); border-bottom: 1px solid var(--al-hairline-inverse); margin-bottom: var(--al-space-4); }
+.al-sil__title { color: #fff; font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); }
+.al-sil__note { color: var(--al-ink-inverse-muted); font-size: var(--al-text-xs); margin-top: 2px; }
+.al-sil__mark { font-size: var(--al-text-xs); text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow); color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-bold); white-space: nowrap; }
+
+.al-sil__body { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: var(--al-space-5); align-items: start; }
+@media (max-width: 780px) {
+  .al-sil__body { grid-template-columns: minmax(0, 1fr); }
+  .al-sil__fig { max-width: 300px; margin-inline: auto; }
+}
+
+/* Sunken well, raised figure: both from the palette, roughly two perceptual steps apart. */
+.al-sil__fig { background: var(--al-navy-sunken); border-radius: var(--al-radius-card); padding: var(--al-space-3); min-width: 200px; }
+.al-sil__fig svg { width: 100%; height: auto; display: block; }
+.al-sil__outline { fill: var(--al-navy-raised); stroke: rgba(255, 255, 255, 0.28); stroke-width: 1.2; }
+
+.al-sil__region { cursor: pointer; stroke-width: 1.2; transition: opacity var(--al-duration-fast) var(--al-ease); }
+.al-sil__region--on { fill: color-mix(in srgb, var(--al-teal) 55%, transparent); stroke: var(--al-teal); }
+.al-sil__region--disputed { fill: color-mix(in srgb, var(--al-amber) 45%, transparent); stroke: var(--al-amber); stroke-dasharray: 3 2; }
+.al-sil__region--none { fill: color-mix(in srgb, var(--al-state-neutral) 55%, transparent); stroke: rgba(255, 255, 255, 0.25); }
+.al-sil__region:hover { opacity: 0.8; }
+.al-sil__region.is-on { stroke-width: 2.5; opacity: 1; }
+.al-sil__region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
+
+.al-sil__lead { stroke: rgba(255, 255, 255, 0.35); stroke-width: 1; }
+/* 12 SVG units at the 200px minimum is 10.9px, so the labels are set larger: 13 units
+   renders at 11.8px there and 15px on desktop. The floor guard reads CSS px, and SVG
+   text units are not px; the accessible name carries the same words regardless. */
+.al-sil__label { font-family: var(--al-font-ui); font-size: 13px; fill: #DDE5EA; }
+.al-sil__label--on { fill: var(--al-teal); font-weight: var(--al-weight-bold); }
+.al-sil__label--disputed { fill: #F0B48F; font-weight: var(--al-weight-bold); }
+
+.al-sil__legend { display: flex; gap: var(--al-space-3); flex-wrap: wrap; font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin-top: var(--al-space-2); }
+.al-sil__sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+.al-sil__sw--on { background: var(--al-teal); } .al-sil__sw--disputed { background: var(--al-amber); } .al-sil__sw--none { background: var(--al-state-neutral); }
+
+.al-sil__detail { background: var(--al-surface); color: var(--al-ink); border-radius: var(--al-radius-card); padding: var(--al-space-4); }
+.al-sil__detail h4 { margin: 0 0 var(--al-space-1); font-size: var(--al-text-h3); }
+.al-sil__plain { margin: 0 0 var(--al-space-4); font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); max-width: 62ch; }
+.al-sil__rows { display: grid; gap: var(--al-space-2); }
+.al-sil__row { border-left: 3px solid var(--al-teal-text); background: var(--al-canvas); border-radius: var(--al-radius-sm); padding: var(--al-space-3); }
+.al-sil__row.is-warn { border-left-color: var(--al-amber); }
+.al-sil__row b { display: block; font-size: var(--al-text-xs); text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow); color: var(--al-ink-muted); margin-bottom: 3px; }
+.al-sil__row span { font-size: var(--al-text-sm); }
+.al-sil__row cite { display: block; font-style: normal; font-size: var(--al-text-xs); color: var(--al-teal-text); margin-top: 4px; font-weight: var(--al-weight-semibold); }
+.al-sil__row.is-warn cite { color: var(--al-amber-text); }

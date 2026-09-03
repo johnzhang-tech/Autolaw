@@ -1,5 +1,5 @@
 import { Section } from '../components/primitives/Section';
-import { BodyExplorer } from './BodyExplorer';
+import { Silhouette } from './Silhouette';
 import './ProductExperience.css';
 
 export function ProductExperience() {
@@ -11,7 +11,7 @@ export function ProductExperience() {
       intro="Select a region. Every row cites the page it came from, and a region with no records says so."
     >
       <div className="al-px">
-        <BodyExplorer />
+        <Silhouette />
       </div>
     </Section>
   );

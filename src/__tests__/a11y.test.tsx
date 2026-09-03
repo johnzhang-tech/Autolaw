@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import App from '../App';
-import { CHRONOLOGY } from '../data/demoCase';
+import { CHRONOLOGY, BODY_REGIONS } from '../data/demoCase';
 
 describe('page accessibility', () => {
   it('has exactly one h1', () => {
@@ -144,11 +144,10 @@ describe('keyboard reachability', () => {
     expect(events.length).toBe(CHRONOLOGY.length * 3);
     events.forEach(reachable);
 
-    // Body explorer regions
+    // Silhouette regions
     const regions = screen.getAllByRole('button', { pressed: false })
       .concat(screen.getAllByRole('button', { pressed: true }));
-    // the old body explorer draws four; Task 4 replaces it
-    expect(regions.length).toBe(4);
+    expect(regions.length).toBe(BODY_REGIONS.length);
     regions.forEach(reachable);
 
     // Practice tabs: roving tabindex means only the selected one is a stop, but both
@@ -190,7 +189,7 @@ describe('keyboard reachability', () => {
 
   /*
    * Arrow-key movement itself is covered by PracticeSolutions.test.tsx and
-   * BodyExplorer.test.tsx. What is asserted here is the invariant those interactions
+   * Silhouette.test.tsx. What is asserted here is the invariant those interactions
    * depend on: a tablist must expose exactly one tab stop, or Tab lands inside the
    * widget twice and the arrow keys stop being the way you move.
    */
@@ -521,7 +520,7 @@ describe('shipped stylesheet', () => {
     expect(at(899.98, '.al-story__grid')).toMatch(ONE_COLUMN);
     expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
     expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
-    expect(at(780, '.al-bx__body')).toMatch(ONE_COLUMN);
+    expect(at(780, '.al-sil__body')).toMatch(ONE_COLUMN);
   });
 
   it('keeps the comparison table scrolling inside its own container', () => {
@@ -577,6 +576,7 @@ describe('shipped stylesheet', () => {
       '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
       '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
       '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story', '.al-askal',
+      '.al-sil',
     ];
     const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
 
