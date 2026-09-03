@@ -7,6 +7,8 @@ import App from '../App';
 import { SecurityPage } from '../pages/security/SecurityPage';
 import { AboutPage } from '../pages/about/AboutPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
+import { PrivacyPage } from '../pages/privacy/PrivacyPage';
+import { TermsPage } from '../pages/terms/TermsPage';
 import { renderedText } from '../pages/__tests__/renderedText';
 import { APP_ORIGIN, LOGIN_URL, TRIAL_ENABLED } from '../config';
 
@@ -56,10 +58,12 @@ const PAGES: ReadonlyArray<[string, ComponentType]> = [
   ['security', SecurityPage],
   ['about', AboutPage],
   ['schedule-call', ScheduleCallPage],
+  ['privacy', PrivacyPage],
+  ['terms', TermsPage],
 ];
 
 const ROOT = process.cwd();
-const HTML = ['index.html', 'security/index.html', 'about/index.html', 'schedule-call/index.html'];
+const HTML = ['index.html', 'security/index.html', 'about/index.html', 'schedule-call/index.html', 'privacy/index.html', 'terms/index.html'];
 
 function pageText(Page: ComponentType): string {
   const { container } = render(<Page />);

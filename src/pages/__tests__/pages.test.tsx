@@ -4,6 +4,8 @@ import type { ReactElement } from 'react';
 import { SecurityPage } from '../security/SecurityPage';
 import { AboutPage } from '../about/AboutPage';
 import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
+import { PrivacyPage } from '../privacy/PrivacyPage';
+import { TermsPage } from '../terms/TermsPage';
 
 /*
  * The structural invariants every standalone page shares, asserted once per page rather
@@ -18,6 +20,8 @@ const PAGES: Array<[string, ReactElement]> = [
   ['/security/', <SecurityPage />],
   ['/about/', <AboutPage />],
   ['/schedule-call/', <ScheduleCallPage />],
+  ['/privacy/', <PrivacyPage />],
+  ['/terms/', <TermsPage />],
 ];
 
 describe.each(PAGES)('%s', (_path, element) => {
@@ -129,6 +133,8 @@ describe('subpage link integrity', () => {
     ['security', () => <SecurityPage />],
     ['about', () => <AboutPage />],
     ['schedule-call', () => <ScheduleCallPage />],
+    ['privacy', () => <PrivacyPage />],
+    ['terms', () => <TermsPage />],
   ];
 
   it.each(SUBPAGES)('has no dead same-page fragment links on /%s/', (_name, Page) => {

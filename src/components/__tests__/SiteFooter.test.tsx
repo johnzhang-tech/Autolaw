@@ -30,4 +30,10 @@ describe('SiteFooter', () => {
     expect(within(screen.getByRole('contentinfo')).getByRole('link', { name: /contact/i }))
       .toBe(mailtos[0]);
   });
+
+  it('links no legal page while its slot is empty', () => {
+    render(<SiteFooter />);
+    expect(screen.queryByRole('link', { name: /privacy/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /terms/i })).not.toBeInTheDocument();
+  });
 });

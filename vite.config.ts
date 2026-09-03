@@ -31,6 +31,8 @@ export default defineConfig({
         security: path.resolve(__dirname, 'security/index.html'),
         about: path.resolve(__dirname, 'about/index.html'),
         scheduleCall: path.resolve(__dirname, 'schedule-call/index.html'),
+        privacy: path.resolve(__dirname, 'privacy/index.html'),
+        terms: path.resolve(__dirname, 'terms/index.html'),
       },
     },
   },

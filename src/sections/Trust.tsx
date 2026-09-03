@@ -1,5 +1,5 @@
 import { Section } from '../components/primitives/Section';
-import { CUSTOMER_LOGOS, CERTIFICATIONS } from '../config';
+import { CUSTOMER_LOGOS, CERTIFICATIONS, PRIVACY_TEXT, PRIVACY_URL } from '../config';
 import './Trust.css';
 
 /*
@@ -77,10 +77,21 @@ export function Trust() {
       )}
 
       <div className="al-trust__controls">
-        {CONTROLS.map((c) => (
+        {CONTROLS.map((c, i) => (
           <div key={c.title} className="al-ctrl">
             <b>{c.title}</b>
-            <p>{c.body}</p>
+            {i === 0 ? (
+              <p>
+                {c.body}
+                {PRIVACY_TEXT.length > 0 && (
+                  <>
+                    {' '}<a href={PRIVACY_URL}>Privacy policy</a>
+                  </>
+                )}
+              </p>
+            ) : (
+              <p>{c.body}</p>
+            )}
           </div>
         ))}
       </div>

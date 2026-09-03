@@ -135,3 +135,17 @@ export const CONTACT_ENDPOINT: string | null = null;
  *   - no automatic reminder emails to the invitee
  */
 export const BOOKING_URL: string | null = null;
+
+/**
+ * Legal pages. Owner slots, following the CUSTOMER_LOGOS pattern: each page exists as a
+ * route, but its document renders only when the text is supplied here, and the footer
+ * links it only then. Never paste a template; the in-app policy (case-app, dated
+ * 2026-05-12) should be revised to cover model training, subprocessors, and the BAA
+ * before it is published here, so that the site's no-training claim links to a document
+ * that says it.
+ */
+export interface LegalSection { heading: string; paragraphs: ReadonlyArray<string> }
+export const PRIVACY_TEXT: ReadonlyArray<LegalSection> = [];
+export const TERMS_TEXT: ReadonlyArray<LegalSection> = [];
+export const PRIVACY_URL = '/privacy/';
+export const TERMS_URL = '/terms/';

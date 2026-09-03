@@ -68,6 +68,8 @@ describe('credibility guards', () => {
       'security/index.html',
       'about/index.html',
       'schedule-call/index.html',
+      'privacy/index.html',
+      'terms/index.html',
     ]);
     entries.forEach((f) => expect(existsSync(f), `${f} is a build entry but does not exist`).toBe(true));
   });
