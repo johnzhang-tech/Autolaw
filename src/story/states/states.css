@@ -39,3 +39,29 @@
 .al-tile--conflict .al-tile__n { color: var(--al-amber); }
 /* 12px floor: the old tiles used 11px labels. */
 .al-tile__l { font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin-top: 6px; line-height: var(--al-leading-snug); }
+
+/* ---- Arrival (state 1) ---- */
+
+.al-arrival__count {
+  display: flex; align-items: baseline; gap: var(--al-space-2);
+  font-size: 2.5rem; font-weight: var(--al-weight-bold); line-height: 1;
+  color: var(--al-teal); font-variant-numeric: tabular-nums;
+  margin-bottom: var(--al-space-4);
+}
+.al-arrival__of { font-size: var(--al-text-sm); color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-medium); }
+
+.al-arrival__chips { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
+.al-arrival__chips li {
+  font-size: var(--al-text-xs); padding: 6px 12px; border-radius: var(--al-radius-pill);
+  background: var(--al-navy-raised); border: 1px solid var(--al-hairline-inverse);
+  color: var(--al-ink-inverse);
+}
+/*
+ * Chips land one after another. 40ms per chip is under the 60ms stagger ceiling; the
+ * fade itself is the fast token. Only on the live stage — the inline copy is static.
+ */
+.al-stage--live .al-arrival__chips li {
+  animation: al-chip-in var(--al-duration-fast) var(--al-ease) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@keyframes al-chip-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

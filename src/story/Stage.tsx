@@ -1,5 +1,6 @@
 import type { ChapterIndex } from './chapters';
 import { Signals } from './states/Signals';
+import { Arrival } from './states/Arrival';
 import { SAMPLE_MARK } from '../data/demoCase';
 import './Stage.css';
 
@@ -50,7 +51,7 @@ function Placeholder({ name }: { name: string }) {
 export function StageState({ chapter }: { chapter: ChapterIndex }) {
   switch (chapter) {
     case 0: return <Signals />;
-    case 1: return <Placeholder name="arrival" />;
+    case 1: return <Arrival />;
     case 2:
     case 3:
     case 4: return <Placeholder name="chronology" />;
