@@ -64,8 +64,9 @@ it works, and two nav links to one anchor is a nav nobody tested. The Resources 
 removed because it held one item; Security becomes a top-level link. Footer mirrors the nav
 and adds Privacy and Terms only when their pages exist.
 
-Section anchors on the home page, in order: `#story` (chapter 1), `#ask-al`, `#solutions`,
-`#trust`, `#contact`. "Product" links to `#story`, "Solutions" to `#solutions`.
+Section anchors on the home page, in order: `#story` (the section; chapter 1 is
+`#story-arrives`), `#ask-al`, `#solutions`, `#trust`, `#contact`. "Product" links to
+`#story-arrives`, "Solutions" to `#solutions`.
 
 ---
 
@@ -81,7 +82,8 @@ Two-column grid at ≥ 900 px: copy left, stage right, stage capped at 55 % of t
   file and builds one connected case file. Every fact cites its document, page, and
   sentence. Where two records disagree, you see both.
 - **Primary:** Schedule a call → `SCHEDULE_URL`
-- **Secondary:** See how it works → `#story` (scrolls; also focuses the chapter list)
+- **Secondary:** See how it works → `#story-arrives` (chapter 1; focus lands on the chapter
+  block, and the next Tab reaches the chapter dots)
 - **Trust strip:** Source-linked evidence · Attorney confirms every fact · SOC 2 Type II ·
   BAA on request
 - `TRIAL_ENABLED` adds "Analyze one report" as a third, secondary button, with the
@@ -100,10 +102,10 @@ read from `src/data/demoCase.ts`, which is extended rather than duplicated.
 | # | Anchor id | Left column: heading and one paragraph | Stage state |
 |---|---|---|---|
 | 0 | hero | (the hero copy) | **Signals.** Case identity strip and the six signal tiles: 3 missing records, 2 conflicting facts, 1 treatment gap, 41 confirmed facts, 6 work restrictions, 4 next actions. |
-| 1 | `story` | **214 documents, out of order.** Records arrive continuously and never in sequence. | **Arrival.** Document chips enter in arrival order, grouped by type as they land: QME report, PTP reports ×9, imaging order, wage records, billing, incident report, UR letter, correspondence ×40. Count ticks to 214. |
+| 1 | `story-arrives` | **214 documents, out of order.** Records arrive continuously and never in sequence. | **Arrival.** Document chips enter in arrival order, grouped by type as they land: QME report, PTP reports ×9, imaging order, wage records, billing, incident report, UR letter, correspondence ×40. Count ticks to 214. |
 | 2 | `story-connected` | **One timeline, every fact cited.** Each event names the document, the page, and the sentence it came from. | **Chronology.** The five-event spine assembles in date order. Each event gains a citation line `document · p.N`. |
 | 3 | `story-conflict` | **Both records stay visible.** The PTP released him to modified duty on 04/02. The QME on 04/18 says temporarily totally disabled. Autolaw does not pick a winner. | **Conflict.** Events 4 and 5 highlight amber. A citation card rises out of the PTP row onto a page facsimile with the cited sentence marked in Source Serif. Beneath it, the QME's opposing sentence with its own page. Chip: "Conflicts with QME". |
-| 4 | `story-missing` | **Referenced, never produced.** Two reports cite an MRI. No imaging report is in the file. | **Missing.** Event 3 turns amber. Card: "Needed: diagnostic report", cited to QME p.14 and PTP p.5, review state "Needs review". |
+| 4 | `story-missing` | **Referenced, never produced.** Two reports cite an MRI. No imaging report is in the file. | **Missing.** Event 3 turns amber. Card: "Needed: imaging report", referenced by QME p.14 and PTP p.5, review state "Needs review". |
 | 5 | `story-ask` | **Answers only from the file.** Ask a question and every sentence of the answer cites its source. Ask for what is not there and it says so. | **Ask AL preview.** The question "What are the current work restrictions?" types in; the answer appears with [1] [2] markers; two chips beneath: "1 · Workers' Comp fact · PTP report · pg. 3", "2 · Document excerpt · QME report · pg. 22". |
 | 6 | `story-confirm` | **An attorney decides.** Autolaw proposes. It never writes case truth on its own. | **Review queue.** One fact, "Work restriction · No lifting over 15 lb · PTP p.3", state "Needs review", with Confirm and Dismiss, and "Extraction confidence 92 %" as a labelled bar. Pressing nothing; the state is static with the buttons rendered as labels, as in the corrected chronology. |
 | 7 | `story-output` | **What leaves the system.** A chronology you can check, a list of what is missing, and a readiness score. | **Output.** Three rows: Source-linked chronology (5 events, 5 citations), Missing evidence (1 · Needed: diagnostic report), Claim readiness (developing). Export button rendered inert with the product's real tooltip: "A human-approved event is required before exporting." |
@@ -118,13 +120,17 @@ After chapter 7 the stage unpins and normal scrolling resumes.
 - **Chapter selection** is an `IntersectionObserver` on the seven chapter blocks with
   `rootMargin` set so a chapter becomes active when its heading crosses the upper third of
   the viewport. The active index is React state in `Story`; `Stage` receives it as a prop.
-- **State transitions** are class-driven. Each state mounts with a `data-entering`
-  attribute for one frame and transitions opacity and a 12 px translate over
-  `--al-duration-slow`. Elements that persist between states (the spine in 2→3→4) keep
+- **State transitions** are class-driven. Each state mounts with a CSS entry animation
+  (opacity and a 12 px translate over `--al-duration-slow`, with a reduced-motion escape)
+  applied only on the live stage. Two beats run in JavaScript rather than CSS and are
+  deliberate exceptions to the 240 ms ceiling: the arrival count ticks over 240 ms, and
+  the Ask AL question types over 900 ms, because text appearing is not the page moving.
+  Both are static in the stacked layout. Elements that persist between states (the spine in 2→3→4) keep
   their DOM nodes so the citation card genuinely rises out of the row that produced it.
   No library.
 - **Chapter list.** A vertical list of eight dots with visually hidden labels, rendered
-  beside the stage, `role="list"` with links to each chapter anchor. It is the keyboard
+  beside the stage as a `role="group"` named "Story chapters" (not a second navigation
+  landmark), with links to each chapter anchor. It is the keyboard
   path: Tab reaches it, Enter follows the anchor, and the observer then selects the state.
   It also shows progress.
 - **Fallbacks.** Below 900 px wide or 720 px tall, and whenever `prefers-reduced-motion: reduce`
