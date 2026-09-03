@@ -3,6 +3,11 @@
  * Never replace with content derived from an actual matter.
  */
 
+export const DOCUMENT_COUNT = 214;
+
+/** Shown on every stage state; the figures are fictional and must always say so. */
+export const SAMPLE_MARK = 'Sample data';
+
 export type SignalTone = 'verified' | 'conflict' | 'neutral';
 
 export interface Signal {
@@ -13,7 +18,7 @@ export interface Signal {
 
 export const CASE_SUMMARY = {
   title: 'Demo case — lumbar & left shoulder',
-  meta: 'Workers’ compensation · 214 documents · 1,880 pages',
+  meta: `Workers’ compensation · ${DOCUMENT_COUNT} documents · 1,880 pages`,
 };
 
 export const SIGNALS: Signal[] = [
@@ -45,8 +50,24 @@ export interface ChronologyEvent {
   /** null when the fact is unresolved or the document is absent. */
   confidence: number | null;
   warning?: { title: string; body: string };
+  /** The opposing source in a conflict, shown beneath this event's citation. */
+  counterpart?: { source: string; page: string; quote: [string, string, string] };
   action: string;
 }
+
+/**
+ * The QME's opposing finding on work status. Page 22 is where the QME addresses work
+ * status; page 14 (cited on the QME event itself) is the imaging finding.
+ */
+export const CONFLICT_COUNTERPART = {
+  source: 'QME report — Dr. A. Reyes',
+  page: 'page 22',
+  quote: [
+    'On examination the claimant ',
+    'remains temporarily totally disabled',
+    ' pending orthopedic consultation.',
+  ] as [string, string, string],
+};
 
 export const CHRONOLOGY: ChronologyEvent[] = [
   {
@@ -115,6 +136,7 @@ export const CHRONOLOGY: ChronologyEvent[] = [
       title: 'Unresolved conflict.',
       body: 'The QME dated 04/18/2025 opines the injured worker was temporarily totally disabled from the date of injury through that evaluation — a period that overlaps this release to modified duty. Both opinions stay visible with their dates and sources. Autolaw does not pick a winner — an attorney resolves it.',
     },
+    counterpart: CONFLICT_COUNTERPART,
     action: 'Compare sources',
   },
   {
@@ -233,3 +255,72 @@ export const PRACTICE_OUTPUTS = {
 } as const;
 
 export type PracticeArea = keyof typeof PRACTICE_OUTPUTS;
+
+/* ---- Story states ---- */
+
+export interface ArrivalGroup { label: string; count: number }
+
+/** In arrival order, not date order — that is the point of chapter 1. Sums to DOCUMENT_COUNT. */
+export const ARRIVALS: ReadonlyArray<ArrivalGroup> = [
+  { label: 'QME report', count: 1 },
+  { label: 'PTP reports', count: 9 },
+  { label: 'Imaging order', count: 1 },
+  { label: 'Wage records', count: 12 },
+  { label: 'Billing', count: 38 },
+  { label: 'Incident report', count: 1 },
+  { label: 'UR letter', count: 1 },
+  { label: 'Correspondence', count: 40 },
+  { label: 'Claims administrator notices', count: 11 },
+  { label: 'Prior claim records', count: 100 },
+];
+
+/** The product's citation-kind vocabulary, verbatim from case-app's citationDisplayTitle.ts. */
+export const CITATION_KINDS = [
+  'Timeline event',
+  'Document excerpt',
+  'Workers\' Comp fact',
+  'Wage record',
+  'Computed figure',
+  'Medical encounter',
+  'Clinical recommendation',
+] as const;
+export type CitationKind = (typeof CITATION_KINDS)[number];
+
+export interface AnswerSentence { text: string; cite: number | null }
+export interface CitationChip { n: number; kind: CitationKind; document: string; page: number }
+
+export const ASK_AL_PREVIEW: {
+  question: string;
+  answer: ReadonlyArray<AnswerSentence>;
+  chips: ReadonlyArray<CitationChip>;
+} = {
+  question: 'What are the current work restrictions?',
+  answer: [
+    { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1 },
+    { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2 },
+    { text: 'The two opinions conflict and are flagged for review.', cite: null },
+  ],
+  chips: [
+    { n: 1, kind: 'Workers\' Comp fact', document: 'PTP report', page: 3 },
+    { n: 2, kind: 'Document excerpt', document: 'QME report', page: 22 },
+  ],
+};
+
+/** One fact in the review queue, in the queue's own vocabulary. */
+export const REVIEW_ITEM = {
+  title: 'Work restriction',
+  value: 'No lifting over 15 lb',
+  source: 'PTP report',
+  page: 'p.3',
+  status: 'Needs review',
+  confidence: 92,
+};
+
+export const OUTPUT_ROWS: ReadonlyArray<{ label: string; value: string }> = [
+  { label: 'Source-linked chronology', value: '5 events · 5 citations' },
+  { label: 'Missing evidence', value: '1 · Needed: imaging report' },
+  { label: 'Claim readiness', value: 'Developing' },
+];
+
+/** The product's own export tooltip, verbatim. */
+export const EXPORT_RULE = 'A human-approved event is required before exporting.';
