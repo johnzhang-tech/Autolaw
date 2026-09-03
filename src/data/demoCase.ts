@@ -278,7 +278,7 @@ export const ARRIVALS: ReadonlyArray<ArrivalGroup> = [
 export const CITATION_KINDS = [
   'Timeline event',
   'Document excerpt',
-  'Workers\' Comp fact',
+  'Workers’ Comp fact',
   'Wage record',
   'Computed figure',
   'Medical encounter',
@@ -301,7 +301,7 @@ export const ASK_AL_PREVIEW: {
     { text: 'The two opinions conflict and are flagged for review.', cite: null },
   ],
   chips: [
-    { n: 1, kind: 'Workers\' Comp fact', document: 'PTP report', page: 3 },
+    { n: 1, kind: 'Workers’ Comp fact', document: 'PTP report', page: 3 },
     { n: 2, kind: 'Document excerpt', document: 'QME report', page: 22 },
   ],
 };
