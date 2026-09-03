@@ -142,4 +142,21 @@ describe('credibility guards', () => {
       expect(existsSync(join(ROOT, 'public/fonts', `${face}.woff2`)), `${face}.woff2 missing`).toBe(true);
     }
   });
+  /*
+   * summary_large_image reserves a 1200x630 panel and fills it with nothing when og:image
+   * is absent or 404s, so the link renders as a blank slab — the worst artifact at the
+   * moment one attorney forwards this to another. The three tags and the file therefore
+   * ship together or not at all, and this asserts exactly that rather than each half.
+   */
+  it('claims a large share image only when the file exists', () => {
+    const png = existsSync(join(ROOT, 'public/og-card.png'));
+    for (const f of htmlEntries()) {
+      const html = readFileSync(f, 'utf8');
+      const large = /twitter:card"\s+content="summary_large_image"/.test(html);
+      const image = /property="og:image"\s+content="https:\/\/www\.autolaw\.ai\/og-card\.png"/.test(html);
+      const alt = /property="og:image:alt"/.test(html);
+      expect(large && image && alt, `${f} share tags`).toBe(png);
+    }
+    expect(png).toBe(true);
+  });
 });

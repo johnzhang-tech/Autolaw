@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Autolaw share card — 1200×630</title>
+    <!--
+      The source of public/og-card.png. Open this file at exactly 1200×630 and screenshot
+      it; do not hand-edit the PNG. Fonts are the site's own self-hosted faces, referenced
+      relatively so this renders correctly from the design-system directory.
+
+      Everything on the card is true of the product and matches the home page's own words:
+      the headline is the H1, the standfirst is the meta description's claim, and the three
+      figures are the demo matter's signal tiles.
+    -->
+    <style>
+      @font-face { font-family: "Manrope"; font-style: normal; font-weight: 500; src: url("../public/fonts/manrope-500.woff2") format("woff2"); }
+      @font-face { font-family: "Manrope"; font-style: normal; font-weight: 700; src: url("../public/fonts/manrope-700.woff2") format("woff2"); }
+
+      :root {
+        --navy: #0C2238;
+        --raised: #14304A;
+        --teal: #18A999;
+        --amber: #C76B3B;
+        --ink-inverse: #FFFFFF;
+        --ink-inverse-muted: #A7BACB;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1200px; height: 630px; overflow: hidden; }
+      body {
+        background: var(--navy);
+        color: var(--ink-inverse);
+        font-family: Manrope, system-ui, sans-serif;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: 64px 72px;
+      }
+
+      .brand { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+
+      /* Widths in px, not ch: a ch max-width on this wrapper resolves against its own
+         inherited 16px, not the 72px heading inside it, and squeezes the headline to a
+         column six lines tall. */
+      .lead { align-self: center; }
+      h1 {
+        font-size: 72px;
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.022em;
+        margin-bottom: 24px;
+        max-width: 900px;
+      }
+      .sub {
+        font-size: 30px;
+        font-weight: 500;
+        line-height: 1.35;
+        color: var(--ink-inverse-muted);
+        max-width: 760px;
+      }
+
+      .tiles { display: flex; gap: 16px; }
+      .tile {
+        background: var(--raised);
+        border-radius: 14px;
+        padding: 18px 24px;
+        border-left: 4px solid var(--teal);
+        min-width: 220px;
+      }
+      .tile.amber { border-left-color: var(--amber); }
+      .tile b {
+        display: block;
+        font-size: 40px;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--teal);
+        font-variant-numeric: tabular-nums;
+      }
+      .tile.amber b { color: var(--amber); }
+      .tile span {
+        display: block;
+        margin-top: 8px;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--ink-inverse-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <p class="brand">Autolaw</p>
+
+    <div class="lead">
+      <h1>Know where every fact came from.</h1>
+      <p class="sub">Source-linked case intelligence for personal injury and workers&rsquo; compensation firms.</p>
+    </div>
+
+    <div class="tiles">
+      <div class="tile amber"><b>3</b><span>Missing records</span></div>
+      <div class="tile amber"><b>2</b><span>Conflicting facts</span></div>
+      <div class="tile"><b>41</b><span>Confirmed facts</span></div>
+    </div>
+  </body>
+</html>

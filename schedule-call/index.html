@@ -15,8 +15,11 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.autolaw.ai/schedule-call/" />
     <meta property="og:site_name" content="Autolaw" />
-    <!-- "summary", not "summary_large_image", for the reason documented in the root index.html. -->
-    <meta name="twitter:card" content="summary" />
+    <!-- public/og-card.png exists; the credibility guard fails the build if these
+         three tags and the file ever disagree. -->
+    <meta property="og:image" content="https://www.autolaw.ai/og-card.png" />
+    <meta property="og:image:alt" content="Autolaw — Know where every fact came from. Source-linked case intelligence for personal injury and workers&rsquo; compensation firms." />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="canonical" href="https://www.autolaw.ai/schedule-call/" />
     <link rel="preload" href="/fonts/manrope-400.woff2" as="font" type="font/woff2" crossorigin />

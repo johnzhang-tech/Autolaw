@@ -15,21 +15,11 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.autolaw.ai/" />
     <meta property="og:site_name" content="Autolaw" />
-    <!--
-      twitter:card is "summary", not "summary_large_image", because no share image
-      exists. summary_large_image reserves a 1200x630 panel and fills it with nothing
-      when og:image is absent or 404s — so the link renders as a blank slab, which is
-      the worst possible artifact at the moment one attorney forwards this to another.
-      "summary" renders correctly with only a title and description, which is what is
-      actually true today.
-
-      To upgrade: add a real 1200x630 asset at public/og-card.png, add og:image
-      pointing at https://www.autolaw.ai/og-card.png together with og:image:alt, then
-      switch this back to summary_large_image — in that order, and not before the file
-      exists. (The tag is described rather than written out here so a commented-out
-      meta element cannot be scraped as a live one.)
-    -->
-    <meta name="twitter:card" content="summary" />
+    <!-- public/og-card.png exists; the credibility guard fails the build if these
+         three tags and the file ever disagree. -->
+    <meta property="og:image" content="https://www.autolaw.ai/og-card.png" />
+    <meta property="og:image:alt" content="Autolaw — Know where every fact came from. Source-linked case intelligence for personal injury and workers&rsquo; compensation firms." />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="canonical" href="https://www.autolaw.ai/" />
     <link rel="preload" href="/fonts/manrope-400.woff2" as="font" type="font/woff2" crossorigin />
