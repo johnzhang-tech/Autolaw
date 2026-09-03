@@ -5,7 +5,7 @@ import { Output } from '../states/Output';
 import { REVIEW_ITEM, OUTPUT_ROWS, EXPORT_RULE } from '../../data/demoCase';
 
 describe('Review', () => {
-  it("shows one fact awaiting a person, with the queue's own labels and no live controls", () => {
+  it("shows one fact awaiting a person, with the queue’s own labels and no live controls", () => {
     render(<Review />);
     expect(screen.getByText(REVIEW_ITEM.title)).toBeInTheDocument();
     expect(screen.getByText(REVIEW_ITEM.value)).toBeInTheDocument();

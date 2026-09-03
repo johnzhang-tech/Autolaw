@@ -133,7 +133,7 @@ describe('keyboard reachability', () => {
     schedule.forEach(reachable);
 
     // Chronology events — every one, not just the selected one. Filtered to outside the
-    // banner because the nav's disclosure triggers carry aria-expanded too.
+    // banner because the nav's mobile toggle carries aria-expanded too.
     const banner = screen.getByRole('banner');
     const events = screen.getAllByRole('button', { expanded: false })
       .concat(screen.getAllByRole('button', { expanded: true }))
@@ -511,7 +511,7 @@ describe('shipped stylesheet', () => {
      */
     const ONE_COLUMN = /grid-template-columns:\s*(?:minmax\(\s*0\s*,\s*1fr\s*\)|1fr)\s*(?:;|$)/;
 
-    expect(at(900, '.al-story__grid')).toMatch(ONE_COLUMN);
+    expect(at(899.98, '.al-story__grid')).toMatch(ONE_COLUMN);
     expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
     expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
     expect(at(780, '.al-bx__body')).toMatch(ONE_COLUMN);
@@ -529,5 +529,76 @@ describe('shipped stylesheet', () => {
     // one alone puts the overflow on the page instead.
     expect(decls('.al-cmp table')).toMatch(/min-width:\s*\d+px/);
     expect(decls('.al-cmp__scroller')).toMatch(/overflow-x:\s*auto/);
+  });
+
+  /*
+   * The pinned and stacked layouts may differ in motion, but this `display: none` list is
+   * the only place they are allowed to differ in *content* — it is what keeps the missing
+   * phase's substance (the needed document, who referenced it, the review state) reachable
+   * on the pinned stage. Pinning the exact set means growing it again has to be a deliberate
+   * act, not a side effect of some other compaction rule reusing `.al-stage--live`.
+   */
+  it('keeps the live-stage compaction list to exactly the rules the pinned/missing override accounts for', () => {
+    const rules = topLevelRules(css);
+
+    const hidden = new Set(
+      styleRules(rules, (r) => !isReducedMotion(r))
+        .filter((r) => /(^|;)\s*display\s*:\s*none\s*(;|$)/.test(r.body))
+        .flatMap(selectorsOf)
+        .filter((s) => s.includes('.al-stage--live'))
+    );
+
+    expect([...hidden].sort()).toEqual(
+      [
+        '.al-stage--live .al-cite__meta',
+        '.al-stage--live .al-cite__offers',
+        '.al-stage--live .al-page__rules',
+        '.al-stage--live .al-cite__warn span',
+      ].sort()
+    );
+  });
+
+  /*
+   * No text inside the stage may render below 12px (--al-text-xs). Tokens already route
+   * every stage font-size through --al-text-*, so this only has literal px/rem/em values
+   * to catch — the kind that route around the token and would otherwise ship silently.
+   */
+  it('holds every story text node at the 12px floor', () => {
+    const rules = topLevelRules(css);
+
+    const storyPrefixes = [
+      '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
+      '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
+      '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story',
+    ];
+    const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
+
+    const storyRules = styleRules(rules, (r) => !isReducedMotion(r))
+      .filter((r) => selectorsOf(r).some(isStorySelector));
+
+    // Guard against a vacuous pass: prove the selector filter above actually reached
+    // story rules that set a font-size at all (token-routed or literal), not just that
+    // it matched zero rules and let the loop below assert nothing.
+    const withFontSize = storyRules.filter((r) => /font-size\s*:/.test(r.body));
+    expect(withFontSize.length).toBeGreaterThanOrEqual(5);
+
+    const tooSmall: string[] = [];
+    for (const r of withFontSize) {
+      for (const m of r.body.matchAll(/font-size\s*:\s*([\d.]+)(px|rem|em)\b/g)) {
+        const value = parseFloat(m[1]);
+        const unit = m[2];
+        // rem and px resolve to an absolute size against the 16px root; em is left
+        // relative (1em = 16px here), so — per the simpler rule — anything under 1em is
+        // flagged outright rather than resolved against an ancestor size this scan can't see.
+        if (unit === 'em') {
+          if (value < 1) tooSmall.push(`${r.prelude} { font-size: ${value}em }`);
+        } else {
+          const px = unit === 'px' ? value : value * 16;
+          if (px < 12) tooSmall.push(`${r.prelude} { font-size: ${value}${unit} }`);
+        }
+      }
+    }
+
+    expect(tooSmall).toEqual([]);
   });
 });

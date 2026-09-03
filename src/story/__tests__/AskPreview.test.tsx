@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { AskPreview } from '../states/AskPreview';
+import { AskPreview, typeOut } from '../states/AskPreview';
 import { ASK_AL_PREVIEW, CITATION_KINDS } from '../../data/demoCase';
 
 afterEach(() => vi.useRealTimers());
@@ -36,5 +36,23 @@ describe('AskPreview', () => {
     expect(screen.getByText(/^Ask AL$/)).toBeInTheDocument();
     const text = screen.getByTestId('state-ask').textContent ?? '';
     expect(text).not.toMatch(/suggested questions|streaming|generate documents|compute action/i);
+  });
+
+  it('shows the full question and the answer already in, with no timers advanced, when animate is false', () => {
+    render(<AskPreview animate={false} />);
+    expect(screen.getByTestId('ask-question')).toHaveTextContent(ASK_AL_PREVIEW.question);
+    expect(screen.getByTestId('ask-answer')).toHaveClass('is-in');
+  });
+
+  it('typeOut stops ticking once cancelled', () => {
+    vi.useFakeTimers();
+    const spy = vi.fn();
+    const cancel = typeOut('abcdef', 60, spy);
+    act(() => { vi.advanceTimersByTime(15); });
+    const callsAtCancel = spy.mock.calls.length;
+    cancel();
+    act(() => { vi.advanceTimersByTime(500); });
+    expect(callsAtCancel).toBeLessThan(6);
+    expect(spy.mock.calls.length).toBe(callsAtCancel);
   });
 });

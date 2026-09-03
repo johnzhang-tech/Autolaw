@@ -236,8 +236,8 @@
   border: 1px solid var(--al-hairline-inverse); border-radius: var(--al-radius-pill); padding: 4px 10px 4px 6px;
 }
 .al-ask__chips b {
-  display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
-  background: var(--al-teal); color: var(--al-navy); font-size: 11px;
+  display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--al-teal); color: var(--al-navy); font-size: var(--al-text-xs);
 }
 .al-ask__chips span + span::before { content: "·"; margin-right: var(--al-space-2); color: var(--al-ink-inverse-muted); }
 
@@ -296,3 +296,8 @@
 .al-stage--live .al-cite__offers,
 .al-stage--live .al-page__rules,
 .al-stage--live .al-cite__warn span { display: none; }
+
+/* The missing phase has no page facsimile, so it has the room — and its substance is in
+   these rows: the needed document, who referenced it, and the review state. */
+.al-stage--live .al-chron[data-phase="missing"] .al-cite__meta { display: grid; }
+.al-stage--live .al-chron[data-phase="missing"] .al-cite__offers { display: flex; }

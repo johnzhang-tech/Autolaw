@@ -50,7 +50,7 @@ export function StageState({ chapter, animate = true }: { chapter: ChapterIndex;
     case 2:
     case 3:
     case 4: return <ChronologyState key="chronology" phase={phaseFor(chapter)} />;
-    case 5: return <AskPreview />;
+    case 5: return <AskPreview animate={animate} />;
     case 6: return <Review />;
     case 7: return <Output />;
   }

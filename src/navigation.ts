@@ -6,7 +6,7 @@ import { SECURITY_URL, ABOUT_URL } from './config';
  * read this list, so a destination cannot be removed from one and linger in the other.
  */
 export const SITE_LINKS: ReadonlyArray<{ href: string; label: string }> = [
-  { href: '/#story', label: 'Product' },
+  { href: '/#story-arrives', label: 'Product' },
   { href: '/#solutions', label: 'Solutions' },
   { href: SECURITY_URL, label: 'Security' },
   { href: ABOUT_URL, label: 'About' },

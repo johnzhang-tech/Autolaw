@@ -23,11 +23,14 @@ export function typeOut(full: string, ms: number, onTick: (s: string) => void): 
 const TYPE_MS = 900;
 
 /** State 5. One question typed in, one grounded answer, its citations as chips. */
-export function AskPreview() {
-  const [typed, setTyped] = useState('');
+export function AskPreview({ animate = true }: { animate?: boolean }) {
+  const [typed, setTyped] = useState(animate ? '' : ASK_AL_PREVIEW.question);
   const done = typed === ASK_AL_PREVIEW.question;
 
-  useEffect(() => typeOut(ASK_AL_PREVIEW.question, TYPE_MS, setTyped), []);
+  useEffect(() => {
+    if (!animate) return;
+    return typeOut(ASK_AL_PREVIEW.question, TYPE_MS, setTyped);
+  }, [animate]);
 
   return (
     <div className="al-state al-ask" data-testid="state-ask">
@@ -39,7 +42,7 @@ export function AskPreview() {
         <span className="al-state__mark">{SAMPLE_MARK}</span>
       </div>
 
-      <div className="al-ask__input" aria-label="Question">
+      <div className="al-ask__input" role="group" aria-label="Question">
         <span className="al-ask__q" data-testid="ask-question">{typed}<i className="al-ask__caret" aria-hidden="true" /></span>
         <span className="al-ask__go">Ask →</span>
       </div>

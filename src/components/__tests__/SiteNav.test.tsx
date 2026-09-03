@@ -16,7 +16,7 @@ describe('SiteNav', () => {
   });
 
   it('points Product at the story and Solutions at the practice section', () => {
-    expect(SITE_LINKS.find((l) => l.label === 'Product')?.href).toBe('/#story');
+    expect(SITE_LINKS.find((l) => l.label === 'Product')?.href).toBe('/#story-arrives');
     expect(SITE_LINKS.find((l) => l.label === 'Solutions')?.href).toBe('/#solutions');
   });
 
