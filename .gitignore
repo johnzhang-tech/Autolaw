@@ -27,3 +27,6 @@ design-system/dist/
 
 # brainstorming companion mockups
 .superpowers/
+
+# Local Claude Code configuration
+.claude/

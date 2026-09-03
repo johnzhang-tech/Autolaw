@@ -13,24 +13,24 @@ export function LegalPage({ title, eyebrow, sections }: Props) {
   return (
     <PageShell>
       <PageHero eyebrow={eyebrow} title={title} />
-      <div id="legal-intro"></div>
-      <section className="al-container al-legal" id="legal-content" role="region" aria-label={title}>
+      <div id="legal-document" className="al-container al-legal">
         {sections.length === 0 ? (
-          <div id="legal-notice">
+          <section id="legal-notice" className="al-legal__section" aria-labelledby="legal-unpublished-heading">
+            <h2 id="legal-unpublished-heading" className="al-visually-hidden">Not yet published</h2>
             <p className="al-legal__unpublished">
               This document is not yet published here. Ask for the current version at{' '}
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will send it.
             </p>
-          </div>
+          </section>
         ) : (
           sections.map((s, i) => (
-            <section key={s.heading} id={`legal-section-${i}`} className="al-legal__section" aria-labelledby={`legal-${s.heading.replace(/\W+/g, '-').toLowerCase()}`}>
-              <h2 id={`legal-${s.heading.replace(/\W+/g, '-').toLowerCase()}`}>{s.heading}</h2>
+            <section key={s.heading} className="al-legal__section" aria-labelledby={`legal-${i}-${s.heading.replace(/\W+/g, '-').toLowerCase()}`}>
+              <h2 id={`legal-${i}-${s.heading.replace(/\W+/g, '-').toLowerCase()}`}>{s.heading}</h2>
               {s.paragraphs.map((p, j) => <p key={j}>{p}</p>)}
             </section>
           ))
         )}
-      </section>
+      </div>
     </PageShell>
   );
 }
