@@ -13,15 +13,12 @@ export function LegalPage({ title, eyebrow, sections }: Props) {
   return (
     <PageShell>
       <PageHero eyebrow={eyebrow} title={title} />
-      <div id="legal-document" className="al-container al-legal">
+      <div className="al-container al-legal">
         {sections.length === 0 ? (
-          <section id="legal-notice" className="al-legal__section" aria-labelledby="legal-unpublished-heading">
-            <h2 id="legal-unpublished-heading" className="al-visually-hidden">Not yet published</h2>
-            <p className="al-legal__unpublished">
-              This document is not yet published here. Ask for the current version at{' '}
-              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will send it.
-            </p>
-          </section>
+          <p className="al-legal__unpublished">
+            This document is not yet published here. Ask for the current version at{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> and we will send it.
+          </p>
         ) : (
           sections.map((s, i) => (
             <section key={s.heading} className="al-legal__section" aria-labelledby={`legal-${i}-${s.heading.replace(/\W+/g, '-').toLowerCase()}`}>
