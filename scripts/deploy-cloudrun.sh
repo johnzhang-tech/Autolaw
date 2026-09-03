@@ -1,53 +1,44 @@
 #!/usr/bin/env bash
+#
+# Build the static site image and deploy it to Cloud Run.
+#
+# The site is a Vite build served by nginx. It needs NO environment: no database, no session
+# secret, no API key. An earlier version of this script deployed with --source and injected
+# SESSION_SECRET, DATABASE_URL, and OPENAI_API_KEY into this service's environment — real
+# secrets on a service that never reads them. --clear-env-vars below removes anything that
+# is still set from that era.
+#
+# Optional overrides: PROJECT_ID, REGION, SERVICE_NAME, IMAGE.
 set -euo pipefail
 
-# Required env vars (via .env):
-#   PROJECT_ID, REGION, SESSION_SECRET, DATABASE_URL, OPENAI_API_KEY
-
-if [[ -f ".env" ]]; then
-  eval "$(python3 - <<'PY'
-import shlex
-for line in open(".env"):
-    line = line.strip()
-    if not line or line.startswith("#"):
-        continue
-    k, v = line.split("=", 1)
-    k = k.strip()
-    v = v.strip().strip('"').strip("'")
-    print(f"export {k}={shlex.quote(v)}")
-PY
-)"
-fi
+cd "$(dirname "$0")/.."
 
 PROJECT_ID="${PROJECT_ID:-legal-intelligence}"
 REGION="${REGION:-us-west1}"
 SERVICE_NAME="${SERVICE_NAME:-autolaw}"
+IMAGE="${IMAGE:-gcr.io/${PROJECT_ID}/${SERVICE_NAME}}"
 
-missing=()
-[[ -z "${SESSION_SECRET:-}" ]] && missing+=("SESSION_SECRET")
-[[ -z "${DATABASE_URL:-}" ]] && missing+=("DATABASE_URL")
-[[ -z "${OPENAI_API_KEY:-}" ]] && missing+=("OPENAI_API_KEY")
-if [[ ${#missing[@]} -gt 0 ]]; then
-  echo "Missing required env vars: ${missing[*]}"
-  echo "Loaded from .env? $(pwd)/.env"
-  exit 1
-fi
+# Never ship an image from a red suite or a broken build. The same steps run inside the
+# Docker build, but failing here is faster and keeps a bad image out of the registry.
+npm ci
+npm test
+npm run build
 
-gcloud auth login
-gcloud config set project "${PROJECT_ID}"
-gcloud config set run/region "${REGION}"
-
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com sqladmin.googleapis.com
+gcloud builds submit --project "${PROJECT_ID}" --tag "${IMAGE}" .
 
 gcloud run deploy "${SERVICE_NAME}" \
-  --source . \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --image "${IMAGE}" \
+  --platform managed \
   --allow-unauthenticated \
-  --set-env-vars "NODE_ENV=production,SESSION_SECRET=${SESSION_SECRET},DATABASE_URL=${DATABASE_URL},OPENAI_API_KEY=${OPENAI_API_KEY}${APP_BASE_URL:+,APP_BASE_URL=${APP_BASE_URL}}"
+  --port 8080 \
+  --clear-env-vars
 
 SERVICE_URL="$(gcloud run services describe "${SERVICE_NAME}" \
+  --project "${PROJECT_ID}" \
   --region "${REGION}" \
   --format='value(status.url)')"
 
-echo "Cloud Run service URL: ${SERVICE_URL}"
-echo "Set APP_BASE_URL=${SERVICE_URL} for Google OAuth callbacks."
+echo "Deployed ${SERVICE_NAME} to ${SERVICE_URL}"
+echo "www.autolaw.ai is mapped to this service; the apex autolaw.ai must redirect to https://www.autolaw.ai."

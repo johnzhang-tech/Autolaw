@@ -108,7 +108,7 @@
       if (d.conf !== null) {
         html += "<dt>Confidence</dt><dd" + (d.conf < 60 ? ' class="low"' : "") + '><span class="conf-bar"><span class="conf-fill" style="width:' + d.conf + '%"></span></span>' + (d.conf < 60 ? "unresolved" : d.conf + "%") + "</dd>";
       }
-      html += "</dl><div class='dt-act'>" + (d.q ? '<button class="mini mini-go">Open ' + esc(d.pg) + "</button>" : '<button class="mini mini-go">Draft records request</button>') + '<button class="mini">Confirm</button><button class="mini">Flag</button></div>';
+      html += "</dl><div class='dt-act'>" + (d.q ? '<button class="mini mini-go">Open ' + esc(d.pg) + "</button>" : '<button class="mini mini-go">Needed: imaging report</button>') + '<button class="mini">Confirm</button><button class="mini">Dismiss</button></div>';
       detail.innerHTML = html;
     }
 

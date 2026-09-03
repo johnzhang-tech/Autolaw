@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found — Autolaw</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
+    <!--
+      Self-contained on purpose. Vite content-hashes the site's stylesheets, so a static
+      page cannot link one by name; and a 404 page that itself depends on an asset that
+      may have moved is a 404 page that renders unstyled at the exact moment it is needed.
+    -->
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0; min-height: 100vh; display: grid; place-items: center;
+        background: #F7F5EF; color: #13222E;
+        font-family: Manrope, "Segoe UI", system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 34rem; padding: 2rem 1.5rem; text-align: center; }
+      p.eyebrow {
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        color: #0E7C70; margin: 0 0 1rem;
+      }
+      h1 { font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); line-height: 1.1; margin: 0 0 1rem; letter-spacing: -0.02em; }
+      p { font-size: 1.05rem; line-height: 1.55; color: #4A5A66; margin: 0 0 1.5rem; }
+      a.btn {
+        display: inline-block; background: #0C2238; color: #fff; text-decoration: none;
+        font-weight: 600; padding: 0.85rem 1.6rem; border-radius: 999px;
+      }
+      a.btn:hover { background: #16344f; }
+      a.btn:focus-visible { outline: 3px solid #18A999; outline-offset: 3px; }
+      nav { margin-top: 1.5rem; font-size: 0.9rem; }
+      nav a { color: #0E7C70; margin: 0 0.6rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">404</p>
+      <h1>There is no page at this address.</h1>
+      <p>The address may have been typed by hand or copied from an older link. Everything on the site is reachable from the home page.</p>
+      <a class="btn" href="/">Go to the home page</a>
+      <nav aria-label="Site pages">
+        <a href="/security/">Security</a>
+        <a href="/about/">About</a>
+        <a href="/schedule-call/">Schedule a call</a>
+      </nav>
+    </main>
+  </body>
+</html>

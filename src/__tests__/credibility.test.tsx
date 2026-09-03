@@ -112,4 +112,24 @@ describe('credibility guards', () => {
     const app = readFileSync(join(SRC, 'styles/tokens.css'), 'utf8');
     expect(app).toBe(ds);
   });
+  /*
+   * Site basics. Every page links the favicon, and the files a crawler or a browser asks
+   * for without being told exist under public/. Before this, /favicon.ico returned the
+   * home page with a 200 — as did every other unknown path — so a missing file was invisible.
+   */
+  it('ships a favicon, robots.txt, sitemap.xml, and a 404 page', () => {
+    for (const f of ['favicon.svg', 'favicon.png', 'apple-touch-icon.png', 'robots.txt', 'sitemap.xml', '404.html']) {
+      expect(existsSync(join(ROOT, 'public', f)), `public/${f} is missing`).toBe(true);
+    }
+    const sitemap = readFileSync(join(ROOT, 'public/sitemap.xml'), 'utf8');
+    for (const page of ['/', '/security/', '/about/', '/schedule-call/']) {
+      expect(sitemap).toContain(`<loc>https://www.autolaw.ai${page}</loc>`);
+    }
+  });
+
+  it('links the favicon from every page', () => {
+    for (const f of [...htmlEntries(), join(ROOT, 'public/404.html')]) {
+      expect(readFileSync(f, 'utf8'), `${f} has no favicon link`).toMatch(/rel="icon" href="\/favicon\.svg"/);
+    }
+  });
 });

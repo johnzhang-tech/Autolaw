@@ -8,3 +8,15 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 README.md
+
+# Not part of the static site. server/ and shared/ are a leftover Express app; the rest is
+# design source, documentation, and tooling that the Vite build never reads.
+server
+shared
+docs
+design-system
+scripts
+attached_assets
+client
+.superpowers
+.claude

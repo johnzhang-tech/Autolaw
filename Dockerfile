@@ -1,8 +1,10 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm install
+# npm ci from the committed lockfile: the image is built from exactly the dependency set
+# the tests ran against, and the build fails loudly if the lockfile is missing or stale.
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
 RUN npm run build
