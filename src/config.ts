@@ -58,21 +58,6 @@ export const SECURITY_URL = '/security/';
 export const ABOUT_URL = '/about/';
 
 /**
- * Nav dropdown menus. An entry with no items does not render at all — no empty
- * dropdown, no dead link, no "coming soon". Add items as their pages ship.
- * Same discipline as CUSTOMER_LOGOS: the slot stays empty until it is real.
- */
-export interface NavMenuItem { label: string; href: string; description?: string }
-
-export const RESOURCE_MENU: ReadonlyArray<NavMenuItem> = [
-  { label: 'Security', href: SECURITY_URL, description: 'Controls, data handling, and certifications' },
-];
-
-export const ABOUT_MENU: ReadonlyArray<NavMenuItem> = [
-  { label: 'About Autolaw', href: ABOUT_URL, description: 'Why we built this for PI and workers’ comp' },
-];
-
-/**
  * Site-wide announcement. null renders nothing — never ship an invented announcement.
  * Example when real: { text: 'Autolaw is now SOC 2 Type II certified', href: '/security/' }
  */

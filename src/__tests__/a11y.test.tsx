@@ -113,23 +113,12 @@ describe('keyboard reachability', () => {
      * loop then passes over a shorter list and reports nothing.
      */
 
-    // Nav links: brand, three section links, and the header CTA. No login link while
-    // LOGIN_URL is null. The two dropdown menus are buttons, not links, and their items
-    // are not in the DOM until one opens.
+    // Nav links: brand, four site links, and the header CTA. No login link while
+    // LOGIN_URL is null.
     const nav = screen.getByRole('navigation', { name: /primary/i });
     const navLinks = within(nav).getAllByRole('link');
-    expect(navLinks.length).toBe(5);
+    expect(navLinks.length).toBe(6);
     navLinks.forEach(reachable);
-
-    /*
-     * Resources and About. Asserted as buttons on purpose: a hover-only dropdown built on
-     * a <span> or an <a href="#"> is exactly the regression this catches, and it is
-     * unreachable by keyboard the moment it happens. The mobile toggle is display:none at
-     * this width, so it is not among them.
-     */
-    const menuTriggers = within(nav).getAllByRole('button', { expanded: false });
-    expect(menuTriggers.length).toBe(2);
-    menuTriggers.forEach(reachable);
 
     // The hero's secondary control, and the one "see it on your own matter" link in the
     // chronology detail. The trial CTA is absent while TRIAL_ENABLED is false.
@@ -172,11 +161,11 @@ describe('keyboard reachability', () => {
     // Comparison scroller — focusable so a keyboard user can scroll it
     reachable(screen.getByTestId('comparison-scroller'));
 
-    // Footer links: three section links, security, about, schedule a call, contact.
+    // Footer links: four site links, schedule a call, contact.
     // No login link while LOGIN_URL is null.
     const footer = screen.getByRole('contentinfo');
     const footerLinks = within(footer).getAllByRole('link');
-    expect(footerLinks.length).toBe(7);
+    expect(footerLinks.length).toBe(6);
     footerLinks.forEach(reachable);
   });
 

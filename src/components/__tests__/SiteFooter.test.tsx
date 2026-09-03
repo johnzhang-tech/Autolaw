@@ -2,19 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import App from '../../App';
 import { SiteFooter } from '../SiteFooter';
-import { CONTACT_EMAIL, SCHEDULE_URL, RESOURCE_MENU, ABOUT_MENU } from '../../config';
+import { CONTACT_EMAIL, SCHEDULE_URL } from '../../config';
+import { SITE_LINKS } from '../../navigation';
 
 describe('SiteFooter', () => {
   it('carries every destination the nav offers, in one flat list', () => {
     render(<SiteFooter />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual([
-      // Root-relative so they work from the subpages this footer also renders on.
-      '/#products',
-      '/#solutions',
-      '/#story-arrives',
-      ...RESOURCE_MENU.map((i) => i.href),
-      ...ABOUT_MENU.map((i) => i.href),
+      ...SITE_LINKS.map((l) => l.href),
       SCHEDULE_URL,
       // No login link: LOGIN_URL is null until app.autolaw.ai resolves.
       `mailto:${CONTACT_EMAIL}`,

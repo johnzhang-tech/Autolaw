@@ -45,6 +45,10 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     pattern: /upload\s+(a|one)\s+(single\s+)?case\s+file/i,
     reason: 'the trial accepts one medical-legal or narrative report, not a case file',
   },
+  {
+    pattern: /suggested\s+questions|streaming|generate\s+documents|compute\s+action/i,
+    reason: 'Ask AL roadmap items, not shipped behaviour',
+  },
 ];
 
 const PAGES: ReadonlyArray<[string, ComponentType]> = [
