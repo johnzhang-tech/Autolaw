@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Chip } from '../components/primitives/Chip';
 import { CHRONOLOGY } from '../data/demoCase';
-import { TRIAL_URL } from '../config';
+import { SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL } from '../config';
 import './Chronology.css';
 
 export function Chronology() {
@@ -91,19 +91,27 @@ export function Chronology() {
           {/*
             These name the actions the product offers on a fact; on this page they are
             labels, not controls. Rendering them as <button> made them focusable, announced
-            as buttons, and completely inert — a dead "Draft records request" on the section
-            whose whole argument is that it demonstrates rather than asserts. The one live
-            action is the trial link, which is the thing a visitor can actually do next.
+            as buttons, and completely inert — a dead action on the section whose whole
+            argument is that it demonstrates rather than asserts. "Confirm" and "Dismiss"
+            are the review queue's own labels. The one live action is the link, which is
+            the thing a visitor can actually do next: the trial when it is on, the call
+            otherwise.
           */}
           <div className="al-detail__actions">
             <ul className="al-detail__offers">
               <li>{event.action}</li>
               <li>Confirm</li>
-              <li>Flag</li>
+              <li>Dismiss</li>
             </ul>
-            <a className="al-mini al-mini--go" href={TRIAL_URL}>
-              Try this on your own case
-            </a>
+            {TRIAL_ENABLED ? (
+              <a className="al-mini al-mini--go" href={TRIAL_URL}>
+                Try this on one of your reports
+              </a>
+            ) : (
+              <a className="al-mini al-mini--go" href={SCHEDULE_URL}>
+                See it on your own matter
+              </a>
+            )}
           </div>
         </div>
       </div>

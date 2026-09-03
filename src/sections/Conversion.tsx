@@ -1,5 +1,5 @@
 import { Button } from '../components/primitives/Button';
-import { TRIAL_URL, SCHEDULE_URL } from '../config';
+import { SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL } from '../config';
 import './Conversion.css';
 
 export function Conversion() {
@@ -8,26 +8,32 @@ export function Conversion() {
       <div className="al-container al-conv__inner">
         <h2 id="conv-heading" className="al-conv__title">Prove it on one of your matters.</h2>
         {/*
-          Written as self-serve because /trial is what exists. The previous copy promised
-          a serviced engagement ("Bring a single case file. We will return...") six inches
-          above a button that opens a signup form — two different products on one screen,
-          and the buyer notices which one the button actually delivers.
+          Written for the call, because the call is what exists. The trial is behind
+          TRIAL_ENABLED: /trial is gated off on case-app and app.autolaw.ai does not resolve,
+          and a closing button that opens a browser error is the last impression a visitor
+          gets. When the switch is on, the trial is described as what it is — one report,
+          chronologized — and never as "upload a case file", which it cannot take.
         */}
         <p className="al-conv__sub">
-          Upload a single case file. You will get back a source-linked chronology, the conflicts
-          we found, and the records that are missing &mdash; so you can judge the output against
-          a matter you already know.
+          Bring a matter you already know. We walk through it in the workflow you practice,
+          and you judge the chronology, the conflicts, and the missing records against what
+          you know is in the file.
         </p>
         <div className="al-conv__ctas">
-          <Button href={TRIAL_URL} variant="inverse" size="lg" withCaret>Analyze one case</Button>
-          {/* The same pair the hero and the nav offer, so a visitor who scrolled the whole
-              page is not asked to go back up to find the other lane. The mailto that used
-              to sit here is in the footer, where a link that opens a mail client belongs. */}
-          <Button href={SCHEDULE_URL} variant="inverse-secondary" size="lg">Schedule a call</Button>
+          <Button href={SCHEDULE_URL} variant="inverse" size="lg" withCaret>Schedule a call</Button>
+          {TRIAL_ENABLED && (
+            <Button href={TRIAL_URL} variant="inverse-secondary" size="lg">Analyze one report</Button>
+          )}
         </div>
+        {TRIAL_ENABLED && (
+          <p className="al-conv__fine">
+            Or upload one QME, AME, or IME report and see it chronologized, with every fact
+            cited to its page.
+          </p>
+        )}
         <p className="al-conv__fine">
-          Personal injury and workers&rsquo; compensation are set up separately &mdash; tell us
-          which one you practice and you will see that workflow, not a generic demo.
+          Personal injury and workers&rsquo; compensation run as separate workflows &mdash; tell
+          us which one you practice and you will see that workflow, not a generic demo.
         </p>
       </div>
     </section>

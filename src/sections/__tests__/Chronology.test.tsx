@@ -46,10 +46,12 @@ describe('Chronology', () => {
     /*
      * Asserted as text, not as a button. The offer is a label here — rendering it as a
      * control made it focusable, announced as a button, and completely inert, which is
-     * the opposite of what this section is arguing. What matters is that the panel offers
-     * a records request instead of a page link, because there is no page to link to.
+     * the opposite of what this section is arguing. What matters is that the panel names
+     * the document that is needed instead of a page link, because there is no page to link
+     * to — and that it does not claim to draft anything, because the product does not.
      */
-    expect(within(detail).getByText(/draft records request/i)).toBeInTheDocument();
+    expect(within(detail).getByText(/needed: imaging report/i)).toBeInTheDocument();
+    expect(within(detail).queryByText(/records request/i)).not.toBeInTheDocument();
     expect(within(detail).queryByText(/^Open page/i)).not.toBeInTheDocument();
   });
 

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import App from '../../App';
 import { SiteFooter } from '../SiteFooter';
-import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL, RESOURCE_MENU, ABOUT_MENU } from '../../config';
+import { CONTACT_EMAIL, SCHEDULE_URL, RESOURCE_MENU, ABOUT_MENU } from '../../config';
 
 describe('SiteFooter', () => {
   it('carries every destination the nav offers, in one flat list', () => {
@@ -16,7 +16,7 @@ describe('SiteFooter', () => {
       ...RESOURCE_MENU.map((i) => i.href),
       ...ABOUT_MENU.map((i) => i.href),
       SCHEDULE_URL,
-      LOGIN_URL,
+      // No login link: LOGIN_URL is null until app.autolaw.ai resolves.
       `mailto:${CONTACT_EMAIL}`,
     ]);
   });

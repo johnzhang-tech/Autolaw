@@ -29,7 +29,7 @@ export function SiteFooter() {
             <li key={l.href}><a href={l.href}>{l.label}</a></li>
           ))}
           <li><a href={SCHEDULE_URL}>Schedule a call</a></li>
-          <li><a href={LOGIN_URL}>Log in</a></li>
+          {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
           <li><a href={`mailto:${CONTACT_EMAIL}`}>Contact</a></li>
         </ul>
       </div>

@@ -13,12 +13,12 @@ describe('AboutPage — what it says', () => {
     ).toBeInTheDocument();
   });
 
-  it('explains why the two practices are separate products, not one with the labels swapped', () => {
+  it('explains why the two practices are separate workflows, not one with the labels swapped', () => {
     render(<AboutPage />);
-    const practices = within(screen.getByRole('region', { name: /two practices, two products/i }));
+    const practices = within(screen.getByRole('region', { name: /two practices, two workflows/i }));
     expect(practices.getByRole('heading', { name: /personal injury/i })).toBeInTheDocument();
     expect(practices.getByRole('heading', { name: /workers’ compensation/i })).toBeInTheDocument();
-    expect(practices.getByText(/not one product with the labels swapped/i)).toBeInTheDocument();
+    expect(practices.getByText(/not one workflow with the labels swapped/i)).toBeInTheDocument();
   });
 
   it('states the human-confirmation principle and its legal reason', () => {

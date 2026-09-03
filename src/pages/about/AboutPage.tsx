@@ -62,7 +62,7 @@ export function AboutPage() {
         intro={
           <>
             Autolaw is case intelligence for personal injury and workers&rsquo; compensation
-            firms. It reads what is already in a matter &mdash; intake calls, medical records,
+            firms. It reads what is already in a matter &mdash; intake notes, medical records,
             expert reports &mdash; and builds one connected case file in which every fact cites
             the document, page, and sentence it came from.
           </>
@@ -88,8 +88,8 @@ export function AboutPage() {
       <Section
         id="practices"
         eyebrow="Practice areas"
-        heading="Two practices, two products"
-        intro="Personal injury and workers’ compensation look adjacent from outside the work. They are not, and building one product for both would mean building neither."
+        heading="Two practices, two workflows"
+        intro="Personal injury and workers’ compensation look adjacent from outside the work. They are not, and one workflow for both would fit neither."
       >
         <div className="al-about__pair">
           <div className="al-about__card">
@@ -109,9 +109,10 @@ export function AboutPage() {
           </div>
         </div>
         <p className="al-about__note">
-          So they are set up as two products with their own intake, their own screens, and their
-          own outputs &mdash; not one product with the labels swapped. It is more work, and it is
-          the difference between a tool that fits the practice and a demo that impresses.
+          So they run as two workflows on one engine, each configured with its own screens
+          and its own outputs &mdash; not one workflow with the labels swapped. It is more work,
+          and it is the difference between a tool that fits the practice and a demo that
+          impresses.
         </p>
       </Section>
 

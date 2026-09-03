@@ -24,3 +24,6 @@ uploads/
 .env
 # design system build output
 design-system/dist/
+
+# brainstorming companion mockups
+.superpowers/

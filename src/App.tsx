@@ -1,6 +1,4 @@
-import { AnnouncementBanner } from './components/AnnouncementBanner';
-import { SiteNav } from './components/SiteNav';
-import { SiteFooter } from './components/SiteFooter';
+import { PageShell } from './pages/PageShell';
 import { Hero } from './sections/Hero';
 import { Transformation } from './sections/Transformation';
 import { ProductExperience } from './sections/ProductExperience';
@@ -8,30 +6,20 @@ import { PracticeSolutions } from './sections/PracticeSolutions';
 import { Trust } from './sections/Trust';
 import { Conversion } from './sections/Conversion';
 
+/*
+ * The same frame as every standalone page — skip link, announcement, banner, main, footer —
+ * so the home page cannot drift from the others. It used to carry its own copy of that
+ * frame, with the same Safari focus comment, which is how drift starts.
+ */
 export default function App() {
   return (
-    <>
-      <a className="al-skip" href="#main">Skip to content</a>
-      <div id="top" />
-      {/* Above the sticky bar and outside it, so the bar's height — and therefore
-          scroll-padding-top — is unchanged. Renders nothing while ANNOUNCEMENT is null. */}
-      <AnnouncementBanner />
-      <SiteNav />
-      {/*
-        tabIndex={-1} so the skip link actually moves focus. Chrome and Firefox set the
-        sequential-focus starting point on a non-focusable fragment target; Safari does
-        not, so without this the link scrolls the page and leaves focus in the nav — the
-        next Tab drops the user back where they started.
-      */}
-      <main id="main" tabIndex={-1}>
-        <Hero />
-        <Transformation />
-        <ProductExperience />
-        <PracticeSolutions />
-        <Trust />
-        <Conversion />
-      </main>
-      <SiteFooter />
-    </>
+    <PageShell>
+      <Hero />
+      <Transformation />
+      <ProductExperience />
+      <PracticeSolutions />
+      <Trust />
+      <Conversion />
+    </PageShell>
   );
 }

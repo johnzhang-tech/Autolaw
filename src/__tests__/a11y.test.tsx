@@ -113,11 +113,12 @@ describe('keyboard reachability', () => {
      * loop then passes over a shorter list and reports nothing.
      */
 
-    // Nav links: brand, three section links, log in, and the header CTA. The two dropdown
-    // menus are buttons, not links, and their items are not in the DOM until one opens.
+    // Nav links: brand, three section links, and the header CTA. No login link while
+    // LOGIN_URL is null. The two dropdown menus are buttons, not links, and their items
+    // are not in the DOM until one opens.
     const nav = screen.getByRole('navigation', { name: /primary/i });
     const navLinks = within(nav).getAllByRole('link');
-    expect(navLinks.length).toBe(6);
+    expect(navLinks.length).toBe(5);
     navLinks.forEach(reachable);
 
     /*
@@ -130,8 +131,11 @@ describe('keyboard reachability', () => {
     expect(menuTriggers.length).toBe(2);
     menuTriggers.forEach(reachable);
 
-    // CTAs, wherever they appear. Both halves of the split are live, so both are checked.
-    screen.getAllByRole('link', { name: /analyze one case/i }).forEach(reachable);
+    // The hero's secondary control, and the one "see it on your own matter" link in the
+    // chronology detail. The trial CTA is absent while TRIAL_ENABLED is false.
+    reachable(screen.getByRole('link', { name: /see how it works/i }));
+    reachable(screen.getByRole('link', { name: /on your own matter/i }));
+    expect(screen.queryAllByRole('link', { name: /analyze one/i })).toEqual([]);
     // Nav, hero, closing CTA, footer. The count is exact for the reason given above.
     const schedule = screen.getAllByRole('link', { name: /schedule a call/i });
     expect(schedule.length).toBe(4);
@@ -165,10 +169,11 @@ describe('keyboard reachability', () => {
     // Comparison scroller — focusable so a keyboard user can scroll it
     reachable(screen.getByTestId('comparison-scroller'));
 
-    // Footer links: three section links, security, about, schedule a call, log in, contact
+    // Footer links: three section links, security, about, schedule a call, contact.
+    // No login link while LOGIN_URL is null.
     const footer = screen.getByRole('contentinfo');
     const footerLinks = within(footer).getAllByRole('link');
-    expect(footerLinks.length).toBe(8);
+    expect(footerLinks.length).toBe(7);
     footerLinks.forEach(reachable);
   });
 

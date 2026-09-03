@@ -9,7 +9,25 @@
  */
 export const APP_ORIGIN = 'https://app.autolaw.ai';
 
-export const LOGIN_URL = `${APP_ORIGIN}/login`;
+/**
+ * null until app.autolaw.ai resolves. There is nowhere true to send a customer yet: the
+ * canonical host has no DNS record, and the raw Cloud Run host may not appear on the site
+ * (the credibility guard fails the build if it does). Nav and footer render no login link
+ * while this is null. When the host is live: `${APP_ORIGIN}/login`.
+ */
+export const LOGIN_URL: string | null = null;
+
+/**
+ * The self-serve trial, off. Two things have to be true before this flips: app.autolaw.ai
+ * must resolve, and TRIAL_SIGNUP_ENABLED=true must be set on the case-app service, or
+ * /trial returns 404. While false, no trial CTA renders anywhere — the claim guard asserts
+ * it — and "Schedule a call" is the only primary action on the site.
+ *
+ * When it flips, the copy beside the button must describe the trial as it is: the visitor
+ * uploads ONE QME, AME, IME, or narrative report and gets it chronologized with page cites.
+ * It is not "upload a case file", and the guard fails the build on that phrase.
+ */
+export const TRIAL_ENABLED = false;
 
 /** Requires TRIAL_SIGNUP_ENABLED=true on the case-app service, or this 404s. */
 export const TRIAL_URL = `${APP_ORIGIN}/trial`;
@@ -22,6 +40,9 @@ export const CONTACT_EMAIL = 'hello@autolaw.ai';
  * Relative because the page is served by this site, not the app.
  */
 export const SCHEDULE_URL = '/schedule-call/';
+
+/** The hero's secondary control: an invitation to scroll, not a second lane. */
+export const HOW_IT_WORKS_URL = '/#transformation';
 
 /**
  * The other two standalone pages. Named here, and referenced everywhere else, because a

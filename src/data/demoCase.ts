@@ -96,9 +96,9 @@ export const CHRONOLOGY: ChronologyEvent[] = [
     confidence: null,
     warning: {
       title: 'Referenced but never produced.',
-      body: 'Two documents cite an MRI dated 03/14/2025. No imaging report exists in the file. Autolaw flags the gap and drafts the records request rather than inferring the findings.',
+      body: 'Two documents cite an MRI dated 03/14/2025. No imaging report exists in the file. Autolaw flags the gap and lists the imaging report as needed rather than inferring the findings.',
     },
-    action: 'Draft records request',
+    action: 'Needed: imaging report',
   },
   {
     date: '04/02/2025',
@@ -166,7 +166,7 @@ export const BODY_REGIONS: BodyRegion[] = [
       { label: 'Imaging', value: '4mm disc protrusion at L4–L5, mild foraminal narrowing — recited in the QME report; the MRI itself is not in the file', cite: 'QME report p.14', warn: true },
       { label: 'Treatment', value: 'Conservative care, 12 physical therapy visits, epidural injection 05/06/2025', cite: 'Billing summary p.7', warn: false },
       { label: 'Restrictions', value: 'No lifting over 15 lb — disputed by QME', cite: 'PTP p.3 / QME p.22', warn: true },
-      { label: 'Missing', value: 'MRI report referenced by two documents, never produced', cite: 'Records request drafted', warn: true },
+      { label: 'Missing', value: 'MRI report referenced by two documents, never produced', cite: 'Flagged as missing', warn: true },
     ],
   },
   {

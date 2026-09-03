@@ -353,8 +353,8 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
       <fieldset className="al-sched__fieldset">
         <legend>Which do you practice?</legend>
         <p className="al-sched__hint" id={hintId('practice')}>
-          Personal injury and workers&rsquo; compensation are built separately. This answer
-          decides which product the call is about.
+          Personal injury and workers&rsquo; compensation run as separate workflows. This
+          answer decides which workflow the call is about.
         </p>
         {errors.practice && (
           <p className="al-sched__error" id={errorId('practice')}>{errors.practice}</p>
@@ -523,7 +523,7 @@ export function ScheduleCallPage() {
       <PageHero
         eyebrow="Talk to us"
         title="Schedule a call"
-        intro="Tell us which practice you run and the call follows that practice. Personal injury and workers’ compensation are separate products here, so the first question decides the whole conversation."
+        intro="Tell us which practice you run and the call follows that practice. Personal injury and workers’ compensation are separate workflows here, so the first question decides the whole conversation."
       />
 
       <Section

@@ -11,7 +11,7 @@ describe('Trust', () => {
     expect(screen.queryByText(/trusted by/i)).not.toBeInTheDocument();
   });
 
-  it('states the four control claims in plain language', () => {
+  it('states the control claims in plain language', () => {
     render(<Trust />);
     expect(screen.getByText(/does not train models/i)).toBeInTheDocument();
     // Re-pointed from "tenant isolation" — vendor vocabulary that names a lease to the

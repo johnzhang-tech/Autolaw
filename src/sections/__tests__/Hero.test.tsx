@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Hero } from '../Hero';
-import { TRIAL_URL, SCHEDULE_URL } from '../../config';
+import { SCHEDULE_URL, HOW_IT_WORKS_URL } from '../../config';
 
 describe('Hero', () => {
   it('leads with the buyer outcome, not the category', () => {
@@ -11,9 +11,17 @@ describe('Hero', () => {
     ).toBeInTheDocument();
   });
 
-  it('points the primary CTA at the trial flow', () => {
+  /*
+   * Schedule a call leads. The trial is behind TRIAL_ENABLED because /trial is gated off
+   * on case-app and app.autolaw.ai does not resolve; a primary button that opens a browser
+   * error is worse than no button.
+   */
+  it('points the primary CTA at the scheduling page', () => {
     render(<Hero />);
-    expect(screen.getByRole('link', { name: /analyze one case/i })).toHaveAttribute('href', TRIAL_URL);
+    const primary = screen.getByRole('link', { name: /schedule a call/i });
+    expect(primary).toHaveAttribute('href', SCHEDULE_URL);
+    expect(primary).toHaveClass('al-btn--primary');
+    expect(screen.queryByRole('link', { name: /analyze one/i })).not.toBeInTheDocument();
   });
 
   it('gives the cockpit a single descriptive label rather than bare numbers', () => {
@@ -23,13 +31,14 @@ describe('Hero', () => {
   });
 
   /*
-   * Both lanes of the split, in the hero: self-serve first, sales-assisted beside it. The
-   * secondary slot was empty while WALKTHROUGH_URL stayed null, so this is what fills it.
+   * The secondary control is an invitation to scroll, not a second lane. A visitor who is
+   * not ready to book a call is asked to read on, which is the only other thing the page
+   * can honestly offer while the trial is off.
    */
-  it('offers Schedule a call as the secondary CTA', () => {
+  it('offers See how it works as the secondary control', () => {
     render(<Hero />);
-    const secondary = screen.getByRole('link', { name: /schedule a call/i });
-    expect(secondary).toHaveAttribute('href', SCHEDULE_URL);
+    const secondary = screen.getByRole('link', { name: /see how it works/i });
+    expect(secondary).toHaveAttribute('href', HOW_IT_WORKS_URL);
     expect(secondary).toHaveClass('al-btn--secondary');
   });
 

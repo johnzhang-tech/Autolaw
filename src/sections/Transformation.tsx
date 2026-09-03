@@ -7,7 +7,7 @@ import './Transformation.css';
  * attorney reading it saw someone else's file.
  */
 const INPUTS = [
-  'Intake calls', 'Police and incident reports', 'ER and hospital records',
+  'Intake notes', 'Police and incident reports', 'ER and hospital records',
   'Treating physician reports', 'QME/AME reports', 'PTP reports', 'Imaging',
   'Billing and liens', 'Wage records', 'Subpoenaed records', 'Prior claims',
   'Correspondence',

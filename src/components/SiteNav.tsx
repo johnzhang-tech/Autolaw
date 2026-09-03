@@ -227,7 +227,7 @@ export function SiteNav() {
           </ul>
 
           <div className="al-nav__actions">
-            <a className="al-nav__login" href={LOGIN_URL}>Log in</a>
+            {LOGIN_URL && <a className="al-nav__login" href={LOGIN_URL}>Log in</a>}
             {/* Sales-assisted, not self-serve: the trial CTA leads the hero, and the bar
                 carries the other half of the pair. */}
             <Button href={SCHEDULE_URL} variant="primary" size="md" withCaret>Schedule a call</Button>
@@ -270,9 +270,11 @@ export function SiteNav() {
               </div>
             ))}
 
-            <ul>
-              <li><a href={LOGIN_URL}>Log in</a></li>
-            </ul>
+            {LOGIN_URL && (
+              <ul>
+                <li><a href={LOGIN_URL}>Log in</a></li>
+              </ul>
+            )}
             <Button href={SCHEDULE_URL} variant="primary" size="md" withCaret>Schedule a call</Button>
           </div>
         )}

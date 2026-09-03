@@ -33,8 +33,8 @@ export function PracticeSolutions() {
     <Section
       id="solutions"
       eyebrow="Solutions"
-      heading="Two practices, two products"
-      intro="Personal injury and workers’ compensation are separate products, not one product with the labels swapped. Each has its own intake, its own screens, and its own outputs."
+      heading="Two practices, two workflows"
+      intro="Personal injury and workers’ compensation run as separate workflows on one engine, not one workflow with the labels swapped. Each is configured with its own screens, its own questions, and its own outputs."
     >
       <div className="al-seg" role="tablist" aria-label="Practice area" onKeyDown={onKeyDown}>
         {AREAS.map((a) => (

@@ -117,7 +117,18 @@ describe('SiteNav', () => {
      * and /schedule-call/, where "#products" would resolve to nothing on the current
      * page and the link would silently do nothing.
      */
-    expect(hrefs).toEqual(['/', '/#products', '/#solutions', '/#transformation', LOGIN_URL, SCHEDULE_URL]);
+    expect(hrefs).toEqual(['/', '/#products', '/#solutions', '/#transformation', SCHEDULE_URL]);
+  });
+
+  /*
+   * No login link while LOGIN_URL is null. app.autolaw.ai has no DNS record, and the raw
+   * Cloud Run host may not appear on the site, so there is nowhere true to send a customer
+   * yet. A link that fails is the first thing an existing customer would try.
+   */
+  it('renders no login link while LOGIN_URL is unset', () => {
+    expect(LOGIN_URL).toBeNull();
+    render(<SiteNav />);
+    expect(screen.queryByRole('link', { name: /log in/i })).not.toBeInTheDocument();
   });
 
   /*

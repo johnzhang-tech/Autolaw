@@ -1,6 +1,7 @@
 import { Button } from '../components/primitives/Button';
 import { SignalCockpit } from './SignalCockpit';
-import { TRIAL_URL, SCHEDULE_URL, WALKTHROUGH_URL } from '../config';
+import { TRIAL_ENABLED, TRIAL_URL, SCHEDULE_URL, HOW_IT_WORKS_URL, WALKTHROUGH_URL } from '../config';
+import '../components/primitives/Section.css';
 import './Hero.css';
 
 /*
@@ -44,21 +45,26 @@ export function Hero() {
             Turn case complexity into legal advantage. Know where every fact came from.
           </h1>
           <p className="al-hero__sub">
-            Autolaw reads the intake calls, medical records, and expert reports in a file and
+            Autolaw reads the intake notes, medical records, and expert reports in a file and
             builds one connected case file &mdash; every fact citing its document, page, and
             sentence. Where two records disagree, you see both.
           </p>
           <div className="al-hero__ctas">
-            <Button href={TRIAL_URL} variant="primary" size="lg" withCaret>
-              Analyze one case
-            </Button>
             {/*
-              Both lanes, side by side: self-serve for the firm that wants to try it
-              tonight, sales-assisted for the one that wants to be walked through it.
+              Schedule a call leads. The trial sits behind TRIAL_ENABLED (see config.ts):
+              a primary button that opens a browser error is worse than no button.
             */}
-            <Button href={SCHEDULE_URL} variant="secondary" size="lg">
+            <Button href={SCHEDULE_URL} variant="primary" size="lg" withCaret>
               Schedule a call
             </Button>
+            <Button href={HOW_IT_WORKS_URL} variant="secondary" size="lg">
+              See how it works
+            </Button>
+            {TRIAL_ENABLED && (
+              <Button href={TRIAL_URL} variant="secondary" size="lg">
+                Analyze one report
+              </Button>
+            )}
             {WALKTHROUGH_URL && (
               <Button href={WALKTHROUGH_URL} variant="secondary" size="lg">
                 Watch a 3-minute case walkthrough

@@ -24,10 +24,10 @@ const ROWS: Array<[string, string, string]> = [
   ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the exact sentence — one click opens it'],
   ['Two documents disagree', 'Picks one, silently', 'Surfaced as a conflict with both sources and dates'],
   ['A fact with no support', 'Reads identically to a supported one', 'Kept apart from cited facts and labeled uncited'],
-  ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and drafts the request'],
+  ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and lists what is needed'],
   ['Becoming case truth', 'Output is the answer', 'Proposes only; an attorney confirms before anything is recorded'],
-  ['Practice fit', 'Generic', 'Separate PI and workers’ comp products, each with its own intake and outputs'],
-  ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every access logged, never used to train models'],
+  ['Practice fit', 'Generic', 'Separate PI and workers’ comp workflows on one engine, each with its own screens and outputs'],
+  ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every document opened is logged, never used to train models'],
 ];
 
 function Cross() {
