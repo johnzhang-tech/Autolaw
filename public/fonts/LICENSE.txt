@@ -1,0 +1,15 @@
+The fonts in this directory are used under the SIL Open Font License, Version 1.1.
+
+  Manrope — Copyright (c) 2018 The Manrope Project Authors
+  https://github.com/sharanda/manrope
+
+  Source Serif 4 — Copyright (c) 2014-2023 Adobe (http://www.adobe.com/),
+  with Reserved Font Name "Source"
+  https://github.com/adobe-fonts/source-serif
+
+Both families are licensed under the SIL Open Font License, Version 1.1.
+The full licence text is available at: https://openfontlicense.org
+
+The files here are the Latin subsets published by Google Fonts, downloaded once by
+scripts/fetch-fonts.mjs and committed so that no page on this site loads a font from a
+third-party origin.

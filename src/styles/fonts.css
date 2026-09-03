@@ -1,0 +1,16 @@
+/*
+ * Self-hosted so no page loads anything from a third-party origin. Latin subset only,
+ * fetched once by scripts/fetch-fonts.mjs; both families are SIL Open Font Licensed and
+ * the notice ships beside them in public/fonts/LICENSE.txt.
+ *
+ * font-display: swap — the page renders immediately in the fallback stack and reflows
+ * when the face arrives. On a text-first site that is the right trade: a reader who came
+ * for a sentence should not wait on a typeface to read it.
+ */
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/manrope-400.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/manrope-500.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/manrope-600.woff2") format("woff2"); }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/manrope-700.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/source-serif-4-400.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/source-serif-4-600.woff2") format("woff2"); }
+@font-face { font-family: "Source Serif 4"; font-style: italic; font-weight: 400; font-display: swap; src: url("/fonts/source-serif-4-400-italic.woff2") format("woff2"); }

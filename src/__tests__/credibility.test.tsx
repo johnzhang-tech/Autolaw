@@ -134,4 +134,12 @@ describe('credibility guards', () => {
       expect(readFileSync(f, 'utf8'), `${f} has no favicon link`).toMatch(/rel="icon" href="\/favicon\.svg"/);
     }
   });
+
+  it('loads no stylesheet, font, or script from a third-party origin', () => {
+    const offenders = htmlEntries().filter((f) => /https?:\/\/(fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg|jsdelivr)/i.test(readFileSync(f, 'utf8')));
+    expect(offenders).toEqual([]);
+    for (const face of ['manrope-400', 'manrope-500', 'manrope-600', 'manrope-700', 'source-serif-4-400', 'source-serif-4-600', 'source-serif-4-400-italic']) {
+      expect(existsSync(join(ROOT, 'public/fonts', `${face}.woff2`)), `${face}.woff2 missing`).toBe(true);
+    }
+  });
 });

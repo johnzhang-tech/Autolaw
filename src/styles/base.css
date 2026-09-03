@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './fonts.css';
 
 /*
  * Everything here lives in @layer base so component stylesheets always win, regardless
