@@ -1,5 +1,5 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { BODY_REGIONS, SAMPLE_MARK } from '../data/demoCase';
+import { BODY_REGIONS, SAMPLE_MARK, type BodyRegion } from '../data/demoCase';
 import './Silhouette.css';
 
 /** Visual top-to-bottom order, left before right, so the arrow keys feel physical. */
@@ -26,11 +26,16 @@ const OUTLINE = 'M110 12c-15 0-26 12-26 27 0 12 6 22 15 26v12c-22 3-40 11-50 26-
 
 type Key = (typeof SIL_ORDER)[number];
 
-function statusOf(key: Key): string {
-  const r = BODY_REGIONS.find((x) => x.key === key)!;
-  if (r.claimed) return 'accepted body part';
-  return r.rows.some((row) => /no documents reference/i.test(row.value)) ? 'not an accepted body part, no records' : 'not an accepted body part, disputed';
-}
+/**
+ * The spoken status for each tone. Read straight off `BodyRegion['tone']` — a
+ * structural fact of the data — rather than inferred by sniffing row prose, so a
+ * region worded differently from the others can never be misclassified.
+ */
+const STATUS: Record<BodyRegion['tone'], string> = {
+  accepted: 'accepted body part',
+  disputed: 'not an accepted body part, disputed',
+  none: 'not an accepted body part, no records',
+};
 
 /**
  * The body-part figure the WC workflow's Injury & Work Status screen is built around.
@@ -71,7 +76,7 @@ export function Silhouette() {
               const meta = BODY_REGIONS.find((r) => r.key === key)!;
               const h = HITS[key];
               const on = key === activeKey;
-              const tone = meta.claimed ? 'on' : statusOf(key).includes('disputed') ? 'disputed' : 'none';
+              const tone = meta.tone === 'accepted' ? 'on' : meta.tone;
               const cx = h.x + h.w / 2, cy = h.y + h.h / 2;
               return (
                 <g key={key}>
@@ -84,7 +89,7 @@ export function Silhouette() {
                     tabIndex={0}
                     role="button"
                     aria-pressed={on}
-                    aria-label={`${meta.label}, ${statusOf(key)}`}
+                    aria-label={`${meta.label}, ${STATUS[meta.tone]}`}
                     onClick={() => setActiveKey(key)}
                     onKeyDown={(e) => onKeyDown(e, key)}
                   />

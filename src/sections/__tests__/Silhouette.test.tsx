@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Silhouette, SIL_ORDER, HITS } from '../Silhouette';
-import { BODY_REGIONS } from '../../data/demoCase';
+import { BODY_REGIONS, type BodyRegion } from '../../data/demoCase';
 
 describe('Silhouette', () => {
   it('draws every region as a named button carrying its status in words', () => {
@@ -42,6 +42,18 @@ describe('Silhouette', () => {
   it('labels every region beside the figure, not only by colour', () => {
     render(<Silhouette />);
     BODY_REGIONS.forEach((r) => expect(screen.getAllByText(r.label).length).toBeGreaterThan(0));
+  });
+
+  it("announces each region's status exactly as its declared tone specifies", () => {
+    render(<Silhouette />);
+    const STATUS_BY_TONE: Record<BodyRegion['tone'], string> = {
+      accepted: 'accepted body part',
+      disputed: 'not an accepted body part, disputed',
+      none: 'not an accepted body part, no records',
+    };
+    BODY_REGIONS.forEach((r) => {
+      expect(screen.getByRole('button', { name: `${r.label}, ${STATUS_BY_TONE[r.tone]}` })).toBeInTheDocument();
+    });
   });
 
   it('gives every hit target at least 24px at the smallest rendered size', () => {

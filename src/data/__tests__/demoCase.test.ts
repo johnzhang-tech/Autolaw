@@ -62,6 +62,13 @@ describe('sections data', () => {
     expect(BODY_REGIONS.filter((r) => r.rows.some((row) => /no documents reference/i.test(row.value)))).toHaveLength(4);
   });
 
+  it("states each body region's status as data instead of leaving it to be inferred from prose", () => {
+    expect(BODY_REGIONS.every((r) => ['accepted', 'disputed', 'none'].includes(r.tone))).toBe(true);
+    expect(BODY_REGIONS.filter((r) => r.tone === 'accepted')).toHaveLength(2);
+    expect(BODY_REGIONS.filter((r) => r.tone === 'disputed')).toHaveLength(1);
+    expect(BODY_REGIONS.filter((r) => r.tone === 'none')).toHaveLength(5);
+  });
+
   it('closes differently for each practice', () => {
     expect(PRACTICE_CLOSING.PI.heading).not.toBe(PRACTICE_CLOSING.WC.heading);
     expect(PRACTICE_CLOSING.PI.href).toBe('/schedule-call/?practice=pi');

@@ -174,6 +174,13 @@ export interface BodyRegion {
    * built from this flag must say "accepted", never "claimed".
    */
   claimed: boolean;
+  /**
+   * The region's status, stated rather than inferred from prose — the figure colours
+   * and announces from this field alone. 'accepted' is a claimed body part; 'disputed'
+   * is unaccepted but genuinely contested by the record; 'none' is unaccepted with
+   * nothing in the file to dispute.
+   */
+  tone: 'accepted' | 'disputed' | 'none';
   plain: string;
   rows: Array<{ label: string; value: string; cite: string; warn: boolean }>;
 }
@@ -183,6 +190,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     key: 'lumbar',
     label: 'Lumbar spine',
     claimed: true,
+    tone: 'accepted',
     plain: 'A disc at L4–L5 bulges into the opening the nerve root passes through. The records tie that to the left-leg pain; no imaging report in the file confirms nerve compression.',
     rows: [
       { label: 'Symptoms', value: 'Low back pain radiating into the left lower extremity', cite: 'PTP report p.2', warn: false },
@@ -197,6 +205,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     label: 'Left shoulder',
     side: 'left',
     claimed: true,
+    tone: 'accepted',
     plain: 'The rotator cuff is partially torn. Surgery was recommended, denied at utilization review, and is now on appeal to IMR.',
     rows: [
       { label: 'Symptoms', value: 'Pain with overhead reach, night pain, weakness', cite: 'PTP report p.4', warn: false },
@@ -211,6 +220,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     key: 'cervical',
     label: 'Cervical spine',
     claimed: false,
+    tone: 'disputed',
     plain: 'Not an accepted body part. Records still reference it, so the region stays visible instead of being hidden.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
@@ -222,6 +232,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     label: 'Right knee',
     side: 'right',
     claimed: false,
+    tone: 'none',
     plain: 'Not an accepted body part, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
@@ -229,7 +240,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     ],
   },
   {
-    key: 'shoulder-right', label: 'Right shoulder', side: 'right', claimed: false,
+    key: 'shoulder-right', label: 'Right shoulder', side: 'right', claimed: false, tone: 'none',
     plain: 'Not part of the claim, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
@@ -237,7 +248,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     ],
   },
   {
-    key: 'hand-left', label: 'Left hand', side: 'left', claimed: false,
+    key: 'hand-left', label: 'Left hand', side: 'left', claimed: false, tone: 'none',
     plain: 'Not part of the claim, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
@@ -245,7 +256,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     ],
   },
   {
-    key: 'hand-right', label: 'Right hand', side: 'right', claimed: false,
+    key: 'hand-right', label: 'Right hand', side: 'right', claimed: false, tone: 'none',
     plain: 'Not part of the claim, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
@@ -253,7 +264,7 @@ export const BODY_REGIONS: BodyRegion[] = [
     ],
   },
   {
-    key: 'knee-left', label: 'Left knee', side: 'left', claimed: false,
+    key: 'knee-left', label: 'Left knee', side: 'left', claimed: false, tone: 'none',
     plain: 'Not part of the claim, and no document in the file mentions it.',
     rows: [
       { label: 'Claim status', value: 'Not an accepted body part', cite: 'Claims administrator notice p.2', warn: true },
