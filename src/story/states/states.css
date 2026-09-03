@@ -203,3 +203,39 @@
 .al-mini:hover { border-color: var(--al-ink); background: color-mix(in srgb, var(--al-ink) 3%, transparent); }
 .al-mini--go { background: var(--al-navy); color: #fff; border-color: transparent; }
 .al-mini--go:hover { background: var(--al-navy-raised); border-color: transparent; }
+
+/* ---- Ask AL preview (state 5) ---- */
+
+.al-ask__input {
+  display: flex; align-items: center; gap: var(--al-space-2);
+  background: var(--al-navy-raised); border: 1px solid var(--al-hairline-inverse);
+  border-radius: var(--al-radius-pill); padding: 10px 10px 10px var(--al-space-3);
+  margin-bottom: var(--al-space-3);
+}
+.al-ask__q { flex: 1; font-size: var(--al-text-sm); color: #fff; min-height: 1.4em; }
+.al-ask__caret { display: inline-block; width: 1px; height: 1em; background: var(--al-teal); vertical-align: -2px; margin-left: 2px; }
+.al-ask__go {
+  background: var(--al-teal); color: var(--al-navy); font-weight: var(--al-weight-bold);
+  font-size: var(--al-text-xs); border-radius: var(--al-radius-pill); padding: 6px 12px; white-space: nowrap;
+}
+
+.al-ask__answer { opacity: 0; transition: opacity var(--al-duration-base) var(--al-ease); }
+.al-ask__answer.is-in { opacity: 1; }
+.al-ask__answer p {
+  margin: 0 0 var(--al-space-3); background: var(--al-navy-raised);
+  border-radius: var(--al-radius-card); padding: var(--al-space-3);
+  font-size: var(--al-text-sm); line-height: var(--al-leading-normal); color: #fff;
+}
+.al-ask__answer sup { color: var(--al-teal); font-weight: var(--al-weight-bold); font-size: 0.75em; margin-left: 2px; }
+
+.al-ask__chips { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: 0; padding: 0; }
+.al-ask__chips li {
+  display: inline-flex; align-items: center; gap: var(--al-space-2);
+  font-size: var(--al-text-xs); color: var(--al-ink-inverse);
+  border: 1px solid var(--al-hairline-inverse); border-radius: var(--al-radius-pill); padding: 4px 10px 4px 6px;
+}
+.al-ask__chips b {
+  display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--al-teal); color: var(--al-navy); font-size: 11px;
+}
+.al-ask__chips span + span::before { content: "·"; margin-right: var(--al-space-2); color: var(--al-ink-inverse-muted); }

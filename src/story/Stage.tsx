@@ -2,6 +2,7 @@ import type { ChapterIndex } from './chapters';
 import { Signals } from './states/Signals';
 import { Arrival } from './states/Arrival';
 import { ChronologyState, phaseFor } from './states/ChronologyState';
+import { AskPreview } from './states/AskPreview';
 import { SAMPLE_MARK } from '../data/demoCase';
 import './Stage.css';
 
@@ -56,7 +57,7 @@ export function StageState({ chapter }: { chapter: ChapterIndex }) {
     case 2:
     case 3:
     case 4: return <ChronologyState key="chronology" phase={phaseFor(chapter)} />;
-    case 5: return <Placeholder name="ask" />;
+    case 5: return <AskPreview />;
     case 6: return <Placeholder name="review" />;
     case 7: return <Placeholder name="output" />;
   }
