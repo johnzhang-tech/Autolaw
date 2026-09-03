@@ -15,7 +15,7 @@ import './SiteNav.css';
 const LINKS = [
   { href: '/#products', label: 'Product' },
   { href: '/#solutions', label: 'Solution' },
-  { href: '/#transformation', label: 'How it works' },
+  { href: '/#story-arrives', label: 'How it works' },
 ];
 
 /*

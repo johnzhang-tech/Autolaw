@@ -4,11 +4,14 @@ import './states.css';
 
 const COUNT_MS = 240; // --al-duration-slow; the ceiling for any motion on the site
 
-/** State 1. Documents land in arrival order and the total ticks to 214. */
-export function Arrival() {
-  const [count, setCount] = useState(0);
+/** State 1. Documents land in arrival order and the total ticks to 214. `animate={false}`
+ *  is the stacked layout's static copy: it shows the final count immediately and never
+ *  starts the rAF loop, so nothing on the page moves. */
+export function Arrival({ animate = true }: { animate?: boolean }) {
+  const [count, setCount] = useState(animate ? 0 : DOCUMENT_COUNT);
 
   useEffect(() => {
+    if (!animate) return;
     let frame = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -18,7 +21,7 @@ export function Arrival() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [animate]);
 
   return (
     <div className="al-state al-arrival" data-testid="state-arrival">

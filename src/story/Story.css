@@ -1,0 +1,66 @@
+/* Focus lands here from "See how it works" and the skip-to-chapter links; the scroll is
+   the feedback, a ring around the whole section is noise. */
+#story:focus { outline: none; box-shadow: none; }
+
+.al-story__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: var(--al-space-7);
+  align-items: start;
+}
+.al-story[data-mode="stacked"] .al-story__grid { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 900px) { .al-story__grid { grid-template-columns: minmax(0, 1fr); } }
+
+/*
+ * The pinned column. Sticky, not fixed: it scrolls with the page until it reaches the
+ * offset, holds while its grid area is taller than it, and leaves with the grid. Nothing
+ * intercepts the wheel. The 55% cap is the spec's: the stage never dominates the copy.
+ */
+.al-story__stage {
+  position: sticky;
+  top: calc(var(--al-nav-height) + var(--al-space-4));
+  align-self: start;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--al-space-3);
+  max-width: 55vw;
+}
+
+.al-story__copy > .al-hero { padding-bottom: var(--al-space-8); }
+
+.al-story__chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--al-space-8); }
+.al-story[data-mode="stacked"] .al-story__chapters { gap: var(--al-space-6); }
+
+.al-chapter { border-left: 2px solid var(--al-hairline); padding-left: var(--al-space-4); transition: border-color var(--al-duration-base) var(--al-ease); }
+.al-chapter[data-active] { border-left-color: var(--al-teal-text); }
+.al-chapter__n {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-xs); font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-eyebrow); text-transform: uppercase; color: var(--al-teal-text);
+}
+.al-chapter__h {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-h2); font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug); letter-spacing: var(--al-tracking-display);
+  text-wrap: balance;
+}
+.al-chapter__p { margin: 0; font-size: var(--al-text-body-lg); color: var(--al-ink-muted); max-width: 48ch; }
+/* Dim what is not current, so the eye lands where the stage is looking. Colour carries
+   nothing the border and the chapter list do not also carry. */
+.al-story[data-mode="pinned"] .al-chapter:not([data-active]) .al-chapter__h,
+.al-story[data-mode="pinned"] .al-chapter:not([data-active]) .al-chapter__p { opacity: 0.55; transition: opacity var(--al-duration-base) var(--al-ease); }
+
+.al-story__inline { margin-top: var(--al-space-4); }
+
+/* ---- chapter list: eight dots ---- */
+.al-chapters ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; align-content: start; padding-top: var(--al-space-2); }
+.al-chapters a {
+  display: block; width: 20px; height: 20px; border-radius: 50%; position: relative;
+}
+.al-chapters a::before {
+  content: ""; position: absolute; inset: 6px; border-radius: 50%;
+  background: var(--al-hairline-strong);
+  transition: background-color var(--al-duration-fast) var(--al-ease), transform var(--al-duration-fast) var(--al-ease);
+}
+.al-chapters a[aria-current="step"]::before { background: var(--al-teal-text); transform: scale(1.35); }
+.al-chapters a:hover::before { background: var(--al-ink); }

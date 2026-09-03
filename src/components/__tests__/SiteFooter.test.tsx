@@ -12,7 +12,7 @@ describe('SiteFooter', () => {
       // Root-relative so they work from the subpages this footer also renders on.
       '/#products',
       '/#solutions',
-      '/#transformation',
+      '/#story-arrives',
       ...RESOURCE_MENU.map((i) => i.href),
       ...ABOUT_MENU.map((i) => i.href),
       SCHEDULE_URL,

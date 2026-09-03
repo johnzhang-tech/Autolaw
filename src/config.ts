@@ -41,8 +41,9 @@ export const CONTACT_EMAIL = 'hello@autolaw.ai';
  */
 export const SCHEDULE_URL = '/schedule-call/';
 
-/** The hero's secondary control: an invitation to scroll, not a second lane. */
-export const HOW_IT_WORKS_URL = '/#transformation';
+/** The hero's secondary control. Points at chapter 1, not the section top — the hero is
+ *  inside the story section, so "#story" would scroll nowhere. */
+export const HOW_IT_WORKS_URL = '/#story-arrives';
 
 /**
  * The other two standalone pages. Named here, and referenced everywhere else, because a

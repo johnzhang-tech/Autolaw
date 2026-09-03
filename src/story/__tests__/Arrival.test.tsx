@@ -24,4 +24,9 @@ describe('Arrival', () => {
     expect(screen.getByRole('list', { name: /documents by type/i })).toBeInTheDocument();
     expect(screen.getByText(/documents received/i)).toBeInTheDocument();
   });
+
+  it('shows the final count immediately, with no animation, when animate is false', () => {
+    render(<Arrival animate={false} />);
+    expect(screen.getByTestId('arrival-count')).toHaveTextContent(String(DOCUMENT_COUNT));
+  });
 });

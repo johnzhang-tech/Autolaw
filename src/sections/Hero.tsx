@@ -1,19 +1,13 @@
 import { Button } from '../components/primitives/Button';
-import { SignalCockpit } from './SignalCockpit';
 import { TRIAL_ENABLED, TRIAL_URL, SCHEDULE_URL, HOW_IT_WORKS_URL, WALKTHROUGH_URL } from '../config';
 import '../components/primitives/Section.css';
 import './Hero.css';
 
-/*
- * "SOC 2 Type II & HIPAA" put the two on one line as if they were the same kind of thing.
- * SOC 2 Type II is an audited attestation; HIPAA has no certifying body, and what a firm
- * can actually receive is a signed BAA. See the note on CERTIFICATIONS in config.ts.
- */
 const TRUST = [
   'Source-linked evidence',
   'Attorney confirms every fact',
-  'Auditable access',
-  'SOC 2 Type II · BAA on request',
+  'SOC 2 Type II',
+  'BAA on request',
 ];
 
 function Tick() {
@@ -24,61 +18,46 @@ function Tick() {
   );
 }
 
+/**
+ * Copy only. The stage beside it belongs to Story, which owns the grid so the same panel
+ * can pin through the chapters below. One-sentence H1 so the stage is the second thing a
+ * visitor sees rather than the fifth; the old headline lives on in <title> and og:title.
+ */
 export function Hero() {
-  /*
-   * Deliberately a <div>, not a <header>. Hero sits inside <main>, where HTML-AAM maps
-   * <header> to generic rather than banner — but only in implementations that apply the
-   * element-scoping constraint. @testing-library/dom 10.4.1 does not (aria-query 5.3.0
-   * declares the constraint; the role resolver builds its selector from the element name
-   * and attributes only), so a <header> here is reported as a second banner landmark
-   * sitting inside main. The tag bought nothing — every style here is class-based and no
-   * landmark is wanted for the lead content — so the ambiguity is not worth carrying.
-   */
   return (
-    <div className="al-section al-hero">
-      <div className="al-container al-hero__grid">
-        <div>
-          <p className="al-sec__eyebrow">
-            AI-native case intelligence for personal injury &amp; workers&rsquo; compensation firms
-          </p>
-          <h1 className="al-hero__title">
-            Turn case complexity into legal advantage. Know where every fact came from.
-          </h1>
-          <p className="al-hero__sub">
-            Autolaw reads the intake notes, medical records, and expert reports in a file and
-            builds one connected case file &mdash; every fact citing its document, page, and
-            sentence. Where two records disagree, you see both.
-          </p>
-          <div className="al-hero__ctas">
-            {/*
-              Schedule a call leads. The trial sits behind TRIAL_ENABLED (see config.ts):
-              a primary button that opens a browser error is worse than no button.
-            */}
-            <Button href={SCHEDULE_URL} variant="primary" size="lg" withCaret>
-              Schedule a call
-            </Button>
-            <Button href={HOW_IT_WORKS_URL} variant="secondary" size="lg">
-              See how it works
-            </Button>
-            {TRIAL_ENABLED && (
-              <Button href={TRIAL_URL} variant="secondary" size="lg">
-                Analyze one report
-              </Button>
-            )}
-            {WALKTHROUGH_URL && (
-              <Button href={WALKTHROUGH_URL} variant="secondary" size="lg">
-                Watch a 3-minute case walkthrough
-              </Button>
-            )}
-          </div>
-          <ul className="al-hero__strip">
-            {TRUST.map((t) => (
-              <li key={t}><Tick />{t}</li>
-            ))}
-          </ul>
-        </div>
-        <SignalCockpit />
+    <div className="al-hero">
+      <p className="al-sec__eyebrow">
+        Case intelligence for personal injury &amp; workers&rsquo; compensation firms
+      </p>
+      <h1 className="al-hero__title">Know where every fact came from.</h1>
+      <p className="al-hero__sub">
+        Autolaw reads the medical records, expert reports, and case documents in a file and
+        builds one connected case file. Every fact cites its document, page, and sentence.
+        Where two records disagree, you see both.
+      </p>
+      <div className="al-hero__ctas">
+        <Button href={SCHEDULE_URL} variant="primary" size="lg" withCaret>
+          Schedule a call
+        </Button>
+        <Button href={HOW_IT_WORKS_URL} variant="secondary" size="lg">
+          See how it works
+        </Button>
+        {TRIAL_ENABLED && (
+          <Button href={TRIAL_URL} variant="secondary" size="lg">
+            Analyze one report
+          </Button>
+        )}
+        {WALKTHROUGH_URL && (
+          <Button href={WALKTHROUGH_URL} variant="secondary" size="lg">
+            Watch a 3-minute case walkthrough
+          </Button>
+        )}
       </div>
+      <ul className="al-hero__strip">
+        {TRUST.map((t) => (
+          <li key={t}><Tick />{t}</li>
+        ))}
+      </ul>
     </div>
   );
 }

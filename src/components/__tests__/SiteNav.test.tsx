@@ -117,7 +117,7 @@ describe('SiteNav', () => {
      * and /schedule-call/, where "#products" would resolve to nothing on the current
      * page and the link would silently do nothing.
      */
-    expect(hrefs).toEqual(['/', '/#products', '/#solutions', '/#transformation', SCHEDULE_URL]);
+    expect(hrefs).toEqual(['/', '/#products', '/#solutions', '/#story-arrives', SCHEDULE_URL]);
   });
 
   /*

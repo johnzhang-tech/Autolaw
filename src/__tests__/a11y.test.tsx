@@ -134,7 +134,9 @@ describe('keyboard reachability', () => {
     // The hero's secondary control, and the one "see it on your own matter" link in the
     // chronology detail. The trial CTA is absent while TRIAL_ENABLED is false.
     reachable(screen.getByRole('link', { name: /see how it works/i }));
-    reachable(screen.getByRole('link', { name: /on your own matter/i }));
+    // The stacked layout (which this suite always renders) inlines a full ChronologyState
+    // under each of chapters 2, 3, and 4, so the citation card's link appears three times.
+    screen.getAllByRole('link', { name: /on your own matter/i }).forEach(reachable);
     expect(screen.queryAllByRole('link', { name: /analyze one/i })).toEqual([]);
     // Nav, hero, closing CTA, footer. The count is exact for the reason given above.
     const schedule = screen.getAllByRole('link', { name: /schedule a call/i });
@@ -147,7 +149,8 @@ describe('keyboard reachability', () => {
     const events = screen.getAllByRole('button', { expanded: false })
       .concat(screen.getAllByRole('button', { expanded: true }))
       .filter((el) => !banner.contains(el));
-    expect(events.length).toBe(CHRONOLOGY.length);
+    // One chronology per chapter 2–4 in the stacked layout the suite renders.
+    expect(events.length).toBe(CHRONOLOGY.length * 3);
     events.forEach(reachable);
 
     // Body explorer regions
@@ -274,7 +277,7 @@ describe('landmarks and identifiers', () => {
      * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
      * a <header> there would read as a second banner landmark.
      */
-    const SECTIONS = ['transformation', 'products', 'solutions', 'trust', 'contact'];
+    const SECTIONS = ['story', 'products', 'solutions', 'trust', 'contact'];
     const unlabelled = SECTIONS.filter((id) => {
       const el = container.querySelector(`section[id="${id}"]`);
       if (!el) return true;
@@ -519,8 +522,8 @@ describe('shipped stylesheet', () => {
      */
     const ONE_COLUMN = /grid-template-columns:\s*(?:minmax\(\s*0\s*,\s*1fr\s*\)|1fr)\s*(?:;|$)/;
 
-    expect(at(900, '.al-hero__grid')).toMatch(ONE_COLUMN);
-    expect(at(520, '.al-cockpit__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
+    expect(at(900, '.al-story__grid')).toMatch(ONE_COLUMN);
+    expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
     expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
     expect(at(780, '.al-bx__body')).toMatch(ONE_COLUMN);
   });

@@ -28,7 +28,7 @@ export function Stage({ chapter, animate = true }: StageProps) {
       role="region"
       aria-label="Demonstration of one matter"
     >
-      <StageState chapter={chapter} />
+      <StageState chapter={chapter} animate={animate} />
     </div>
   );
 }
@@ -38,15 +38,15 @@ export function Stage({ chapter, animate = true }: StageProps) {
 export function InlineState({ chapter }: { chapter: ChapterIndex }) {
   return (
     <div className="al-stage al-on-navy" data-chapter={chapter} data-testid="stage">
-      <StageState chapter={chapter} />
+      <StageState chapter={chapter} animate={false} />
     </div>
   );
 }
 
-export function StageState({ chapter }: { chapter: ChapterIndex }) {
+export function StageState({ chapter, animate = true }: { chapter: ChapterIndex; animate?: boolean }) {
   switch (chapter) {
     case 0: return <Signals />;
-    case 1: return <Arrival />;
+    case 1: return <Arrival animate={animate} />;
     case 2:
     case 3:
     case 4: return <ChronologyState key="chronology" phase={phaseFor(chapter)} />;

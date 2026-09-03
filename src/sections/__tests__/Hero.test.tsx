@@ -7,7 +7,7 @@ describe('Hero', () => {
   it('leads with the buyer outcome, not the category', () => {
     render(<Hero />);
     expect(
-      screen.getByRole('heading', { level: 1, name: /turn case complexity into legal advantage/i })
+      screen.getByRole('heading', { level: 1, name: /know where every fact came from/i })
     ).toBeInTheDocument();
   });
 
@@ -22,12 +22,6 @@ describe('Hero', () => {
     expect(primary).toHaveAttribute('href', SCHEDULE_URL);
     expect(primary).toHaveClass('al-btn--primary');
     expect(screen.queryByRole('link', { name: /analyze one/i })).not.toBeInTheDocument();
-  });
-
-  it('gives the cockpit a single descriptive label rather than bare numbers', () => {
-    render(<Hero />);
-    const fig = screen.getByRole('img', { name: /missing records/i });
-    expect(fig).toBeInTheDocument();
   });
 
   /*
