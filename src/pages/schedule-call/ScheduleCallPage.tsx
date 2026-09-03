@@ -29,6 +29,12 @@ type FieldName = (typeof FIELDS)[number]['name'];
 
 const PRACTICES = ['Personal injury', 'Workers’ compensation', 'Both'];
 
+/** `?practice=pi|wc|both` → index into PRACTICES; anything else preselects nothing. */
+export function practiceFromSearch(search: string): number | null {
+  const v = new URLSearchParams(search).get('practice');
+  return v === 'pi' ? 0 : v === 'wc' ? 1 : v === 'both' ? 2 : null;
+}
+
 const VOLUMES = ['Under 50', '50–200', '200–500', 'More than 500'];
 
 /** Ids are derived, never spelled twice — a label and its control drifting apart is silent. */
@@ -247,6 +253,13 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
   const readyRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
 
+  /*
+   * The closing section's practice switch carries its choice here as `?practice=`, so the
+   * first question this form asks arrives already answered. A junk or absent value
+   * preselects nothing — the visitor still has to choose.
+   */
+  const preset = typeof window === 'undefined' ? null : practiceFromSearch(window.location.search);
+
   const errorList = FIELDS.filter((f) => errors[f.name]);
   const hasErrors = errorList.length > 0;
 
@@ -368,6 +381,7 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
                 name="practice"
                 value={value}
                 required
+                defaultChecked={preset === i}
                 aria-invalid={errors.practice ? true : undefined}
                 aria-describedby={describedBy('practice', true)}
                 onInvalid={onInvalid}

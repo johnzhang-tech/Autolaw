@@ -11,3 +11,11 @@
 }
 .al-conv__ctas { display: flex; gap: var(--al-space-3); justify-content: center; flex-wrap: wrap; margin-bottom: var(--al-space-4); }
 .al-conv__fine { font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); margin: 0; }
+
+.al-conv__switch { display: inline-flex; gap: 2px; background: var(--al-navy-raised); border: 1px solid var(--al-hairline-inverse); border-radius: var(--al-radius-pill); padding: 4px; margin-bottom: var(--al-space-4); }
+.al-conv__switch button {
+  font-family: var(--al-font-ui); font-size: var(--al-text-sm); font-weight: var(--al-weight-semibold); color: var(--al-ink-inverse-muted);
+  background: transparent; border: 0; padding: 8px 16px; border-radius: var(--al-radius-pill); cursor: pointer;
+  transition: background-color var(--al-duration-fast) var(--al-ease), color var(--al-duration-fast) var(--al-ease);
+}
+.al-conv__switch button[aria-pressed="true"] { background: var(--al-teal); color: var(--al-navy); }

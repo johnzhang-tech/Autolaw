@@ -7,6 +7,7 @@ import {
   bookingEmbedSrc,
   composeMailto,
   composePreview,
+  practiceFromSearch,
   scheduleMode,
 } from '../ScheduleCallPage';
 import { SecurityPage } from '../../security/SecurityPage';
@@ -625,5 +626,22 @@ describe('ScheduleCallPage — the security-review aside', () => {
     expect(aside).not.toHaveAttribute('aria-label');
     expect(aside).toHaveAccessibleName(heading.textContent!);
     expect(heading).toHaveTextContent('If your security review comes first');
+  });
+});
+
+describe('ScheduleCallPage — the practice parameter', () => {
+  it('maps pi, wc, both, and junk', () => {
+    expect(practiceFromSearch('?practice=pi')).toBe(0);
+    expect(practiceFromSearch('?practice=wc')).toBe(1);
+    expect(practiceFromSearch('?practice=both')).toBe(2);
+    expect(practiceFromSearch('?practice=other')).toBeNull();
+    expect(practiceFromSearch('')).toBeNull();
+  });
+
+  it('preselects the practice the closing section chose', () => {
+    window.history.replaceState({}, '', '/schedule-call/?practice=wc');
+    render(<ScheduleCallPage />);
+    expect(screen.getByRole('radio', { name: /workers/i })).toBeChecked();
+    window.history.replaceState({}, '', '/');
   });
 });
