@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import App from '../App';
-import { CHRONOLOGY, BODY_REGIONS } from '../data/demoCase';
+import { CHRONOLOGY } from '../data/demoCase';
 
 describe('page accessibility', () => {
   it('has exactly one h1', () => {
@@ -144,11 +144,8 @@ describe('keyboard reachability', () => {
     expect(events.length).toBe(CHRONOLOGY.length * 3);
     events.forEach(reachable);
 
-    // Silhouette regions
-    const regions = screen.getAllByRole('button', { pressed: false })
-      .concat(screen.getAllByRole('button', { pressed: true }));
-    expect(regions.length).toBe(BODY_REGIONS.length);
-    regions.forEach(reachable);
+    // the silhouette's regions are covered by Silhouette.test.tsx; it renders only
+    // under the WC Injury tab
 
     // Practice tabs: roving tabindex means only the selected one is a stop, but both
     // must be able to hold focus once an arrow key moves to them. Scoped to the practice
@@ -188,8 +185,8 @@ describe('keyboard reachability', () => {
   });
 
   /*
-   * Arrow-key movement itself is covered by PracticeSolutions.test.tsx and
-   * Silhouette.test.tsx. What is asserted here is the invariant those interactions
+   * Arrow-key movement itself is covered by Solutions.test.tsx and Silhouette.test.tsx.
+   * What is asserted here is the invariant those interactions
    * depend on: a tablist must expose exactly one tab stop, or Tab lands inside the
    * widget twice and the arrow keys stop being the way you move.
    */
@@ -272,7 +269,7 @@ describe('landmarks and identifiers', () => {
      * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
      * a <header> there would read as a second banner landmark.
      */
-    const SECTIONS = ['story', 'ask-al', 'products', 'solutions', 'trust', 'contact'];
+    const SECTIONS = ['story', 'ask-al', 'solutions', 'trust', 'contact'];
     const unlabelled = SECTIONS.filter((id) => {
       const el = container.querySelector(`section[id="${id}"]`);
       if (!el) return true;
@@ -576,7 +573,7 @@ describe('shipped stylesheet', () => {
       '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
       '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
       '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story', '.al-askal',
-      '.al-sil',
+      '.al-sil', '.al-sol', '.al-seg',
     ];
     const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
 

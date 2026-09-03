@@ -63,7 +63,7 @@ export function SecurityPage() {
       {/*
         `title` carries a literal curly apostrophe rather than &rsquo;. It is a JSX string
         attribute, where an HTML entity is not decoded and would reach the reader as the
-        characters "&rsquo;" — the same trap noted on PracticeSolutions' intro.
+        characters "&rsquo;" — the same trap noted on Solutions' intro.
       */}
       <PageHero
         eyebrow="Security"

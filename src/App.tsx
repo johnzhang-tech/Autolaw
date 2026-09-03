@@ -1,8 +1,8 @@
 import { PageShell } from './pages/PageShell';
+import { PracticeProvider } from './practice/PracticeContext';
 import { Story } from './story/Story';
 import { AskAl } from './sections/AskAl';
-import { ProductExperience } from './sections/ProductExperience';
-import { PracticeSolutions } from './sections/PracticeSolutions';
+import { Solutions } from './sections/Solutions';
 import { Trust } from './sections/Trust';
 import { Conversion } from './sections/Conversion';
 import { ASK_AL_ENABLED } from './config';
@@ -10,12 +10,13 @@ import { ASK_AL_ENABLED } from './config';
 export default function App() {
   return (
     <PageShell>
-      <Story />
-      {ASK_AL_ENABLED && <AskAl />}
-      <ProductExperience />
-      <PracticeSolutions />
-      <Trust />
-      <Conversion />
+      <PracticeProvider>
+        <Story />
+        {ASK_AL_ENABLED && <AskAl />}
+        <Solutions />
+        <Trust />
+        <Conversion />
+      </PracticeProvider>
     </PageShell>
   );
 }
