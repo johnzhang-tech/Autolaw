@@ -24,7 +24,7 @@ const PAGES: Array<[string, ReactElement]> = [
   ['/terms/', <TermsPage />],
 ];
 
-describe.each(PAGES)('%s', (_path, element) => {
+describe.each(PAGES)('%s', (path, element) => {
   it('renders one main landmark, one banner, and one footer', () => {
     render(element);
     expect(screen.getAllByRole('main')).toHaveLength(1);
@@ -90,8 +90,12 @@ describe.each(PAGES)('%s', (_path, element) => {
     const duplicates = ids.filter((id) => (seen.has(id) ? true : (seen.add(id), false)));
     /* The floor was a guard against a page that rendered nothing. A legal page whose
        owner slot is empty legitimately carries almost no ids (main from PageShell and
-       skip link id). "Did it render at all" is already proven for every page by the h1
-       and landmark tests in this same file. */
+       skip link id) — "Did it render at all" is already proven for every page by the h1
+       and landmark tests in this same file — so the floor is scoped to pages that are
+       not those legal slots. */
+    if (path !== '/privacy/' && path !== '/terms/') {
+      expect(ids.length).toBeGreaterThan(3);
+    }
     expect([...new Set(duplicates)]).toEqual([]);
   });
 

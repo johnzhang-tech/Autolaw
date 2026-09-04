@@ -32,7 +32,7 @@ const DATA = [
   },
   {
     title: 'Retention',
-    body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, or earlier on request, except where retention is required by law. That is what the privacy policy states, and it is all it states.',
+    body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, and you may request deletion at any time, except where retention is required by law. That is what the privacy policy states, and it is all it states.',
   },
 ];
 

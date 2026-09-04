@@ -20,7 +20,15 @@
 
 /* ---- Signals (state 0) ---- */
 
-.al-signals__tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2); }
+/* .al-stage is now display: grid, so this state stretches to the panel's 440px floor;
+   the row split keeps the header at its own height and gives the tiles the rest. */
+.al-signals { display: grid; grid-template-rows: auto 1fr; }
+.al-signals__tiles {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--al-space-2);
+  /* Centers the tiles in the row the grid above hands them, instead of leaving them
+     pinned to the top with blank space below. */
+  align-content: center;
+}
 @media (max-width: 520px) { .al-signals__tiles { grid-template-columns: repeat(2, 1fr); } }
 
 .al-tile {

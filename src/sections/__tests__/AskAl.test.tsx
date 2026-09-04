@@ -15,6 +15,19 @@ describe('AskAl', () => {
     expect(screen.getAllByTestId('askal-chip')).toHaveLength(ASK_AL_QA[0].citations.length);
   });
 
+  it('punctuates a sentence-ending citation but leaves a mid-sentence one alone', async () => {
+    const user = userEvent.setup();
+    render(<AskAl />);
+    // The first question's citations sit at the end of their sentences, so the marker is
+    // now followed by a full stop rather than running straight into the next sentence.
+    expect(screen.getByTestId('askal-answer')).toHaveTextContent(/2025\[1\]\./);
+
+    await user.click(screen.getByRole('tab', { name: /missing from the file/i }));
+    // The second question's citations sit mid-sentence ("...cited by the QME[1] and...")
+    // and must not gain a period they never had.
+    expect(screen.getByTestId('askal-answer')).not.toHaveTextContent('QME.');
+  });
+
   it('names a real citation kind, document, and page on every chip', () => {
     render(<AskAl />);
     screen.getAllByTestId('askal-chip').forEach((chip, i) => {

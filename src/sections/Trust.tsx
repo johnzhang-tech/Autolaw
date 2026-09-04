@@ -7,8 +7,8 @@ import './Trust.css';
  * lease to this reader, "deep-linked" and "separate lane" name nothing at all, and
  * "extraction" is our word for our own component. Each claim below states what happens.
  */
-const CONTROLS = [
-  { title: 'Your data does not train models', body: 'Case content is never used to train or fine-tune any model, ours or a vendor’s.' },
+const CONTROLS: Array<{ title: string; body: string; privacyLink?: boolean }> = [
+  { title: 'Your data does not train models', body: 'Case content is never used to train or fine-tune any model, ours or a vendor’s.', privacyLink: true },
   { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
   { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
   { title: 'Human confirmation required', body: 'Autolaw proposes. It never writes case truth on its own. An attorney confirms each value before it counts as a fact.' },
@@ -77,10 +77,10 @@ export function Trust() {
       )}
 
       <div className="al-trust__controls">
-        {CONTROLS.map((c, i) => (
+        {CONTROLS.map((c) => (
           <div key={c.title} className="al-ctrl">
             <b>{c.title}</b>
-            {i === 0 ? (
+            {c.privacyLink ? (
               <p>
                 {c.body}
                 {PRIVACY_TEXT.length > 0 && (

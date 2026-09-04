@@ -16,6 +16,9 @@
 .al-footer__links a {
   font-size: var(--al-text-sm); color: var(--al-ink-muted); text-decoration: none;
   transition: color var(--al-duration-fast) var(--al-ease);
+  /* WCAG 2.5.8 target size: the sm text alone renders under 24px tall, and this list
+     only grows as the legal slots fill. */
+  display: inline-flex; align-items: center; min-height: 24px;
 }
 .al-footer__links a:hover { color: var(--al-ink); }
 

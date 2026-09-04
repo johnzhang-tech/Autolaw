@@ -1,9 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Conversion } from '../Conversion';
 import { PracticeProvider } from '../../practice/PracticeContext';
 import { PRACTICE_CLOSING } from '../../data/demoCase';
+
+/*
+ * Each render below expects to start on the default PI practice. PracticeProvider
+ * persists the visitor's choice to sessionStorage (by design — see PracticeContext.tsx),
+ * which otherwise leaks a WC selection from one test into the next render in this file.
+ * Same reason Solutions.test.tsx establishes this beforeEach.
+ */
+beforeEach(() => window.sessionStorage.clear());
 
 describe('Conversion', () => {
   it('closes for PI by default, pointing the call at the PI practice', () => {

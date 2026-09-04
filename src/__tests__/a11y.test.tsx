@@ -6,6 +6,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import App from '../App';
 import { CHRONOLOGY } from '../data/demoCase';
+import { ASK_AL_ENABLED } from '../config';
 
 describe('page accessibility', () => {
   it('has exactly one h1', () => {
@@ -269,7 +270,9 @@ describe('landmarks and identifiers', () => {
      * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
      * a <header> there would read as a second banner landmark.
      */
-    const SECTIONS = ['story', 'ask-al', 'solutions', 'trust', 'contact'];
+    // ASK_AL_ENABLED is a kill switch (see config.ts) — pulling it must not turn this
+    // suite red, so 'ask-al' only belongs in the list while the section actually renders.
+    const SECTIONS = ['story', ...(ASK_AL_ENABLED ? ['ask-al'] : []), 'solutions', 'trust', 'contact'];
     const unlabelled = SECTIONS.filter((id) => {
       const el = container.querySelector(`section[id="${id}"]`);
       if (!el) return true;
@@ -573,7 +576,7 @@ describe('shipped stylesheet', () => {
       '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
       '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
       '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story', '.al-askal',
-      '.al-sil', '.al-sol', '.al-seg',
+      '.al-sil', '.al-sol', '.al-seg', '.al-conv',
     ];
     const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
 

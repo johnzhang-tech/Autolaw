@@ -6,6 +6,10 @@
  * font-display: swap — the page renders immediately in the fallback stack and reflows
  * when the face arrives. On a text-first site that is the right trade: a reader who came
  * for a sentence should not wait on a typeface to read it.
+ *
+ * The italic face is declared for the record excerpts this family is reserved for.
+ * Browsers fetch only the faces a page actually uses, so declaring it here costs a
+ * visitor nothing until a quoted excerpt actually renders in italic.
  */
 @font-face { font-family: "Manrope"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/manrope-400.woff2") format("woff2"); }
 @font-face { font-family: "Manrope"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/manrope-500.woff2") format("woff2"); }

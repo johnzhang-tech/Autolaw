@@ -272,35 +272,6 @@ export const BODY_REGIONS: BodyRegion[] = [
   },
 ];
 
-export const PRACTICE_OUTPUTS = {
-  PI: {
-    heading: 'Built for the demand',
-    intro: 'Liability, causation, and damages assembled from the record — every figure traceable to a bill or a report.',
-    items: [
-      { title: 'Causation chain', detail: 'Mechanism to diagnosis, gaps flagged' },
-      { title: 'Treatment gaps', detail: 'Breaks in care, with dates' },
-      { title: 'Medical specials', detail: 'Billed vs. paid, reconciled' },
-      { title: 'Prior injuries and claims', detail: 'What the defense will find, before they find it' },
-      { title: 'Liens and subrogation', detail: 'Every lienholder, with the amount asserted' },
-      { title: 'Demand narrative', detail: 'Source-linked, firm-formatted' },
-    ],
-  },
-  WC: {
-    heading: 'Built for the claim',
-    intro: 'The claim turns on what the QME said, when the injured worker was temporarily disabled, and which body parts the claims administrator accepted. Autolaw pulls each of those out of the file with the page cite attached.',
-    items: [
-      { title: 'QME/AME vs PTP', detail: 'Where the opinions diverge' },
-      { title: 'Work status & restrictions', detail: 'Current and historical' },
-      { title: 'MMI / P&S', detail: 'Date and supporting opinion' },
-      { title: 'Apportionment', detail: 'Industrial vs. non-industrial, per body part, per physician' },
-      { title: 'UR / IMR history', detail: 'Denials and appeals' },
-      { title: 'Unresolved conflicts', detail: 'Surfaced, never auto-resolved' },
-    ],
-  },
-} as const;
-
-export type PracticeArea = keyof typeof PRACTICE_OUTPUTS;
-
 /* ---- Story states ---- */
 
 export interface ArrivalGroup { label: string; count: number }
@@ -331,7 +302,12 @@ export const CITATION_KINDS = [
 ] as const;
 export type CitationKind = (typeof CITATION_KINDS)[number];
 
-export interface AnswerSentence { text: string; cite: number | null }
+export interface AnswerSentence {
+  text: string;
+  cite: number | null;
+  /** Punctuation that follows this sentence's citation marker. Empty where the citation sits mid-sentence. */
+  end?: string;
+}
 export interface CitationChip { n: number; kind: CitationKind; document: string; page: number }
 
 export const ASK_AL_PREVIEW: {
@@ -341,8 +317,8 @@ export const ASK_AL_PREVIEW: {
 } = {
   question: 'What are the current work restrictions?',
   answer: [
-    { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1 },
-    { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2 },
+    { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1, end: '.' },
+    { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2, end: '.' },
     { text: 'The two opinions conflict and are flagged for review.', cite: null },
   ],
   chips: [
@@ -396,8 +372,8 @@ export const ASK_AL_QA: ReadonlyArray<AskAlQuestion> = [
     id: 'restrictions',
     question: 'What are the current work restrictions?',
     answer: [
-      { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1 },
-      { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2 },
+      { text: 'No lifting over 15 lb per the PTP on 04/02/2025', cite: 1, end: '.' },
+      { text: 'The QME on 04/18/2025 finds the claimant temporarily totally disabled', cite: 2, end: '.' },
       { text: 'The two opinions conflict and are flagged for review.', cite: null },
     ],
     citations: [

@@ -4,6 +4,9 @@
   padding: var(--al-space-5);
   box-shadow: var(--al-shadow-card);
   min-height: 440px;
+  /* Stretches the single state child to fill the floor above rather than leaving it
+     top-aligned with blank space beneath. */
+  display: grid;
 }
 
 /*

@@ -51,7 +51,7 @@ export function AskPreview({ animate = true }: { animate?: boolean }) {
         <p>
           {ASK_AL_PREVIEW.answer.map((s, i) => (
             <span key={i}>
-              {s.text}{s.cite !== null && <sup>[{s.cite}]</sup>}{i < ASK_AL_PREVIEW.answer.length - 1 ? ' ' : ''}
+              {s.text}{s.cite !== null && <><sup>[{s.cite}]</sup>{s.end}</>}{i < ASK_AL_PREVIEW.answer.length - 1 ? ' ' : ''}
             </span>
           ))}
         </p>

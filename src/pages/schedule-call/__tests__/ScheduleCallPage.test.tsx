@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
@@ -630,6 +630,12 @@ describe('ScheduleCallPage — the security-review aside', () => {
 });
 
 describe('ScheduleCallPage — the practice parameter', () => {
+  // In an afterEach rather than inline at the end of the test below, so the real URL is
+  // restored even if an assertion above it throws.
+  afterEach(() => {
+    window.history.replaceState({}, '', '/');
+  });
+
   it('maps pi, wc, both, and junk', () => {
     expect(practiceFromSearch('?practice=pi')).toBe(0);
     expect(practiceFromSearch('?practice=wc')).toBe(1);
@@ -642,6 +648,5 @@ describe('ScheduleCallPage — the practice parameter', () => {
     window.history.replaceState({}, '', '/schedule-call/?practice=wc');
     render(<ScheduleCallPage />);
     expect(screen.getByRole('radio', { name: /workers/i })).toBeChecked();
-    window.history.replaceState({}, '', '/');
   });
 });

@@ -88,7 +88,7 @@ export function AskAl() {
           <p className={`al-askal__answer${q.refusal ? ' al-askal__answer--refusal' : ''}`} data-testid="askal-answer">
             {q.answer.map((s, i) => (
               <span key={i}>
-                {s.text}{s.cite !== null && <sup>[{s.cite}]</sup>}{i < q.answer.length - 1 ? ' ' : ''}
+                {s.text}{s.cite !== null && <><sup>[{s.cite}]</sup>{s.end}</>}{i < q.answer.length - 1 ? ' ' : ''}
               </span>
             ))}
           </p>
