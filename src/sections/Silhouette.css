@@ -23,7 +23,6 @@
 .al-sil__region.is-on { stroke-width: 2.5; opacity: 1; }
 .al-sil__region:focus-visible { outline: 2px solid var(--al-teal); outline-offset: 2px; }
 
-.al-sil__lead { stroke: rgba(255, 255, 255, 0.35); stroke-width: 1; }
 /* 12 SVG units at the 200px minimum is 10.9px, so the labels are set larger: 13 units
    renders at 11.8px there and 15px on desktop. The floor guard reads CSS px, and SVG
    text units are not px; the accessible name carries the same words regardless. */

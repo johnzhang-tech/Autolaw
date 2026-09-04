@@ -56,6 +56,14 @@ describe('Silhouette', () => {
     });
   });
 
+  it('orders the regions by where they actually sit in the figure', () => {
+    // The arrow keys claim to move top to bottom, so the declared order and the drawing
+    // must agree. Asserted against HITS rather than against a second copy of the list,
+    // which is what let an earlier order put the hands above the lumbar spine.
+    const centres = SIL_ORDER.map((k) => HITS[k].y + HITS[k].h / 2);
+    expect(centres).toEqual([...centres].sort((a, b) => a - b));
+  });
+
   it('gives every hit target at least 24px at the smallest rendered size', () => {
     // The figure is 220 units wide and renders no narrower than 200px, so one unit is
     // at least 0.909px: a target needs 27 units to clear 24px.

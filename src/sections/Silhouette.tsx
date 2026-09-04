@@ -2,8 +2,13 @@ import { useRef, useState, type KeyboardEvent } from 'react';
 import { BODY_REGIONS, SAMPLE_MARK, type BodyRegion } from '../data/demoCase';
 import './Silhouette.css';
 
-/** Visual top-to-bottom order, left before right, so the arrow keys feel physical. */
-export const SIL_ORDER = ['cervical', 'shoulder', 'shoulder-right', 'hand-left', 'hand-right', 'lumbar', 'knee-left', 'knee'] as const;
+/**
+ * Visual top-to-bottom order, left before right, so the arrow keys feel physical.
+ * Ordered by each region's own centre in HITS below — lumbar (centre 210) sits above the
+ * hands (247), which an earlier order had reversed. The test asserts the two agree rather
+ * than restating this list, so the order cannot drift from the drawing again.
+ */
+export const SIL_ORDER = ['cervical', 'shoulder', 'shoulder-right', 'lumbar', 'hand-left', 'hand-right', 'knee-left', 'knee'] as const;
 
 /** Hit targets in figure units (viewBox 220×440). Each side is ≥ 27 units: see the test. */
 export const HITS: Record<(typeof SIL_ORDER)[number], { x: number; y: number; w: number; h: number; r: number; label: [number, number]; anchor: 'start' | 'end' }> = {
@@ -77,11 +82,20 @@ export function Silhouette() {
               const h = HITS[key];
               const on = key === activeKey;
               const tone = meta.tone === 'accepted' ? 'on' : meta.tone;
-              const cx = h.x + h.w / 2, cy = h.y + h.h / 2;
               return (
                 <g key={key}>
-                  <line className="al-sil__lead" x1={h.label[0] > cx ? h.x + h.w : h.x} y1={cy} x2={h.anchor === 'end' ? h.label[0] - 60 : h.label[0] + 60} y2={h.label[1] - 4} aria-hidden="true" />
-                  <text className={`al-sil__label al-sil__label--${tone}`} x={h.label[0]} y={h.label[1]} textAnchor={h.anchor} aria-hidden="true">{meta.label}</text>
+                  {/* No connector line: at this figure size a label is wider than the
+                      gutter beside it, so any line long enough to reach one would cross
+                      it. The label sits at its region's own height, on its own side, and
+                      carries the status in words — which is what the colour must not be
+                      the only carrier of. */}
+                  <text
+                    className={`al-sil__label al-sil__label--${tone}`}
+                    x={h.label[0]}
+                    y={h.label[1]}
+                    textAnchor={h.anchor}
+                    aria-hidden="true"
+                  >{meta.label}</text>
                   <rect
                     ref={(el) => { refs.current[key] = el; }}
                     className={`al-sil__region al-sil__region--${tone}${on ? ' is-on' : ''}`}
