@@ -64,6 +64,19 @@ describe('Silhouette', () => {
     expect(centres).toEqual([...centres].sort((a, b) => a - b));
   });
 
+  it('keeps every label level with the region it names', () => {
+    // Nothing connects a label to its region any more, so vertical alignment is what
+    // carries the association. label[1] is a text baseline, which sits about 5 units
+    // below the visual centre at this size — so that, not the raw centre, is what a
+    // level label matches.
+    const BASELINE_DROP = 5;
+    for (const key of SIL_ORDER) {
+      const h = HITS[key];
+      const level = h.y + h.h / 2 + BASELINE_DROP;
+      expect(Math.abs(h.label[1] - level), `${key}'s label is ${h.label[1] - level} units off level`).toBeLessThanOrEqual(1);
+    }
+  });
+
   it('gives every hit target at least 24px at the smallest rendered size', () => {
     // The figure is 220 units wide and renders no narrower than 200px, so one unit is
     // at least 0.909px: a target needs 27 units to clear 24px.

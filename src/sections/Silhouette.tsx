@@ -10,20 +10,28 @@ import './Silhouette.css';
  */
 export const SIL_ORDER = ['cervical', 'shoulder', 'shoulder-right', 'lumbar', 'hand-left', 'hand-right', 'knee-left', 'knee'] as const;
 
-/** Hit targets in figure units (viewBox 220×440). Each side is ≥ 27 units: see the test. */
+/**
+ * Hit targets in figure units (viewBox 220×440). Each side is ≥ 27 units: see the test.
+ *
+ * `label[1]` is a text BASELINE, not a centre, so it sits about 5 units below its
+ * region's own centre (`y + h / 2`) for the label to look level with it. With no
+ * connector drawn, that alignment is what tells a reader which label belongs to which
+ * region, so the test asserts it. No two regions at the same height share a side, so
+ * every label can take its ideal position without colliding with a neighbour.
+ */
 export const HITS: Record<(typeof SIL_ORDER)[number], { x: number; y: number; w: number; h: number; r: number; label: [number, number]; anchor: 'start' | 'end' }> = {
   // Right-side labels anchor 'end' at x=216 (a 4-unit margin mirroring the left side's
   // x=4) so the text grows leftward, toward the figure, and stays inside the 220-wide
   // viewBox. Anchored 'start' at x=176 they measured up to 265 in a real browser —
   // jsdom can't see that clipping, since it never lays out SVG text.
-  cervical:         { x: 96,  y: 60,  w: 28, h: 27, r: 8,  label: [216, 66],  anchor: 'end' },
-  shoulder:         { x: 56,  y: 90,  w: 30, h: 28, r: 10, label: [4, 90],    anchor: 'start' },
-  'shoulder-right': { x: 134, y: 90,  w: 30, h: 28, r: 10, label: [216, 100], anchor: 'end' },
-  'hand-left':      { x: 30,  y: 232, w: 28, h: 30, r: 9,  label: [4, 228],   anchor: 'start' },
-  'hand-right':     { x: 162, y: 232, w: 28, h: 30, r: 9,  label: [216, 262], anchor: 'end' },
-  lumbar:           { x: 86,  y: 194, w: 48, h: 32, r: 10, label: [216, 196], anchor: 'end' },
-  'knee-left':      { x: 78,  y: 306, w: 28, h: 28, r: 9,  label: [4, 340],   anchor: 'start' },
-  knee:             { x: 114, y: 306, w: 28, h: 28, r: 9,  label: [216, 330], anchor: 'end' },
+  cervical:         { x: 96,  y: 60,  w: 28, h: 27, r: 8,  label: [216, 78],  anchor: 'end' },
+  shoulder:         { x: 56,  y: 90,  w: 30, h: 28, r: 10, label: [4, 109],    anchor: 'start' },
+  'shoulder-right': { x: 134, y: 90,  w: 30, h: 28, r: 10, label: [216, 109], anchor: 'end' },
+  'hand-left':      { x: 30,  y: 232, w: 28, h: 30, r: 9,  label: [4, 252],   anchor: 'start' },
+  'hand-right':     { x: 162, y: 232, w: 28, h: 30, r: 9,  label: [216, 252], anchor: 'end' },
+  lumbar:           { x: 86,  y: 194, w: 48, h: 32, r: 10, label: [216, 215], anchor: 'end' },
+  'knee-left':      { x: 78,  y: 306, w: 28, h: 28, r: 9,  label: [4, 325],   anchor: 'start' },
+  knee:             { x: 114, y: 306, w: 28, h: 28, r: 9,  label: [216, 325], anchor: 'end' },
 };
 
 /* One outline. Front view, no face, no musculature: medical illustration in restraint. */
