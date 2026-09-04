@@ -1,7 +1,7 @@
 # Autolaw.ai site refresh — design
 
 **Date:** 2026-09-02
-**Status:** design, awaiting owner review
+**Status:** implemented — plan 1 (story engine) and plan 2 (sections and polish) both complete on `site-redesign` as of 2026-09-03
 **Builds on:** the correction release (`2026-09-02-autolaw-correction-release-design.md`),
 which must be deployed first. This spec assumes that branch state as its baseline.
 **Reads product truth from:** `case-app` at `/Users/zhongzhang/projects/case-app`, surveyed
@@ -233,9 +233,9 @@ Added to `src/config.ts`, each documented beside its value:
 - `PRIVACY_TEXT: ReadonlyArray<{ heading: string; paragraphs: string[] }> = []` — owner slot;
   `/privacy/` renders and is linked only when non-empty.
 - `TERMS_TEXT`, same shape.
-- `ASK_AL_ENABLED = true` — a kill switch, not a launch gate. If the assistant is ever pulled
-  from the product, the section and story chapter 5 disappear together; chapter numbering
-  is derived, not written.
+- `ASK_AL_ENABLED = true` — a kill switch, not a launch gate. It hides the Ask AL section
+  only; story chapter 5 stays, because what that chapter demonstrates is grounded answering
+  with citations, which is the behaviour that would survive the section being pulled.
 
 Unchanged: `TRIAL_ENABLED`, `LOGIN_URL`, `BOOKING_URL`, `CONTACT_ENDPOINT`, `ANNOUNCEMENT`,
 `CUSTOMER_LOGOS`, `CERTIFICATIONS`, `WALKTHROUGH_URL`.
@@ -254,12 +254,15 @@ Unchanged: `TRIAL_ENABLED`, `LOGIN_URL`, `BOOKING_URL`, `CONTACT_ENDPOINT`, `ANN
 ## Polish
 
 - **Fonts self-hosted.** Manrope 400–700 and Source Serif 4 (400, 600, 400 italic) as
-  `woff2` under `public/fonts/`, `@font-face` in `tokens.css` with `font-display: swap`. The
-  Google Fonts `<link>` and both preconnects are removed from all pages, and the CSP drops
-  `fonts.googleapis.com` and `fonts.gstatic.com`. Every page then loads from one origin.
-- **Share card.** A 1200 × 630 `og-card.png` rendered from an HTML template in this repo
-  during the build of this work (browser screenshot, committed as a static asset). All four
-  pages switch to `summary_large_image` with `og:image` and `og:image:alt`, in that order.
+  `woff2` under `public/fonts/`, fetched once by `scripts/fetch-fonts.mjs`, declared in
+  `src/styles/fonts.css` with `font-display: swap`, and shipped with their OFL notice. The
+  Google Fonts `<link>` and both preconnects are removed from all six pages, and the CSP
+  drops `fonts.googleapis.com` and `fonts.gstatic.com`. Every page then loads from one
+  origin.
+- **Share card.** A 1200 × 630 `og-card.png` rendered from `design-system/og-card.html`,
+  committed as a static asset. All six pages switch to `summary_large_image` with
+  `og:image` and `og:image:alt`, and a credibility guard ties the three tags to the file so
+  they can only ship together.
 - **Type floor.** No text inside the stage or panels below 12 px.
 - **ESLint** with `react-hooks` and `jsx-a11y`, run in `npm test` via a `lint` script. The
   scroll engine's effects are exactly where dependency mistakes hide.
@@ -303,7 +306,14 @@ story engine is where the risk is and it should be reviewed before the rest is b
    body) so the stage fits under the fold; the stacked layout shows them all.
 2. **Sections and polish:** Ask AL, Solutions with the silhouette, lifted practice state and
    conversion, `/privacy/` and `/terms/` slots, security additions, call-page query, fonts,
-   share card, ESLint, guards.
+   share card, ESLint, guards. Implemented in
+   `docs/superpowers/plans/2026-09-03-autolaw-sections-and-polish.md` (2026-09-03), with two
+   deviations recorded there and repeated here: `ASK_AL_ENABLED` hides the Ask AL section
+   only, leaving the story's chapter 5 in place, because grounded answering is what that
+   chapter demonstrates and it is not what a withdrawal would remove; and the security
+   page's Retention card required deleting two lines from that page's unverified-vocabulary
+   guard, which is the guard's own documented procedure — the deletion is the record that
+   someone checked the claim against the in-app privacy policy.
 
 ## Not in this work
 
