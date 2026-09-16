@@ -62,4 +62,12 @@ describe('FeaturePage', () => {
       expect(link).toHaveAttribute('href', '/schedule-call/?practice=wc');
     });
   });
+
+  it('uses the high-contrast inverse CTA on both navy panels', () => {
+    const { container } = render(<FeaturePage id="ask-al" />);
+    const panelLinks = container.querySelectorAll('.al-fpage__hero .al-btn, .al-fpage__close .al-btn');
+
+    expect(panelLinks).toHaveLength(2);
+    panelLinks.forEach((link) => expect(link).toHaveClass('al-btn--inverse'));
+  });
 });

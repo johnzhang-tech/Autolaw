@@ -57,7 +57,7 @@ function FeaturePageContent({ id }: { id: string }) {
           {feature.availability === 'early-access' && (
             <p className="al-fpage__pilot">Our team runs the pilot with your firm on your case.</p>
           )}
-          <Button href={scheduleUrl} variant="primary" size="lg" withCaret>
+          <Button href={scheduleUrl} variant="inverse" size="lg" withCaret>
             Schedule a call
           </Button>
         </div>
@@ -138,7 +138,7 @@ function FeaturePageContent({ id }: { id: string }) {
         <div className="al-container al-fpage__close-inner">
           <p className="al-sec__eyebrow">Your matter, not a canned demo</p>
           <h2 id="feature-close-heading">See {feature.name} on the kind of case your firm handles.</h2>
-          <Button href={scheduleUrl} variant="primary" size="lg" withCaret>
+          <Button href={scheduleUrl} variant="inverse" size="lg" withCaret>
             Schedule a call
           </Button>
         </div>
