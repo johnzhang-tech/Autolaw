@@ -5,7 +5,6 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import App from '../App';
-import { CHRONOLOGY } from '../data/demoCase';
 import { ASK_AL_ENABLED } from '../config';
 
 describe('page accessibility', () => {
@@ -121,29 +120,31 @@ describe('keyboard reachability', () => {
     expect(navLinks.length).toBe(6);
     navLinks.forEach(reachable);
 
-    // The hero's secondary control, and the one "see it on your own matter" link in the
-    // chronology detail. The trial CTA is absent while TRIAL_ENABLED is false.
+    // The hero's secondary control. The trial CTA is absent while TRIAL_ENABLED is false.
     reachable(screen.getByRole('link', { name: /see how it works/i }));
-    // The stacked layout (which this suite always renders) inlines a full ChronologyState
-    // under each of chapters 2, 3, and 4, so the citation card's link appears three times.
-    screen.getAllByRole('link', { name: /on your own matter/i }).forEach(reachable);
     expect(screen.queryAllByRole('link', { name: /analyze one/i })).toEqual([]);
     // Nav, hero, closing CTA, footer. The count is exact for the reason given above.
     const schedule = screen.getAllByRole('link', { name: /schedule a call/i });
     expect(schedule.length).toBe(4);
     schedule.forEach(reachable);
 
-    // Chronology events — every one, not just the selected one. Filtered to outside the
-    // banner because the nav's mobile toggle carries aria-expanded too, and outside Ask
-    // AL because its citation chips carry aria-expanded as well.
+    // Every feature card's disclosure. Filtered to outside the banner because the nav's
+    // mobile toggle carries aria-expanded too, and outside Ask AL because its citation
+    // chips carry aria-expanded as well.
     const banner = screen.getByRole('banner');
     const askAl = container.querySelector('#ask-al');
-    const events = screen.getAllByRole('button', { expanded: false })
-      .concat(screen.getAllByRole('button', { expanded: true }))
+    // queryAll, not getAll: every card starts collapsed, so the expanded set is legitimately
+    // empty on first paint and getAllByRole would throw on it rather than assert anything.
+    const disclosures = screen.queryAllByRole('button', { expanded: false })
+      .concat(screen.queryAllByRole('button', { expanded: true }))
       .filter((el) => !banner.contains(el) && !(askAl && askAl.contains(el)));
-    // One chronology per chapter 2–4 in the stacked layout the suite renders.
-    expect(events.length).toBe(CHRONOLOGY.length * 3);
-    events.forEach(reachable);
+    // Counted against the cards themselves rather than a literal, so adding a feature does
+    // not send anyone here to edit a number — but a toggle that became a <div onClick>
+    // drops out of the role query and still fails, which is what this is here to catch.
+    const cards = screen.getAllByTestId('feature-card');
+    expect(cards.length).toBeGreaterThan(5);
+    expect(disclosures.length).toBe(cards.length);
+    disclosures.forEach(reachable);
 
     // the silhouette's regions are covered by Silhouette.test.tsx; it renders only
     // under the WC Injury tab
@@ -267,12 +268,15 @@ describe('landmarks and identifiers', () => {
 
     /*
      * Checked by id rather than by count, so this fails with the name of whatever went
-     * missing instead of an off-by-one. Hero is absent on purpose — it is a <div>, since
-     * a <header> there would read as a second banner landmark.
+     * missing instead of an off-by-one. The hero section is absent on purpose: it carries
+     * an aria-label rather than a heading reference (its h1 is the page's, not the
+     * section's) and it has no id, because nothing navigates to it — the top of the page
+     * is where a visitor already is. The landmark itself is still checked, by "labels
+     * every section landmark" above.
      */
     // ASK_AL_ENABLED is a kill switch (see config.ts) — pulling it must not turn this
     // suite red, so 'ask-al' only belongs in the list while the section actually renders.
-    const SECTIONS = ['story', ...(ASK_AL_ENABLED ? ['ask-al'] : []), 'solutions', 'trust', 'contact'];
+    const SECTIONS = ['product', ...(ASK_AL_ENABLED ? ['ask-al'] : []), 'solutions', 'trust', 'contact'];
     const unlabelled = SECTIONS.filter((id) => {
       const el = container.querySelector(`section[id="${id}"]`);
       if (!el) return true;
@@ -517,7 +521,7 @@ describe('shipped stylesheet', () => {
      */
     const ONE_COLUMN = /grid-template-columns:\s*(?:minmax\(\s*0\s*,\s*1fr\s*\)|1fr)\s*(?:;|$)/;
 
-    expect(at(899.98, '.al-story__grid')).toMatch(ONE_COLUMN);
+    expect(at(900, '.al-herosec__grid')).toMatch(ONE_COLUMN);
     expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
     expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
     expect(at(780, '.al-sil__body')).toMatch(ONE_COLUMN);
@@ -565,28 +569,28 @@ describe('shipped stylesheet', () => {
   });
 
   /*
-   * No text inside the stage may render below 12px (--al-text-xs). Tokens already route
-   * every stage font-size through --al-text-*, so this only has literal px/rem/em values
+   * No text inside a panel may render below 12px (--al-text-xs). Tokens already route
+   * every panel font-size through --al-text-*, so this only has literal px/rem/em values
    * to catch — the kind that route around the token and would otherwise ship silently.
    */
-  it('holds every story text node at the 12px floor', () => {
+  it('holds every panel text node at the 12px floor', () => {
     const rules = topLevelRules(css);
 
-    const storyPrefixes = [
+    const panelPrefixes = [
       '.al-stage', '.al-state', '.al-signals', '.al-tile', '.al-arrival', '.al-spine',
       '.al-ev', '.al-cite', '.al-page', '.al-conf', '.al-mini', '.al-ask', '.al-review',
-      '.al-output', '.al-chron', '.al-chapters', '.al-chapter', '.al-story', '.al-askal',
+      '.al-output', '.al-chron', '.al-herosec', '.al-askal',
       '.al-sil', '.al-sol', '.al-seg', '.al-conv',
     ];
-    const isStorySelector = (s: string) => storyPrefixes.some((p) => s.startsWith(p));
+    const isPanelSelector = (s: string) => panelPrefixes.some((p) => s.startsWith(p));
 
-    const storyRules = styleRules(rules, (r) => !isReducedMotion(r))
-      .filter((r) => selectorsOf(r).some(isStorySelector));
+    const panelRules = styleRules(rules, (r) => !isReducedMotion(r))
+      .filter((r) => selectorsOf(r).some(isPanelSelector));
 
     // Guard against a vacuous pass: prove the selector filter above actually reached
-    // story rules that set a font-size at all (token-routed or literal), not just that
+    // panel rules that set a font-size at all (token-routed or literal), not just that
     // it matched zero rules and let the loop below assert nothing.
-    const withFontSize = storyRules.filter((r) => /font-size\s*:/.test(r.body));
+    const withFontSize = panelRules.filter((r) => /font-size\s*:/.test(r.body));
     expect(withFontSize.length).toBeGreaterThanOrEqual(5);
 
     const tooSmall: string[] = [];

@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { AskPreview, typeOut } from '../states/AskPreview';
-import { ASK_AL_PREVIEW, CITATION_KINDS } from '../../data/demoCase';
+import { AskPreview, typeOut } from '../AskPreview';
+import { ASK_AL_PREVIEW, CITATION_KINDS } from '../../../data/demoCase';
 
 afterEach(() => vi.useRealTimers());
 

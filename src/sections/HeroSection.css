@@ -1,0 +1,11 @@
+.al-herosec__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 55%) minmax(0, 1fr);
+  gap: var(--al-space-7);
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .al-herosec__grid { grid-template-columns: 1fr; }
+  .al-herosec__stage { order: 2; }
+}

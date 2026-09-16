@@ -1,3 +1,34 @@
+/*
+ * ---- The panel every state is painted on ----
+ *
+ * Moved here from story/Stage.css when the story engine was deleted. The states paint
+ * inverse ink, so whoever renders one owns this panel too: without .al-stage there is no
+ * navy ground under the white text. It lives with the states rather than with any one
+ * caller, so the hero and the feature cards cannot drift apart.
+ */
+.al-stage {
+  background: var(--al-navy);
+  border-radius: var(--al-radius-panel);
+  padding: var(--al-space-5);
+  box-shadow: var(--al-shadow-card);
+  min-height: 440px;
+  /* Stretches the single state child to fill the floor above rather than leaving it
+     top-aligned with blank space beneath. */
+  display: grid;
+}
+
+/*
+ * Entry transition, only on the live (pinned) stage. Duration and easing are tokens, so
+ * reduced motion collapses this to 1ms at :root without a per-component opt-out — the
+ * pinned stage does not render under reduced motion anyway, but the rule holds.
+ */
+.al-stage--live .al-state { animation: al-state-in var(--al-duration-slow) var(--al-ease) both; }
+@keyframes al-state-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .al-stage--live .al-state { animation: none; } }
+
 /* ---- Shared by every stage state ---- */
 
 .al-state { color: var(--al-ink-inverse); }

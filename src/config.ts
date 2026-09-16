@@ -41,9 +41,10 @@ export const CONTACT_EMAIL = 'hello@autolaw.ai';
  */
 export const SCHEDULE_URL = '/schedule-call/';
 
-/** The hero's secondary control. Points at chapter 1, not the section top — the hero is
- *  inside the story section, so "#story" would scroll nowhere. */
-export const HOW_IT_WORKS_URL = '/#story-arrives';
+/** The hero's secondary control. The answer to "how does it work" is now the feature
+ *  grid, which is its own section with its own landmark — so this points at the section
+ *  top rather than at some block inside it. */
+export const HOW_IT_WORKS_URL = '/#product';
 
 /**
  * The other two standalone pages. Named here, and referenced everywhere else, because a
@@ -95,8 +96,8 @@ export const WALKTHROUGH_URL: string | null = null;
 
 /**
  * A kill switch, not a launch gate. Ask AL ships in every case today. If it is ever pulled
- * from the product, this hides the section; the story's chapter 5 stays, because grounded
- * answering is what it demonstrates and that behaviour is not what would be pulled.
+ * from the product, this hides the section and drops the Ask AL card from the feature grid
+ * with it — one switch, so no card is left pointing at a section that no longer renders.
  */
 export const ASK_AL_ENABLED = true;
 

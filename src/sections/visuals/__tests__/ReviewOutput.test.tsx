@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Review } from '../states/Review';
-import { Output } from '../states/Output';
-import { REVIEW_ITEM, OUTPUT_ROWS, EXPORT_RULE } from '../../data/demoCase';
+import { Review } from '../Review';
+import { Output } from '../Output';
+import { REVIEW_ITEM, OUTPUT_ROWS, EXPORT_RULE } from '../../../data/demoCase';
 
 describe('Review', () => {
   it("shows one fact awaiting a person, with the queue’s own labels and no live controls", () => {

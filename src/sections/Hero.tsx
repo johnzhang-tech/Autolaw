@@ -19,9 +19,9 @@ function Tick() {
 }
 
 /**
- * Copy only. The stage beside it belongs to Story, which owns the grid so the same panel
- * can pin through the chapters below. One-sentence H1 so the stage is the second thing a
- * visitor sees rather than the fifth; the old headline lives on in <title> and og:title.
+ * Copy only. The panel beside it belongs to HeroSection, which owns the grid both sit in.
+ * One-sentence H1 so the panel is the second thing a visitor sees rather than the fifth;
+ * the old headline lives on in <title> and og:title.
  */
 export function Hero() {
   return (

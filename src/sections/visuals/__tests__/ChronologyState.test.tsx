@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChronologyState, phaseFor, PHASE_EVENT } from '../states/ChronologyState';
-import { CHRONOLOGY } from '../../data/demoCase';
-import { SCHEDULE_URL } from '../../config';
+import { ChronologyState, phaseFor, PHASE_EVENT } from '../ChronologyState';
+import { CHRONOLOGY } from '../../../data/demoCase';
+import { SCHEDULE_URL } from '../../../config';
 
 describe('ChronologyState', () => {
   it('maps chapters 2, 3, 4 to connected, conflict, missing', () => {

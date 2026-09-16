@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import { Arrival } from '../states/Arrival';
-import { ARRIVALS, DOCUMENT_COUNT } from '../../data/demoCase';
+import { Arrival } from '../Arrival';
+import { ARRIVALS, DOCUMENT_COUNT } from '../../../data/demoCase';
 
 afterEach(() => vi.useRealTimers());
 

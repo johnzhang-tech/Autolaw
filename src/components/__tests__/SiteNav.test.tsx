@@ -15,8 +15,8 @@ describe('SiteNav', () => {
     expect(within(nav).queryAllByRole('button', { expanded: false })).toEqual([]);
   });
 
-  it('points Product at the story and Solutions at the practice section', () => {
-    expect(SITE_LINKS.find((l) => l.label === 'Product')?.href).toBe('/#story-arrives');
+  it('points Product at the feature grid and Solutions at the practice section', () => {
+    expect(SITE_LINKS.find((l) => l.label === 'Product')?.href).toBe('/#product');
     expect(SITE_LINKS.find((l) => l.label === 'Solutions')?.href).toBe('/#solutions');
   });
 
