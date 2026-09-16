@@ -87,6 +87,7 @@ const PAIRS = [
   { fg: "--al-amber-text", bg: "--al-canvas", min: 4.5, use: "conflict copy" },
   { fg: "--al-ink", bg: "--al-surface", min: 4.5, use: "text on cards" },
   { fg: "--al-ink-muted", bg: "--al-surface", min: 4.5, use: "secondary on cards" },
+  { fg: "--al-ink", bg: "--al-state-neutral", min: 4.5, use: "practice badge" },
   { fg: "--al-teal-text", bg: "--al-teal-wash", min: 4.5, use: "verified chip" },
   { fg: "--al-amber-text", bg: "--al-amber-wash", min: 4.5, use: "conflict chip" },
   { fg: "--al-ink-inverse", bg: "--al-navy", min: 4.5, use: "text on navy panels" },

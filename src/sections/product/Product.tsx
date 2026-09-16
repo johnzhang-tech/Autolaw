@@ -1,6 +1,6 @@
 import { Section } from '../../components/primitives/Section';
 import { FeatureCard } from './FeatureCard';
-import { FEATURES, PHASES, PLATFORM, type Phase } from '../../data/product';
+import { ASK_AL_FEATURE_ID, FEATURES, PHASES, PLATFORM, type Phase } from '../../data/product';
 import { usePractice } from '../../practice/PracticeContext';
 import { ASK_AL_ENABLED } from '../../config';
 import './Product.css';
@@ -17,7 +17,7 @@ const PHASE_ORDER: ReadonlyArray<Phase> = ['pre-lit', 'litigation'];
  */
 export function Product() {
   const { practice } = usePractice();
-  const shown = FEATURES.filter((f) => ASK_AL_ENABLED || f.id !== 'ask-al');
+  const shown = FEATURES.filter((f) => ASK_AL_ENABLED || f.id !== ASK_AL_FEATURE_ID);
   const columnFeatures = (phase: Phase) =>
     shown.filter((f) => f.phases.includes(phase) && f.availability !== 'coming-next');
   const comingNext = shown.filter((f) => f.availability === 'coming-next');
@@ -34,11 +34,11 @@ export function Product() {
           <div key={phase} className="al-prod__col" data-testid={`column-${phase}`}>
             <h3 className="al-prod__phase">{PHASES[phase].heading}</h3>
             <p className="al-prod__phase-line">{PHASES[phase].line}</p>
-            <div className="al-prod__cards">
+            <ul className="al-prod__cards">
               {columnFeatures(phase).map((f) => (
-                <FeatureCard key={f.id} feature={f} practice={practice} />
+                <li key={f.id}><FeatureCard feature={f} practice={practice} /></li>
               ))}
-            </div>
+            </ul>
           </div>
         ))}
       </div>
@@ -55,11 +55,11 @@ export function Product() {
       {comingNext.length > 0 && (
         <div className="al-prod__next" data-testid="coming-next">
           <h3 className="al-prod__next-head">Coming next</h3>
-          <div className="al-prod__cards al-prod__cards--next">
+          <ul className="al-prod__cards al-prod__cards--next">
             {comingNext.map((f) => (
-              <FeatureCard key={f.id} feature={f} practice={practice} />
+              <li key={f.id}><FeatureCard feature={f} practice={practice} /></li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </Section>

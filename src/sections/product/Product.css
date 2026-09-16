@@ -4,6 +4,11 @@
   gap: var(--al-space-7);
 }
 
+/* A grid item defaults to min-width: auto, which lets its content (a long feature name,
+   an unbroken word) force the 1fr track wider than the sibling column. This is the rule
+   that keeps the two columns actually equal. */
+.al-prod__col { min-width: 0; }
+
 .al-prod__phase {
   font-size: 1.25rem;
   line-height: var(--al-leading-tight);
@@ -15,10 +20,18 @@
   margin: var(--al-space-1) 0 var(--al-space-4);
 }
 
+/*
+ * A real list: a screen-reader user gets "list, N items" and can navigate item to item,
+ * which matters once a column holds a dozen-plus cards. Reset to look like the flex
+ * column it always was — <ul> and <li> ship their own margin, padding, and marker.
+ */
 .al-prod__cards {
   display: flex;
   flex-direction: column;
   gap: var(--al-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .al-feat {
@@ -29,14 +42,16 @@
 }
 
 /*
- * Header row: name, availability tag, practice badge, then the chevron pushed to the
- * far end (FeatureCard.tsx renders all four here — the badge never reaches the footer,
- * which now holds only the output line).
+ * Header row: name, availability tag, and practice badge sit inside .al-feat__head, a
+ * wrapper that is free to wrap onto a second line as a group; the chevron is that
+ * wrapper's only sibling, so it is never pulled onto a wrapped line of its own — it stays
+ * pinned beside the first line, aligned to the row's top edge, no matter how much the
+ * head wraps. FeatureCard.tsx renders all of this in the always-visible header; the
+ * footer below holds only the output line.
  */
 .al-feat__toggle {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--al-space-2);
   width: 100%;
   padding: 0;
@@ -50,6 +65,15 @@
 
 .al-feat__toggle:focus-visible { outline: var(--al-focus-ring); }
 
+.al-feat__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--al-space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .al-feat__name { font-weight: 600; }
 
 .al-feat__tag {
@@ -62,7 +86,8 @@
 }
 
 /* Filled pill, sized to match .al-feat__tag beside it in the header row. Dark ink on
-   --al-state-neutral clears AA (4.6:1) — that pairing only works with the inherited ink
+   --al-state-neutral is verified numerically as the "practice badge" pair in
+   design-system/build.mjs (`npm run ds`) — that pairing only works with the inherited ink
    color, so this rule deliberately leaves `color` unset rather than repeating it. */
 .al-feat__badge {
   border-radius: var(--al-radius-pill);
@@ -73,7 +98,12 @@
 }
 
 .al-feat__chev {
-  margin-left: auto;
+  /* .al-feat__head carries flex: 1 1 auto, so it already claims the row's free width and
+     leaves the chevron flush right — no margin-left: auto needed. The top offset instead
+     centers the 0.5rem glyph against the header's first text line (1em * the body line-
+     height token), so align-items: flex-start on the row above still reads as "beside the
+     name" rather than pinned to the very top of the button. */
+  margin-top: calc((1em * var(--al-leading-normal) - 0.5rem) / 2);
   width: 0.5rem;
   height: 0.5rem;
   border-right: 1.5px solid var(--al-ink-muted);

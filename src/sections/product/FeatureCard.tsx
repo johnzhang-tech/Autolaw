@@ -41,25 +41,32 @@ export function FeatureCard({ feature, practice, visual }: {
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen(!open)}
       >
-        <span className="al-feat__name">{feature.name}</span>
         {/*
-          JSX drops the whitespace between adjacent expression children (there is no text
-          node between two `{...}` siblings), so without the literal `{' '}` below the
-          accessible name runs the parts together: "NameTagBadge". CSS `gap` in Task 3
-          handles the visible spacing regardless; this space is what a screen reader needs.
+          Name, tag, and badge share this wrapper so they can wrap onto a second line as a
+          group while the chevron — a sibling of the wrapper, not of these three — stays
+          pinned beside the first line instead of being pushed onto a lonely row of its own.
         */}
-        {label && (
-          <>
-            {' '}
-            <span className="al-feat__tag">{label}</span>
-          </>
-        )}
-        {feature.practice !== 'both' && (
-          <>
-            {' '}
-            <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
-          </>
-        )}
+        <span className="al-feat__head">
+          <span className="al-feat__name">{feature.name}</span>
+          {/*
+            JSX drops the whitespace between adjacent expression children (there is no text
+            node between two `{...}` siblings), so without the literal `{' '}` below the
+            accessible name runs the parts together: "NameTagBadge". CSS `gap` in Task 3
+            handles the visible spacing regardless; this space is what a screen reader needs.
+          */}
+          {label && (
+            <>
+              {' '}
+              <span className="al-feat__tag">{label}</span>
+            </>
+          )}
+          {feature.practice !== 'both' && (
+            <>
+              {' '}
+              <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
+            </>
+          )}
+        </span>
         <i className="al-feat__chev" aria-hidden="true" />
       </button>
 

@@ -47,9 +47,16 @@ export const PHASES: Record<Phase, { heading: string; line: string }> = {
   },
 };
 
+/**
+ * The one feature id the ASK_AL_ENABLED kill switch (src/config.ts) has to name. Exported
+ * so the switch's consumer imports this instead of retyping the string — a rename here
+ * would otherwise silently defeat the switch instead of failing to compile.
+ */
+export const ASK_AL_FEATURE_ID = 'ask-al';
+
 export const FEATURES: ReadonlyArray<Feature> = [
   {
-    id: 'ask-al',
+    id: ASK_AL_FEATURE_ID,
     name: 'Ask AL',
     line: 'Ask anything about the case. Every answer cites document, page, and line.',
     practice: 'both',
