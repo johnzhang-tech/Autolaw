@@ -74,15 +74,23 @@ Replaces the story at `#product`. Section heading: **"What Autolaw does for your
 
 ### 4.1 Structure
 
+**Revised 2026-09-16.** The first build put every feature in an expandable card on the home page. Seeing it, the owner rejected it: each feature should have **its own page**, reached from a **Product dropdown** split into the two phases — the pattern anytimeai.ai uses. Cards that expand in place are gone.
+
+Three surfaces, one data source:
+
 ```
-Product
-├─ Pre-Litigation column  — Build the file. Prove the damages. Send the demand.
-├─ Litigation column      — The same file, ready for the fight.
-├─ Across every phase     — a strip, not a column
-└─ Coming next            — a row, visually distinct from the columns
+Product dropdown (nav)     Pre-Litigation column │ Litigation column
+                           each entry a link to that feature's page
+
+Home § Product             the same two columns, as linked cards
+                           name + sales line, no expansion
+
+/product/<slug>/           one page per feature — 13 of them
 ```
 
-A feature may appear in both columns (Ask AL, Medical Chronologies). This follows the reference sites and reflects the product: most of case-app is phase-neutral.
+A feature may appear in both phase columns (Ask AL, Medical Chronologies, QME/AME). One page each regardless; the phase columns are navigation, not ownership.
+
+**Which features get a page:** the 12 `live` features plus Accident & Injury Illustrations — 13. `Discovery Responses` and `Deposition Review` appear in the dropdown and on the home page in a Coming next block, and link nowhere. A page whose only message is "not yet" wastes the click.
 
 ### 4.2 Data model
 
@@ -100,8 +108,23 @@ export interface Feature {
   practice: 'PI' | 'WC' | 'both';
   phases: ReadonlyArray<Phase>; // may be both
   availability: Availability;
-  detail: ReadonlyArray<string>;// shown when the card expands
+  detail: ReadonlyArray<string>;// the "what it does" bullets on the page
   output: string;               // "Word export" | "On screen" | ...
+  slug?: string;                // /product/<slug>/ — absent means no page
+  page?: FeaturePage;           // the page's own content, below
+}
+
+export interface FeaturePage {
+  /** The <h1> promise. Longer than `line`, still one sentence. */
+  promise: string;
+  /** 2–3 paragraphs: what the work is, and what it replaces. */
+  body: ReadonlyArray<string>;
+  /** Three steps, each a short imperative clause. */
+  steps: ReadonlyArray<{ heading: string; body: string }>;
+  /** What it will NOT do. The most persuasive block on the page — see §4.4. */
+  limits: ReadonlyArray<string>;
+  /** Ids of 2–3 related features, rendered as links at the foot. */
+  related: ReadonlyArray<string>;
 }
 ```
 
@@ -131,17 +154,40 @@ The Damages Ledger `wcLine`: *Reconcile the benefit printout — every TTD, PD, 
 
 **Across every phase** (strip): Case Files — upload, Dropbox sync, OCR, document classification · Attorney Review Queue · Firm roles and per-case access.
 
-### 4.4 Expanded card
+### 4.4 The feature page
 
-Click or keyboard-activate expands one card in place: two to four `detail` bullets, the `output` line ("Word export", "On screen"), and a practice badge where the feature is PI-only or WC-only. Expansion is a `<button>` toggling `aria-expanded` on a `<div role="region">`; one open at a time is not enforced.
+One component, `FeaturePage`, rendered by 13 thin routes. Writing a page means writing data, never JSX. Every page runs in this order:
 
-`detail` for an `early-access` card must state what a visitor gets today: for illustrations, that it runs on your case with our team during a pilot.
+1. **Hero** — eyebrow naming the phase(s) and practice, `<h1>` carrying `promise`, the sales line beneath, and "Schedule a call".
+2. **What it does** — the `detail` bullets, with `body` paragraphs around them.
+3. **The visual** — this feature's demo panel, where it has one (§5).
+4. **How it works** — the three `steps`.
+5. **What it will not do** — the `limits`. Every competitor page is a list of promises; a short list of refusals is the one block an attorney will believe, and we have real ones: it does not pick a winner between conflicting records, it does not draft the records request, it does not export a figure nobody approved.
+6. **What you get** — the `output` line, stated plainly.
+7. **Related** — links to the `related` features, keeping a reader inside Product.
+8. **Close** — "Schedule a call", and the practice the visitor chose carried with them.
 
-**Narrow screens.** The two columns stack, Pre-Litigation first, each keeping its phase heading; the strip and the Coming next row follow. Cards stay collapsed by default at every width, so the section's own height does not depend on the viewport.
+An `early-access` page says what a visitor gets today — it runs on your case with our team, during a pilot — in the hero, not buried at the foot.
+
+**Narrow screens.** The two columns stack, Pre-Litigation first, each keeping its phase heading; the Coming next block follows. The dropdown collapses into the existing mobile menu as a nested list.
 
 **The Ask AL kill switch.** `ASK_AL_ENABLED` already hides the standalone Ask AL section. It now also drops the Ask AL cards from both columns and the link to that section, so one switch removes the feature everywhere rather than leaving a card pointing at a section that no longer renders.
 
-### 4.5 Copy rules
+### 4.5 Routing and build
+
+Each page is a directory entry, exactly like `/security/` — no router, nothing client-side that can disagree with what is deployed. For each of the 13:
+
+- `product/<slug>/index.html` — its own `<title>`, description, canonical, and og tags. These are what a search result and a forwarded link show, so they are written per feature, not templated from the name.
+- `product/<slug>/main.tsx` — five lines, rendering `<FeaturePage id="…" />`.
+- an entry in `vite.config.ts` `rollupOptions.input`.
+- a line in `public/sitemap.xml`.
+- a row in the `PAGES` list in `src/pages/__tests__/pages.test.tsx`, which asserts the structural invariants every page shares.
+
+Slugs are the feature's name, lowercased and hyphenated: `/product/medical-chronologies/`, `/product/ask-al/`, `/product/qme-ame-deep-analysis/`. They are permanent once published — a renamed slug is a dead link in someone's email.
+
+`nginx.conf` needs no change: `try_files $uri $uri/ /index.html` already serves a directory entry at its clean URL. Verify this rather than assume it, in Docker, before the deploy.
+
+### 4.6 Copy rules
 
 Outcome first, mechanism second. No hours-saved or money-recovered claims: plaintiff firms work on contingency, and the research is clear that "hours saved" is defence-firm framing. No competitor comparisons by name. No number that is not measured — which for illustrations means **no accuracy percentage of any kind** (§7).
 
@@ -156,11 +202,15 @@ Outcome first, mechanism second. No hours-saved or money-recovered claims: plain
 | Visual | New home |
 |---|---|
 | `Signals` | beside the Hero, preserving the current above-the-fold composition |
-| `ChronologyState` | Medical Chronologies, expanded |
-| `AskPreview` | Ask AL, expanded |
-| `Arrival` | Case Files, in the across-every-phase strip |
-| `Review` | Attorney Review Queue, in the strip |
-| `Output` | Case Management Summary, expanded |
+| `ChronologyState` | the Medical Chronologies page |
+| `AskPreview` | the Ask AL page |
+| `Output` | the Case Management Summary page |
+| `Arrival` | the Missing Records & Gaps page — it shows what arrived, against what was referenced |
+| `Review` | the Conflicting Records & Opinions page — a conflict held for a person to resolve |
+
+Feature pages are wide, so the panels run at roughly the width they were designed for. The container queries added while they lived in cards stay: they are correct at any width, and they are what lets the same panel sit in a narrower column later without being rebuilt.
+
+Each visual keeps its "Sample data" mark. On a page that describes a real capability, an unmarked fabricated screen is the single most damaging thing we could ship.
 
 **Re-parented:** `Hero` is copy-only and currently sits inside Story's grid. It becomes its own `<section>` above Product, keeping its own CSS. Its "See how it works" button points at `HOW_IT_WORKS_URL`, which changes from `/#story-arrives` to `/#product`.
 
@@ -174,7 +224,9 @@ The standalone `AskAl` section stays. It demonstrates grounded answering with ci
 
 ### 6.1 Navigation
 
-`SITE_LINKS` keeps four entries: Product (`/#product`), Solutions (`/#solutions`), Security, About, plus the "Schedule a call" button.
+`SITE_LINKS` keeps four entries: Product, Solutions (`/#solutions`), Security, About, plus the "Schedule a call" button.
+
+**Product is now a dropdown**, not an anchor. It opens onto the two phase columns, each listing its features as links to `/product/<slug>/`, with the phase heading and its line above — the anytimeai.ai shape. Requirements: it opens on hover AND on click/Enter, closes on Escape and on focus leaving, is a real `<button aria-expanded>` controlling a labelled list, and every entry is reachable by keyboard in DOM order. On narrow screens it renders inside the existing mobile menu as a nested list, always expanded — a disclosure inside a disclosure is a trap on a phone. The Product label itself also links to the home Product section for anyone who clicks rather than opens.
 
 Security is the first objection a firm handling PHI raises, and Anytime AI puts it first in their nav for that reason. Rather than reorder — which would put a trust page ahead of the product a visitor came to see — Security keeps its position and gains a small shield mark before its label, in both nav and footer. It stays a plain link at the same type size: the mark is a signal, not a badge, and nothing about it implies a certification.
 
@@ -200,6 +252,8 @@ The claim guard gains three rules:
 1. **Availability is enforceable.** Any feature whose `availability` is not `live` must render inside a card carrying its label. A test asserts the label text is present for every non-live feature, so a later edit cannot quietly promote one.
 2. **New retired phrases**, from the media-engine audit: any accuracy percentage applied to illustrations, plus `medically validated`, `expert[- ]reviewed`, `court[- ]admissible`, `clinician[- ]approved`, `3D`, and surgical-procedure claims. media-engine's own accuracy corpus is directional, every case is agent-proposed, and the test that would gate a measured number is named `test_gate_condition_is_not_yet_met`.
 3. **Existing rules hold.** `certified` stays banned sitewide; `generate documents` is retired, so the Discovery Responses copy must not use it.
+4. **Every feature page is scanned**, not just the home page. 13 new pages are 13 new places for a claim to appear, and the guard's page list must grow with them — including their `<title>` and meta description, which the guard already scans raw for the existing pages.
+5. **A page exists only for a feature that has one.** A test asserts that the set of `slug`s matches the set of built routes in `vite.config.ts` and the sitemap, so a page cannot be shipped that nothing links to, and a link cannot point at a page that was never built.
 
 No rendered sample from media-engine ships on the site. The one real render inspected on 2026-09-15 has garbled label text ("Plaufinit" for "Plaintiff") — exactly what its own OCR drift check exists to catch.
 
