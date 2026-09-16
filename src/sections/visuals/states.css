@@ -2,18 +2,19 @@
  * ---- The panel every state is painted on ----
  *
  * Moved here from story/Stage.css when the story engine was deleted. The states paint
- * inverse ink, so whoever renders one owns this panel too: without .al-stage there is no
- * navy ground under the white text. It lives with the states rather than with any one
- * caller, so the hero and the feature cards cannot drift apart.
+ * inverse ink, so without .al-stage there is no navy ground under the white text. Nobody
+ * writes these two classes by hand — StatePanel.tsx owns them, which is what keeps the
+ * hero and the feature cards from drifting apart.
  */
 .al-stage {
   background: var(--al-navy);
   border-radius: var(--al-radius-panel);
   padding: var(--al-space-5);
   box-shadow: var(--al-shadow-card);
-  min-height: 440px;
-  /* Stretches the single state child to fill the floor above rather than leaving it
-     top-aligned with blank space beneath. */
+  /* Stretches the single state child to whatever height the panel has, rather than
+     leaving it top-aligned with blank space beneath. No height is set here: the hero asks
+     for a floor (.al-herosec__stage), and a panel in a feature card takes its content's
+     height, which is the only height that makes sense inside a card that opens. */
   display: grid;
 }
 
@@ -47,11 +48,10 @@
   font-size: var(--al-text-xs); text-transform: uppercase; letter-spacing: var(--al-tracking-eyebrow);
   color: var(--al-ink-inverse-muted); font-weight: var(--al-weight-bold); white-space: nowrap;
 }
-.al-state__title { margin: 0 0 var(--al-space-3); color: #fff; font-size: var(--al-text-h3); }
 
 /* ---- Signals (state 0) ---- */
 
-/* .al-stage is now display: grid, so this state stretches to the panel's 440px floor;
+/* .al-stage is display: grid, so this state stretches to whatever floor the panel has;
    the row split keeps the header at its own height and gives the tiles the rest. */
 .al-signals { display: grid; grid-template-rows: auto 1fr; }
 .al-signals__tiles {

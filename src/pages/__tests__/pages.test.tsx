@@ -132,8 +132,8 @@ describe.each(PAGES)('%s', (path, element) => {
 
 /*
  * The nav and footer render on every subpage, and their section links were bare fragments
- * ("#products"), which resolve to nothing anywhere except the home page — seven silently
- * dead links per page. Root-relative "/#products" fixes it. This asserts the property
+ * ("#product"), which resolve to nothing anywhere except the home page — seven silently
+ * dead links per page. Root-relative "/#product" fixes it. This asserts the property
  * rather than the spelling: no link on a subpage may point at a fragment that does not
  * exist on that page.
  */

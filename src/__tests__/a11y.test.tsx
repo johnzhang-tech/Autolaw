@@ -268,11 +268,11 @@ describe('landmarks and identifiers', () => {
 
     /*
      * Checked by id rather than by count, so this fails with the name of whatever went
-     * missing instead of an off-by-one. The hero section is absent on purpose: it carries
-     * an aria-label rather than a heading reference (its h1 is the page's, not the
-     * section's) and it has no id, because nothing navigates to it — the top of the page
-     * is where a visitor already is. The landmark itself is still checked, by "labels
-     * every section landmark" above.
+     * missing instead of an off-by-one. The hero section is absent from this list only
+     * because it has no id — nothing navigates to it, the top of the page being where a
+     * visitor already is. Its label is checked by the test below, and it has to be: a
+     * section that loses its name drops OUT of role="region", so the landmark loop in
+     * "labels every section landmark" would pass over a shorter list and report nothing.
      */
     // ASK_AL_ENABLED is a kill switch (see config.ts) — pulling it must not turn this
     // suite red, so 'ask-al' only belongs in the list while the section actually renders.
@@ -286,12 +286,24 @@ describe('landmarks and identifiers', () => {
     expect(unlabelled).toEqual([]);
   });
 
+  /*
+   * Named by its own h1, so the name is the promise the page makes rather than the site
+   * name a screen reader has just read out of the banner. Asserted by name and not merely
+   * by presence: an aria-labelledby pointing at an id that no longer exists leaves the
+   * section with an empty name, which is how it stops being a region in the first place.
+   */
+  it('gives the hero landmark its name from the page heading', () => {
+    render(<App />);
+    const hero = screen.getByRole('region', { name: /know where every fact came from/i });
+    expect(hero).toContainElement(screen.getByRole('heading', { level: 1 }));
+  });
+
   it('resolves every in-page anchor to an element that exists', () => {
     const { container } = render(<App />);
 
     /*
-     * Both forms count. The nav and footer use "/#products" because they also render on
-     * /security/, /about/, and /schedule-call/, where a bare "#products" would resolve to
+     * Both forms count. The nav and footer use "/#product" because they also render on
+     * /security/, /about/, and /schedule-call/, where a bare "#product" would resolve to
      * nothing. On this page both must still land on a real element — matching only
      * a[href^="#"] would have left every nav link unchecked.
      */
@@ -525,6 +537,28 @@ describe('shipped stylesheet', () => {
     expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
     expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
     expect(at(780, '.al-sil__body')).toMatch(ONE_COLUMN);
+  });
+
+  /*
+   * The 440px floor is the hero's, not every panel's. It came across from the pinned
+   * stage, where it stopped the panel resizing as chapters swapped states; on .al-stage it
+   * would follow the visuals into the feature cards, and a card that opens onto a 440px
+   * navy slab is a different thing entirely. Which selector carries the rule is precisely
+   * what a careless merge of the two files would change.
+   */
+  it('puts the panel floor on the hero rather than on every state panel', () => {
+    const rules = topLevelRules(css);
+    const decls = (selector: string) =>
+      styleRules(rules)
+        .filter((r) => selectorsOf(r).includes(selector))
+        .map((r) => r.body)
+        .join(';');
+
+    // Prove the selector was found before asserting what it does not contain: a renamed
+    // .al-stage would otherwise return an empty string and sail through the negative.
+    expect(decls('.al-stage')).toMatch(/background:/);
+    expect(decls('.al-stage')).not.toMatch(/min-height/);
+    expect(decls('.al-herosec__stage')).toMatch(/min-height:\s*440px/);
   });
 
   it('keeps the comparison table scrolling inside its own container', () => {

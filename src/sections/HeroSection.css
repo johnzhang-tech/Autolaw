@@ -5,7 +5,14 @@
   align-items: center;
 }
 
+/*
+ * The hero's panel has a floor; a panel inside a feature card does not. It lives here
+ * rather than on .al-stage because it was never about the navy ground — it kept the
+ * pinned stage from jumping as chapters swapped states, and what it does now is keep the
+ * fold steady beside a hero whose copy is taller than the six signal tiles.
+ */
+.al-herosec__stage { min-height: 440px; }
+
 @media (max-width: 900px) {
   .al-herosec__grid { grid-template-columns: 1fr; }
-  .al-herosec__stage { order: 2; }
 }

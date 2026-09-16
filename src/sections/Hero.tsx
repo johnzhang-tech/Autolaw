@@ -19,6 +19,14 @@ function Tick() {
 }
 
 /**
+ * The h1 doubles as the name of the section around it, so HeroSection can point
+ * aria-labelledby here instead of repeating the copy in an aria-label. Exported rather
+ * than spelled out at both ends: an id that is typed twice is an id that drifts, and a
+ * dangling aria-labelledby costs the landmark its name silently.
+ */
+export const HERO_HEADING_ID = 'hero-heading';
+
+/**
  * Copy only. The panel beside it belongs to HeroSection, which owns the grid both sit in.
  * One-sentence H1 so the panel is the second thing a visitor sees rather than the fifth;
  * the old headline lives on in <title> and og:title.
@@ -29,7 +37,7 @@ export function Hero() {
       <p className="al-sec__eyebrow">
         Case intelligence for personal injury &amp; workers&rsquo; compensation firms
       </p>
-      <h1 className="al-hero__title">Know where every fact came from.</h1>
+      <h1 id={HERO_HEADING_ID} className="al-hero__title">Know where every fact came from.</h1>
       <p className="al-hero__sub">
         Autolaw reads the medical records, expert reports, and case documents in a file and
         builds one connected case file. Every fact cites its document, page, and sentence.

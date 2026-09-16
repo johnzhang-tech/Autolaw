@@ -1,4 +1,5 @@
-import { Hero } from './Hero';
+import { Hero, HERO_HEADING_ID } from './Hero';
+import { StatePanel } from './visuals/StatePanel';
 import { Signals } from './visuals/Signals';
 import './HeroSection.css';
 
@@ -7,18 +8,16 @@ import './HeroSection.css';
  * With the chapters gone it owns its own landmark, and keeps the Signals panel beside it
  * so the composition above the fold does not change.
  *
- * `al-stage al-on-navy` on the panel is the same pair Stage.tsx put there: the navy
- * ground, the 440px floor, and the inverse focus ring the light-on-dark panel needs.
- * Every state in visuals/ paints inverse ink, so a panel without it renders white text on
- * the canvas — the classes are load-bearing, not decoration. Their rules moved into
- * visuals/states.css with the states themselves.
+ * Named by its own h1 rather than by an aria-label: "Autolaw" there would have a screen
+ * reader announce the site name a second time, immediately after the banner, and say
+ * nothing about what the section holds.
  */
 export function HeroSection() {
   return (
-    <section className="al-section al-herosec" aria-label="Autolaw">
+    <section className="al-section al-herosec" aria-labelledby={HERO_HEADING_ID}>
       <div className="al-container al-herosec__grid">
         <Hero />
-        <div className="al-herosec__stage al-stage al-on-navy"><Signals /></div>
+        <StatePanel className="al-herosec__stage"><Signals /></StatePanel>
       </div>
     </section>
   );
