@@ -11,7 +11,7 @@ import { SiteFooter } from '../components/SiteFooter';
  * the drift would be invisible — the home page and the security page would simply stop
  * offering the same routes.
  */
-export function PageShell({ children }: { children: ReactNode }) {
+export function PageShell({ children, scheduleHref }: { children: ReactNode; scheduleHref?: string }) {
   return (
     <>
       <a className="al-skip" href="#main">Skip to content</a>
@@ -19,14 +19,14 @@ export function PageShell({ children }: { children: ReactNode }) {
           /security/ — an announcement that showed on the home page and vanished on the
           page it pointed at would be worse than none. */}
       <AnnouncementBanner />
-      <SiteNav />
+      <SiteNav scheduleHref={scheduleHref} />
       {/*
         tabIndex={-1} for the same reason as App.tsx: Safari does not set the
         sequential-focus starting point on a non-focusable fragment target, so without it
         the skip link scrolls the page and leaves focus in the nav.
       */}
       <main id="main" tabIndex={-1}>{children}</main>
-      <SiteFooter />
+      <SiteFooter scheduleHref={scheduleHref} />
     </>
   );
 }

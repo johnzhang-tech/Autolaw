@@ -6,6 +6,8 @@ import { AboutPage } from '../about/AboutPage';
 import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../privacy/PrivacyPage';
 import { TermsPage } from '../terms/TermsPage';
+import { FeaturePage } from '../product/FeaturePage';
+import { ROUTED_FEATURES } from '../../data/product';
 
 /*
  * The structural invariants every standalone page shares, asserted once per page rather
@@ -22,6 +24,10 @@ const PAGES: Array<[string, ReactElement]> = [
   ['/schedule-call/', <ScheduleCallPage />],
   ['/privacy/', <PrivacyPage />],
   ['/terms/', <TermsPage />],
+  ...ROUTED_FEATURES.map((feature) => [
+    `/product/${feature.slug}/`,
+    <FeaturePage id={feature.id} />,
+  ] as [string, ReactElement]),
 ];
 
 describe.each(PAGES)('%s', (path, element) => {
@@ -144,6 +150,10 @@ describe('subpage link integrity', () => {
     ['schedule-call', () => <ScheduleCallPage />],
     ['privacy', () => <PrivacyPage />],
     ['terms', () => <TermsPage />],
+    ...ROUTED_FEATURES.map((feature) => [
+      `product/${feature.slug}`,
+      () => <FeaturePage id={feature.id} />,
+    ] as [string, () => ReactElement]),
   ];
 
   it.each(SUBPAGES)('has no dead same-page fragment links on /%s/', (_name, Page) => {

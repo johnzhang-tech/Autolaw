@@ -3,7 +3,7 @@ import { SITE_LINKS } from '../navigation';
 import { SecurityMark } from './SecurityMark';
 import './SiteFooter.css';
 
-export function SiteFooter() {
+export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string }) {
   const LEGAL = [PRIVACY_TEXT.length ? { href: PRIVACY_URL, label: 'Privacy' } : null, TERMS_TEXT.length ? { href: TERMS_URL, label: 'Terms' } : null].filter((l): l is { href: string; label: string } => l !== null);
 
   return (
@@ -22,7 +22,7 @@ export function SiteFooter() {
               </a>
             </li>
           ))}
-          <li><a href={SCHEDULE_URL}>Schedule a call</a></li>
+          <li><a href={scheduleHref}>Schedule a call</a></li>
           {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
           <li><a href={`mailto:${CONTACT_EMAIL}`}>Contact</a></li>
           {LEGAL.map((l) => (

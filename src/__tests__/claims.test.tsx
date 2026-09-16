@@ -2,15 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { ComponentType } from 'react';
+import type { ReactElement } from 'react';
 import App from '../App';
 import { SecurityPage } from '../pages/security/SecurityPage';
 import { AboutPage } from '../pages/about/AboutPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
 import { TermsPage } from '../pages/terms/TermsPage';
+import { FeaturePage } from '../pages/product/FeaturePage';
 import { renderedText } from '../pages/__tests__/renderedText';
 import { APP_ORIGIN, LOGIN_URL, TRIAL_ENABLED } from '../config';
+import { AVAILABILITY_LABEL, FEATURES, ROUTED_FEATURES } from '../data/product';
 
 /*
  * The claim guard. The credibility guard in credibility.test.tsx catches fabricated
@@ -51,22 +53,44 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     pattern: /suggested\s+questions|streaming|generate\s+documents|compute\s+action/i,
     reason: 'Ask AL roadmap items, not shipped behaviour',
   },
+  {
+    pattern: /medically\s+validated|expert[- ]reviewed|court[- ]admissible|clinician[- ]approved|\b3D\b|surgical[- ]procedure/i,
+    reason: 'the illustration pilot has evidence controls, not medical, expert, court, 3D, or surgical validation claims',
+  },
+  {
+    pattern: /(?:illustration.{0,100}\b\d+(?:\.\d+)?%|\b\d+(?:\.\d+)?%.{0,100}illustration)/i,
+    reason: 'the illustration corpus is directional and does not support a published accuracy percentage',
+  },
 ];
 
-const PAGES: ReadonlyArray<[string, ComponentType]> = [
-  ['home', App],
-  ['security', SecurityPage],
-  ['about', AboutPage],
-  ['schedule-call', ScheduleCallPage],
-  ['privacy', PrivacyPage],
-  ['terms', TermsPage],
+type PageFactory = () => ReactElement;
+
+const PAGES: ReadonlyArray<[string, PageFactory]> = [
+  ['home', () => <App />],
+  ['security', () => <SecurityPage />],
+  ['about', () => <AboutPage />],
+  ['schedule-call', () => <ScheduleCallPage />],
+  ['privacy', () => <PrivacyPage />],
+  ['terms', () => <TermsPage />],
+  ...ROUTED_FEATURES.map((feature) => [
+    `product/${feature.slug}`,
+    () => <FeaturePage id={feature.id} />,
+  ] as [string, PageFactory]),
 ];
 
 const ROOT = process.cwd();
-const HTML = ['index.html', 'security/index.html', 'about/index.html', 'schedule-call/index.html', 'privacy/index.html', 'terms/index.html'];
+const HTML = [
+  'index.html',
+  'security/index.html',
+  'about/index.html',
+  'schedule-call/index.html',
+  'privacy/index.html',
+  'terms/index.html',
+  ...ROUTED_FEATURES.map((feature) => `product/${feature.slug}/index.html`),
+];
 
-function pageText(Page: ComponentType): string {
-  const { container } = render(<Page />);
+function pageText(page: PageFactory): string {
+  const { container } = render(page());
   const text = renderedText(container);
   cleanup();
   return text;
@@ -78,16 +102,29 @@ describe('claim guard', () => {
    * page has to render a substantial amount of text before the phrase checks mean anything.
    */
   it('renders enough text for the scan to be meaningful', () => {
-    expect(pageText(App).length).toBeGreaterThan(4000);
+    expect(pageText(() => <App />).length).toBeGreaterThan(4000);
   });
 
-  for (const [name, Page] of PAGES) {
+  for (const [name, page] of PAGES) {
     it(`${name} makes no retired claim`, () => {
-      const text = pageText(Page);
+      const text = pageText(page);
       const hits = RETIRED.filter((r) => r.pattern.test(text)).map((r) => `${r.pattern} — ${r.reason}`);
       expect(hits).toEqual([]);
     });
   }
+
+  it('keeps every non-live feature inside a card carrying its availability label', () => {
+    const { container } = render(<App />);
+    const cards = [...container.querySelectorAll<HTMLElement>('[data-testid="feature-card"]')];
+
+    FEATURES.filter((feature) => feature.availability !== 'live').forEach((feature) => {
+      const matches = cards.filter((card) => card.textContent?.includes(feature.name));
+      expect(matches.length, `${feature.name} has no home-page card`).toBeGreaterThan(0);
+      matches.forEach((card) => {
+        expect(card).toHaveTextContent(AVAILABILITY_LABEL[feature.availability]);
+      });
+    });
+  });
 
   /*
    * The four HTML entries carry <title>, description, and og:description — the copy a
@@ -115,9 +152,9 @@ describe('dead-destination guard', () => {
     expect(LOGIN_URL).toBeNull();
   });
 
-  for (const [name, Page] of PAGES) {
+  for (const [name, page] of PAGES) {
     it(`${name} links nowhere into the application while the switches are off`, () => {
-      const { container } = render(<Page />);
+      const { container } = render(page());
       const into = [...container.querySelectorAll<HTMLAnchorElement>('a[href]')]
         .map((a) => a.getAttribute('href') ?? '')
         .filter((href) => href.startsWith(APP_ORIGIN));

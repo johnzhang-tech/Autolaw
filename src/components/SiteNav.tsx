@@ -9,7 +9,7 @@ import './SiteNav.css';
 const PRODUCT_LINK = SITE_LINKS.find((link) => link.label === 'Product')!;
 const FLAT_LINKS = SITE_LINKS.filter((link) => link.label !== 'Product');
 
-export function SiteNav() {
+export function SiteNav({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productPinned, setProductPinned] = useState(false);
   const [productHovered, setProductHovered] = useState(false);
@@ -80,7 +80,7 @@ export function SiteNav() {
 
           <div className="al-nav__actions">
             {LOGIN_URL && <a className="al-nav__login" href={LOGIN_URL}>Log in</a>}
-            <Button href={SCHEDULE_URL} variant="primary" size="md" withCaret>Schedule a call</Button>
+            <Button href={scheduleHref} variant="primary" size="md" withCaret>Schedule a call</Button>
           </div>
 
           <button
@@ -120,7 +120,7 @@ export function SiteNav() {
                 <li><a href={LOGIN_URL}>Log in</a></li>
               </ul>
             )}
-            <Button href={SCHEDULE_URL} variant="primary" size="md" withCaret>Schedule a call</Button>
+            <Button href={scheduleHref} variant="primary" size="md" withCaret>Schedule a call</Button>
           </div>
         )}
       </nav>
