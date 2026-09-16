@@ -2,6 +2,11 @@ import { useId, useState, type ReactNode } from 'react';
 import { AVAILABILITY_LABEL, type Feature } from '../../data/product';
 import type { Practice } from '../../practice/PracticeContext';
 
+/*
+ * Deliberately short forms, and deliberately not shared with the `AREAS` copy in
+ * Solutions.tsx (which spells out "Workers’ compensation"). This badge sits inside a
+ * card that has no room for the long form — do not consolidate the two into one constant.
+ */
 const PRACTICE_BADGE: Record<'PI' | 'WC', string> = {
   PI: 'Personal injury',
   WC: 'Workers’ comp',
@@ -37,9 +42,23 @@ export function FeatureCard({ feature, practice, visual }: {
         onClick={() => setOpen(!open)}
       >
         <span className="al-feat__name">{feature.name}</span>
-        {label && <span className="al-feat__tag">{label}</span>}
+        {/*
+          JSX drops the whitespace between adjacent expression children (there is no text
+          node between two `{...}` siblings), so without the literal `{' '}` below the
+          accessible name runs the parts together: "NameTagBadge". CSS `gap` in Task 3
+          handles the visible spacing regardless; this space is what a screen reader needs.
+        */}
+        {label && (
+          <>
+            {' '}
+            <span className="al-feat__tag">{label}</span>
+          </>
+        )}
         {feature.practice !== 'both' && (
-          <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
+          <>
+            {' '}
+            <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
+          </>
         )}
         <i className="al-feat__chev" aria-hidden="true" />
       </button>
@@ -49,7 +68,7 @@ export function FeatureCard({ feature, practice, visual }: {
       {open && (
         <div id={panelId} className="al-feat__panel">
           <ul className="al-feat__detail">
-            {feature.detail.map((d) => <li key={d}>{d}</li>)}
+            {feature.detail.map((d, i) => <li key={i}>{d}</li>)}
           </ul>
           {visual && <div className="al-feat__visual">{visual}</div>}
           <p className="al-feat__foot">

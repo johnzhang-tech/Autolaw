@@ -12,6 +12,8 @@ const live: Feature = {
 
 const soon: Feature = { ...live, id: 'soon', name: 'Discovery Responses', availability: 'coming-next', output: 'Not yet available' };
 const wcOnly: Feature = { ...live, id: 'wc', name: 'QME/AME Deep Analysis', practice: 'WC' };
+const earlyAccess: Feature = { ...live, id: 'early', name: 'Accident & Injury Illustrations', availability: 'early-access' };
+const tagAndBadge: Feature = { ...soon, id: 'both-parts', practice: 'WC' };
 
 describe('FeatureCard', () => {
   it('shows the name and the sales line before anything is opened', () => {
@@ -59,5 +61,53 @@ describe('FeatureCard', () => {
     unmount();
     render(<FeatureCard feature={ledger} practice="PI" />);
     expect(screen.getByText('PI line.')).toBeInTheDocument();
+  });
+
+  it('labels an early-access feature too, not only a coming-next one', () => {
+    render(<FeatureCard feature={earlyAccess} practice="PI" />);
+    expect(screen.getByText('Early access')).toBeInTheDocument();
+  });
+
+  it('separates name, tag, and badge with real separators in the accessible name', () => {
+    // Adjacent JSX expression children carry no whitespace text node between them, so
+    // without a deliberate separator the button's accessible name runs the parts
+    // together — this is the defect a reviewer caught in the first pass of this card.
+    render(<FeatureCard feature={tagAndBadge} practice="PI" />);
+    const toggle = screen.getByRole('button');
+    expect(toggle).toHaveAccessibleName('Discovery Responses Coming next Workers’ comp');
+  });
+
+  it('does not show the output line while the card is collapsed', () => {
+    render(<FeatureCard feature={live} practice="PI" />);
+    expect(screen.queryByText('Word export')).not.toBeInTheDocument();
+  });
+
+  it('points aria-controls at the panel only once the panel exists', async () => {
+    const user = userEvent.setup();
+    render(<FeatureCard feature={live} practice="PI" />);
+    const toggle = screen.getByRole('button', { name: /medical chronologies/i });
+    expect(toggle).not.toHaveAttribute('aria-controls');
+
+    await user.click(toggle);
+    const panelId = toggle.getAttribute('aria-controls');
+    expect(panelId).toBeTruthy();
+    expect(document.getElementById(panelId!)).toHaveClass('al-feat__panel');
+  });
+
+  it('renders the visual only in the open panel, and only when one is passed', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(
+      <FeatureCard feature={live} practice="PI" visual={<div data-testid="chart">chart</div>} />,
+    );
+    // Collapsed: the visual does not exist yet, whatever the prop says.
+    expect(container.querySelector('.al-feat__visual')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /medical chronologies/i }));
+    expect(screen.getByTestId('chart')).toBeInTheDocument();
+    expect(container.querySelector('.al-feat__visual')).toBeInTheDocument();
+
+    // Same open panel (state survives the rerender), this time with no visual prop.
+    rerender(<FeatureCard feature={live} practice="PI" />);
+    expect(container.querySelector('.al-feat__visual')).not.toBeInTheDocument();
   });
 });
