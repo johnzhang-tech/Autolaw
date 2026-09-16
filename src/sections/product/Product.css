@@ -35,35 +35,46 @@
 }
 
 .al-feat {
+  display: grid;
+  gap: var(--al-space-2);
   border: 1px solid var(--al-hairline);
   border-radius: var(--al-radius-card);
   background: var(--al-surface);
-  padding: var(--al-space-3) var(--al-space-4);
+  padding: var(--al-space-4);
+  color: var(--al-ink);
+  text-decoration: none;
+  min-height: 142px;
 }
 
-/*
- * Header row: name, availability tag, and practice badge sit inside .al-feat__head, a
- * wrapper that is free to wrap onto a second line as a group; the chevron is that
- * wrapper's only sibling, so it is never pulled onto a wrapped line of its own — it stays
- * pinned beside the first line, aligned to the row's top edge, no matter how much the
- * head wraps. FeatureCard.tsx renders all of this in the always-visible header; the
- * footer below holds only the output line.
- */
-.al-feat__toggle {
+.al-feat--link {
+  box-shadow: 0 0 0 transparent;
+  transition:
+    transform var(--al-duration-base) var(--al-ease),
+    border-color var(--al-duration-base) var(--al-ease),
+    box-shadow var(--al-duration-base) var(--al-ease),
+    background var(--al-duration-base) var(--al-ease);
+}
+
+.al-feat--link:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--al-teal-text) 42%, var(--al-hairline));
+  background: linear-gradient(145deg, var(--al-surface), var(--al-teal-wash));
+  box-shadow: var(--al-shadow-card);
+}
+
+.al-feat--link:focus-visible { --al-ring: var(--al-focus-ring); }
+
+.al-feat--future {
+  background: color-mix(in srgb, var(--al-canvas) 72%, var(--al-surface));
+  border-style: dashed;
+}
+
+.al-feat__top {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: var(--al-space-2);
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
 }
-
-.al-feat__toggle:focus-visible { outline: var(--al-focus-ring); }
 
 .al-feat__head {
   display: flex;
@@ -74,7 +85,11 @@
   min-width: 0;
 }
 
-.al-feat__name { font-weight: 600; }
+.al-feat__name {
+  font-size: 1.0625rem;
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
 
 .al-feat__tag {
   border: 1px solid var(--al-hairline-strong);
@@ -97,52 +112,23 @@
   white-space: nowrap;
 }
 
-.al-feat__chev {
-  /* .al-feat__head carries flex: 1 1 auto, so it already claims the row's free width and
-     leaves the chevron flush right — no margin-left: auto needed. The top offset instead
-     centers the 0.5rem glyph against the header's first text line (1em * the body line-
-     height token), so align-items: flex-start on the row above still reads as "beside the
-     name" rather than pinned to the very top of the button. */
-  margin-top: calc((1em * var(--al-leading-normal) - 0.5rem) / 2);
-  width: 0.5rem;
-  height: 0.5rem;
-  border-right: 1.5px solid var(--al-ink-muted);
-  border-bottom: 1.5px solid var(--al-ink-muted);
-  transform: rotate(45deg);
-  transition: transform var(--al-duration-fast) var(--al-ease);
+.al-feat__arrow {
+  color: var(--al-teal-text);
+  font-size: 1.25rem;
+  font-style: normal;
+  line-height: 1;
   flex-shrink: 0;
+  transition: transform var(--al-duration-fast) var(--al-ease);
 }
 
-.al-feat__toggle[aria-expanded='true'] .al-feat__chev { transform: rotate(225deg); }
+.al-feat--link:hover .al-feat__arrow { transform: translateX(4px); }
 
 .al-feat__line {
+  display: block;
   color: var(--al-ink-muted);
-  margin: var(--al-space-1) 0 0;
-}
-
-.al-feat__panel { margin-top: var(--al-space-3); }
-
-.al-feat__detail {
   margin: 0;
-  padding-left: var(--al-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--al-space-1);
+  line-height: var(--al-leading-normal);
 }
-
-.al-feat__visual { margin-top: var(--al-space-3); }
-
-/* Only the output line lives here now — the availability tag and practice badge moved
-   to the always-visible header so they read without opening the card. */
-.al-feat__foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--al-space-2);
-  margin: var(--al-space-3) 0 0;
-  font-size: 0.875rem;
-}
-
-.al-feat__output { color: var(--al-ink-muted); }
 
 .al-prod__strip,
 .al-prod__next { margin-top: var(--al-space-7); }

@@ -1,36 +1,11 @@
-import type { ReactNode } from 'react';
 import { Section } from '../../components/primitives/Section';
 import { FeatureCard } from './FeatureCard';
 import { ASK_AL_FEATURE_ID, FEATURES, PHASES, PLATFORM, type Phase } from '../../data/product';
 import { usePractice } from '../../practice/PracticeContext';
 import { ASK_AL_ENABLED } from '../../config';
-import { StatePanel } from '../visuals/StatePanel';
-import { AskPreview } from '../visuals/AskPreview';
-import { ChronologyState } from '../visuals/ChronologyState';
-import { Output } from '../visuals/Output';
 import './Product.css';
 
 const PHASE_ORDER: ReadonlyArray<Phase> = ['pre-lit', 'litigation'];
-
-/**
- * The three features that have a visual, keyed by the id they carry in product.ts — so a
- * renamed or deleted feature loses its visual rather than mounting it under a card that
- * no longer means what the visual shows.
- *
- * Every one is wrapped in StatePanel: the states paint inverse ink and StatePanel is the
- * navy ground under it. FeatureCard mounts what it is given only while the card is open,
- * so nothing here renders on a page nobody has opened a card on.
- *
- * AskPreview types its question in with setTimeout, which no CSS media query can disable.
- * The pinned stage used to hand it `animate={false}` whenever its reduced-motion query
- * failed; that query went with the story, and adding a matchMedia hook back so a demo can
- * type inside a disclosure is not a trade worth making. It renders static.
- */
-const VISUALS: Record<string, ReactNode> = {
-  'medical-chronologies': <StatePanel><ChronologyState /></StatePanel>,
-  [ASK_AL_FEATURE_ID]: <StatePanel><AskPreview animate={false} /></StatePanel>,
-  'case-management-summary': <StatePanel><Output /></StatePanel>,
-};
 
 /**
  * What the firm gets, by the phase of the case it belongs to.
@@ -52,7 +27,7 @@ export function Product() {
       id="product"
       eyebrow="Product"
       heading="What Autolaw does for your firm"
-      intro="Two phases of the case, and the work Autolaw does in each. Open any one to see what it produces."
+      intro="From the first record through the fight that follows. Explore the work Autolaw puts within reach at each phase."
     >
       <div className="al-prod__columns">
         {PHASE_ORDER.map((phase) => (
@@ -62,7 +37,7 @@ export function Product() {
             <ul className="al-prod__cards">
               {columnFeatures(phase).map((f) => (
                 <li key={f.id}>
-                  <FeatureCard feature={f} practice={practice} visual={VISUALS[f.id]} />
+                  <FeatureCard feature={f} practice={practice} />
                 </li>
               ))}
             </ul>
