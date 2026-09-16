@@ -117,11 +117,13 @@ describe('claim guard', () => {
     const { container } = render(<App />);
     const cards = [...container.querySelectorAll<HTMLElement>('[data-testid="feature-card"]')];
 
-    FEATURES.filter((feature) => feature.availability !== 'live').forEach((feature) => {
+    FEATURES.forEach((feature) => {
+      if (feature.availability === 'live') return;
+      const label = AVAILABILITY_LABEL[feature.availability];
       const matches = cards.filter((card) => card.textContent?.includes(feature.name));
       expect(matches.length, `${feature.name} has no home-page card`).toBeGreaterThan(0);
       matches.forEach((card) => {
-        expect(card).toHaveTextContent(AVAILABILITY_LABEL[feature.availability]);
+        expect(card).toHaveTextContent(label);
       });
     });
   });

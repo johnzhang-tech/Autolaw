@@ -21,11 +21,7 @@ import './SecurityPage.css';
  * allowed set only after confirming the control exists in case-app.
  */
 
-const DATA = [
-  {
-    title: 'Your case content never trains a model',
-    body: 'Case content is never used to train or fine-tune any model — ours or a vendor’s.',
-  },
+const PRIVATE_DATA = [
   {
     title: 'Documents can come from where they already are',
     body: 'Autolaw connects to Dropbox, so a matter can be built from the case documents your firm already stores there.',
@@ -34,9 +30,6 @@ const DATA = [
     title: 'Retention',
     body: 'Case data is kept while the account is active and deleted within 90 days of an account ending, and you may request deletion at any time, except where retention is required by law. That is what the privacy policy states, and it is all it states.',
   },
-];
-
-const ACCESS = [
   {
     title: 'One firm, one boundary',
     body: 'Every case, every document, and every background job belongs to exactly one firm. The rule is enforced on our servers — not by hiding things in the browser, which is a control any visitor can defeat with the developer tools.',
@@ -44,6 +37,31 @@ const ACCESS = [
   {
     title: 'Document access is recorded',
     body: 'Who opened which document, and when, is recorded and reviewable — so “who opened this file” has an answer rather than an assumption.',
+  },
+];
+
+const BAR_GUIDANCE = 'https://www.calbar.ca.gov/sites/default/files/portals/0/documents/ethics/Generative-AI-Practical-Guidance.pdf';
+
+const ILLUSTRATION_CONTROLS = [
+  {
+    title: 'The record has to be sufficient',
+    body: 'The pilot refuses to start when the record is too thin to support an accident or injury scene.',
+  },
+  {
+    title: 'Every scene stays inside the evidence',
+    body: 'A scene contract binds what may be shown to the record. If the record does not state something, the scene must not depict it.',
+  },
+  {
+    title: 'The render is checked again',
+    body: 'The system re-inspects each render for problems such as reversed impact direction or an over-claimed spinal level.',
+  },
+  {
+    title: 'A failed check stops the work',
+    body: 'The pilot parks a failed render for attorney review instead of presenting it as finished work.',
+  },
+  {
+    title: 'Approval creates a verifiable record',
+    body: 'After human approval, the system hash-verifies the locked exhibit so a later change can be detected.',
   },
 ];
 
@@ -95,29 +113,13 @@ export function SecurityPage() {
       </PageHero>
 
       <Section
-        id="data"
-        eyebrow="Your data"
-        heading="What we do with your case data"
-        intro="Two things decide whether a case file can go anywhere near a vendor: what happens to the content, and where the documents come from."
+        id="privacy"
+        eyebrow="Question one"
+        heading="Does my client’s medical data stay private?"
+        intro="The answer has to be visible in the controls: one firm boundary, reviewable document access, stated retention, and a BAA before protected health information arrives."
       >
-        <div className="al-secp__grid al-secp__grid--three">
-          {DATA.map((c) => (
-            <div key={c.title} className="al-secp__card">
-              <h3>{c.title}</h3>
-              <p>{c.body}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section
-        id="access"
-        eyebrow="Access"
-        heading="Who can see it"
-        intro="Separation between firms is enforced on our servers rather than in the browser, and every document opened is on the record."
-      >
-        <div className="al-secp__grid">
-          {ACCESS.map((c) => (
+        <div className="al-secp__grid al-secp__grid--two-by-two">
+          {PRIVATE_DATA.map((c) => (
             <div key={c.title} className="al-secp__card">
               <h3>{c.title}</h3>
               <p>{c.body}</p>
@@ -129,9 +131,9 @@ export function SecurityPage() {
       <Section
         id="model-limits"
         tone="navy"
-        eyebrow="Model limits"
-        heading="What the model is not allowed to do"
-        intro="The constraints below are legal before they are technical, which is why none of them is offered as a preference to be turned off."
+        eyebrow="Question two"
+        heading="Does my case train your model?"
+        intro="No. Case content is never used to train or fine-tune any model — ours or a vendor’s. The same boundary applies to what the model may assert about the case."
       >
         <div className="al-secp__grid al-secp__grid--three">
           {LIMITS.map((c) => (
@@ -153,6 +155,51 @@ export function SecurityPage() {
           a claim is still alive, and where it can be brought, is not something a model gets to
           assert on its own. So Autolaw proposes, and a person at your firm confirms.
         </p>
+      </Section>
+
+      <Section
+        id="client-questions"
+        eyebrow="Question three"
+        heading="What should I tell my client?"
+        intro="These are questions to take to your firm’s ethics counsel, not legal advice from a software company. The State Bar’s current guidance is the starting point."
+      >
+        <div className="al-secp__grid al-secp__grid--three al-secp__ethics">
+          <div className="al-secp__card">
+            <h3>Could this affect confidentiality or privilege?</h3>
+            <p>Ask how the system collects, uses, stores, and discloses client information, and match the safeguards to the access the tool receives.</p>
+          </div>
+          <div className="al-secp__card">
+            <h3>When should I tell my client?</h3>
+            <p>Consider the technology, its risks, the scope of the representation, and whether its use materially affects decision-making.</p>
+          </div>
+          <div className="al-secp__card">
+            <h3>May AI costs be passed through?</h3>
+            <p>Separate general firm overhead from a cost incurred for the particular matter, then review the fee agreement, actual cost, and consent requirements.</p>
+          </div>
+        </div>
+        <a className="al-secp__guidance" href={BAR_GUIDANCE} target="_blank" rel="noreferrer">
+          Read the State Bar of California’s 2026 Practical Guidance <span aria-hidden="true">↗</span>
+        </a>
+      </Section>
+
+      <Section
+        id="illustration-controls"
+        tone="navy"
+        eyebrow="Early access"
+        heading="How does the illustration pilot keep the evidence in charge?"
+        intro="The pilot runs with our team on your case. It does not replace attorney review, and it does not turn an unsupported scene into evidence."
+      >
+        <div className="al-secp__control-list">
+          {ILLUSTRATION_CONTROLS.map((control, index) => (
+            <div key={control.title} className="al-secp__control">
+              <span aria-hidden="true">0{index + 1}</span>
+              <div>
+                <h3>{control.title}</h3>
+                <p>{control.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </Section>
 
       <Section

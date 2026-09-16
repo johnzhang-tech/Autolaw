@@ -13,6 +13,18 @@ import { renderedText } from '../../__tests__/renderedText';
 const pageText = () => renderedText(screen.getByRole('main'));
 
 describe('SecurityPage — the controls it claims', () => {
+  it('answers the firm’s three questions first, in order', () => {
+    render(<SecurityPage />);
+    const headings = [...screen.getByRole('main').querySelectorAll('section h2')]
+      .map((heading) => heading.textContent?.trim());
+
+    expect(headings.slice(0, 3)).toEqual([
+      'Does my client’s medical data stay private?',
+      'Does my case train your model?',
+      'What should I tell my client?',
+    ]);
+  });
+
   it('states every control on the verified list', () => {
     render(<SecurityPage />);
     const main = within(screen.getByRole('main'));
@@ -58,14 +70,14 @@ describe('SecurityPage — the controls it claims', () => {
 
   it('states retention as the in-app policy states it, and nothing more specific', () => {
     render(<SecurityPage />);
-    const data = within(screen.getByRole('region', { name: /what we do with your case data/i }));
+    const data = within(screen.getByRole('region', { name: /does my client’s medical data stay private/i }));
     expect(data.getByRole('heading', { name: /retention/i })).toBeInTheDocument();
     expect(data.getByText(/deleted within 90 days of an account ending/i)).toBeInTheDocument();
   });
 
   it('lists the seven citation kinds as the form grounding takes', () => {
     render(<SecurityPage />);
-    const limits = within(screen.getByRole('region', { name: /what the model is not allowed to do/i }));
+    const limits = within(screen.getByRole('region', { name: /does my case train your model/i }));
     CITATION_KINDS.forEach((k) => expect(limits.getByText(k)).toBeInTheDocument());
   });
 
@@ -77,6 +89,31 @@ describe('SecurityPage — the controls it claims', () => {
       expect.stringContaining('mailto:hello@autolaw.ai')
     );
     expect(main.getByRole('link', { name: /schedule a call/i })).toHaveAttribute('href', '/schedule-call/');
+  });
+
+  it('frames privilege, disclosure, and costs as questions and points to current State Bar guidance', () => {
+    render(<SecurityPage />);
+    const ethics = within(screen.getByRole('region', { name: /what should I tell my client/i }));
+
+    expect(ethics.getByRole('heading', { name: /could this affect confidentiality or privilege/i })).toBeInTheDocument();
+    expect(ethics.getByRole('heading', { name: /when should I tell my client/i })).toBeInTheDocument();
+    expect(ethics.getByRole('heading', { name: /may AI costs be passed through/i })).toBeInTheDocument();
+    expect(ethics.getByRole('link', { name: /state bar.*practical guidance/i })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^https:\/\/www\.calbar\.ca\.gov\//),
+    );
+    expect(ethics.getByText(/questions to take to your firm’s ethics counsel/i)).toBeInTheDocument();
+  });
+
+  it('states the early-access illustration controls without an accuracy percentage', () => {
+    render(<SecurityPage />);
+    const illustrations = within(screen.getByRole('region', { name: /how does the illustration pilot keep the evidence in charge/i }));
+
+    expect(illustrations.getByText('Early access')).toBeInTheDocument();
+    expect(illustrations.getByText(/refuses to start when the record is too thin/i)).toBeInTheDocument();
+    expect(illustrations.getByText(/re-inspects each render/i)).toBeInTheDocument();
+    expect(illustrations.getByText(/parks a failed render for attorney review/i)).toBeInTheDocument();
+    expect(illustrations.getByText(/hash-verifies the locked exhibit/i)).toBeInTheDocument();
   });
 });
 
@@ -148,6 +185,7 @@ const UNVERIFIED: Array<[string, RegExp]> = [
   ['incident commitments', /\bincident response\b|\bbreach notification\b/i],
   ['staffing controls', /\bbackground check|\bsecurity training\b/i],
   ['marketing absolutes', /\bbank[\s-]?level\b|\bmilitary[\s-]?grade\b|\bunhackable\b|\b100% secure\b/i],
+  ['illustration overclaims', /medically\s+validated|expert[- ]reviewed|court[- ]admissible|clinician[- ]approved|\b3D\b|surgical[- ]procedure|(?:illustration.{0,100}\b\d+(?:\.\d+)?%|\b\d+(?:\.\d+)?%.{0,100}illustration)/i],
 ];
 
 describe('SecurityPage — claims not on the verified list', () => {
