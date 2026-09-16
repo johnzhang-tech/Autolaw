@@ -4,8 +4,9 @@
  * `availability` is a claim, not a decoration. `live` renders no label, so the absence
  * of a label IS the assertion that a customer can reach the feature today. Nothing may
  * be moved to `live` without checking case-app: see the audit recorded in
- * docs/superpowers/specs/2026-09-15-autolaw-product-section-design.md, and the guard in
- * src/__tests__/claims.test.tsx that fails the build if a non-live feature loses its label.
+ * docs/superpowers/specs/2026-09-15-autolaw-product-section-design.md. Task 6 of that
+ * plan adds a guard to src/__tests__/claims.test.tsx that will fail the build if a
+ * non-live feature loses its label — until that lands, this rule is convention only.
  */
 export type Availability = 'live' | 'early-access' | 'coming-next';
 export type Phase = 'pre-lit' | 'litigation';

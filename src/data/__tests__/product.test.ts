@@ -23,8 +23,9 @@ describe('product data', () => {
   });
 
   it('promises no output for a feature that does not exist yet', () => {
-    FEATURES.filter((f) => f.availability === 'coming-next')
-      .forEach((f) => expect(f.output).toBe('Not yet available'));
+    const comingNext = FEATURES.filter((f) => f.availability === 'coming-next');
+    expect(comingNext.length).toBeGreaterThan(0);
+    comingNext.forEach((f) => expect(f.output).toBe('Not yet available'));
   });
 
   it('keeps every phase heading and its line', () => {
@@ -39,7 +40,13 @@ describe('product data', () => {
   });
 
   it('claims no accuracy percentage anywhere in the copy', () => {
-    const all = FEATURES.flatMap((f) => [f.line, f.wcLine ?? '', ...f.detail]).join(' ');
+    const all = FEATURES.flatMap((f) => [f.line, f.wcLine ?? '', f.output, ...f.detail])
+      .concat(PLATFORM.map((p) => p.line))
+      .join(' ');
     expect(all).not.toMatch(/\d+\s*%/);
+  });
+
+  it('never puts a WC-specific line on a PI-only feature', () => {
+    expect(FEATURES.filter((f) => f.wcLine).every((f) => f.practice !== 'PI')).toBe(true);
   });
 });
