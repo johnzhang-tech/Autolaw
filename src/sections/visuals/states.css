@@ -16,19 +16,18 @@
      for a floor (.al-herosec__stage), and a panel in a feature card takes its content's
      height, which is the only height that makes sense inside a card that opens. */
   display: grid;
+  /*
+   * The states no longer have one stage that tracks the viewport. Measured: at a 1240px
+   * viewport the hero's panel is 465px and a panel inside an opened feature card is 506px;
+   * at 880px — where the product's two columns collapse into one — the card's panel grows
+   * to 751px while the viewport has shrunk. A max-width media query would collapse these
+   * layouts at the width where the card has the MOST room, so every layout rule below asks
+   * about this box instead. Named, so a query says which box it means and a container
+   * added inside a state later cannot capture it.
+   */
+  container-type: inline-size;
+  container-name: al-panel;
 }
-
-/*
- * Entry transition, only on the live (pinned) stage. Duration and easing are tokens, so
- * reduced motion collapses this to 1ms at :root without a per-component opt-out — the
- * pinned stage does not render under reduced motion anyway, but the rule holds.
- */
-.al-stage--live .al-state { animation: al-state-in var(--al-duration-slow) var(--al-ease) both; }
-@keyframes al-state-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
-}
-@media (prefers-reduced-motion: reduce) { .al-stage--live .al-state { animation: none; } }
 
 /* ---- Shared by every stage state ---- */
 
@@ -60,7 +59,15 @@
      pinned to the top with blank space below. */
   align-content: center;
 }
-@media (max-width: 520px) { .al-signals__tiles { grid-template-columns: repeat(2, 1fr); } }
+/*
+ * Three tiles need about 110px each — the figure on one line, "Work restrictions" under it
+ * in at most two — so the row needs about 340px of panel and pairs the tiles up below that.
+ * Deliberately not a translation of the 520px viewport rule this replaces: the hero's panel
+ * is ~400px wide at a 1240px viewport and ~410px at a 520px one, so that rule collapsed a
+ * panel WIDER than the desktop panel it left alone. The panel's own width is the only
+ * measure that was ever meant here.
+ */
+@container al-panel (max-width: 340px) { .al-signals__tiles { grid-template-columns: repeat(2, 1fr); } }
 
 .al-tile {
   background: var(--al-navy-raised);
@@ -95,21 +102,14 @@
   background: var(--al-navy-raised); border: 1px solid var(--al-hairline-inverse);
   color: var(--al-ink-inverse);
 }
-/*
- * Chips land one after another. 40ms per chip is under the 60ms stagger ceiling; the
- * fade itself is the fast token. Only on the live stage — the inline copy is static.
- */
-.al-stage--live .al-arrival__chips li {
-  animation: al-chip-in var(--al-duration-fast) var(--al-ease) both;
-  animation-delay: calc(var(--i, 0) * 40ms);
-}
-@keyframes al-chip-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .al-stage--live .al-arrival__chips li { animation: none; } }
 
 /* ---- Chronology (states 2–4) ---- */
 
 .al-chron__body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--al-space-4); }
-@media (max-width: 860px) { .al-chron__body { grid-template-columns: minmax(0, 1fr); } }
+/* Two columns need a spine wide enough for a wrapped event title — about 260px — beside a
+   citation card that can hold a sentence of the record, about 300px. With the gap that is
+   584px of panel; under 600 the pair stacks. */
+@container al-panel (max-width: 600px) { .al-chron__body { grid-template-columns: minmax(0, 1fr); } }
 
 .al-spine { list-style: none; margin: 0; padding: 0 0 0 var(--al-space-4); position: relative; }
 .al-ev { position: relative; margin-bottom: 2px; }
@@ -172,8 +172,7 @@
 .al-cite__warn b { display: block; }
 
 /* The page. Off-white, a shadow's worth of edge, faint rules for the text around the
-   passage, and the passage itself in the record face. Rises out of the spine on the live
-   stage; sits still inline. */
+   passage, and the passage itself in the record face. */
 .al-page {
   position: relative;
   background: #FDFDFB; border: 1px solid var(--al-hairline);
@@ -191,9 +190,6 @@
 }
 .al-page__quote mark, .al-cite__quote mark { background: var(--al-teal-wash); color: inherit; border-radius: 3px; padding: 1px 2px; }
 .al-page__no { position: absolute; right: var(--al-space-3); bottom: 6px; font-size: var(--al-text-xs); color: var(--al-ink-muted); }
-.al-stage--live .al-page { animation: al-page-in var(--al-duration-slow) var(--al-ease) both; }
-@keyframes al-page-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .al-stage--live .al-page { animation: none; } }
 
 .al-cite__counter {
   border-left: 3px solid var(--al-amber); padding-left: var(--al-space-3);
@@ -206,7 +202,16 @@
 .al-cite__meta > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--al-space-3); }
 .al-cite__meta dt { color: var(--al-ink-muted); }
 .al-cite__meta dd { margin: 0; font-weight: var(--al-weight-medium); }
-@media (max-width: 520px) {
+/*
+ * The 120px label track above only pays for itself while the citation card is wide enough
+ * to hold a value beside it — "Lumbar strain with radicular symptoms" is a value, not a
+ * word, and it wants about 180px. In the two-column body the card measures almost exactly
+ * half the panel, so 120 + the 16px gap + 180, plus the card's own 48px of padding, needs
+ * about 720px of panel. Below 600 the body has already stacked and the card is full width,
+ * so this stacks a little earlier than it strictly must; the cost is vertical space, and
+ * the alternative is a second container on the card itself to tell those two bands apart.
+ */
+@container al-panel (max-width: 720px) {
   .al-cite__meta { gap: var(--al-space-2); }
   .al-cite__meta > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
 }
@@ -325,18 +330,3 @@
 .al-output__export { display: flex; align-items: center; gap: var(--al-space-3); flex-wrap: wrap; }
 .al-output__export .al-review__btn--go { opacity: 0.55; }
 .al-output__export p { margin: 0; font-size: var(--al-text-xs); color: var(--al-ink-inverse-muted); }
-
-/* ---- Live-stage compaction: the pinned stage must fit under the fold ---- */
-.al-stage--live .al-chron .al-ev button { padding: 6px 10px; }
-.al-stage--live .al-chron .al-ev { margin-bottom: 0; }
-.al-stage--live .al-cite { padding: var(--al-space-3); }
-/* Secondary detail the chapter copy already carries; the stacked layout shows it all. */
-.al-stage--live .al-cite__meta,
-.al-stage--live .al-cite__offers,
-.al-stage--live .al-page__rules,
-.al-stage--live .al-cite__warn span { display: none; }
-
-/* The missing phase has no page facsimile, so it has the room — and its substance is in
-   these rows: the needed document, who referenced it, and the review state. */
-.al-stage--live .al-chron[data-phase="missing"] .al-cite__meta { display: grid; }
-.al-stage--live .al-chron[data-phase="missing"] .al-cite__offers { display: flex; }

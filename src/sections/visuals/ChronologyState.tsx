@@ -6,10 +6,6 @@ import './states.css';
 
 export type Phase = 'connected' | 'conflict' | 'missing';
 
-export function phaseFor(chapter: 2 | 3 | 4): Phase {
-  return chapter === 2 ? 'connected' : chapter === 3 ? 'conflict' : 'missing';
-}
-
 /** Which event each phase opens. Indexes into CHRONOLOGY, which is in date order. */
 export const PHASE_EVENT: Record<Phase, number> = { connected: 0, conflict: 3, missing: 2 };
 
@@ -122,11 +118,17 @@ export function CitationCard({ event, phase }: { event: ChronologyEvent; phase: 
 }
 
 /**
- * States 2, 3 and 4 in one component so the spine's DOM persists across them and the
- * card genuinely rises out of the row that produced it. A phase change moves the
+ * The three chronology phases in one component so the spine's DOM persists across them
+ * and the card genuinely rises out of the row that produced it. A phase change moves the
  * selection; a click moves it again. The phase does not fight the reader afterwards.
+ *
+ * `connected` is the default because it is the base case the other two are deviations
+ * from: every event cited, one citation open on its page. `conflict` and `missing` are
+ * what the Conflicting Records and Missing Records features show, and neither mounts a
+ * visual today — so the one caller, the Medical Chronologies card, wants the plain case
+ * and says nothing. The other two stay reachable, and stay tested, through the prop.
  */
-export function ChronologyState({ phase }: { phase: Phase }) {
+export function ChronologyState({ phase = 'connected' }: { phase?: Phase }) {
   const [renderedPhase, setRenderedPhase] = useState(phase);
   const [selected, setSelected] = useState(PHASE_EVENT[phase]);
 

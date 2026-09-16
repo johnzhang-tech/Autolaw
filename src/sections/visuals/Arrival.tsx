@@ -37,8 +37,8 @@ export function Arrival({ animate = true }: { animate?: boolean }) {
         <span className="al-arrival__of">of {DOCUMENT_COUNT}</span>
       </div>
       <ul className="al-arrival__chips" aria-label="Documents by type">
-        {ARRIVALS.map((g, i) => (
-          <li key={g.label} style={{ ['--i' as string]: i }}>
+        {ARRIVALS.map((g) => (
+          <li key={g.label}>
             {g.label}{g.count > 1 ? ` ×${g.count}` : ''}
           </li>
         ))}

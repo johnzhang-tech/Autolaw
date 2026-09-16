@@ -1,15 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChronologyState, phaseFor, PHASE_EVENT } from '../ChronologyState';
+import { ChronologyState, PHASE_EVENT } from '../ChronologyState';
 import { CHRONOLOGY } from '../../../data/demoCase';
 import { SCHEDULE_URL } from '../../../config';
 
 describe('ChronologyState', () => {
-  it('maps chapters 2, 3, 4 to connected, conflict, missing', () => {
-    expect([phaseFor(2), phaseFor(3), phaseFor(4)]).toEqual(['connected', 'conflict', 'missing']);
+  /* PHASE_EVENT indexes into CHRONOLOGY by position, so inserting an event ahead of these
+     two would silently open the wrong row. The titles are what pin the indices. */
+  it('opens each phase on the event that phase is about', () => {
     expect(CHRONOLOGY[PHASE_EVENT.conflict].title).toMatch(/modified duty/i);
     expect(CHRONOLOGY[PHASE_EVENT.missing].title).toMatch(/MRI/);
+  });
+
+  it('shows the connected phase when no phase is asked for', () => {
+    render(<ChronologyState />);
+    expect(screen.getByTestId('state-chronology')).toHaveAttribute('data-phase', 'connected');
+    expect(within(screen.getByTestId('citation-card')).getByText(/DWC-1 claim form/i)).toBeInTheDocument();
   });
 
   it('lists every event in date order with a document and page citation line', () => {

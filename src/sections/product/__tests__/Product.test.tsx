@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Product } from '../Product';
 import { PracticeProvider } from '../../../practice/PracticeContext';
 import { FEATURES } from '../../../data/product';
@@ -105,6 +106,37 @@ describe('Product', () => {
     expect(
       within(pre).queryByText('Every medical bill, lien, and benefit payment in one running total.'),
     ).not.toBeInTheDocument();
+  });
+
+  /*
+   * FeatureCard's own tests prove it mounts whatever `visual` it is handed once open.
+   * What is only true here is the pairing: which visual belongs to which card, and that
+   * each one arrives on the navy ground. A state rendered without .al-stage is white text
+   * on the cream canvas, and jsdom paints nothing, so the class is the only evidence.
+   */
+  it.each([
+    ['Medical Chronologies', 'state-chronology'],
+    ['Ask AL', 'state-ask'],
+    ['Case Management Summary', 'state-output'],
+  ])('opens %s onto its own visual, on the navy ground', async (name, testId) => {
+    const user = userEvent.setup();
+    renderProduct();
+
+    expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
+    await user.click(screen.getAllByRole('button', { name: new RegExp(`^${name}`) })[0]);
+
+    const visual = screen.getByTestId(testId);
+    expect(visual.closest('.al-feat__visual')).toBeInTheDocument();
+    expect(visual.closest('.al-stage.al-on-navy')).toBeInTheDocument();
+  });
+
+  it('opens a card with no visual onto its detail alone', async () => {
+    const user = userEvent.setup();
+    const { container } = renderProduct();
+    await user.click(screen.getByRole('button', { name: /^Damages Ledger/ }));
+    expect(screen.getByText(/Bills, liens, and benefits together/)).toBeInTheDocument();
+    expect(container.querySelector('.al-feat__visual')).not.toBeInTheDocument();
+    expect(container.querySelector('.al-stage')).not.toBeInTheDocument();
   });
 
   it('renders Pre-Litigation before Litigation in the DOM', () => {

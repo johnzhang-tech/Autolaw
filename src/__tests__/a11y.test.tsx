@@ -511,18 +511,36 @@ describe('shipped stylesheet', () => {
   /*
    * jsdom does no CSS layout, so no test here can prove the page reflows. What is
    * proved is that the breakpoints the plan claims survive into the shipped bundle —
-   * a deleted or renamed media query fails this. Whether the result actually looks
-   * right at 360/768/1024/1440, and whether the page avoids horizontal scroll, still
-   * needs a human in a browser.
+   * a deleted or renamed query fails this. Whether the result actually looks right at
+   * 360/768/1024/1440, and whether the page avoids horizontal scroll, still needs a
+   * human in a browser.
+   *
+   * The three panel rules are container queries, not media queries: a panel inside an
+   * opened feature card measures 506px at a 1240px viewport and 751px at an 880px one —
+   * it gets wider as the window narrows, because the product's two columns collapse into
+   * one — so a max-width media query collapses those layouts at the width where the card
+   * has the most room. They are asserted here the same way as the viewport ones — the
+   * query has to exist, and it has to still be the collapse it claims to be — plus the
+   * two things a container query can fail at that a media query cannot: the container it
+   * names must be declared, and the rule must not have been left behind in a viewport
+   * query where the card never reaches it.
    */
   it('ships the documented layout breakpoints', () => {
     const rules = topLevelRules(css);
 
-    const at = (maxWidth: number, selector: string) =>
-      rulesInside(rules, (r) => new RegExp(`max-width\\s*:\\s*${maxWidth}px`).test(r.prelude))
-        .filter((r) => selectorsOf(r).includes(selector))
+    // Minification closes the spaces around a child combinator, so `.al-cite__meta > div`
+    // ships as `.al-cite__meta>div`. Compare on the closed form, whichever was written.
+    const tight = (s: string) => s.replace(/\s*>\s*/g, '>');
+    const inQuery = (query: RegExp, selector: string) =>
+      rulesInside(rules, (r) => query.test(r.prelude))
+        .filter((r) => selectorsOf(r).map(tight).includes(tight(selector)))
         .map((r) => r.body)
         .join(';');
+
+    const media = (maxWidth: number, selector: string) =>
+      inQuery(new RegExp(`^@media[^{]*max-width\\s*:\\s*${maxWidth}px`), selector);
+    const panel = (maxWidth: number, selector: string) =>
+      inQuery(new RegExp(`^@container\\s+al-panel[^{]*max-width\\s*:\\s*${maxWidth}px`), selector);
 
     /*
      * One column, written either way. A bare `1fr` is `minmax(auto, 1fr)`, so the track
@@ -533,10 +551,31 @@ describe('shipped stylesheet', () => {
      */
     const ONE_COLUMN = /grid-template-columns:\s*(?:minmax\(\s*0\s*,\s*1fr\s*\)|1fr)\s*(?:;|$)/;
 
-    expect(at(900, '.al-herosec__grid')).toMatch(ONE_COLUMN);
-    expect(at(520, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
-    expect(at(860, '.al-chron__body')).toMatch(ONE_COLUMN);
-    expect(at(780, '.al-sil__body')).toMatch(ONE_COLUMN);
+    expect(media(900, '.al-herosec__grid')).toMatch(ONE_COLUMN);
+    expect(media(780, '.al-sil__body')).toMatch(ONE_COLUMN);
+
+    expect(panel(340, '.al-signals__tiles')).toMatch(/grid-template-columns:\s*repeat\(2,\s*1fr\)/);
+    expect(panel(600, '.al-chron__body')).toMatch(ONE_COLUMN);
+    expect(panel(720, '.al-cite__meta > div')).toMatch(ONE_COLUMN);
+
+    // A query against a container nobody declares never matches, and fails silently.
+    const stage = styleRules(rules)
+      .filter((r) => selectorsOf(r).includes('.al-stage'))
+      .map((r) => r.body)
+      .join(';');
+    expect(stage, '.al-stage no longer establishes a container').toMatch(/container-type:\s*inline-size/);
+    expect(stage, 'the container the three rules name is not the one declared').toMatch(/container-name:\s*al-panel/);
+
+    // And none of the three may go back to asking about the viewport, where an opened
+    // card — narrow inside a wide window — is exactly the case that gets it wrong.
+    const byViewport = rulesInside(rules, (r) => /^@media/.test(r.prelude))
+      .filter((r) =>
+        ['.al-signals__tiles', '.al-chron__body', '.al-cite__meta>div'].some((s) =>
+          selectorsOf(r).map(tight).includes(s)
+        )
+      )
+      .flatMap(selectorsOf);
+    expect(byViewport).toEqual([]);
   });
 
   /*
@@ -573,33 +612,6 @@ describe('shipped stylesheet', () => {
     // one alone puts the overflow on the page instead.
     expect(decls('.al-cmp table')).toMatch(/min-width:\s*\d+px/);
     expect(decls('.al-cmp__scroller')).toMatch(/overflow-x:\s*auto/);
-  });
-
-  /*
-   * The pinned and stacked layouts may differ in motion, but this `display: none` list is
-   * the only place they are allowed to differ in *content* — it is what keeps the missing
-   * phase's substance (the needed document, who referenced it, the review state) reachable
-   * on the pinned stage. Pinning the exact set means growing it again has to be a deliberate
-   * act, not a side effect of some other compaction rule reusing `.al-stage--live`.
-   */
-  it('keeps the live-stage compaction list to exactly the rules the pinned/missing override accounts for', () => {
-    const rules = topLevelRules(css);
-
-    const hidden = new Set(
-      styleRules(rules, (r) => !isReducedMotion(r))
-        .filter((r) => /(^|;)\s*display\s*:\s*none\s*(;|$)/.test(r.body))
-        .flatMap(selectorsOf)
-        .filter((s) => s.includes('.al-stage--live'))
-    );
-
-    expect([...hidden].sort()).toEqual(
-      [
-        '.al-stage--live .al-cite__meta',
-        '.al-stage--live .al-cite__offers',
-        '.al-stage--live .al-page__rules',
-        '.al-stage--live .al-cite__warn span',
-      ].sort()
-    );
   });
 
   /*
