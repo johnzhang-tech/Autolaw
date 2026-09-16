@@ -36,4 +36,11 @@ describe('SiteFooter', () => {
     expect(screen.queryByRole('link', { name: /privacy/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /terms/i })).not.toBeInTheDocument();
   });
+
+  it('marks Security without changing it from a plain link', () => {
+    render(<SiteFooter />);
+    const security = screen.getByRole('link', { name: 'Security' });
+    expect(security).toHaveAttribute('href', '/security/');
+    expect(within(security).getByTestId('security-mark')).toHaveAttribute('aria-hidden', 'true');
+  });
 });

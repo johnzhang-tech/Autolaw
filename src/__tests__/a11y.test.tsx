@@ -113,12 +113,13 @@ describe('keyboard reachability', () => {
      * loop then passes over a shorter list and reports nothing.
      */
 
-    // Nav links: brand, four site links, and the header CTA. No login link while
-    // LOGIN_URL is null.
+    // Nav links: brand, Product overview, three flat site links, and the header CTA.
+    // The adjacent Product menu toggle is the sixth primary-navigation control.
     const nav = screen.getByRole('navigation', { name: /primary/i });
     const navLinks = within(nav).getAllByRole('link');
     expect(navLinks.length).toBe(6);
     navLinks.forEach(reachable);
+    reachable(within(nav).getByRole('button', { name: /product menu/i }));
 
     // The hero's secondary control. The trial CTA is absent while TRIAL_ENABLED is false.
     reachable(screen.getByRole('link', { name: /see how it works/i }));
@@ -128,23 +129,16 @@ describe('keyboard reachability', () => {
     expect(schedule.length).toBe(4);
     schedule.forEach(reachable);
 
-    // Every feature card's disclosure. Filtered to outside the banner because the nav's
-    // mobile toggle carries aria-expanded too, and outside Ask AL because its citation
-    // chips carry aria-expanded as well.
-    const banner = screen.getByRole('banner');
-    const askAl = container.querySelector('#ask-al');
-    // queryAll, not getAll: every card starts collapsed, so the expanded set is legitimately
-    // empty on first paint and getAllByRole would throw on it rather than assert anything.
-    const disclosures = screen.queryAllByRole('button', { expanded: false })
-      .concat(screen.queryAllByRole('button', { expanded: true }))
-      .filter((el) => !banner.contains(el) && !(askAl && askAl.contains(el)));
-    // Counted against the cards themselves rather than a literal, so adding a feature does
-    // not send anyone here to edit a number — but a toggle that became a <div onClick>
-    // drops out of the role query and still fails, which is what this is here to catch.
+    // Every routed feature card is one link. Coming-next cards are intentionally inert:
+    // they remain visible and labelled, but never enter the tab order as dead destinations.
     const cards = screen.getAllByTestId('feature-card');
+    const routedCards = cards.filter((card) => card.getAttribute('data-availability') !== 'coming-next');
+    const productLinks = routedCards
+      .map((card) => (card.matches('a[href]') ? card : card.querySelector('a[href]')))
+      .filter((card): card is Element => card !== null);
     expect(cards.length).toBeGreaterThan(5);
-    expect(disclosures.length).toBe(cards.length);
-    disclosures.forEach(reachable);
+    expect(productLinks.length).toBe(routedCards.length);
+    productLinks.forEach(reachable);
 
     // the silhouette's regions are covered by Silhouette.test.tsx; it renders only
     // under the WC Injury tab

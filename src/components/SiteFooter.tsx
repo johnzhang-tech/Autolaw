@@ -1,5 +1,6 @@
 import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
 import { SITE_LINKS } from '../navigation';
+import { SecurityMark } from './SecurityMark';
 import './SiteFooter.css';
 
 export function SiteFooter() {
@@ -14,7 +15,12 @@ export function SiteFooter() {
         </div>
         <ul className="al-footer__links">
           {SITE_LINKS.map((l) => (
-            <li key={l.href}><a href={l.href}>{l.label}</a></li>
+            <li key={l.href}>
+              <a href={l.href}>
+                {l.label === 'Security' && <SecurityMark />}
+                <span>{l.label}</span>
+              </a>
+            </li>
           ))}
           <li><a href={SCHEDULE_URL}>Schedule a call</a></li>
           {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
