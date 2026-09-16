@@ -1,0 +1,150 @@
+.al-prod__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--al-space-7);
+}
+
+.al-prod__phase {
+  font-size: 1.25rem;
+  line-height: var(--al-leading-tight);
+  margin: 0;
+}
+
+.al-prod__phase-line {
+  color: var(--al-ink-muted);
+  margin: var(--al-space-1) 0 var(--al-space-4);
+}
+
+.al-prod__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+}
+
+.al-feat {
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  background: var(--al-surface);
+  padding: var(--al-space-3) var(--al-space-4);
+}
+
+/*
+ * Header row: name, availability tag, practice badge, then the chevron pushed to the
+ * far end (FeatureCard.tsx renders all four here — the badge never reaches the footer,
+ * which now holds only the output line).
+ */
+.al-feat__toggle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--al-space-2);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.al-feat__toggle:focus-visible { outline: var(--al-focus-ring); }
+
+.al-feat__name { font-weight: 600; }
+
+.al-feat__tag {
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-pill);
+  color: var(--al-ink-muted);
+  font-size: 0.75rem;
+  padding: 0 var(--al-space-2);
+  white-space: nowrap;
+}
+
+/* Filled pill, sized to match .al-feat__tag beside it in the header row. Dark ink on
+   --al-state-neutral clears AA (4.6:1) — that pairing only works with the inherited ink
+   color, so this rule deliberately leaves `color` unset rather than repeating it. */
+.al-feat__badge {
+  border-radius: var(--al-radius-pill);
+  background: var(--al-state-neutral);
+  font-size: 0.75rem;
+  padding: 0 var(--al-space-2);
+  white-space: nowrap;
+}
+
+.al-feat__chev {
+  margin-left: auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1.5px solid var(--al-ink-muted);
+  border-bottom: 1.5px solid var(--al-ink-muted);
+  transform: rotate(45deg);
+  transition: transform var(--al-duration-fast) var(--al-ease);
+  flex-shrink: 0;
+}
+
+.al-feat__toggle[aria-expanded='true'] .al-feat__chev { transform: rotate(225deg); }
+
+.al-feat__line {
+  color: var(--al-ink-muted);
+  margin: var(--al-space-1) 0 0;
+}
+
+.al-feat__panel { margin-top: var(--al-space-3); }
+
+.al-feat__detail {
+  margin: 0;
+  padding-left: var(--al-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-1);
+}
+
+.al-feat__visual { margin-top: var(--al-space-3); }
+
+/* Only the output line lives here now — the availability tag and practice badge moved
+   to the always-visible header so they read without opening the card. */
+.al-feat__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-2);
+  margin: var(--al-space-3) 0 0;
+  font-size: 0.875rem;
+}
+
+.al-feat__output { color: var(--al-ink-muted); }
+
+.al-prod__strip,
+.al-prod__next { margin-top: var(--al-space-7); }
+
+.al-prod__strip-head,
+.al-prod__next-head {
+  font-size: 1rem;
+  margin: 0 0 var(--al-space-3);
+}
+
+.al-prod__strip ul {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--al-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.al-prod__strip li { display: flex; flex-direction: column; gap: var(--al-space-1); }
+.al-prod__strip span { color: var(--al-ink-muted); }
+
+.al-prod__cards--next {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--al-space-3);
+}
+
+/* One column below the point where two stop fitting. Cards stay collapsed at every
+   width, so the section's height never depends on the viewport. */
+@media (max-width: 900px) {
+  .al-prod__columns,
+  .al-prod__strip ul,
+  .al-prod__cards--next { grid-template-columns: 1fr; }
+}
