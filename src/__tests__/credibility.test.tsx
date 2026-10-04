@@ -68,6 +68,7 @@ describe('credibility guards', () => {
       'index.html',
       'security/index.html',
       'security/subprocessors/index.html',
+      'security/ai/index.html',
       'about/index.html',
       'schedule-call/index.html',
       'privacy/index.html',

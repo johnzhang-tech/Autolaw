@@ -6,6 +6,7 @@ import type { ReactElement } from 'react';
 import App from '../App';
 import { SecurityPage } from '../pages/security/SecurityPage';
 import { SubprocessorsPage } from '../pages/security/subprocessors/SubprocessorsPage';
+import { AiDataUsePage } from '../pages/security/ai/AiDataUsePage';
 import { AboutPage } from '../pages/about/AboutPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
@@ -86,6 +87,7 @@ const PAGES: ReadonlyArray<[string, PageFactory]> = [
   ['home', () => <App />],
   ['security', () => <SecurityPage />],
   ['security/subprocessors', () => <SubprocessorsPage />],
+  ['security/ai', () => <AiDataUsePage />],
   ['about', () => <AboutPage />],
   ['schedule-call', () => <ScheduleCallPage />],
   ['privacy', () => <PrivacyPage />],
@@ -101,6 +103,7 @@ const HTML = [
   'index.html',
   'security/index.html',
   'security/subprocessors/index.html',
+  'security/ai/index.html',
   'about/index.html',
   'schedule-call/index.html',
   'privacy/index.html',
