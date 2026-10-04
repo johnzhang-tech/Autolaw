@@ -3,13 +3,13 @@ import { PageHero } from '../PageHero';
 import { Section } from '../../components/primitives/Section';
 import { Button } from '../../components/primitives/Button';
 import { AI_USE_URL, CERTIFICATIONS, CONTACT_EMAIL, SCHEDULE_URL, SUBPROCESSORS_URL } from '../../config';
-import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, TRUST_LAST_VERIFIED } from '../../data/trust';
-import { TrustCardView } from './TrustCardView';
+import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, REVIEWER_COMMITMENTS, SECTION_INTROS, TRUST_LAST_VERIFIED } from '../../data/trust';
+import { PlannedList, TrustCardView } from './TrustCardView';
 import './SecurityPage.css';
 
 /*
- * EVERY STATEMENT ON THIS PAGE IS TRUE IN THE PRODUCT TODAY, OR IS MARKED AS PLANNED
- * WITH ITS QUARTER.
+ * EVERY STATEMENT IN THE PRIVACY, AI AND AUDIT SECTIONS IS TRUE IN THE PRODUCT TODAY, OR IS
+ * MARKED AS PLANNED WITH ITS QUARTER.
  *
  * The privacy, model and audit copy comes from src/data/trust.ts, where each card names
  * the claim ids that prove it in case-app's evidence record (docs/trust/evidence-annex.md).
@@ -54,8 +54,8 @@ export function SecurityPage() {
         title="How Autolaw handles your firm’s case data"
         intro={
           <>
-            Everything below is true in the product today, or is marked as planned with its
-            quarter. Last verified {TRUST_LAST_VERIFIED}. A firm evaluating Autolaw can read the
+            The privacy, AI and audit answers below are true in the product today, or are marked
+            as planned with their quarter. Last verified {TRUST_LAST_VERIFIED}. A firm evaluating Autolaw can read the
             full Trust Pack, with the evidence behind each statement and the limits we have not
             closed yet, under a confidentiality agreement.
           </>
@@ -78,7 +78,7 @@ export function SecurityPage() {
         id="privacy"
         eyebrow="Question one"
         heading="Does my client’s medical data stay private?"
-        intro="The answer is in the controls: each firm’s data is kept apart, opening a document is recorded, traffic and storage are encrypted, and retention is stated."
+        intro={SECTION_INTROS.privacy.text}
       >
         <div className="al-secp__grid al-secp__grid--two-by-two">
           {PRIVACY_CARDS.map((c) => <TrustCardView key={c.title} card={c} />)}
@@ -90,7 +90,7 @@ export function SecurityPage() {
         tone="navy"
         eyebrow="Question two"
         heading="Does my case train your model?"
-        intro="No. Autolaw trains no models on your data, and the AI providers that read your documents work under paid terms that do not allow them to train on it."
+        intro={SECTION_INTROS.model.text}
       >
         <div className="al-secp__grid al-secp__grid--three">
           {AI_CARDS.map((c) => <TrustCardView key={c.title} card={c} tone="navy" />)}
@@ -176,15 +176,12 @@ export function SecurityPage() {
             </li>
             <li>
               <b>Your firm’s security questionnaire</b>
-              <span>We complete it directly, in your format.</span>
+              <span>We complete it directly, on request.</span>
             </li>
             <li>
               <b>A security issue</b>
-              <span>
-                Report it to {CONTACT_EMAIL} with “Security” in the subject line. A written
-                incident-response plan, with notice to affected firms within 72 hours of
-                confirming a breach, is planned for Q4 2026.
-              </span>
+              <span>Report it to {CONTACT_EMAIL} with “Security” in the subject line.</span>
+              <PlannedList items={REVIEWER_COMMITMENTS} label="Planned: incident response" />
             </li>
             <li>
               <b>A question this page does not answer</b>

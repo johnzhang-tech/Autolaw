@@ -80,20 +80,6 @@
 }
 .al-secp__card--navy p { color: var(--al-ink-inverse-muted); }
 
-.al-secp__why {
-  margin: var(--al-space-4) 0 0;
-  padding-left: var(--al-space-4);
-  border-left: 3px solid var(--al-amber);
-  font-size: var(--al-text-body);
-  line-height: var(--al-leading-normal);
-  color: var(--al-ink-inverse-muted);
-  max-width: 76ch;
-}
-
-.al-secp__kinds { margin-top: var(--al-space-4); color: var(--al-ink-inverse-muted); font-size: var(--al-text-sm); }
-.al-secp__kinds ul { display: flex; flex-wrap: wrap; gap: var(--al-space-2); list-style: none; margin: var(--al-space-2) 0 0; padding: 0; }
-.al-secp__kinds li { border: 1px solid var(--al-hairline-inverse); border-radius: var(--al-radius-pill); padding: 4px 10px; color: var(--al-ink-inverse); font-size: var(--al-text-xs); }
-
 .al-secp__ethics { margin-bottom: var(--al-space-5); }
 .al-secp__guidance {
   display: inline-flex;
@@ -199,4 +185,9 @@
   color: var(--al-ink-inverse-muted);
 }
 .al-secp__more a { color: var(--al-ink-inverse); text-underline-offset: 0.2em; }
-.al-secp__more a:focus-visible { outline: 2px solid var(--al-focus-ring-inverse); outline-offset: 2px; }
+
+/* On a navy card the planned list switches to the inverse ink and hairline. */
+.al-secp__card--navy .al-secp__planned { color: var(--al-ink-inverse); border-top-color: var(--al-hairline-inverse); }
+.al-secp__card--navy .al-secp__quarter { border-color: var(--al-hairline-inverse); }
+/* The reviewer list's planned item sits under its sentence. */
+.al-secp__asks .al-secp__planned { border-top: 0; padding-top: 0; margin-top: var(--al-space-2); }

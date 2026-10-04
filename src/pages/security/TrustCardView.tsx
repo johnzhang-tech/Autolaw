@@ -1,4 +1,29 @@
-import type { TrustCard } from '../../data/trust';
+import type { Commitment, TrustCard } from '../../data/trust';
+
+interface PlannedListProps {
+  items: ReadonlyArray<Commitment>;
+  label: string;
+  className?: string;
+  quarterClassName?: string;
+}
+
+/**
+ * Dated plans, each visibly marked "Planned" with its quarter. `data-planned` lets the page
+ * guard (trustGuard.ts) set these aside: a plan may name a control that does not exist yet.
+ */
+export function PlannedList({ items, label, className = 'al-secp__planned', quarterClassName = 'al-secp__quarter' }: PlannedListProps) {
+  if (items.length === 0) return null;
+  return (
+    <ul className={className} aria-label={label} data-planned="">
+      {items.map((c) => (
+        <li key={c.text}>
+          <span className={quarterClassName}>Planned · {c.quarter}</span>
+          <span>{c.text}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 interface Props {
   card: TrustCard;
@@ -11,16 +36,7 @@ export function TrustCardView({ card, tone }: Props) {
     <div className={tone === 'navy' ? 'al-secp__card al-secp__card--navy' : 'al-secp__card'}>
       <h3>{card.title}</h3>
       <p>{card.body}</p>
-      {card.commitments && card.commitments.length > 0 && (
-        <ul className="al-secp__planned" aria-label={`Planned: ${card.title}`}>
-          {card.commitments.map((c) => (
-            <li key={c.text}>
-              <span className="al-secp__quarter">{c.quarter}</span>
-              <span>{c.text}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <PlannedList items={card.commitments ?? []} label={`Planned: ${card.title}`} />
     </div>
   );
 }

@@ -13,7 +13,7 @@ describe('Trust', () => {
 
   it('states the control claims in plain language', () => {
     render(<Trust />);
-    expect(screen.getByText(/does not train models/i)).toBeInTheDocument();
+    expect(screen.getByText(/autolaw does not train on your data/i)).toBeInTheDocument();
     // Re-pointed from "tenant isolation" — vendor vocabulary that names a lease to the
     // attorney reading it. Same control, stated as what it does.
     expect(screen.getByText(/no other firm can see your cases/i)).toBeInTheDocument();

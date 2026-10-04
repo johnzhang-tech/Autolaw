@@ -6,8 +6,8 @@ import './Hero.css';
 const TRUST = [
   'Source-linked evidence',
   'Attorney confirms every fact',
-  'No AI training on your data',
-  'Encrypted in transit and at rest',
+  'Autolaw trains no AI on your data',
+  'Each firm’s data kept separate',
 ];
 
 function Tick() {

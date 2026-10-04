@@ -62,16 +62,20 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     reason: 'the illustration corpus is directional and does not support a published accuracy percentage',
   },
   {
-    pattern: /SOC\s*2\s*Type\s*II|Type\s*II\s+(?:report|attestation)/i,
+    pattern: /SOC\s*2\s*Type\s*(?:II|2)\b|Type\s*(?:II|2)\s+(?:report|attestation)/i,
     reason: 'no SOC 2 report exists yet: the owner confirmed on 2026-10-03 that the audit is in preparation, with a Type I report planned for Q2 2027',
   },
   {
-    pattern: /BAA\s+(?:is\s+)?(?:signed\s+)?on\s+request|signed\s+on\s+request/i,
+    pattern: /\bBAAs?\b[^.]{0,40}\b(?:up)?on\s+request|business\s+associate\s+agreements?[^.]{0,40}\b(?:up)?on\s+request|signed\s+on\s+request/i,
     reason: 'a BAA needs BAAs with the AI providers first, and the Gemini Developer API is not among Google’s HIPAA-covered products (checked 2026-10-03)',
   },
   {
     pattern: /within\s+90\s+days/i,
     reason: 'no deletion procedure exists to meet a 90-day window; the privacy-policy wording is with legal (case-app evidence annex, blocker 3)',
+  },
+  {
+    pattern: /encrypt\w*\s+in\s+transit\s+and\s+at\s+rest|end[\s-]to[\s-]end\s+encrypt/i,
+    reason: 'encryption is stated per connection and per store (case-app evidence EN-1, EN-2); the job queue and the graph host’s disks are not evidenced',
   },
 ];
 
@@ -117,6 +121,20 @@ describe('claim guard', () => {
     expect(pageText(() => <App />).length).toBeGreaterThan(4000);
   });
 
+  it('catches the wording it retires and passes the corrected wording', () => {
+    const retired = [
+      'SOC 2 Type II', 'SOC 2 Type II', 'SOC 2 Type 2', 'BAA available on request',
+      'BAA signed on request', 'a business associate agreement, signed on request',
+      'deleted within 90 days of an account ending', 'Encrypted in transit and at rest',
+    ];
+    const corrected = [
+      'SOC 2 in preparation', 'Type I report planned for Q2 2027',
+      'Business associate agreement planned', 'When your firm leaves, we delete its data on request.',
+    ];
+    retired.forEach((s) => expect(RETIRED.some((r) => r.pattern.test(s)), s).toBe(true));
+    corrected.forEach((s) => expect(RETIRED.filter((r) => r.pattern.test(s)).map((r) => String(r.pattern)), s).toEqual([]));
+  });
+
   for (const [name, page] of PAGES) {
     it(`${name} makes no retired claim`, () => {
       const text = pageText(page);
@@ -147,7 +165,7 @@ describe('claim guard', () => {
    */
   for (const file of HTML) {
     it(`${file} makes no retired claim in its metadata`, () => {
-      const html = readFileSync(join(ROOT, file), 'utf8');
+      const html = readFileSync(join(ROOT, file), 'utf8').replace(/&nbsp;|&#160;/g, ' ');
       const hits = RETIRED.filter((r) => r.pattern.test(html)).map((r) => `${r.pattern} — ${r.reason}`);
       expect(hits).toEqual([]);
     });

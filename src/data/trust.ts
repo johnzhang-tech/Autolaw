@@ -99,6 +99,21 @@ export const AUDIT_CARDS: ReadonlyArray<TrustCard> = [
   },
 ];
 
+export const SECTION_INTROS: Readonly<Record<'privacy' | 'model', { text: string; claims: ReadonlyArray<ClaimId> }>> = {
+  privacy: {
+    text: 'The answer is in the controls: each firm’s data is kept apart, opening a document is recorded, and encryption and retention are stated exactly.',
+    claims: ['TI-1', 'IR-2', 'EN-1', 'RT-1'],
+  },
+  model: {
+    text: 'No. Autolaw trains no models on your data, and the AI providers that read your documents work under paid terms that do not allow them to train on it.',
+    claims: ['MT-1', 'MT-2', 'MT-3'],
+  },
+};
+
+export const REVIEWER_COMMITMENTS: ReadonlyArray<Commitment> = [
+  { quarter: 'Q4 2026', text: 'A written incident-response plan, with notice to affected firms within 72 hours of confirming a breach.' },
+];
+
 export interface Subprocessor {
   vendor: string;
   purpose: string;

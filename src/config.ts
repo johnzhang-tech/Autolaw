@@ -82,10 +82,11 @@ export const CUSTOMER_LOGOS: ReadonlyArray<{ name: string; src: string }> = [];
  * Developer API, which Google's HIPAA agreement does not cover. Both badges now state the
  * plan, dated, and claims.test.tsx retires the old wording. Evidence: case-app
  * docs/trust/evidence-annex.md, claims OV-1 and OV-2.
+ * `claims` names the evidence ids, as in src/data/trust.ts; they are not rendered.
  */
-export const CERTIFICATIONS: ReadonlyArray<{ mark: string; label: string; detail: string }> = [
-  { mark: 'SOC 2', label: 'SOC 2 in preparation', detail: 'Type I report planned for Q2 2027' },
-  { mark: 'HIPAA', label: 'Business associate agreement', detail: 'Planned for Q2 2027, with HIPAA-eligible AI processing' },
+export const CERTIFICATIONS: ReadonlyArray<{ mark: string; label: string; detail: string; claims: ReadonlyArray<string> }> = [
+  { mark: 'SOC 2', label: 'SOC 2 in preparation', detail: 'Type I report planned for Q2 2027', claims: ['OV-2'] },
+  { mark: 'HIPAA', label: 'Business associate agreement planned', detail: 'Q2 2027, with HIPAA-eligible AI processing', claims: ['OV-1'] },
 ];
 
 /**

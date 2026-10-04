@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { SecurityPage } from '../SecurityPage';
 import { CERTIFICATIONS, CONTACT_EMAIL } from '../../../config';
-import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS } from '../../../data/trust';
+import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, REVIEWER_COMMITMENTS, SECTION_INTROS } from '../../../data/trust';
 import { renderedText } from '../../__tests__/renderedText';
-import { guardHits } from './trustGuard';
+import { guardHits, guardText } from './trustGuard';
 
 /*
  * renderedText, not textContent: textContent glues adjacent elements together, which
@@ -38,13 +38,15 @@ describe('SecurityPage — the Trust Center', () => {
       expect(privacy.getByText(c.body)).toBeInTheDocument();
       (c.commitments ?? []).forEach((x) => expect(privacy.getByText(x.text)).toBeInTheDocument());
     });
-    expect(privacy.getAllByText('Q1 2027').length).toBeGreaterThan(0);
+    expect(privacy.getAllByText('Planned · Q1 2027').length).toBe(2);
+    expect(privacy.getByText(SECTION_INTROS.privacy.text)).toBeInTheDocument();
   });
 
   it('renders every model card and links to the AI and subprocessor pages', () => {
     render(<SecurityPage />);
     const model = region(/does my case train your model/i);
     AI_CARDS.forEach((c) => expect(model.getByText(c.body)).toBeInTheDocument());
+    expect(model.getByText(SECTION_INTROS.model.text)).toBeInTheDocument();
     expect(model.getByRole('link', { name: /how autolaw uses ai/i })).toHaveAttribute('href', '/security/ai/');
     expect(model.getByRole('link', { name: /every subprocessor/i })).toHaveAttribute('href', '/security/subprocessors/');
   });
@@ -59,6 +61,7 @@ describe('SecurityPage — the Trust Center', () => {
   it('shows the badges from config rather than hardcoded copy', () => {
     render(<SecurityPage />);
     const badges = within(screen.getByRole('list', { name: 'Audits and agreements' }));
+    expect(CERTIFICATIONS.length).toBeGreaterThan(0);
     CERTIFICATIONS.forEach((c) => {
       expect(badges.getByText(c.label)).toBeInTheDocument();
       expect(badges.getByText(c.detail)).toBeInTheDocument();
@@ -68,12 +71,11 @@ describe('SecurityPage — the Trust Center', () => {
   it('routes a reviewer to a person for the Trust Pack', () => {
     render(<SecurityPage />);
     const main = within(screen.getByRole('main'));
-    expect(main.getByRole('link', { name: new RegExp(`email ${CONTACT_EMAIL.replace('.', '\\.')}`, 'i') })).toHaveAttribute(
-      'href',
-      expect.stringContaining(`mailto:${CONTACT_EMAIL}`),
-    );
+    const emailName = new RegExp(`email ${CONTACT_EMAIL.replace(/[.]/g, '\\.')}`, 'i');
+    expect(main.getByRole('link', { name: emailName })).toHaveAttribute('href', expect.stringContaining(`mailto:${CONTACT_EMAIL}`));
     expect(main.getByRole('link', { name: /schedule a call/i })).toHaveAttribute('href', '/schedule-call/');
     expect(main.getAllByText(/Trust Pack/).length).toBeGreaterThan(1);
+    expect(main.getByText(REVIEWER_COMMITMENTS[0].text)).toBeInTheDocument();
   });
 
   it('frames privilege, disclosure, and costs as questions and points to current State Bar guidance', () => {
@@ -82,6 +84,7 @@ describe('SecurityPage — the Trust Center', () => {
     expect(ethics.getByRole('heading', { name: /could this affect confidentiality or privilege/i })).toBeInTheDocument();
     expect(ethics.getByRole('heading', { name: /when should I tell my client/i })).toBeInTheDocument();
     expect(ethics.getByRole('heading', { name: /may AI costs be passed through/i })).toBeInTheDocument();
+    expect(ethics.getByText(/questions to take to your firm’s ethics counsel/i)).toBeInTheDocument();
     expect(ethics.getByRole('link', { name: /state bar.*practical guidance/i })).toHaveAttribute(
       'href',
       expect.stringMatching(/^https:\/\/www\.calbar\.ca\.gov\//),
@@ -94,6 +97,8 @@ describe('SecurityPage — the Trust Center', () => {
     expect(illustrations.getByText('Early access')).toBeInTheDocument();
     expect(illustrations.getByText(/refuses to start when the record is too thin/i)).toBeInTheDocument();
     expect(illustrations.getByText(/hash-verifies the locked exhibit/i)).toBeInTheDocument();
+    expect(illustrations.getByText(/re-inspects each render/i)).toBeInTheDocument();
+    expect(illustrations.getByText(/parks a failed render for attorney review/i)).toBeInTheDocument();
   });
 });
 
@@ -129,8 +134,15 @@ describe('SecurityPage — audits and agreements', () => {
 describe('SecurityPage — vocabulary not yet verified', () => {
   it('uses none of it, and no NDA-only detail', () => {
     render(<SecurityPage />);
-    const text = pageText();
+    const text = guardText(screen.getByRole('main'));
     expect(text.length).toBeGreaterThan(1500);
     expect(guardHits(text)).toEqual([]);
+  });
+
+  it('names MFA, SSO and incident response only inside a planned item', () => {
+    render(<SecurityPage />);
+    expect(pageText()).toMatch(/Multi-factor authentication/);
+    expect(pageText()).toMatch(/incident-response plan/);
+    expect(guardHits(guardText(screen.getByRole('main')))).toEqual([]);
   });
 });
