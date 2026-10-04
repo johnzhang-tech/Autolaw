@@ -67,6 +67,7 @@ describe('credibility guards', () => {
     expect(entries.map((f) => f.replace(`${ROOT}/`, ''))).toEqual([
       'index.html',
       'security/index.html',
+      'security/subprocessors/index.html',
       'about/index.html',
       'schedule-call/index.html',
       'privacy/index.html',

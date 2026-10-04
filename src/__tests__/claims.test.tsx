@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { ReactElement } from 'react';
 import App from '../App';
 import { SecurityPage } from '../pages/security/SecurityPage';
+import { SubprocessorsPage } from '../pages/security/subprocessors/SubprocessorsPage';
 import { AboutPage } from '../pages/about/AboutPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
@@ -84,6 +85,7 @@ type PageFactory = () => ReactElement;
 const PAGES: ReadonlyArray<[string, PageFactory]> = [
   ['home', () => <App />],
   ['security', () => <SecurityPage />],
+  ['security/subprocessors', () => <SubprocessorsPage />],
   ['about', () => <AboutPage />],
   ['schedule-call', () => <ScheduleCallPage />],
   ['privacy', () => <PrivacyPage />],
@@ -98,6 +100,7 @@ const ROOT = process.cwd();
 const HTML = [
   'index.html',
   'security/index.html',
+  'security/subprocessors/index.html',
   'about/index.html',
   'schedule-call/index.html',
   'privacy/index.html',

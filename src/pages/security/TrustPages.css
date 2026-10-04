@@ -1,0 +1,56 @@
+/* Shared by /security/subprocessors/ and /security/ai/. Tokens only; no new colour pairs. */
+.al-trustp__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  background: var(--al-surface);
+}
+.al-trustp__table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 56rem;
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+}
+.al-trustp__table caption {
+  text-align: left;
+  padding: var(--al-space-3) var(--al-space-4);
+  font-weight: var(--al-weight-semibold);
+  color: var(--al-ink);
+}
+.al-trustp__table th,
+.al-trustp__table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--al-space-3) var(--al-space-4);
+  border-top: 1px solid var(--al-hairline);
+  color: var(--al-ink);
+}
+.al-trustp__table thead th {
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-ink-muted);
+}
+.al-trustp__table tbody th { font-weight: var(--al-weight-semibold); }
+.al-trustp__note { margin: var(--al-space-4) 0 0; max-width: 68ch; color: var(--al-ink-muted); }
+.al-trustp__planned {
+  list-style: none;
+  margin: var(--al-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--al-space-2);
+}
+.al-trustp__planned li { display: flex; gap: var(--al-space-2); align-items: baseline; color: var(--al-ink); }
+.al-trustp__quarter {
+  flex: none;
+  font-weight: var(--al-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-sm);
+  padding: 0 var(--al-space-1);
+}
+.al-trustp__answers { margin: 0; padding-left: 1.2em; display: grid; gap: var(--al-space-2); max-width: 72ch; color: var(--al-ink); }
+.al-trustp__back { display: inline-block; margin-top: var(--al-space-4); color: var(--al-ink); text-underline-offset: 0.2em; }
+.al-trustp__back:focus-visible { outline: 2px solid var(--al-focus-ring); outline-offset: 2px; }

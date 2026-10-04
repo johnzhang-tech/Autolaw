@@ -29,6 +29,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
         security: path.resolve(__dirname, 'security/index.html'),
+        securitySubprocessors: path.resolve(__dirname, 'security/subprocessors/index.html'),
         about: path.resolve(__dirname, 'about/index.html'),
         scheduleCall: path.resolve(__dirname, 'schedule-call/index.html'),
         privacy: path.resolve(__dirname, 'privacy/index.html'),
