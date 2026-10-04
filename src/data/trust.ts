@@ -4,7 +4,8 @@
  * Every statement here is true in case-app today or is a dated commitment, and each card,
  * answer and vendor row names the claim ids that prove it. The ids point into case-app's
  * internal evidence record, docs/trust/evidence-annex.md, which is not public. They are
- * kept here, never rendered, so that `python3 docs/trust/check.py --site <this repo>` in
+ * not rendered, but they do ship in the public JavaScript bundle, so only public-tier ids
+ * may appear here (src/data/__tests__/trust.test.ts enforces it). They are kept so that `python3 docs/trust/check.py --site <this repo>` in
  * case-app can check every statement against that record before the site deploys.
  *
  * Wording source: case-app docs/trust/trust-center.html, subprocessors.html and
@@ -146,6 +147,12 @@ export const SUBPROCESSOR_NOTICE: Commitment = {
 
 export const SUBPROCESSOR_CHANGES: ReadonlyArray<{ version: string; date: string; change: string }> = [
   { version: '1.0', date: '3 October 2026', change: 'First published list.' },
+];
+
+/** Shown under the vendor table. */
+export const SUBPROCESSOR_NOTES: ReadonlyArray<AiAnswer> = [
+  { text: 'OpenAI is not used.', claims: ['DF-6'] },
+  { text: 'Anthropic receives no document text in our current configuration.', claims: ['DF-8'] },
 ];
 
 export interface AiAnswer {

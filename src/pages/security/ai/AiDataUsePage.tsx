@@ -23,7 +23,7 @@ export function AiDataUsePage() {
           </>
         }
       />
-      {AI_QUESTIONS.map((q) => (
+      {AI_QUESTIONS.map((q, i) => (
         <Section key={q.id} id={q.id} heading={q.question}>
           {q.answers.length > 0 && (
             <ul className="al-trustp__answers">
@@ -36,11 +36,11 @@ export function AiDataUsePage() {
             className="al-trustp__planned"
             quarterClassName="al-trustp__quarter"
           />
+          {i === AI_QUESTIONS.length - 1 && (
+            <a className="al-trustp__back" href={SECURITY_URL}>Back to the Trust Center</a>
+          )}
         </Section>
       ))}
-      <Section id="more">
-        <a className="al-trustp__back" href={SECURITY_URL}>Back to the Trust Center</a>
-      </Section>
     </PageShell>
   );
 }

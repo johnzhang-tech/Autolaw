@@ -39,7 +39,7 @@ export const NDA_ONLY_PHRASES: ReadonlyArray<string> = [
 ];
 
 /** The page's text with every "Planned" list removed, so dated plans do not trip the guard. */
-export function guardText(root: HTMLElement): string {
+function guardText(root: HTMLElement): string {
   const clone = root.cloneNode(true) as HTMLElement;
   clone.querySelectorAll('[data-planned]').forEach((el) => el.remove());
   return renderedText(clone);

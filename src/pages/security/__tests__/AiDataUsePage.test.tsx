@@ -17,7 +17,10 @@ describe('AiDataUsePage', () => {
     AI_QUESTIONS.forEach((q) => {
       const section = within(screen.getByRole('region', { name: q.question }));
       q.answers.forEach((a) => expect(section.getByText(a.text)).toBeInTheDocument());
-      (q.commitments ?? []).forEach((c) => expect(section.getByText(c.text)).toBeInTheDocument());
+      (q.commitments ?? []).forEach((c) => {
+        // A plan must render as a plan, never as a current fact.
+        expect(section.getByText(c.text).closest('[data-planned]')).not.toBeNull();
+      });
     });
   });
 

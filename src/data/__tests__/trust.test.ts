@@ -8,6 +8,7 @@ import {
   SECTION_INTROS,
   SUBPROCESSORS,
   SUBPROCESSOR_CHANGES,
+  SUBPROCESSOR_NOTES,
   TRUST_LAST_VERIFIED,
 } from '../trust';
 import { NDA_ONLY_CLAIMS, NDA_ONLY_PHRASES } from '../../pages/security/__tests__/trustGuard';
@@ -23,7 +24,7 @@ const CLAIM_ID = /^(?:OV|DF|TI|EN|RT|DL|MT|IR|AC)-\d+$|^SP-table$/;
 const QUARTER = /^Q[1-4] 20\d\d$/;
 
 const cards = [...PRIVACY_CARDS, ...AI_CARDS, ...AUDIT_CARDS];
-const answers = AI_QUESTIONS.flatMap((q) => q.answers);
+const answers = [...AI_QUESTIONS.flatMap((q) => q.answers), ...SUBPROCESSOR_NOTES];
 const allClaims = [
   ...cards.flatMap((c) => c.claims),
   ...answers.flatMap((a) => a.claims),
