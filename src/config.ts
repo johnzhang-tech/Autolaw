@@ -57,6 +57,9 @@ export const HOW_IT_WORKS_URL = '/#product';
  */
 export const SECURITY_URL = '/security/';
 export const ABOUT_URL = '/about/';
+/** The two public trust pages under /security/. Trailing slash as above. */
+export const SUBPROCESSORS_URL = '/security/subprocessors/';
+export const AI_USE_URL = '/security/ai/';
 
 /**
  * Site-wide announcement. null renders nothing — never ship an invented announcement.
@@ -73,18 +76,16 @@ export const CUSTOMER_LOGOS: ReadonlyArray<{ name: string; src: string }> = [];
 /**
  * `mark` is the short text inside the badge disc — never derive it by splitting `label`.
  *
- * The owner confirmed on 2026-08-05 that the SOC 2 Type II attestation and HIPAA
- * compliance are both real and may be displayed. This is recorded so the next engineer
- * does not have to re-litigate whether these badges are allowed on the page.
- *
- * The wording is not interchangeable, though. SOC 2 Type II is an audited attestation by
- * a named firm, so it can be claimed as a certification. HIPAA has no certifying body —
- * "HIPAA certified" is a claim nobody can issue, and an attorney knows it. What a firm
- * can actually be given is safeguards plus a signed BAA, so that is what is offered.
+ * Corrected on 2026-10-03. The 2026-08-05 note that a SOC 2 Type II attestation exists
+ * was wrong: the owner confirmed that SOC 2 is in preparation, with no report yet. And a
+ * BAA cannot be signed today, because Autolaw's AI processing runs on the Gemini
+ * Developer API, which Google's HIPAA agreement does not cover. Both badges now state the
+ * plan, dated, and claims.test.tsx retires the old wording. Evidence: case-app
+ * docs/trust/evidence-annex.md, claims OV-1 and OV-2.
  */
 export const CERTIFICATIONS: ReadonlyArray<{ mark: string; label: string; detail: string }> = [
-  { mark: 'SOC 2', label: 'SOC 2 Type II', detail: 'Report available under NDA' },
-  { mark: 'HIPAA', label: 'HIPAA safeguards', detail: 'BAA signed on request' },
+  { mark: 'SOC 2', label: 'SOC 2 in preparation', detail: 'Type I report planned for Q2 2027' },
+  { mark: 'HIPAA', label: 'Business associate agreement', detail: 'Planned for Q2 2027, with HIPAA-eligible AI processing' },
 ];
 
 /**

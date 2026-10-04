@@ -178,8 +178,8 @@ function SecurityReviewAside() {
         Read the security page
       </Button>
       <p className="al-sched__aside-note">
-        The SOC&nbsp;2 Type&nbsp;II report is available under NDA and a BAA is signed on
-        request &mdash; ask in the message and we will have both ready.
+        The full Trust Pack, with the evidence behind each control, is sent under a
+        confidentiality agreement &mdash; ask in the message and we will start one.
       </p>
     </aside>
   );

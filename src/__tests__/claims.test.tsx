@@ -61,6 +61,18 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     pattern: /(?:illustration.{0,100}\b\d+(?:\.\d+)?%|\b\d+(?:\.\d+)?%.{0,100}illustration)/i,
     reason: 'the illustration corpus is directional and does not support a published accuracy percentage',
   },
+  {
+    pattern: /SOC\s*2\s*Type\s*II|Type\s*II\s+(?:report|attestation)/i,
+    reason: 'no SOC 2 report exists yet: the owner confirmed on 2026-10-03 that the audit is in preparation, with a Type I report planned for Q2 2027',
+  },
+  {
+    pattern: /BAA\s+(?:is\s+)?(?:signed\s+)?on\s+request|signed\s+on\s+request/i,
+    reason: 'a BAA needs BAAs with the AI providers first, and the Gemini Developer API is not among Google’s HIPAA-covered products (checked 2026-10-03)',
+  },
+  {
+    pattern: /within\s+90\s+days/i,
+    reason: 'no deletion procedure exists to meet a 90-day window; the privacy-policy wording is with legal (case-app evidence annex, blocker 3)',
+  },
 ];
 
 type PageFactory = () => ReactElement;
