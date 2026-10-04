@@ -11,6 +11,7 @@ import {
   TRUST_LAST_VERIFIED,
 } from '../trust';
 import { NDA_ONLY_CLAIMS, NDA_ONLY_PHRASES } from '../../pages/security/__tests__/trustGuard';
+import { CERTIFICATIONS } from '../../config';
 
 /*
  * Every public trust statement names the evidence that proves it. The ids point into
@@ -27,6 +28,7 @@ const allClaims = [
   ...cards.flatMap((c) => c.claims),
   ...answers.flatMap((a) => a.claims),
   ...SUBPROCESSORS.flatMap((s) => s.claims),
+  ...CERTIFICATIONS.flatMap((c) => c.claims),
   ...Object.values(SECTION_INTROS).flatMap((i) => i.claims),
 ];
 const allText = [

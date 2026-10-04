@@ -74,7 +74,7 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     reason: 'no deletion procedure exists to meet a 90-day window; the privacy-policy wording is with legal (case-app evidence annex, blocker 3)',
   },
   {
-    pattern: /encrypt\w*\s+in\s+transit\s+and\s+at\s+rest|end[\s-]to[\s-]end\s+encrypt/i,
+    pattern: /encrypt\w*\s+(?:in\s+transit\s+(?:and|&)\s+at\s+rest|at\s+rest\s+(?:and|&)\s+in\s+transit)|end[\s-]to[\s-]end\s+encrypt/i,
     reason: 'encryption is stated per connection and per store (case-app evidence EN-1, EN-2); the job queue and the graph host’s disks are not evidenced',
   },
 ];
@@ -123,9 +123,9 @@ describe('claim guard', () => {
 
   it('catches the wording it retires and passes the corrected wording', () => {
     const retired = [
-      'SOC 2 Type II', 'SOC 2 Type II', 'SOC 2 Type 2', 'BAA available on request',
+      'SOC 2 Type II', 'SOC\u00a02 Type\u00a0II', 'SOC 2 Type 2', 'BAA available on request',
       'BAA signed on request', 'a business associate agreement, signed on request',
-      'deleted within 90 days of an account ending', 'Encrypted in transit and at rest',
+      'deleted within 90 days of an account ending', 'Encrypted in transit and at rest', 'Data is encrypted at rest and in transit',
     ];
     const corrected = [
       'SOC 2 in preparation', 'Type I report planned for Q2 2027',
@@ -165,7 +165,7 @@ describe('claim guard', () => {
    */
   for (const file of HTML) {
     it(`${file} makes no retired claim in its metadata`, () => {
-      const html = readFileSync(join(ROOT, file), 'utf8').replace(/&nbsp;|&#160;/g, ' ');
+      const html = readFileSync(join(ROOT, file), 'utf8').replace(/&nbsp;|&#160;|&#xa0;/gi, ' ');
       const hits = RETIRED.filter((r) => r.pattern.test(html)).map((r) => `${r.pattern} — ${r.reason}`);
       expect(hits).toEqual([]);
     });

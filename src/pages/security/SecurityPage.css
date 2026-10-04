@@ -141,15 +141,15 @@
 }
 
 .al-secp__asks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--al-space-4); }
-.al-secp__asks li {
+.al-secp__asks > li {
   display: grid;
   gap: var(--al-space-1);
   padding-bottom: var(--al-space-4);
   border-bottom: 1px solid var(--al-hairline);
 }
-.al-secp__asks li:last-child { padding-bottom: 0; border-bottom: 0; }
-.al-secp__asks b { font-size: var(--al-text-body); }
-.al-secp__asks span { font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
+.al-secp__asks > li:last-child { padding-bottom: 0; border-bottom: 0; }
+.al-secp__asks > li > b { font-size: var(--al-text-body); }
+.al-secp__asks > li > span { font-size: var(--al-text-sm); color: var(--al-ink-muted); line-height: var(--al-leading-normal); }
 
 .al-secp__ctas { display: flex; flex-direction: column; gap: var(--al-space-3); align-items: stretch; }
 .al-secp__ctas .al-btn { width: 100%; }

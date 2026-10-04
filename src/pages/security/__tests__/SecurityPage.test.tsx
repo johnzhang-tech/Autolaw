@@ -4,7 +4,7 @@ import { SecurityPage } from '../SecurityPage';
 import { CERTIFICATIONS, CONTACT_EMAIL } from '../../../config';
 import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, REVIEWER_COMMITMENTS, SECTION_INTROS } from '../../../data/trust';
 import { renderedText } from '../../__tests__/renderedText';
-import { guardHits, guardText } from './trustGuard';
+import { guardHits, pageGuardHits } from './trustGuard';
 
 /*
  * renderedText, not textContent: textContent glues adjacent elements together, which
@@ -134,15 +134,19 @@ describe('SecurityPage — audits and agreements', () => {
 describe('SecurityPage — vocabulary not yet verified', () => {
   it('uses none of it, and no NDA-only detail', () => {
     render(<SecurityPage />);
-    const text = guardText(screen.getByRole('main'));
+    const text = pageText();
     expect(text.length).toBeGreaterThan(1500);
-    expect(guardHits(text)).toEqual([]);
+    expect(pageGuardHits(screen.getByRole('main'))).toEqual([]);
   });
 
   it('names MFA, SSO and incident response only inside a planned item', () => {
     render(<SecurityPage />);
     expect(pageText()).toMatch(/Multi-factor authentication/);
     expect(pageText()).toMatch(/incident-response plan/);
-    expect(guardHits(guardText(screen.getByRole('main')))).toEqual([]);
+    // Positive control: unfiltered, the page does name them, so the rules can fire.
+    const unfiltered = guardHits(pageText());
+    expect(unfiltered.some((h) => h.startsWith('authentication features'))).toBe(true);
+    expect(unfiltered.some((h) => h.startsWith('incident commitments'))).toBe(true);
+    expect(pageGuardHits(screen.getByRole('main'))).toEqual([]);
   });
 });
