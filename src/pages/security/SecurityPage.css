@@ -171,3 +171,32 @@
   .al-secp__ctas { flex-direction: row; flex-wrap: wrap; align-items: center; }
   .al-secp__ctas .al-btn { width: auto; }
 }
+
+/* Planned items inside a trust card: the quarter, then what is planned. Neutral ink on the
+   card surface; no new colour pair, so the design-system contrast check is unchanged. */
+.al-secp__planned {
+  list-style: none;
+  margin: var(--al-space-3) 0 0;
+  padding: var(--al-space-3) 0 0;
+  border-top: 1px solid var(--al-hairline);
+  display: grid;
+  gap: var(--al-space-2);
+  font-size: var(--al-text-sm);
+  color: var(--al-ink);
+}
+.al-secp__planned li { display: flex; gap: var(--al-space-2); align-items: baseline; }
+.al-secp__quarter {
+  flex: none;
+  font-weight: var(--al-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-sm);
+  padding: 0 var(--al-space-1);
+}
+.al-secp__more {
+  margin: var(--al-space-4) 0 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-inverse-muted);
+}
+.al-secp__more a { color: var(--al-ink-inverse); text-underline-offset: 0.2em; }
+.al-secp__more a:focus-visible { outline: 2px solid var(--al-focus-ring-inverse); outline-offset: 2px; }
