@@ -63,7 +63,7 @@ export const AI_USE_URL = '/security/ai/';
 
 /**
  * Site-wide announcement. null renders nothing — never ship an invented announcement.
- * Example when real: { text: 'Autolaw is now SOC 2 Type II certified', href: '/security/' }
+ * Example when real: { text: 'The Autolaw subprocessor list has been updated', href: '/security/subprocessors/' }
  */
 export const ANNOUNCEMENT: { text: string; href: string } | null = null;
 
