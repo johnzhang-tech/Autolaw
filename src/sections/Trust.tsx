@@ -8,7 +8,7 @@ import './Trust.css';
  * "extraction" is our word for our own component. Each claim below states what happens.
  */
 const CONTROLS: Array<{ title: string; body: string; privacyLink?: boolean }> = [
-  { title: 'Your data does not train models', body: 'Case content is never used to train or fine-tune any model, ours or a vendor’s.', privacyLink: true },
+  { title: 'Autolaw does not train on your data', body: 'Autolaw trains no models on your case content, and the AI providers that read your documents work under paid terms that do not allow them to train on it.', privacyLink: true },
   { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
   { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
   { title: 'Human confirmation required', body: 'Autolaw proposes. It never writes case truth on its own. An attorney confirms each value before it counts as a fact.' },
@@ -27,7 +27,7 @@ const ROWS: Array<[string, string, string]> = [
   ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and lists what is needed'],
   ['Becoming case truth', 'Output is the answer', 'Proposes only; an attorney confirms before anything is recorded'],
   ['Practice fit', 'Generic', 'Separate PI and workers’ comp workflows on one engine, each with its own screens and outputs'],
-  ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every document opened is logged, never used to train models'],
+  ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every document opened is logged, never used by Autolaw to train models'],
 ];
 
 function Cross() {

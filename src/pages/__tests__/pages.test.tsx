@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { SecurityPage } from '../security/SecurityPage';
+import { SubprocessorsPage } from '../security/subprocessors/SubprocessorsPage';
+import { AiDataUsePage } from '../security/ai/AiDataUsePage';
 import { AboutPage } from '../about/AboutPage';
 import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../privacy/PrivacyPage';
@@ -20,6 +22,8 @@ import { ROUTED_FEATURES } from '../../data/product';
  */
 const PAGES: Array<[string, ReactElement]> = [
   ['/security/', <SecurityPage />],
+  ['/security/subprocessors/', <SubprocessorsPage />],
+  ['/security/ai/', <AiDataUsePage />],
   ['/about/', <AboutPage />],
   ['/schedule-call/', <ScheduleCallPage />],
   ['/privacy/', <PrivacyPage />],
@@ -146,6 +150,8 @@ describe.each(PAGES)('%s', (path, element) => {
 describe('subpage link integrity', () => {
   const SUBPAGES: Array<[string, () => ReactElement]> = [
     ['security', () => <SecurityPage />],
+    ['security/subprocessors', () => <SubprocessorsPage />],
+    ['security/ai', () => <AiDataUsePage />],
     ['about', () => <AboutPage />],
     ['schedule-call', () => <ScheduleCallPage />],
     ['privacy', () => <PrivacyPage />],

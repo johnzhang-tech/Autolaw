@@ -6,8 +6,8 @@ import './Hero.css';
 const TRUST = [
   'Source-linked evidence',
   'Attorney confirms every fact',
-  'SOC 2 Type II',
-  'BAA on request',
+  'Autolaw trains no AI on your data',
+  'Each firm’s data kept separate',
 ];
 
 function Tick() {
