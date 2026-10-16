@@ -30,3 +30,6 @@ design-system/dist/
 
 # Local Claude Code configuration
 .claude/
+
+# Firecrawl research cache (local only)
+.firecrawl/
