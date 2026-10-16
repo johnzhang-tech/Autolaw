@@ -3,7 +3,7 @@
   display: flex; justify-content: space-between; gap: var(--al-space-5);
   flex-wrap: wrap; margin-bottom: var(--al-space-5);
 }
-.al-footer__brand { font-size: 1.125rem; font-weight: var(--al-weight-bold); margin: 0 0 var(--al-space-1); }
+.al-footer__brand { color: var(--al-navy); font-size: 1.25rem; margin: 0 0 var(--al-space-1); }
 .al-footer__tag { font-size: var(--al-text-sm); color: var(--al-ink-muted); margin: 0; max-width: 40ch; }
 
 /* Eight destinations in one row wrap on narrow viewports, so the row gap is smaller than

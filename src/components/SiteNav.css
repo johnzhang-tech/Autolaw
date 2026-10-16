@@ -15,11 +15,12 @@
   height: var(--al-nav-height);
 }
 
+/* The wordmark owns the family, weight and tracking; the link owns colour and size. */
 .al-nav__brand {
-  color: var(--al-ink);
-  font-size: 1.25rem;
-  font-weight: var(--al-weight-bold);
-  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  color: var(--al-navy);
+  font-size: 1.375rem;
   text-decoration: none;
   transition: color var(--al-duration-fast) var(--al-ease);
 }
@@ -187,6 +188,24 @@
   text-decoration: none;
 }
 .al-nav__login:hover { color: var(--al-teal-text); }
+
+/*
+ * Sign up reads as the quieter sibling of "Schedule a call", not as a third primary
+ * button: the call is still the action the site is asking for. An outline keeps it
+ * visibly a control while the filled button keeps the emphasis.
+ */
+.al-nav__signup {
+  padding: 6px 14px;
+  border: 1px solid var(--al-hairline-strong);
+  border-radius: var(--al-radius-pill);
+  color: var(--al-ink);
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+  text-decoration: none;
+  transition: border-color var(--al-duration-fast) var(--al-ease),
+    color var(--al-duration-fast) var(--al-ease);
+}
+.al-nav__signup:hover { border-color: var(--al-teal-text); color: var(--al-teal-text); }
 
 .al-nav__toggle {
   display: none;

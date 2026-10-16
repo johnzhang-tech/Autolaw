@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { Button } from './primitives/Button';
 import { ProductMenu } from './ProductMenu';
 import { SecurityMark } from './SecurityMark';
-import { LOGIN_URL, SCHEDULE_URL } from '../config';
+import { Wordmark } from './Wordmark';
+import { LOGIN_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL } from '../config';
 import { SITE_LINKS } from '../navigation';
 import './SiteNav.css';
 
@@ -32,7 +33,9 @@ export function SiteNav({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string
     <header className="al-nav">
       <nav className="al-nav__nav" aria-label="Primary">
         <div className="al-container al-nav__inner">
-          <a className="al-nav__brand" href="/">Autolaw</a>
+          <a className="al-nav__brand" href="/" aria-label="AutoLaw home">
+            <Wordmark />
+          </a>
 
           <ul className="al-nav__links">
             {/* The list item is the shared interaction boundary for its link, button, and
@@ -80,6 +83,9 @@ export function SiteNav({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string
 
           <div className="al-nav__actions">
             {LOGIN_URL && <a className="al-nav__login" href={LOGIN_URL}>Log in</a>}
+            {/* The self-serve lane. Hidden, not disabled, while the trial is off: there
+                is no page behind it until TRIAL_SIGNUP_ENABLED is set on case-app. */}
+            {TRIAL_ENABLED && <a className="al-nav__signup" href={TRIAL_URL}>Sign up</a>}
             <Button href={scheduleHref} variant="primary" size="md" withCaret>Schedule a call</Button>
           </div>
 
@@ -115,9 +121,10 @@ export function SiteNav({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string
                 </li>
               ))}
             </ul>
-            {LOGIN_URL && (
+            {(LOGIN_URL || TRIAL_ENABLED) && (
               <ul>
-                <li><a href={LOGIN_URL}>Log in</a></li>
+                {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
+                {TRIAL_ENABLED && <li><a href={TRIAL_URL}>Sign up</a></li>}
               </ul>
             )}
             <Button href={scheduleHref} variant="primary" size="md" withCaret>Schedule a call</Button>

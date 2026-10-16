@@ -1,6 +1,7 @@
-import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
+import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
 import { SITE_LINKS } from '../navigation';
 import { SecurityMark } from './SecurityMark';
+import { Wordmark } from './Wordmark';
 import './SiteFooter.css';
 
 export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: string }) {
@@ -10,7 +11,7 @@ export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: str
     <footer className="al-footer">
       <div className="al-container al-footer__inner">
         <div>
-          <p className="al-footer__brand">Autolaw</p>
+          <p className="al-footer__brand"><Wordmark /></p>
           <p className="al-footer__tag">Case intelligence for personal injury and workers&rsquo; compensation.</p>
         </div>
         <ul className="al-footer__links">
@@ -24,6 +25,7 @@ export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: str
           ))}
           <li><a href={scheduleHref}>Schedule a call</a></li>
           {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
+          {TRIAL_ENABLED && <li><a href={TRIAL_URL}>Sign up</a></li>}
           <li><a href={`mailto:${CONTACT_EMAIL}`}>Contact</a></li>
           {LEGAL.map((l) => (
             <li key={l.href}><a href={l.href}>{l.label}</a></li>

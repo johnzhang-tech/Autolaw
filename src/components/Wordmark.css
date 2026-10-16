@@ -1,0 +1,15 @@
+/*
+ * Type, not artwork. The mark inherits `color`, so the same component reads navy on the
+ * cream nav and cream on a navy panel without a second asset.
+ *
+ * The tracking is tighter than body serif: at wordmark size Source Serif's default
+ * spacing reads loose and the two halves drift apart, which is exactly what the capital
+ * L is there to prevent.
+ */
+.al-wordmark {
+  font-family: var(--al-font-record);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-kerning: normal;
+  white-space: nowrap;
+}
