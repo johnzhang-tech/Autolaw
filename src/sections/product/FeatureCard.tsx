@@ -1,5 +1,6 @@
 import { AVAILABILITY_LABEL, type Feature } from '../../data/product';
 import type { Practice } from '../../practice/PracticeContext';
+import { ProductIcon } from '../../components/ProductIcon';
 
 const PRACTICE_BADGE: Record<'PI' | 'WC', string> = {
   PI: 'Personal injury',
@@ -13,19 +14,22 @@ export function FeatureCard({ feature, practice }: {
   const label = feature.availability === 'live' ? null : AVAILABILITY_LABEL[feature.availability];
   const line = practice === 'WC' && feature.wcLine ? feature.wcLine : feature.line;
   const content = (
-    <>
-      <span className="al-feat__top">
-        <span className="al-feat__head">
-          <span className="al-feat__name">{feature.name}</span>
-          {label && <span className="al-feat__tag">{label}</span>}
-          {feature.practice !== 'both' && (
-            <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
-          )}
+    <span className="al-feat__content">
+      <ProductIcon featureId={feature.id} icon={feature.icon} size="card" />
+      <span className="al-feat__copy">
+        <span className="al-feat__top">
+          <span className="al-feat__head">
+            <span className="al-feat__name">{feature.name}</span>
+            {label && <span className="al-feat__tag">{label}</span>}
+            {feature.practice !== 'both' && (
+              <span className="al-feat__badge">{PRACTICE_BADGE[feature.practice]}</span>
+            )}
+          </span>
+          {feature.slug && <i className="al-feat__arrow" aria-hidden="true">→</i>}
         </span>
-        {feature.slug && <i className="al-feat__arrow" aria-hidden="true">→</i>}
+        <span className="al-feat__line">{line}</span>
       </span>
-      <span className="al-feat__line">{line}</span>
-    </>
+    </span>
   );
 
   if (feature.slug) {

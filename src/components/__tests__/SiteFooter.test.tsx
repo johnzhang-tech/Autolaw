@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import App from '../../App';
 import { SiteFooter } from '../SiteFooter';
-import { CONTACT_EMAIL, SCHEDULE_URL } from '../../config';
+import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL } from '../../config';
 import { SITE_LINKS } from '../../navigation';
 
 describe('SiteFooter', () => {
@@ -12,7 +12,7 @@ describe('SiteFooter', () => {
     expect(hrefs).toEqual([
       ...SITE_LINKS.map((l) => l.href),
       SCHEDULE_URL,
-      // No login link: LOGIN_URL is null until app.autolaw.ai resolves.
+      LOGIN_URL,
       `mailto:${CONTACT_EMAIL}`,
     ]);
   });

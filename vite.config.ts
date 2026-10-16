@@ -33,6 +33,7 @@ export default defineConfig({
         scheduleCall: path.resolve(__dirname, 'schedule-call/index.html'),
         privacy: path.resolve(__dirname, 'privacy/index.html'),
         terms: path.resolve(__dirname, 'terms/index.html'),
+        productIntake: path.resolve(__dirname, 'product/intake/index.html'),
         productAskAl: path.resolve(__dirname, 'product/ask-al/index.html'),
         productMedicalChronologies: path.resolve(__dirname, 'product/medical-chronologies/index.html'),
         productMedicalSignificanceBrief: path.resolve(__dirname, 'product/medical-significance-brief/index.html'),

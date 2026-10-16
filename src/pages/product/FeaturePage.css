@@ -17,6 +17,8 @@
   margin-bottom: var(--al-space-5);
 }
 
+.al-fpage__hero-icon { margin-bottom: var(--al-space-4); }
+
 .al-fpage__chips span,
 .al-fpage__chips strong {
   display: inline-flex;

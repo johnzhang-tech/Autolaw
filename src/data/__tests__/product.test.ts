@@ -15,9 +15,23 @@ describe('product data', () => {
     FEATURES.forEach((f: Feature) => {
       expect(f.name.length).toBeGreaterThan(0);
       expect(f.line.length).toBeGreaterThan(0);
+      expect('icon' in f, `${f.name} has no product icon`).toBe(true);
       expect(f.detail.length).toBeGreaterThanOrEqual(2);
       expect(f.phases.length).toBeGreaterThan(0);
     });
+  });
+
+  it('publishes Intake as the first live pre-litigation destination', () => {
+    const intake = FEATURE_BY_ID.get('intake');
+
+    expect(intake).toMatchObject({
+      name: 'Intake',
+      availability: 'live',
+      phases: ['pre-lit'],
+      slug: 'intake',
+    });
+    expect(inPhase('pre-lit')[0]?.id).toBe('intake');
+    expect(intake?.page).toBeDefined();
   });
 
   it('uses unique ids', () => {
@@ -37,8 +51,9 @@ describe('product data', () => {
 
   it('keeps every phase heading and its line', () => {
     expect(PHASES['pre-lit'].heading).toBe('Pre-Litigation');
+    expect(PHASES['pre-lit'].line).toBe('Build stronger cases—with insight and speed.');
     expect(PHASES['litigation'].heading).toBe('Litigation');
-    Object.values(PHASES).forEach((p) => expect(p.line.length).toBeGreaterThan(0));
+    expect(PHASES['litigation'].line).toBe('Win with deeper preparation and faster response.');
   });
 
   it('names the cross-phase strip items', () => {
@@ -57,9 +72,10 @@ describe('product data', () => {
     expect(FEATURES.filter((f) => f.wcLine).every((f) => f.practice !== 'PI')).toBe(true);
   });
 
-  it('gives exactly the thirteen publishable features complete page data', () => {
-    expect(ROUTED_FEATURES).toHaveLength(13);
+  it('gives exactly the fourteen publishable features complete page data', () => {
+    expect(ROUTED_FEATURES).toHaveLength(14);
     expect(ROUTED_FEATURES.map((f) => f.slug)).toEqual([
+      'intake',
       'ask-al',
       'medical-chronologies',
       'medical-significance-brief',

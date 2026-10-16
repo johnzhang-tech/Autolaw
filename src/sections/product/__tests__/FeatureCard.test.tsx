@@ -3,9 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { FeatureCard } from '../FeatureCard';
 import type { Feature } from '../../../data/product';
 
-const live: Feature = {
+const live = {
   id: 'medical-chronologies',
   name: 'Medical Chronologies',
+  icon: 'chronology',
   line: 'One dated treatment story.',
   practice: 'both',
   phases: ['pre-lit'],
@@ -13,7 +14,7 @@ const live: Feature = {
   detail: ['Every visit in order.', 'Each entry cites its page.'],
   output: 'Word export',
   slug: 'medical-chronologies',
-};
+} as Feature & { icon: 'chronology' };
 
 const comingNext: Feature = {
   ...live,
@@ -33,6 +34,7 @@ describe('FeatureCard', () => {
       '/product/medical-chronologies/',
     );
     expect(screen.getByText('One dated treatment story.')).toBeInTheDocument();
+    expect(screen.getByTestId('product-icon-medical-chronologies')).toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 

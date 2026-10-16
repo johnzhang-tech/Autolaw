@@ -11,6 +11,7 @@ import { Output } from '../../sections/visuals/Output';
 import { Review } from '../../sections/visuals/Review';
 import { StatePanel } from '../../sections/visuals/StatePanel';
 import { PageShell } from '../PageShell';
+import { ProductIcon } from '../../components/ProductIcon';
 import './FeaturePage.css';
 
 const VISUALS: Partial<Record<string, ReactNode>> = {
@@ -50,6 +51,9 @@ function FeaturePageContent({ id }: { id: string }) {
             {feature.phases.map((phase) => <span key={phase}>{PHASES[phase].heading}</span>)}
             <span>{PRACTICE_LABEL[feature.practice]}</span>
             {availability && <strong>{availability}</strong>}
+          </div>
+          <div className="al-fpage__hero-icon">
+            <ProductIcon featureId={feature.id} icon={feature.icon} size="hero" />
           </div>
           <p className="al-fpage__name">{feature.name}</p>
           <h1 id="feature-title">{feature.page.promise}</h1>

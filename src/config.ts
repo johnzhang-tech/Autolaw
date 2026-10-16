@@ -1,21 +1,18 @@
 /**
  * Every outbound URL and gated asset in one place.
  *
- * APP_ORIGIN must be the canonical app host. It is deliberately NOT a raw Cloud Run
- * URL — src/__tests__/credibility.test.tsx fails the build if one appears in src/.
- * See docs/superpowers/specs/2026-08-05-autolaw-site-redesign-design.md, "Launch
- * dependencies": app.autolaw.ai needs a DNS record and Cloud Run domain mapping, and
- * NEXT_PUBLIC_APP_URL / CASE_APP_BASE_URL in case-app must name the same host.
+ * APP_ORIGIN is reserved for the future canonical app host. Nothing may link to it until
+ * its DNS record and Cloud Run domain mapping exist. See the launch dependencies in
+ * docs/superpowers/specs/2026-08-05-autolaw-site-redesign-design.md.
  */
 export const APP_ORIGIN = 'https://app.autolaw.ai';
 
 /**
- * null until app.autolaw.ai resolves. There is nowhere true to send a customer yet: the
- * canonical host has no DNS record, and the raw Cloud Run host may not appear on the site
- * (the credibility guard fails the build if it does). Nav and footer render no login link
- * while this is null. When the host is live: `${APP_ORIGIN}/login`.
+ * The existing production login used by autolaw.ai. This is the sole approved direct
+ * Cloud Run destination; the credibility guard rejects every other raw service URL.
+ * Move this to `${APP_ORIGIN}/login` when the canonical app host is live.
  */
-export const LOGIN_URL: string | null = null;
+export const LOGIN_URL = 'https://case-app-1055716306475.us-central1.run.app/login';
 
 /**
  * The self-serve trial, off. Two things have to be true before this flips: app.autolaw.ai

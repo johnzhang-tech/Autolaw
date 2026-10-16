@@ -30,6 +30,7 @@ describe('SiteNav', () => {
     expect(within(nav).getByRole('link', { name: 'Solutions' })).toHaveAttribute('href', '/#solutions');
     expect(within(nav).getByRole('link', { name: 'Security' })).toHaveAttribute('href', '/security/');
     expect(within(nav).getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about/');
+    expect(within(nav).getByRole('link', { name: /log in/i })).toHaveAttribute('href', LOGIN_URL);
     expect(within(nav).getByRole('link', { name: /schedule a call/i })).toHaveAttribute('href', SCHEDULE_URL);
     expect(within(nav).getByTestId('security-mark')).toHaveAttribute('aria-hidden', 'true');
   });
@@ -42,6 +43,7 @@ describe('SiteNav', () => {
     await user.click(button);
     expect(button).toHaveAttribute('aria-expanded', 'true');
     const menu = document.getElementById('product-menu')!;
+    expect(within(menu).getByTestId('product-icon-intake')).toBeInTheDocument();
     expect(menu).toBeInTheDocument();
     expect(within(menu).getAllByRole('link', { name: /Medical Chronologies/i })[0]).toHaveAttribute(
       'href',
@@ -98,6 +100,7 @@ describe('SiteNav', () => {
     expect(within(drawer).getByRole('heading', { name: 'Pre-Litigation' })).toBeInTheDocument();
     expect(within(drawer).getByRole('heading', { name: 'Litigation' })).toBeInTheDocument();
     expect(within(drawer).getByRole('link', { name: 'Product overview' })).toHaveAttribute('href', '/#product');
+    expect(within(drawer).getByRole('link', { name: /log in/i })).toHaveAttribute('href', LOGIN_URL);
     expect(within(drawer).queryByRole('button', { name: /product/i })).not.toBeInTheDocument();
     expect(within(drawer).getByText('Deposition Review')).toBeInTheDocument();
     expect(within(drawer).queryByRole('link', { name: /Deposition Review/i })).not.toBeInTheDocument();
@@ -115,9 +118,7 @@ describe('SiteNav', () => {
     expect(within(document.getElementById('nav-mobile')!).queryByText('Ask AL')).not.toBeInTheDocument();
   });
 
-  it('renders no login link while LOGIN_URL is unset', () => {
-    expect(LOGIN_URL).toBeNull();
-    render(<SiteNav />);
-    expect(screen.queryByRole('link', { name: /log in/i })).not.toBeInTheDocument();
+  it('uses the approved existing Autolaw login destination', () => {
+    expect(LOGIN_URL).toBe('https://case-app-1055716306475.us-central1.run.app/login');
   });
 });

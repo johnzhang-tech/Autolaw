@@ -143,15 +143,9 @@ describe('claim guard', () => {
 });
 
 describe('dead-destination guard', () => {
-  /*
-   * app.autolaw.ai has no DNS record and /trial is gated off by TRIAL_SIGNUP_ENABLED on
-   * case-app. While both are true, nothing on the site may link into the application:
-   * a primary CTA that opens a browser error is worse than no CTA, and a "Log in" that
-   * fails is the first thing an existing customer would try.
-   */
-  it('keeps the trial switch off and the login URL unset until the host resolves', () => {
+  it('keeps self-serve trial off while using the approved existing login destination', () => {
     expect(TRIAL_ENABLED).toBe(false);
-    expect(LOGIN_URL).toBeNull();
+    expect(LOGIN_URL).toBe('https://case-app-1055716306475.us-central1.run.app/login');
   });
 
   for (const [name, page] of PAGES) {
@@ -165,9 +159,11 @@ describe('dead-destination guard', () => {
     });
   }
 
-  it('offers no trial CTA and no login link on the home page', () => {
+  it('offers no trial CTA and exposes login in the nav and footer', () => {
     const { queryAllByRole } = render(<App />);
     expect(queryAllByRole('link', { name: /analyze one/i })).toEqual([]);
-    expect(queryAllByRole('link', { name: /log in/i })).toEqual([]);
+    const loginLinks = queryAllByRole('link', { name: /log in/i });
+    expect(loginLinks).toHaveLength(2);
+    loginLinks.forEach((link) => expect(link).toHaveAttribute('href', LOGIN_URL));
   });
 });

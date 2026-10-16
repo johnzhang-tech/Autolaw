@@ -141,14 +141,25 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--al-space-2);
-  min-height: 35px;
-  padding: 6px var(--al-space-2);
+  min-height: 42px;
+  padding: 4px var(--al-space-2);
   border-radius: var(--al-radius-sm);
   color: var(--al-ink);
   font-size: var(--al-text-xs);
   font-weight: var(--al-weight-semibold);
   line-height: var(--al-leading-snug);
   text-decoration: none;
+}
+
+.al-pmenu__item-main {
+  display: flex;
+  align-items: center;
+  gap: var(--al-space-2);
+  min-width: 0;
+}
+
+.al-pmenu__item-main > span:last-child {
+  min-width: 0;
 }
 
 .al-pmenu__phase a:hover {

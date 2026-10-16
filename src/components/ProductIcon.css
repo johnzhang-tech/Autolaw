@@ -1,0 +1,33 @@
+.al-product-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--al-teal-text) 18%, var(--al-hairline));
+  border-radius: 10px;
+  background: var(--al-teal-wash);
+  color: var(--al-teal-text);
+}
+
+.al-product-icon svg {
+  width: 52%;
+  height: 52%;
+}
+
+.al-product-icon--menu {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.al-product-icon--card {
+  width: 48px;
+  height: 48px;
+}
+
+.al-product-icon--hero {
+  width: 64px;
+  height: 64px;
+  border-color: color-mix(in srgb, var(--al-teal) 44%, transparent);
+  background: color-mix(in srgb, var(--al-teal) 12%, transparent);
+  color: var(--al-teal);
+}

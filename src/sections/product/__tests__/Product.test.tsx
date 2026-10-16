@@ -40,7 +40,8 @@ describe('Product', () => {
     renderProduct();
     expect(screen.getByRole('heading', { name: 'Pre-Litigation' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Litigation' })).toBeInTheDocument();
-    expect(screen.getByText('Build the file. Prove the damages. Send the demand.')).toBeInTheDocument();
+    expect(screen.getByText('Build stronger cases—with insight and speed.')).toBeInTheDocument();
+    expect(screen.getByText('Win with deeper preparation and faster response.')).toBeInTheDocument();
   });
 
   it('puts each feature in every phase column it belongs to', () => {

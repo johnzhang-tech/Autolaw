@@ -12,6 +12,7 @@ describe('FeaturePage', () => {
     expect(within(main).getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(within(main).getByRole('heading', { level: 1 })).toHaveTextContent(feature.page.promise);
     expect(within(main).getByText(feature.line)).toBeInTheDocument();
+    expect(within(main).getByTestId(`product-icon-${feature.id}`)).toBeInTheDocument();
     expect(within(main).getByRole('region', { name: 'What it does' })).toBeInTheDocument();
     expect(within(main).getByRole('region', { name: 'How it works' })).toBeInTheDocument();
     expect(within(main).getByRole('region', { name: 'What it will not do' })).toBeInTheDocument();

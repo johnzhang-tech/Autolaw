@@ -10,6 +10,23 @@
  */
 export type Availability = 'live' | 'early-access' | 'coming-next';
 export type Phase = 'pre-lit' | 'litigation';
+export type ProductIconName =
+  | 'intake'
+  | 'assistant'
+  | 'chronology'
+  | 'significance'
+  | 'missing-records'
+  | 'qme'
+  | 'damages'
+  | 'demand'
+  | 'case-value'
+  | 'negotiation'
+  | 'case-summary'
+  | 'conflicts'
+  | 'deadlines'
+  | 'illustrations'
+  | 'discovery'
+  | 'deposition';
 
 /**
  * Deliberately NOT named `Practice`. PracticeContext already exports that name for the
@@ -41,6 +58,7 @@ export interface FeaturePage {
 export interface Feature {
   id: string;
   name: string;
+  icon: ProductIconName;
   line: string;
   /** Practice-specific replacement for `line`. Only the Damages Ledger needs one today. */
   wcLine?: string;
@@ -63,11 +81,11 @@ export const AVAILABILITY_LABEL: Record<Exclude<Availability, 'live'>, string> =
 export const PHASES: Record<Phase, { heading: string; line: string }> = {
   'pre-lit': {
     heading: 'Pre-Litigation',
-    line: 'Build the file. Prove the damages. Send the demand.',
+    line: 'Build stronger cases—with insight and speed.',
   },
   litigation: {
     heading: 'Litigation',
-    line: 'The same file, ready for the fight.',
+    line: 'Win with deeper preparation and faster response.',
   },
 };
 
@@ -80,8 +98,47 @@ export const ASK_AL_FEATURE_ID = 'ask-al';
 
 export const FEATURES: ReadonlyArray<Feature> = [
   {
+    id: 'intake',
+    name: 'Intake',
+    icon: 'intake',
+    line: 'Turn the first client conversation and documents into a review-ready new matter.',
+    practice: 'both',
+    phases: ['pre-lit'],
+    availability: 'live',
+    detail: [
+      'Record in the browser or upload existing audio and documents into a pre-case workspace.',
+      'Review the transcript, summary, candidate facts, and follow-up questions together.',
+      'Attach the approved intake to the case when the team is ready.',
+    ],
+    output: 'Review-ready intake workspace',
+    slug: 'intake',
+    page: {
+      promise: 'Know the new matter before the file ever reaches an attorney.',
+      body: [
+        'Intake gives the team one pre-case workspace for recording or uploading the first client conversation and gathering the documents that arrive with it.',
+        'The transcript, summary, candidate facts, follow-up questions, and document classifications stay together for human review before anything is attached to the matter.',
+      ],
+      steps: [
+        { heading: 'Capture the matter', body: 'Record in the browser or upload existing audio and intake documents.' },
+        { heading: 'Build the review', body: 'Bring the transcript, summary, candidate facts, and unanswered questions into one workspace.' },
+        { heading: 'Approve and attach', body: 'Review the proposed information, correct it, and attach the approved intake to the case.' },
+      ],
+      limits: [
+        'It will not decide whether the firm should accept the matter.',
+        'It will not turn a client-reported statement into a verified case fact without review.',
+        'It will not attach proposed information to a case before the team approves it.',
+      ],
+      related: ['ask-al', 'missing-records', 'case-management-summary'],
+      meta: {
+        title: 'Legal Intake Review Workspace for New Matters | Autolaw',
+        description: 'Capture a new client conversation and documents, then review the transcript, summary, candidate facts, and follow-up questions in one intake workspace.',
+      },
+    },
+  },
+  {
     id: ASK_AL_FEATURE_ID,
     name: 'Ask AL',
+    icon: 'assistant',
     line: 'Ask anything about the case. Every answer cites document, page, and line.',
     practice: 'both',
     phases: ['pre-lit', 'litigation'],
@@ -119,6 +176,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'medical-chronologies',
     name: 'Medical Chronologies',
+    icon: 'chronology',
     line: 'Thousands of pages become one dated treatment story, cited and exportable.',
     practice: 'both',
     phases: ['pre-lit', 'litigation'],
@@ -156,6 +214,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'significance-brief',
     name: 'Medical Significance Brief',
+    icon: 'significance',
     line: 'What actually matters in the records, pulled out and sourced.',
     practice: 'both',
     phases: ['pre-lit'],
@@ -191,6 +250,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'missing-records',
     name: 'Missing Records & Gaps',
+    icon: 'missing-records',
     line: 'See what the records reference but nobody produced.',
     practice: 'both',
     phases: ['pre-lit'],
@@ -226,6 +286,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'qme-ame',
     name: 'QME/AME Deep Analysis',
+    icon: 'qme',
     line: 'Every medical-legal opinion side by side, contradictions surfaced.',
     practice: 'WC',
     phases: ['pre-lit', 'litigation'],
@@ -262,6 +323,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'damages-ledger',
     name: 'Damages Ledger',
+    icon: 'damages',
     line: 'Every medical bill, lien, and benefit payment in one running total.',
     wcLine: 'Reconcile the benefit printout — every TTD, PD, and medical payment — against what is owed.',
     practice: 'both',
@@ -299,6 +361,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'demand-packages',
     name: 'Demand Packages',
+    icon: 'demand',
     line: 'An evidence-backed demand, exported only after an attorney approves it.',
     practice: 'PI',
     phases: ['pre-lit'],
@@ -336,6 +399,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'case-value',
     name: 'Case Value & Howell Analysis',
+    icon: 'case-value',
     line: 'Three scenarios, Howell and Pebley views, future care.',
     practice: 'PI',
     phases: ['pre-lit'],
@@ -372,6 +436,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'negotiation',
     name: 'Negotiation Tracking',
+    icon: 'negotiation',
     line: 'Demand sent, offers, counters, best offer, on one timeline.',
     practice: 'PI',
     phases: ['pre-lit'],
@@ -407,6 +472,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'case-management-summary',
     name: 'Case Management Summary',
+    icon: 'case-summary',
     line: 'Claim info, both chronologies, treatment, providers, damages — one document.',
     practice: 'both',
     phases: ['litigation'],
@@ -442,6 +508,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'conflicts',
     name: 'Conflicting Records & Opinions',
+    icon: 'conflicts',
     line: 'Where the record disagrees with itself, both sources visible.',
     practice: 'both',
     phases: ['litigation'],
@@ -478,6 +545,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'deadlines',
     name: 'Deadlines & Statute of Limitations',
+    icon: 'deadlines',
     line: 'What is running, and what closes next.',
     practice: 'both',
     phases: ['litigation'],
@@ -513,6 +581,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'illustrations',
     name: 'Accident & Injury Illustrations',
+    icon: 'illustrations',
     line: 'Illustrations built only from what the record supports.',
     practice: 'both',
     phases: ['litigation'],
@@ -551,6 +620,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'discovery-responses',
     name: 'Discovery Responses',
+    icon: 'discovery',
     line: 'Answer form and special interrogatories, production, and admissions from the file you already have.',
     practice: 'both',
     phases: ['litigation'],
@@ -564,6 +634,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
   {
     id: 'deposition-review',
     name: 'Deposition Review',
+    icon: 'deposition',
     line: 'Every deposition read and cited before the transcript goes cold.',
     practice: 'both',
     phases: ['litigation'],

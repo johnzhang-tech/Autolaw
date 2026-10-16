@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROUTED_FEATURES } from '../data/product';
+import { LOGIN_URL } from '../config';
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -97,17 +98,13 @@ describe('credibility guards', () => {
     expect(offenders).toEqual([]);
   });
 
-  /*
-   * Matches any .run.app host, not the shape of the one that used to be here. The earlier
-   * pattern required a >=10-digit project number, so it only ever caught
-   * case-app-1055716306475.us-central1.run.app — Cloud Run's newer
-   * service-hash-region.a.run.app format sailed straight through. No legitimate .run.app
-   * host belongs on the marketing site, so the broad pattern carries no false-positive risk.
-   */
-  it('exposes no raw Cloud Run hostname to visitors', () => {
-    const offenders = sourceFiles().filter((f) =>
-      /\.run\.app/i.test(readFileSync(f, 'utf8'))
-    );
+  it('allows only the explicitly approved production login hostname', () => {
+    const approved = 'https://case-app-1055716306475.us-central1.run.app/login';
+    expect(LOGIN_URL).toBe(approved);
+    const offenders = sourceFiles().filter((f) => {
+      const withoutApprovedLogin = readFileSync(f, 'utf8').replaceAll(approved, '');
+      return /\.run\.app/i.test(withoutApprovedLogin);
+    });
     expect(offenders).toEqual([]);
   });
 

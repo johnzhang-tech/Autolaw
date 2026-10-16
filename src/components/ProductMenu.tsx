@@ -6,6 +6,7 @@ import {
   type Phase,
 } from '../data/product';
 import { ASK_AL_ENABLED } from '../config';
+import { ProductIcon } from './ProductIcon';
 
 const PHASE_ORDER: ReadonlyArray<Phase> = ['pre-lit', 'litigation'];
 
@@ -38,7 +39,10 @@ export function ProductMenu({ id, mobile = false, onNavigate }: ProductMenuProps
                   : AVAILABILITY_LABEL[feature.availability];
                 const inner = (
                   <>
-                    <span>{feature.name}</span>
+                    <span className="al-pmenu__item-main">
+                      <ProductIcon featureId={feature.id} icon={feature.icon} size="menu" />
+                      <span>{feature.name}</span>
+                    </span>
                     {label && <small>{label}</small>}
                   </>
                 );

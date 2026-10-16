@@ -85,12 +85,16 @@ Product dropdown (nav)     Pre-Litigation column │ Litigation column
 Home § Product             the same two columns, as linked cards
                            name + sales line, no expansion
 
-/product/<slug>/           one page per feature — 13 of them
+/product/<slug>/           one page per feature — 14 of them
 ```
 
 A feature may appear in both phase columns (Ask AL, Medical Chronologies, QME/AME). One page each regardless; the phase columns are navigation, not ownership.
 
-**Which features get a page:** the 12 `live` features plus Accident & Injury Illustrations — 13. `Discovery Responses` and `Deposition Review` appear in the dropdown and on the home page in a Coming next block, and link nowhere. A page whose only message is "not yet" wastes the click.
+**Owner update, 2026-09-16:** Intake is a `live` Pre-Litigation feature and appears first in that phase. It covers the review workflow for a new client conversation and uploaded documents; it does not claim automated case acceptance or outbound carrier calling.
+
+**Phase positioning, approved 2026-09-16:** Pre-Litigation — “Build stronger cases—with insight and speed.” Litigation — “Win with deeper preparation and faster response.” The same lines appear in the Product dropdown and the home Product section because both read from `PHASES`.
+
+**Which features get a page:** the 13 `live` features plus Accident & Injury Illustrations — 14. `Discovery Responses` and `Deposition Review` appear in the dropdown and on the home page in a Coming next block, and link nowhere. A page whose only message is "not yet" wastes the click.
 
 ### 4.2 Data model
 
@@ -103,6 +107,7 @@ export type Phase = 'pre-lit' | 'litigation';
 export interface Feature {
   id: string;
   name: string;
+  icon: ProductIconName;        // shared across menu, home card, and feature hero
   line: string;                 // the sales line, one sentence
   wcLine?: string;              // practice-specific override
   practice: 'PI' | 'WC' | 'both';
@@ -134,6 +139,7 @@ export interface FeaturePage {
 
 | Card | Sales line | Practice | Phases | State |
 |---|---|---|---|---|
+| Intake | Turn the first client conversation and documents into a review-ready new matter. | both | pre-lit | live |
 | Ask AL | Ask anything about the case. Every answer cites document, page, and line. | both | both | live |
 | Medical Chronologies | Thousands of pages become one dated treatment story, cited and exportable. | both | both | live |
 | Medical Significance Brief | What actually matters in the records, pulled out and sourced. | both | pre-lit | live |
@@ -156,7 +162,7 @@ The Damages Ledger `wcLine`: *Reconcile the benefit printout — every TTD, PD, 
 
 ### 4.4 The feature page
 
-One component, `FeaturePage`, rendered by 13 thin routes. Writing a page means writing data, never JSX. Every page runs in this order:
+One component, `FeaturePage`, rendered by 14 thin routes. Writing a page means writing data, never JSX. Every page runs in this order:
 
 1. **Hero** — eyebrow naming the phase(s) and practice, `<h1>` carrying `promise`, the sales line beneath, and "Schedule a call".
 2. **What it does** — the `detail` bullets, with `body` paragraphs around them.
@@ -175,7 +181,7 @@ An `early-access` page says what a visitor gets today — it runs on your case w
 
 ### 4.5 Routing and build
 
-Each page is a directory entry, exactly like `/security/` — no router, nothing client-side that can disagree with what is deployed. For each of the 13:
+Each page is a directory entry, exactly like `/security/` — no router, nothing client-side that can disagree with what is deployed. For each of the 14:
 
 - `product/<slug>/index.html` — its own `<title>`, description, canonical, and og tags. These are what a search result and a forwarded link show, so they are written per feature, not templated from the name.
 - `product/<slug>/main.tsx` — five lines, rendering `<FeaturePage id="…" />`.
@@ -224,7 +230,7 @@ The standalone `AskAl` section stays. It demonstrates grounded answering with ci
 
 ### 6.1 Navigation
 
-`SITE_LINKS` keeps four entries: Product, Solutions (`/#solutions`), Security, About, plus the "Schedule a call" button.
+`SITE_LINKS` keeps four entries: Product, Solutions (`/#solutions`), Security, About, plus Login and the "Schedule a call" button. Login uses the existing production Autolaw destination, `https://case-app-1055716306475.us-central1.run.app/login`, in desktop nav, mobile nav, and footer. This is the sole explicitly approved raw Cloud Run URL; `app.autolaw.ai` remains unused until its DNS record exists, and self-serve trial remains disabled.
 
 **Product is now a dropdown**, not an anchor. It opens onto the two phase columns, each listing its features as links to `/product/<slug>/`, with the phase heading and its line above — the anytimeai.ai shape. Requirements: it opens on hover AND on click/Enter, closes on Escape and on focus leaving, is a real `<button aria-expanded>` controlling a labelled list, and every entry is reachable by keyboard in DOM order. On narrow screens it renders inside the existing mobile menu as a nested list, always expanded — a disclosure inside a disclosure is a trap on a phone. The Product label itself also links to the home Product section for anyone who clicks rather than opens.
 
@@ -252,7 +258,7 @@ The claim guard gains three rules:
 1. **Availability is enforceable.** Any feature whose `availability` is not `live` must render inside a card carrying its label. A test asserts the label text is present for every non-live feature, so a later edit cannot quietly promote one.
 2. **New retired phrases**, from the media-engine audit: any accuracy percentage applied to illustrations, plus `medically validated`, `expert[- ]reviewed`, `court[- ]admissible`, `clinician[- ]approved`, `3D`, and surgical-procedure claims. media-engine's own accuracy corpus is directional, every case is agent-proposed, and the test that would gate a measured number is named `test_gate_condition_is_not_yet_met`.
 3. **Existing rules hold.** `certified` stays banned sitewide; `generate documents` is retired, so the Discovery Responses copy must not use it.
-4. **Every feature page is scanned**, not just the home page. 13 new pages are 13 new places for a claim to appear, and the guard's page list must grow with them — including their `<title>` and meta description, which the guard already scans raw for the existing pages.
+4. **Every feature page is scanned**, not just the home page. 14 new pages are 14 new places for a claim to appear, and the guard's page list must grow with them — including their `<title>` and meta description, which the guard already scans raw for the existing pages.
 5. **A page exists only for a feature that has one.** A test asserts that the set of `slug`s matches the set of built routes in `vite.config.ts` and the sitemap, so a page cannot be shipped that nothing links to, and a link cannot point at a page that was never built.
 
 No rendered sample from media-engine ships on the site. The one real render inspected on 2026-09-15 has garbled label text ("Plaufinit" for "Plaintiff") — exactly what its own OCR drift check exists to catch.
@@ -268,7 +274,7 @@ No rendered sample from media-engine ships on the site. The one real render insp
 
 ## 9. Non-goals
 
-A pricing page (an explicit non-goal in the 2026-08-05 design doc, and neither reference site publishes prices). Per-feature or per-phase pages. Customer logos or testimonials until real ones exist with permission. Any link into `app.autolaw.ai` while its DNS record is absent.
+A pricing page (an explicit non-goal in the 2026-08-05 design doc, and neither reference site publishes prices). Per-phase aggregate pages. Customer logos or testimonials until real ones exist with permission. Any link into `app.autolaw.ai` while its DNS record is absent.
 
 ---
 

@@ -35,8 +35,7 @@
 }
 
 .al-feat {
-  display: grid;
-  gap: var(--al-space-2);
+  display: block;
   border: 1px solid var(--al-hairline);
   border-radius: var(--al-radius-card);
   background: var(--al-surface);
@@ -44,6 +43,19 @@
   color: var(--al-ink);
   text-decoration: none;
   min-height: 142px;
+}
+
+.al-feat__content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--al-space-3);
+  align-items: start;
+}
+
+.al-feat__copy {
+  display: grid;
+  gap: var(--al-space-2);
+  min-width: 0;
 }
 
 .al-feat--link {
