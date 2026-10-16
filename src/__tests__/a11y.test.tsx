@@ -113,11 +113,12 @@ describe('keyboard reachability', () => {
      * loop then passes over a shorter list and reports nothing.
      */
 
-    // Nav links: brand, Product overview, three flat site links, Login, and the header CTA.
-    // The adjacent Product menu toggle is the eighth primary-navigation control.
+    // Nav links: brand, Product overview, four flat site links (Solutions, Security,
+    // Blog, About), Login, and the header CTA. The adjacent Product menu toggle is the
+    // ninth primary-navigation control. Sign up is absent while TRIAL_ENABLED is false.
     const nav = screen.getByRole('navigation', { name: /primary/i });
     const navLinks = within(nav).getAllByRole('link');
-    expect(navLinks.length).toBe(7);
+    expect(navLinks.length).toBe(8);
     navLinks.forEach(reachable);
     reachable(within(nav).getByRole('button', { name: /product menu/i }));
 
@@ -157,10 +158,11 @@ describe('keyboard reachability', () => {
     // Comparison scroller — focusable so a keyboard user can scroll it
     reachable(screen.getByTestId('comparison-scroller'));
 
-    // Footer links: four site links, schedule a call, Login, contact.
+    // Footer links: five site links, schedule a call, Login, contact. Sign up is absent
+    // while TRIAL_ENABLED is false, as are Privacy and Terms while their slots are empty.
     const footer = screen.getByRole('contentinfo');
     const footerLinks = within(footer).getAllByRole('link');
-    expect(footerLinks.length).toBe(7);
+    expect(footerLinks.length).toBe(8);
     footerLinks.forEach(reachable);
   });
 

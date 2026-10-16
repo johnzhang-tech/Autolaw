@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROUTED_FEATURES } from '../data/product';
+import { POSTS } from '../data/blog';
 import { LOGIN_URL } from '../config';
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -74,6 +75,8 @@ describe('credibility guards', () => {
       'schedule-call/index.html',
       'privacy/index.html',
       'terms/index.html',
+      'blog/index.html',
+      ...POSTS.map((post) => `blog/${post.slug}/index.html`),
       ...ROUTED_FEATURES.map((feature) => `product/${feature.slug}/index.html`),
     ]);
     entries.forEach((f) => expect(existsSync(f), `${f} is a build entry but does not exist`).toBe(true));

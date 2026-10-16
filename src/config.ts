@@ -54,6 +54,8 @@ export const HOW_IT_WORKS_URL = '/#product';
  */
 export const SECURITY_URL = '/security/';
 export const ABOUT_URL = '/about/';
+/** The blog index. Each post is `${BLOG_URL}${post.slug}/`, built from src/data/blog.ts. */
+export const BLOG_URL = '/blog/';
 /** The two public trust pages under /security/. Trailing slash as above. */
 export const SUBPROCESSORS_URL = '/security/subprocessors/';
 export const AI_USE_URL = '/security/ai/';

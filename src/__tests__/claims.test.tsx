@@ -12,9 +12,12 @@ import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
 import { TermsPage } from '../pages/terms/TermsPage';
 import { FeaturePage } from '../pages/product/FeaturePage';
+import { BlogIndexPage } from '../pages/blog/BlogIndexPage';
+import { PostPage } from '../pages/blog/PostPage';
 import { renderedText } from '../pages/__tests__/renderedText';
 import { APP_ORIGIN, LOGIN_URL, TRIAL_ENABLED } from '../config';
 import { AVAILABILITY_LABEL, FEATURES, ROUTED_FEATURES } from '../data/product';
+import { POSTS } from '../data/blog';
 
 /*
  * The claim guard. The credibility guard in credibility.test.tsx catches fabricated
@@ -92,6 +95,8 @@ const PAGES: ReadonlyArray<[string, PageFactory]> = [
   ['schedule-call', () => <ScheduleCallPage />],
   ['privacy', () => <PrivacyPage />],
   ['terms', () => <TermsPage />],
+  ['blog', () => <BlogIndexPage />],
+  ...POSTS.map((post) => [`blog/${post.slug}`, () => <PostPage slug={post.slug} />] as [string, PageFactory]),
   ...ROUTED_FEATURES.map((feature) => [
     `product/${feature.slug}`,
     () => <FeaturePage id={feature.id} />,
@@ -108,6 +113,8 @@ const HTML = [
   'schedule-call/index.html',
   'privacy/index.html',
   'terms/index.html',
+  'blog/index.html',
+  ...POSTS.map((post) => `blog/${post.slug}/index.html`),
   ...ROUTED_FEATURES.map((feature) => `product/${feature.slug}/index.html`),
 ];
 

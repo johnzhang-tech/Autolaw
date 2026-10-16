@@ -9,7 +9,10 @@ import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../privacy/PrivacyPage';
 import { TermsPage } from '../terms/TermsPage';
 import { FeaturePage } from '../product/FeaturePage';
+import { BlogIndexPage } from '../blog/BlogIndexPage';
+import { PostPage } from '../blog/PostPage';
 import { ROUTED_FEATURES } from '../../data/product';
+import { POSTS } from '../../data/blog';
 
 /*
  * The structural invariants every standalone page shares, asserted once per page rather
@@ -28,6 +31,8 @@ const PAGES: Array<[string, ReactElement]> = [
   ['/schedule-call/', <ScheduleCallPage />],
   ['/privacy/', <PrivacyPage />],
   ['/terms/', <TermsPage />],
+  ['/blog/', <BlogIndexPage />],
+  ...POSTS.map((post) => [`/blog/${post.slug}/`, <PostPage slug={post.slug} />] as [string, ReactElement]),
   ...ROUTED_FEATURES.map((feature) => [
     `/product/${feature.slug}/`,
     <FeaturePage id={feature.id} />,
@@ -102,8 +107,13 @@ describe.each(PAGES)('%s', (path, element) => {
        owner slot is empty legitimately carries almost no ids (main from PageShell and
        skip link id) — "Did it render at all" is already proven for every page by the h1
        and landmark tests in this same file — so the floor is scoped to pages that are
-       not those legal slots. */
-    if (path !== '/privacy/' && path !== '/terms/') {
+       not those legal slots.
+
+       /blog/ is exempt for the same reason: its ids are one per section plus one per
+       post, so the count measures how much has been published rather than whether the
+       page works. A post page is not exempt — each of its sections carries a fragment
+       id, so a post that lost its body would drop below the floor. */
+    if (path !== '/privacy/' && path !== '/terms/' && path !== '/blog/') {
       expect(ids.length).toBeGreaterThan(3);
     }
     expect([...new Set(duplicates)]).toEqual([]);
@@ -156,6 +166,8 @@ describe('subpage link integrity', () => {
     ['schedule-call', () => <ScheduleCallPage />],
     ['privacy', () => <PrivacyPage />],
     ['terms', () => <TermsPage />],
+    ['blog', () => <BlogIndexPage />],
+    ...POSTS.map((post) => [`blog/${post.slug}`, () => <PostPage slug={post.slug} />] as [string, () => ReactElement]),
     ...ROUTED_FEATURES.map((feature) => [
       `product/${feature.slug}`,
       () => <FeaturePage id={feature.id} />,
