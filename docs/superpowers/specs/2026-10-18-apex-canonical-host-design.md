@@ -296,3 +296,118 @@ Change the default to `gen-lang-client-0261655942`.
 | Do not use | GoDaddy "Forward with masking" — blocked by `frame-ancestors 'none'` |
 | Hardening | Tier 3 `X-Robots-Tag` variant **implemented 2026-10-18** — the service URL no longer competes in search |
 | Still outstanding | Tier 1, at GoDaddy. Nothing in this repo can do it or test it. |
+
+---
+
+## 9. Runbook — moving the login door to `app.autolaw.ai`
+
+The apex is one of two places the product answers to a Google hostname instead of its own.
+The other is the **Log in** link, in the nav and the footer of every page, which sends a
+visitor to the `case-app` service's raw Cloud Run URL. Same defect, different door.
+
+`src/config.ts` now carries one switch, `APP_HOST_LIVE`, and the guards follow it in both
+states, so the code half of this is a one-line flip. The flip must come **last**.
+
+### What is missing today (verified 2026-10-19)
+
+```
+$ dig +short app.autolaw.ai
+                                  # empty — no record of any kind
+$ gcloud beta run domain-mappings list --project gen-lang-client-0261655942 \
+    --region us-central1
+Listed 0 items.                   # case-app's region has no mappings at all
+```
+
+The `case-app` service itself is healthy at `https://case-app-hxalp7dwmq-uc.a.run.app`
+(project `gen-lang-client-0261655942`, region **us-central1** — note this is a different
+region from the marketing site, which is us-west1).
+
+### Step 1 — create the domain mapping
+
+Run this first, because its output is the authoritative DNS record to enter; do not copy a
+record set from memory or from this document.
+
+```bash
+gcloud beta run domain-mappings create \
+  --service case-app \
+  --domain app.autolaw.ai \
+  --project gen-lang-client-0261655942 \
+  --region us-central1
+```
+
+For a subdomain this prints a single `CNAME` — `app` → `ghs.googlehosted.com.` — which is
+the same shape `www.autolaw.ai` already uses.
+
+### Step 2 — add that record at GoDaddy
+
+**Domains → autolaw.ai → DNS → Add record**, using exactly what Step 1 printed. This is an
+ordinary DNS record, not a forward: do not touch the Forwarding section, which is where the
+apex fix in §5 Tier 1 lives.
+
+Then wait for the certificate. `www.autolaw.ai` took its `CertificateProvisioned` condition
+within the hour; watch it with:
+
+```bash
+gcloud beta run domain-mappings describe --domain app.autolaw.ai \
+  --project gen-lang-client-0261655942 --region us-central1 \
+  --format='value(status.conditions)'
+```
+
+All three conditions — `Ready`, `CertificateProvisioned`, `DomainRoutable` — must be `True`
+before Step 4.
+
+### Step 3 — point case-app at its new host
+
+This is the step that is easy to miss and breaks sign-in rather than the page. Two settings
+in the **case-app** repo name the host, and they are not the same kind of setting:
+
+| Setting | Where | Kind | Current value |
+|---|---|---|---|
+| `CASE_APP_BASE_URL` | `cloudbuild.yaml` substitution `_CASE_APP_BASE_URL`, applied via `--update-env-vars` | **runtime** env var | `https://case-app-hxalp7dwmq-uc.a.run.app` |
+| `NEXT_PUBLIC_APP_URL` | `Dockerfile` `ARG`/`ENV`, passed as a build arg from `cloudbuild.yaml` | **build-time**, baked into the client bundle | `https://case-app-hxalp7dwmq-uc.a.run.app` |
+
+Because `NEXT_PUBLIC_APP_URL` is a build arg, changing it needs a **rebuild** of case-app —
+an env-var update on the running service will not move it.
+
+`case-app/.env.example` states the dependency outright: the Dropbox OAuth callback is
+derived from `CASE_APP_BASE_URL`, and if these drift, sign-in breaks. So both must become
+`https://app.autolaw.ai`, and the Dropbox app's allowed redirect URI has to be updated to
+match before the change lands, or OAuth fails on the first attempt.
+
+### Step 4 — flip the switch here
+
+```
+src/config.ts
+- export const APP_HOST_LIVE = false;
++ export const APP_HOST_LIVE = true;
+```
+
+That is the whole change in this repository. `LOGIN_URL` becomes `${APP_ORIGIN}/login`, and
+the guards invert with it: links into `APP_ORIGIN` stop being banned, and a raw Cloud Run
+host in any rendered link becomes the failure. Both states pass the suite today — 611 tests
+green with the switch off and with it on — so flipping it is not entering untested territory.
+
+Afterwards, `APPROVED_CLOUD_RUN_LOGIN` and the false branch become dead and can be deleted,
+along with the exemption in `credibility.test.tsx`. Leaving them costs nothing immediately;
+the confinement guard keeps the literal from spreading past `src/config.ts` in the meantime.
+
+### Verify
+
+```bash
+# the host resolves and serves case-app under its own name
+curl -sSL -o /dev/null -w 'final URL: %{url_effective}\nstatus:    %{http_code}\n' \
+  https://app.autolaw.ai/login
+
+# and the site's own Log in links now point there
+curl -sS https://www.autolaw.ai | grep -o 'href="https://app.autolaw.ai/login"' | head -2
+```
+
+Then click **Log in** on the live site and confirm the address bar reads `app.autolaw.ai`,
+and that signing in through Dropbox still completes.
+
+### Not in scope here
+
+`TRIAL_ENABLED` stays `false`. The self-serve trial needs `app.autolaw.ai` **and**
+`TRIAL_SIGNUP_ENABLED=true` on case-app (`.env.example` ships it as `false`, and `/trial`
+404s without it). `APP_HOST_LIVE` deliberately does not open that lane — the guards assert
+that flipping the host switch leaves the trial shut.

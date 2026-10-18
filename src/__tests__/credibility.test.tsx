@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROUTED_FEATURES } from '../data/product';
 import { POSTS } from '../data/blog';
-import { LOGIN_URL } from '../config';
+import { APP_HOST_LIVE, APP_ORIGIN, APPROVED_CLOUD_RUN_LOGIN, LOGIN_URL } from '../config';
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -104,13 +104,30 @@ describe('credibility guards', () => {
   });
 
   it('allows only the explicitly approved production login hostname', () => {
-    const approved = 'https://case-app-1055716306475.us-central1.run.app/login';
-    expect(LOGIN_URL).toBe(approved);
+    /*
+     * The assertion is the pairing, not a fixed string. LOGIN_URL follows APP_HOST_LIVE and
+     * both of its states are legitimate; pinning the literal here meant that flipping the
+     * switch failed the very guard the switch exists to satisfy, which is how a guard
+     * teaches someone to edit it rather than heed it.
+     */
+    expect(LOGIN_URL).toBe(APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_RUN_LOGIN);
     const offenders = sourceFiles().filter((f) => {
-      const withoutApprovedLogin = readFileSync(f, 'utf8').replaceAll(approved, '');
+      const withoutApprovedLogin = readFileSync(f, 'utf8').replaceAll(APPROVED_CLOUD_RUN_LOGIN, '');
       return /\.run\.app/i.test(withoutApprovedLogin);
     });
     expect(offenders).toEqual([]);
+  });
+
+  /*
+   * Permitted, but not everywhere. Spread across components the approved host becomes the
+   * kind of string that survives a switch flip in one file and not another; confined to
+   * config.ts it is one line to delete once APP_HOST_LIVE is true for good.
+   */
+  it('keeps the approved Cloud Run host confined to src/config.ts', () => {
+    const carriers = sourceFiles()
+      .filter((f) => readFileSync(f, 'utf8').includes(APPROVED_CLOUD_RUN_LOGIN))
+      .map((f) => f.replace(`${ROOT}/`, ''));
+    expect(carriers).toEqual(['src/config.ts']);
   });
 
   it('keeps app tokens identical to the design system source', () => {

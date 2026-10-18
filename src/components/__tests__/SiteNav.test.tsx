@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SiteNav } from '../SiteNav';
-import { LOGIN_URL, SCHEDULE_URL, TRIAL_URL } from '../../config';
+import { APP_HOST_LIVE, APP_ORIGIN, APPROVED_CLOUD_RUN_LOGIN, LOGIN_URL, SCHEDULE_URL, TRIAL_URL } from '../../config';
 
 const config = vi.hoisted(() => ({ askAlEnabled: true, trialEnabled: false }));
 
@@ -122,8 +122,8 @@ describe('SiteNav', () => {
     expect(within(document.getElementById('nav-mobile')!).queryByText('Ask AL')).not.toBeInTheDocument();
   });
 
-  it('uses the approved existing Autolaw login destination', () => {
-    expect(LOGIN_URL).toBe('https://case-app-1055716306475.us-central1.run.app/login');
+  it('uses the login destination the host switch names', () => {
+    expect(LOGIN_URL).toBe(APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_RUN_LOGIN);
   });
 
   /*

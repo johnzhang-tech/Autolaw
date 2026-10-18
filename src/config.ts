@@ -1,18 +1,48 @@
 /**
  * Every outbound URL and gated asset in one place.
  *
- * APP_ORIGIN is reserved for the future canonical app host. Nothing may link to it until
- * its DNS record and Cloud Run domain mapping exist. See the launch dependencies in
+ * APP_ORIGIN is the canonical app host. Whether anything may link to it is APP_HOST_LIVE's
+ * business, not that constant's. See the launch dependencies in
  * docs/superpowers/specs/2026-08-05-autolaw-site-redesign-design.md.
  */
 export const APP_ORIGIN = 'https://app.autolaw.ai';
 
 /**
- * The existing production login used by autolaw.ai. This is the sole approved direct
- * Cloud Run destination; the credibility guard rejects every other raw service URL.
- * Move this to `${APP_ORIGIN}/login` when the canonical app host is live.
+ * The one raw Cloud Run host the site may show a visitor, and only while APP_HOST_LIVE is
+ * false. The credibility guard rejects every other raw service URL, and permits this one
+ * only in this file.
+ *
+ * It is a brand leak accepted because the alternative is no login link at all: someone
+ * clicking "Log in" watches the address bar turn into the case-app service's own Cloud Run
+ * hostname. That is the same defect as the apex redirect — the product answering to a
+ * Google hostname instead of its own — on a different door, and APP_HOST_LIVE is what
+ * closes it. (The host is not spelled out in this comment on purpose: the credibility
+ * guard greps for it, and a second copy here would be a second place to miss.)
  */
-export const LOGIN_URL = 'https://case-app-1055716306475.us-central1.run.app/login';
+export const APPROVED_CLOUD_RUN_LOGIN = 'https://case-app-1055716306475.us-central1.run.app/login';
+
+/**
+ * Whether app.autolaw.ai resolves yet. It does not: no DNS record and no Cloud Run domain
+ * mapping, verified 2026-10-19.
+ *
+ * This is the whole switch. While false, the login door stays on APPROVED_CLOUD_RUN_LOGIN
+ * and no link into APP_ORIGIN may render. Flipping it to true moves the door to
+ * `${APP_ORIGIN}/login`, and the guards invert with it: a link into APP_ORIGIN stops being
+ * a dead end, and a raw Cloud Run host in any rendered link becomes the failure instead.
+ * Both states are asserted, so neither is the untested one.
+ *
+ * Do not flip it before the DNS record and the domain mapping both exist, or every "Log in"
+ * on the site points at a host that does not resolve. The record to create, the command,
+ * and the case-app setting that has to match are in
+ * docs/superpowers/specs/2026-10-18-apex-canonical-host-design.md, section 9.
+ *
+ * TRIAL_ENABLED is a separate switch and stays off regardless: the trial additionally needs
+ * TRIAL_SIGNUP_ENABLED=true on the case-app service.
+ */
+export const APP_HOST_LIVE = false;
+
+/** The login door, following APP_HOST_LIVE. */
+export const LOGIN_URL = APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_RUN_LOGIN;
 
 /**
  * The self-serve trial, off. Two things have to be true before this flips: app.autolaw.ai

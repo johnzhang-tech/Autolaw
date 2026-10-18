@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { FeaturePage } from '../FeaturePage';
-import { APP_ORIGIN } from '../../../config';
+import { APP_HOST_LIVE, APP_ORIGIN, LOGIN_URL } from '../../../config';
 import { ROUTED_FEATURES } from '../../../data/product';
 
 describe('FeaturePage', () => {
@@ -29,8 +29,14 @@ describe('FeaturePage', () => {
       );
     });
 
+    // A product page must not link into the app while its host is a dead name. Once
+    // APP_HOST_LIVE is true the login door in the shell legitimately points there, and only
+    // it: the trial lane is under APP_ORIGIN too and TRIAL_ENABLED gates it separately.
+    const allowedIntoApp = APP_HOST_LIVE ? [LOGIN_URL] : [];
     const appLinks = [...container.querySelectorAll<HTMLAnchorElement>('a[href]')]
-      .filter((anchor) => anchor.href.startsWith(APP_ORIGIN));
+      .map((anchor) => anchor.href)
+      .filter((href) => href.startsWith(APP_ORIGIN))
+      .filter((href) => !allowedIntoApp.includes(href));
     expect(appLinks).toEqual([]);
   });
 

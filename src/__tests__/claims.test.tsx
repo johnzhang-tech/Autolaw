@@ -15,7 +15,7 @@ import { FeaturePage } from '../pages/product/FeaturePage';
 import { BlogIndexPage } from '../pages/blog/BlogIndexPage';
 import { PostPage } from '../pages/blog/PostPage';
 import { renderedText } from '../pages/__tests__/renderedText';
-import { APP_ORIGIN, LOGIN_URL, TRIAL_ENABLED } from '../config';
+import { APP_HOST_LIVE, APP_ORIGIN, APPROVED_CLOUD_RUN_LOGIN, LOGIN_URL, TRIAL_ENABLED } from '../config';
 import { AVAILABILITY_LABEL, FEATURES, ROUTED_FEATURES } from '../data/product';
 import { POSTS } from '../data/blog';
 
@@ -186,18 +186,41 @@ describe('claim guard', () => {
 });
 
 describe('dead-destination guard', () => {
-  it('keeps self-serve trial off while using the approved existing login destination', () => {
+  it('keeps self-serve trial off while using the login destination the switch names', () => {
     expect(TRIAL_ENABLED).toBe(false);
-    expect(LOGIN_URL).toBe('https://case-app-1055716306475.us-central1.run.app/login');
+    expect(LOGIN_URL).toBe(APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_RUN_LOGIN);
   });
 
   for (const [name, page] of PAGES) {
-    it(`${name} links nowhere into the application while the switches are off`, () => {
+    it(`${name} links into the application only where the switches allow`, () => {
       const { container } = render(page());
-      const into = [...container.querySelectorAll<HTMLAnchorElement>('a[href]')]
-        .map((a) => a.getAttribute('href') ?? '')
-        .filter((href) => href.startsWith(APP_ORIGIN));
+      const hrefs = [...container.querySelectorAll<HTMLAnchorElement>('a[href]')].map(
+        (a) => a.getAttribute('href') ?? ''
+      );
+
+      /*
+       * While APP_HOST_LIVE is false, app.autolaw.ai does not resolve and any link into it
+       * is a dead end. Once it is true the login door legitimately points there — and only
+       * the login door: TRIAL_URL is also under APP_ORIGIN and TRIAL_ENABLED gates it on
+       * its own, so flipping the host switch must not quietly open the trial lane too.
+       */
+      const allowed = APP_HOST_LIVE ? [LOGIN_URL] : [];
+      const into = hrefs
+        .filter((href) => href.startsWith(APP_ORIGIN))
+        .filter((href) => !allowed.includes(href));
       expect(into).toEqual([]);
+
+      /*
+       * The same rule from the visitor's side. The point of the switch is that the address
+       * bar stops showing a Google hostname, so once it is on, no rendered link may carry
+       * one; while it is off, the only one allowed is the approved login.
+       */
+      const raw = [...new Set(hrefs.filter((href) => /\.run\.app/i.test(href)))];
+      if (APP_HOST_LIVE) {
+        expect(raw).toEqual([]);
+      } else {
+        expect(raw.filter((href) => href !== APPROVED_CLOUD_RUN_LOGIN)).toEqual([]);
+      }
       cleanup();
     });
   }
