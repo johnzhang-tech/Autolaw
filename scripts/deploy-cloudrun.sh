@@ -8,12 +8,26 @@
 # secrets on a service that never reads them. --clear-env-vars below removes anything that
 # is still set from that era.
 #
+# This is the manual path, and the second one. Production normally deploys itself: the Cloud
+# Build trigger rmgpgab-autolaw-us-west1-johnzhang-tech-Autolaw--madul builds this Dockerfile
+# on every push to main and pushes to
+# us-west1-docker.pkg.dev/<project>/cloud-run-source-deploy/autolaw/autolaw, tagged with the
+# commit SHA — which is where the live revision's image comes from. Reach for this script to
+# deploy a tree that is not on main, or when the trigger is unavailable. It pushes to IMAGE
+# below rather than to the trigger's registry path, so a revision deployed from here reports a
+# different image location than one the trigger built. Both run the same Dockerfile.
+#
 # Optional overrides: PROJECT_ID, REGION, SERVICE_NAME, IMAGE.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-PROJECT_ID="${PROJECT_ID:-legal-intelligence}"
+# The project id, not its display name. This line read "legal-intelligence" — which is the
+# name shown in the console — and gcloud takes the id, so every default-configuration run died
+# on "Cloud Run Admin API has not been used in project legal-intelligence before or it is
+# disabled". The script worked only for whoever already had PROJECT_ID exported, which is why
+# it went unnoticed.
+PROJECT_ID="${PROJECT_ID:-gen-lang-client-0261655942}"
 REGION="${REGION:-us-west1}"
 SERVICE_NAME="${SERVICE_NAME:-autolaw}"
 IMAGE="${IMAGE:-gcr.io/${PROJECT_ID}/${SERVICE_NAME}}"
