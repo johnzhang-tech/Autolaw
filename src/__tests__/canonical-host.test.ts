@@ -3,23 +3,27 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * The site answers to more hostnames than the one it advertises.
+ * The site answers to more hostnames than the two it is served on.
  *
- * `www.autolaw.ai` is the name every page declares in <link rel="canonical"> and og:url,
- * and the only one a visitor should ever see. But the Cloud Run service behind it is also
- * reachable at `autolaw-<project>.<region>.run.app`, and every `gcloud run deploy --tag`
- * preview revision adds another hostname serving byte-identical HTML. Those are real,
- * public, crawlable copies of the site competing with the brand for its own name — which
- * is how the apex ended up pointing at a run.app URL in the first place.
+ * Two of them are ours: the apex `autolaw.ai` and `www.autolaw.ai`, each with its own Cloud
+ * Run domain mapping, both serving the same pages. `www.autolaw.ai` is the one every page
+ * names in <link rel="canonical"> and og:url, and that tag is what tells a search engine
+ * the two are one site rather than two.
  *
- * nginx.conf answers that with a `map $host $robots_tag` whose only empty value — and so
- * the only host that receives no X-Robots-Tag — is the canonical one. Everything else is
- * served normally and told not to be indexed.
+ * The rest are not ours to advertise. The service is also reachable at
+ * `autolaw-<project>.<region>.run.app`, and every `gcloud run deploy --tag` preview adds
+ * another hostname serving byte-identical HTML — real, public, crawlable copies competing
+ * with the brand for its own name, which is how the apex ended up pointing at a run.app URL
+ * in the first place. `map $host $robots_tag` in nginx.conf leaves our hosts alone and
+ * sends noindex to everything else.
  *
- * What this file guards is the join between the two halves: the host nginx privileges and
- * the host the pages claim. Either can be edited without the other, both look correct in
- * isolation, and nothing at runtime complains if they disagree — the site just quietly
+ * What this file guards is the join between the two halves: the hosts nginx treats as ours
+ * and the host the pages claim. Either can be edited without the other, both look correct
+ * in isolation, and nothing at runtime complains if they disagree — the site just quietly
  * asks Google not to index itself, or stops suppressing the hostname it meant to hide.
+ *
+ * The exemption is derived from the canonical tag rather than listed, so adding a host to
+ * nginx.conf that the pages do not claim fails here rather than shipping.
  *
  * The background, and the DNS-side half that lives outside this repo, are in
  * docs/superpowers/specs/2026-10-18-apex-canonical-host-design.md.
@@ -54,6 +58,23 @@ const robotsMap = (): Array<[string, string]> => {
   return [...block[1].matchAll(/^\s*(\S+)\s+"([^"]*)"\s*;/gm)].map((m) => [m[1], m[2]]);
 };
 
+/** The hosts nginx leaves un-noindexed: the map keys whose value is the empty string. */
+const exemptHosts = (): string[] =>
+  robotsMap()
+    .filter(([host, value]) => host !== 'default' && value === '')
+    .map(([host]) => host)
+    .sort();
+
+/**
+ * The hosts this site is served on, derived rather than listed: the canonical host the
+ * pages declare, plus the apex it sits under. Deriving it means a host added to nginx.conf
+ * that no page claims fails this file instead of quietly becoming indexable.
+ */
+const servedHosts = (): string[] => {
+  const canonical = declaredHosts();
+  return [...new Set(canonical.flatMap((host) => [host.replace(/^www\./, ''), host]))].sort();
+};
+
 describe('canonical host', () => {
   /*
    * Runs first because every assertion below reads through one of these two parsers. A
@@ -72,11 +93,18 @@ describe('canonical host', () => {
     expect(declaredHosts()).toEqual(['www.autolaw.ai']);
   });
 
-  it('exempts exactly the host the pages declare, and no other', () => {
-    const exempt = robotsMap()
-      .filter(([host, value]) => host !== 'default' && value === '')
-      .map(([host]) => host);
-    expect(exempt).toEqual(declaredHosts());
+  it('exempts exactly the hosts this site is served on', () => {
+    expect(exemptHosts()).toEqual(servedHosts());
+  });
+
+  /*
+   * The specific mistake worth failing on. Exempting a run.app hostname would read as a
+   * harmless convenience — it stops a preview looking odd in a crawl test — and would
+   * silently hand the service URL permission to compete with the brand, which is the entire
+   * thing this map exists to prevent.
+   */
+  it('never exempts a Cloud Run hostname', () => {
+    expect(exemptHosts().filter((host) => /\.run\.app$/i.test(host))).toEqual([]);
   });
 
   it('asks robots away from every other host', () => {

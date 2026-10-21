@@ -149,35 +149,71 @@ This resolves the reported symptom in full. The address bar will read `www.autol
 also what every canonical tag, `og:url` and `sitemap.xml` entry in this repo already declares, and
 it is precisely the behaviour `cidsnap.com` has.
 
-### Tier 2 — Map the apex to Cloud Run (optional; fixes deep links)
+### Tier 2 — Map the apex to Cloud Run — **chosen 2026-10-20, mapping created**
 
-GoDaddy's forwarder only handles the root. Deep links to the apex are dropped today, on both
-domains:
+Tier 1 would have fixed the home page and nothing else. GoDaddy's forwarder only handles the
+root, so every deep link to the apex was a 404 on both domains:
 
 ```
-$ curl -sSI https://autolaw.ai/security/   →  HTTP/2 404
-$ curl -sSI https://cidsnap.com/pricing    →  HTTP/2 404
+$ curl -sSI https://autolaw.ai/about/   →  HTTP/2 404
+$ curl -sSI https://cidsnap.com/pricing →  HTTP/2 404
 ```
 
-Tier 1 does not change this — anyone who shares `autolaw.ai/security/` still gets a 404. If that
-matters, take the apex off GoDaddy's forwarder and give it to Cloud Run:
+Mapping the apex to Cloud Run fixes that, and **supersedes Tier 1**: the forwarding record
+goes away entirely, so the apex can no longer point at a `run.app` URL and the forwarding
+field never needs to be edited.
+
+**Decision — both hosts serve, no redirect.** `autolaw.ai` and `www.autolaw.ai` each have
+their own domain mapping and each return 200 for every page. Neither redirects to the other.
+The owner chose this over an apex → www redirect on 2026-10-20. The two copies are
+consolidated for search engines by the `<link rel="canonical">` on every page, which names
+`www.autolaw.ai`; that tag is the only thing distinguishing them, so it must not be removed.
+
+The mapping exists:
 
 ```bash
 gcloud beta run domain-mappings create \
-  --service autolaw \
-  --domain autolaw.ai \
-  --project gen-lang-client-0261655942 \
-  --region us-west1
+  --service autolaw --domain autolaw.ai \
+  --project gen-lang-client-0261655942 --region us-west1
 ```
 
-The command prints the authoritative `A`/`AAAA` record set to enter at GoDaddy — use its output
-rather than a remembered list. Then replace the two forwarder `A` records with those, and let
-Tier 3 perform the apex → `www` redirect inside nginx, where the path survives.
+An apex cannot use a CNAME, so unlike `www` it needs the eight-record Google set:
 
-Requires `autolaw.ai` to be verified to this Google account; the existing
-`google-site-verification=_zyzyJGulpm4yrBqGpKfe-msC8RPukMAKaDtnQRqCTw` TXT record suggests it
-already is. Certificate provisioning typically takes 15–60 minutes. Note that `cidsnap.com` does
-*not* do this — it accepts the same deep-link limitation.
+| Type | Value |
+|---|---|
+| A | `216.239.32.21`, `216.239.34.21`, `216.239.36.21`, `216.239.38.21` |
+| AAAA | `2001:4860:4802:32::15`, `2001:4860:4802:34::15`, `2001:4860:4802:36::15`, `2001:4860:4802:38::15` |
+
+**The outstanding step is at GoDaddy**, and it is a replacement rather than an addition:
+delete the domain **forward** on `autolaw.ai`, then add the eight records above as ordinary
+DNS records. The forward currently owns the apex `A` records, so leaving it in place keeps
+the old behaviour no matter what else is added. Certificate issuance does not begin until
+the records resolve.
+
+Watch for all three conditions to go `True`:
+
+```bash
+gcloud beta run domain-mappings describe --domain autolaw.ai \
+  --project gen-lang-client-0261655942 --region us-west1 \
+  --format='value(status.conditions)'
+```
+
+**The nginx consequence, already shipped.** The `map` in Tier 3 sent `noindex` to every host
+that was not `www.autolaw.ai`. With the apex serving directly, that would have meant the
+apex returning the site *and* telling search engines to ignore it — and a page that is both
+`noindex` and canonicalised to another URL gives contradictory instructions, with the
+`noindex` liable to carry across to the canonical target. The apex is therefore exempt
+alongside `www`, and the test derives the exempt set from the canonical tag rather than
+listing it, so a host added to `nginx.conf` that no page claims fails the suite.
+
+Verified in `nginx:1.27-alpine` with the real config:
+
+| `Host` | Result |
+|---|---|
+| `autolaw.ai` | 200, no `X-Robots-Tag`, all five security headers |
+| `www.autolaw.ai` | 200, no `X-Robots-Tag` |
+| `autolaw-…us-west1.run.app` | 200, `X-Robots-Tag: noindex, nofollow` |
+| `canary---autolaw-….a.run.app` | 200, `X-Robots-Tag: noindex, nofollow` |
 
 ### Tier 3 — Enforce the canonical host in nginx — **implemented 2026-10-18**
 
@@ -291,11 +327,11 @@ Change the default to `gen-lang-client-0261655942`.
 |---|---|
 | Root cause | GoDaddy apex forwarding for `autolaw.ai` points at the Cloud Run service URL |
 | Why cidsnap works | Identical setup; its forwarding points at `https://www.cidsnap.com` |
-| Fix | Change the forwarding destination to `https://www.autolaw.ai`, 301, forward-only |
+| Fix (superseded) | Tier 1 would have pointed the forward at `https://www.autolaw.ai`; Tier 2 removes the forward instead |
 | Code changes required | None for the fix |
 | Do not use | GoDaddy "Forward with masking" — blocked by `frame-ancestors 'none'` |
 | Hardening | Tier 3 `X-Robots-Tag` variant **implemented 2026-10-18** — the service URL no longer competes in search |
-| Still outstanding | Tier 1, at GoDaddy. Nothing in this repo can do it or test it. |
+| Still outstanding | At GoDaddy: delete the apex forward, add the eight A/AAAA records in §5 Tier 2. |
 
 ---
 
