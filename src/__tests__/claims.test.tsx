@@ -233,3 +233,39 @@ describe('dead-destination guard', () => {
     loginLinks.forEach((link) => expect(link).toHaveAttribute('href', LOGIN_URL));
   });
 });
+
+/*
+ * Positioning that has been replaced, which is a different failure from a claim that was
+ * never true.
+ *
+ * "Turn case complexity into legal advantage" was the headline until the hero was
+ * rewritten around "Know where every fact came from." Nothing about it is false — it is
+ * simply vague where the replacement is concrete, and it says nothing about what the
+ * product makes. The rewrite changed the <h1> and left <title> and og:title alone, so the
+ * retired line went on being the first thing a search result and a forwarded link showed,
+ * which is the only place most people ever read.
+ *
+ * That is the shape of the mistake worth failing on: page copy and page metadata are
+ * edited in different files, by different passes, and only the metadata is invisible
+ * while you work. Retiring a line of positioning means retiring it everywhere, so this
+ * scans the raw HTML, where the attributes live.
+ */
+const RETIRED_POSITIONING: ReadonlyArray<{ phrase: string; reason: string }> = [
+  {
+    phrase: 'Turn case complexity into legal advantage',
+    reason:
+      'replaced on 2026-10-28 by the outcome-focused hero; it survived in <title> and og:title after the <h1> was rewritten',
+  },
+];
+
+describe('retired positioning', () => {
+  for (const file of HTML) {
+    it(`${file} carries no retired positioning line in its metadata`, () => {
+      const html = readFileSync(join(ROOT, file), 'utf8');
+      const hits = RETIRED_POSITIONING.filter((r) => html.includes(r.phrase)).map(
+        (r) => `${r.phrase} — ${r.reason}`
+      );
+      expect(hits).toEqual([]);
+    });
+  }
+});

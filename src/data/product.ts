@@ -672,3 +672,97 @@ export const ROUTED_FEATURES = FEATURES.filter(
   (feature): feature is Feature & { slug: string; page: FeaturePage } =>
     Boolean(feature.slug && feature.page),
 );
+
+/**
+ * The reports a firm orders per case.
+ *
+ * This is a narrower list than FEATURES and a stronger claim. A feature marked `live`
+ * means a firm with access can reach it. A report in this catalog means a firm can order
+ * it against one matter and be billed for it — true today only of the types case-app
+ * launches in packages/shared/src/reports-tier.ts: `chronology` and `howell` for personal
+ * injury, `chronology` and `qme_ame_memo` for workers’ compensation. The preview types
+ * behind the `reports_preview` capability row are deliberately absent; they are switched
+ * on per firm and belong in a conversation, not in a catalog.
+ *
+ * Entries name a feature id instead of repeating its copy, so the catalog cannot describe
+ * a report whose page does not exist, cannot drift from the feature’s own description, and
+ * cannot keep advertising something that has been pulled back from `live`.
+ */
+export type ReportPracticeArea = 'PI' | 'WC';
+
+export interface ReportProduct {
+  /** A FEATURES id. Resolved at module load; an unknown id fails the build. */
+  featureId: string;
+  /** Mirrors reports-tier.ts. PI and WC are listed in that order where both apply. */
+  practiceAreas: ReadonlyArray<ReportPracticeArea>;
+  /** The buyer’s problem in the buyer’s words — not a description of what we built. */
+  problem: string;
+  /** Exactly three. More reads as a feature list; fewer reads as a slogan. */
+  deliverables: readonly [string, string, string];
+  /** Where the report stops. Present only where leaving it out would overstate the claim. */
+  boundary?: string;
+}
+
+export const REPORT_PRODUCTS: ReadonlyArray<ReportProduct> = [
+  {
+    featureId: 'medical-chronologies',
+    practiceAreas: ['PI', 'WC'],
+    problem:
+      'Two years of treatment sit in six hundred pages from four providers, in no particular order.',
+    deliverables: [
+      'Date-ordered treatment timeline across every provider',
+      'Diagnoses, restrictions, and work status as recorded',
+      'Document, page, and sentence on every entry',
+    ],
+  },
+  {
+    featureId: 'case-value',
+    practiceAreas: ['PI'],
+    problem:
+      'Billed, paid, adjusted, and outstanding never reconcile across providers, liens, and insurers.',
+    deliverables: [
+      'Billed against paid and adjusted, provider by provider',
+      'Outstanding balances and the liens attached to them',
+      'Every figure traced to the bill or ledger it came from',
+    ],
+    boundary: 'Extracts and reconciles the figures. It does not advise on what is recoverable.',
+  },
+  {
+    featureId: 'qme-ame',
+    practiceAreas: ['WC'],
+    problem:
+      'A sixty-page evaluation buries the four findings that actually decide the claim.',
+    deliverables: [
+      'Causation, impairment, and apportionment as stated',
+      'Work restrictions and future medical care',
+      'The medical-legal questions the report leaves open',
+    ],
+  },
+];
+
+export interface OrderableReport extends ReportProduct {
+  feature: Feature & { slug: string; page: FeaturePage };
+}
+
+/**
+ * Throws rather than returning undefined, and is called at module load by
+ * ORDERABLE_REPORTS below, so each of these mistakes fails the build instead of rendering
+ * a card with an empty heading over a link to a 404.
+ */
+export function resolveReport(product: ReportProduct): OrderableReport {
+  const feature = FEATURE_BY_ID.get(product.featureId);
+  if (!feature) {
+    throw new Error(`Report names unknown feature "${product.featureId}".`);
+  }
+  if (feature.availability !== 'live') {
+    throw new Error(
+      `Report "${product.featureId}" is ${feature.availability}, not live; only a live feature may be advertised as orderable.`,
+    );
+  }
+  if (!feature.slug || !feature.page) {
+    throw new Error(`Report "${product.featureId}" has no published page to link to.`);
+  }
+  return { ...product, feature: feature as Feature & { slug: string; page: FeaturePage } };
+}
+
+export const ORDERABLE_REPORTS: ReadonlyArray<OrderableReport> = REPORT_PRODUCTS.map(resolveReport);

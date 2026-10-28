@@ -2,9 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
   FEATURE_BY_ID,
   FEATURES,
+  ORDERABLE_REPORTS,
   PLATFORM,
   PHASES,
+  REPORT_PRODUCTS,
   ROUTED_FEATURES,
+  resolveReport,
   type Feature,
 } from '../product';
 
@@ -130,5 +133,85 @@ describe('product data', () => {
 
     const pageCopy = ROUTED_FEATURES.map((feature) => JSON.stringify(feature.page)).join(' ');
     expect(pageCopy).not.toMatch(/\d+(?:\.\d+)?\s*%/);
+  });
+});
+
+/*
+ * The catalog is a narrower claim than the feature grid, and a more expensive one to get
+ * wrong.
+ *
+ * A feature being `live` means a firm with access can reach it. A report being in this
+ * catalog means something stronger: that a firm can order it per case and be billed for
+ * it, which is true only of the types case-app actually launches — `chronology` and
+ * `howell` for personal injury, `chronology` and `qme_ame_memo` for workers'
+ * compensation, in packages/shared/src/reports-tier.ts. The practice-area assertion below
+ * is that list, restated here because the two repositories deploy separately and nothing
+ * else would notice them drifting apart.
+ *
+ * The resolver throws rather than returning undefined so that a report naming a feature
+ * that is missing, unrouted, or not live fails the build instead of rendering a card with
+ * an empty heading and a link to a 404.
+ */
+describe('orderable report catalog', () => {
+  it('names exactly the three reports a firm can order, in buyer order', () => {
+    expect(REPORT_PRODUCTS.map((report) => report.featureId)).toEqual([
+      'medical-chronologies',
+      'case-value',
+      'qme-ame',
+    ]);
+  });
+
+  it('offers each report to the practice areas case-app launches it for', () => {
+    const areas = new Map(REPORT_PRODUCTS.map((report) => [report.featureId, report.practiceAreas]));
+    expect(areas.get('medical-chronologies')).toEqual(['PI', 'WC']);
+    expect(areas.get('case-value')).toEqual(['PI']);
+    expect(areas.get('qme-ame')).toEqual(['WC']);
+  });
+
+  it('advertises only live, routed features as orderable', () => {
+    expect(ORDERABLE_REPORTS).toHaveLength(REPORT_PRODUCTS.length);
+    ORDERABLE_REPORTS.forEach((report) => {
+      expect(report.feature.availability).toBe('live');
+      expect(report.feature.slug).toBeTruthy();
+      expect(report.feature.page).toBeDefined();
+    });
+  });
+
+  it('refuses a report that names a feature which does not exist', () => {
+    expect(() => resolveReport({ ...REPORT_PRODUCTS[0], featureId: 'no-such-feature' })).toThrow(
+      /no-such-feature/,
+    );
+  });
+
+  /*
+   * The illustration pilot is the live case for this: it is `early-access`, it has a
+   * routed page, and it is the one a future edit is most likely to promote into the
+   * catalog by mistake, because everything about it except its availability looks ready.
+   */
+  it('refuses a report whose feature is not live', () => {
+    expect(() => resolveReport({ ...REPORT_PRODUCTS[0], featureId: 'illustrations' })).toThrow(
+      /early-access/,
+    );
+  });
+
+  it('gives every report a buyer problem and exactly three deliverables', () => {
+    REPORT_PRODUCTS.forEach((report) => {
+      expect(report.problem.length).toBeGreaterThan(20);
+      expect(report.deliverables).toHaveLength(3);
+      report.deliverables.forEach((deliverable) => expect(deliverable.length).toBeGreaterThan(10));
+    });
+  });
+
+  it('leaves the illustration pilot out of the catalog', () => {
+    expect(REPORT_PRODUCTS.map((report) => report.featureId)).not.toContain('illustrations');
+  });
+
+  it('claims no accuracy percentage in catalog copy', () => {
+    const copy = REPORT_PRODUCTS.flatMap((report) => [
+      report.problem,
+      report.boundary ?? '',
+      ...report.deliverables,
+    ]).join(' ');
+    expect(copy).not.toMatch(/\d+(?:\.\d+)?\s*%/);
   });
 });
