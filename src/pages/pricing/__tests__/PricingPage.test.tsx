@@ -37,10 +37,24 @@ describe('PricingPage', () => {
     expect(names).toHaveLength(REPORT_PACKS.length);
   });
 
-  it('publishes no dollar figure while the prices are unread', () => {
-    expect(REPORT_PACKS.every((pack) => pack.priceUsd === null)).toBe(true);
+  /*
+   * Phrased as an implication rather than a precondition. Asserting "every price is
+   * null" first would mean that the day the owner does the thing config.ts tells them to
+   * do — paste a live Stripe price — this test goes red with a message that looks like a
+   * regression. A guard that fails on the transition it exists to protect is a guard
+   * people learn to edit rather than heed.
+   */
+  it('publishes a dollar figure only for a pack that has one', () => {
     const { container } = render(<PricingPage />);
-    expect(renderedText(container)).not.toMatch(/\$\s?\d/);
+    const text = renderedText(container);
+    if (REPORT_PACKS.every((pack) => pack.priceUsd === null)) {
+      expect(text).not.toMatch(/\$\s?\d/);
+      expect(text).toContain('Priced on a call');
+    } else {
+      REPORT_PACKS.filter((pack) => pack.priceUsd !== null).forEach((pack) => {
+        expect(text).toContain(packPriceLabel(pack));
+      });
+    }
   });
 
   it('formats a price only once one has been written down', () => {

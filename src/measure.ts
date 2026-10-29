@@ -31,8 +31,7 @@ export type AnalyticsEvent =
   | 'sample_viewed'
   | 'pricing_viewed'
   | 'cta_clicked'
-  | 'schedule_started'
-  | 'login_clicked';
+  | 'schedule_started';
 
 export type AnalyticsProps = Record<string, string | number | boolean>;
 

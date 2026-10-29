@@ -21,5 +21,5 @@
     "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "vitest.config.ts", "vite.config.ts"]
+  "include": ["src", "blog", "product", "pricing", "sample-reports", "vitest.config.ts", "vite.config.ts"]
 }

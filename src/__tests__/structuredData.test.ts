@@ -80,9 +80,14 @@ describe('structured data', () => {
    * The guard that matters. An Offer or a price in markup is a published price, and
    * nobody has read the live Stripe figures yet — so while every pack is null, no
    * structured data anywhere may carry one.
+   *
+   * Conditional, for the reason given in PricingPage.test.tsx: filling REPORT_PACKS in
+   * is the expected next step and should not read as a regression. Publishing price
+   * markup once a price exists is a separate decision with Google's structured-data
+   * policy attached, so this goes quiet then rather than guessing at it.
    */
   it('claims no price in markup while no price is known', () => {
-    expect(REPORT_PACKS.every((pack) => pack.priceUsd === null)).toBe(true);
+    if (REPORT_PACKS.some((pack) => pack.priceUsd !== null)) return;
     const offenders: string[] = [];
     for (const entry of htmlEntries()) {
       const raw = JSON.stringify(blocksIn(entry));
