@@ -82,60 +82,128 @@ The second number is the one that matters, because ops review is the default and
 auto-release is the exception. **Any price that only works under auto-release is a price
 that loses money on every new firm**, which is precisely the firm you most want to keep.
 
-## 4. Recommendation
+## 4. The decision: $49, and what has to be true for it to work
 
-Price one credit at **$149**, with volume relief:
+The owner chose to stay near $49 on 2026-10-28, against the $149 this document
+originally argued for. The case for $149 is kept in section 6 so the trade is on the
+record. This section is about making $49 work, because it can — but only under
+conditions that are not currently met.
 
-| Pack | Price | Per report | Saving |
-| --- | --- | --- | --- |
-| Single report | **$149** | $149 | — |
-| 5-report pack | **$625** | $125 | 16% |
-| 10-report pack | **$1,090** | $109 | 27% |
+### What $49 earns, per report
 
-Why $149 and not the $39–49 in the brief:
+Assumptions: a typical first order of 500–800 pages; model cost ~$3; storage, OCR and
+infrastructure ~$1; ops review 30 minutes at a $45/hour loaded rate; Stripe at
+2.9% + $0.30 on the pack, divided across its credits; and a 50% chance that records
+arrive inside the free window, which re-runs the pipeline **and** sends the report back
+to review.
 
-1. **$49 prices the product as the thing it is not.** It lands squarely in the
-   $0.05/page extraction-tool band, next to tools whose output a paralegal must verify
-   from scratch. A firm reading $49 concludes the output needs checking — and then
-   discovers it was right to think so, because it does need an attorney's sign-off.
-   The price is the first claim the page makes about the quality of the work.
-2. **$49 does not survive ops review.** At $15–55 of marginal cost, a $49 report is
-   break-even at best for exactly the firms that are new, careful, and not yet trusted
-   with auto-release. $149 holds a 65–90% gross margin across both regimes.
-3. **$149 is still a tenth of the alternative.** Against $750–2,000 for an outsourced
-   500-page chronology, the pitch is not "cheap AI" but "the same job, same day, for a
-   tenth of what you paid last time, and you can check every line". That is a far better
-   conversation than a discount fight with a $0.05/page tool.
-4. **The packs undercut a subscription without being one.** Ten reports at $1,090 is
-   roughly three months of a single Supio-style seat, with nothing to cancel and nothing
-   to use up. For a firm running a handful of matters a month, that is the easier
-   purchase to approve.
+| Scenario | Price | Cost | Margin |
+| --- | ---: | ---: | ---: |
+| Single $49, auto-release, no refresh | $49 | $5.72 | **$43.28 (88%)** |
+| Single $49, auto-release, 50% refresh | $49 | $7.22 | **$41.78 (85%)** |
+| Single $49, ops review, no refresh | $49 | $30.72 | $18.28 (37%) |
+| Single $49, ops review, 50% refresh | $49 | $44.72 | $4.28 (9%) |
+| 10-pack at $36, auto-release, 50% refresh | $36 | $6.57 | **$29.43 (82%)** |
+| 10-pack at $36, ops review, 50% refresh | $36 | $44.07 | **−$8.07 (−22%)** |
+| 10-pack at $45, ops review, 50% refresh | $45 | $44.34 | $0.66 (1%) |
+| Single $49, ops review, 1,900-page file | $49 | $69.72 | **−$20.72 (−42%)** |
 
-### If you want a lower entry point
+Read the first and the last rows together. **$49 is not a price, it is a bet on
+automation.** Auto-released it is one of the better gross margins in software. With a
+human in the loop and any pack discount at all, it is a loss.
 
-Do not lower the credit. Add a **first report at $49**, once per firm, as the thing the
-call closes on — the same scoped evaluation the earlier trial proposal described. It
-buys the same trial outcome without teaching the market that a report is worth $49.
+### The three conditions
 
-### What stays unknowable from here
+**1. Auto-release has to be the default, not the reward.** This is the whole decision.
+`reports_auto_release` is a per-firm capability row, so today a new firm's reports land
+in `in_review` and a person releases them. At $149 that person is affordable. At $49
+they are the entire margin. Either the three launched report types release themselves
+for everybody, or $49 only works for firms you have already learned to trust — which is
+the opposite of the firms a self-serve price is for.
 
-I cannot read your Stripe account. If `case_app_reports_1 / _5 / _10` already resolve to
-active live-mode prices, those figures are the ones the business has already committed
-to and this document is an argument for changing them, not a description of them. Check
-before publishing anything.
+The budget, if a human stays: $49 single leaves **37 minutes** of actual review; a
+10-pack at $45 leaves **34 minutes**; a 10-pack at $36 leaves **26 minutes**. Those are
+the real ceilings, refresh included.
+
+**2. Pack discounts have to be shallow.** The 16% and 27% this document originally
+proposed were sized against a $149 credit. Applied to $49 they take the 10-pack to $36,
+which is under cost the moment a human touches it. Suggested instead: **$49 single,
+5 for $235 ($47 each), 10 for $450 ($45 each)** — about 4% and 8%. At this price a
+discount buys commitment, not margin, because there is no margin to spend.
+
+**3. Credits have to scale with pages, or the biggest files arrive first.** A flat $49
+against per-page competitors at $0.05–0.10 means a 300-page file costs a firm $49 here
+and $15–30 there, while a 1,900-page file costs $49 here and $95–190 there. Autolaw
+therefore wins precisely the records that cost the most to serve and loses the cheap
+ones — and the expensive ones are the loss-making row in the table above. This is
+adverse selection written into the price list.
+
+The fix keeps the headline: **one credit per 500 pages, rounded up.** A typical file is
+still "a $49 report"; a 1,900-page record is four credits, $196, still a quarter of the
+outsourced price and finally in line with what it costs. It also retires the 2,000-page
+ceiling as a pricing device, leaving it as the operational limit it was meant to be.
+
+This is a change to the debit path in case-app, not to the marketing site, and it is the
+one product change this pricing decision actually requires.
+
+### What $49 buys in positioning
+
+Gained:
+
+- **It is under the approval threshold.** A paralegal expenses $49 without asking
+  anybody. That is the real unlock for self-serve once DNS and the trial flag land — no
+  call, no procurement, no quote. $149 needs a decision; $49 needs a card.
+- **The trial stops being a separate thing to build.** At $49 the first report *is* the
+  trial, which removes a whole entitlement feature from the roadmap.
+- **A one-sentence competitive story**: cheaper than the vendor you use now, per report,
+  nothing to cancel.
+
+Given up:
+
+- **The quality signal.** $49 sits in the band where a firm assumes it must check every
+  line — awkward when the differentiator is that you *can* check every line, because
+  "can" starts reading as "must". Mitigate by leading with the sample page and letting
+  the price be the second thing anybody learns.
+- **Headroom.** $49 to $149 later is a repricing that existing customers feel. $149 to
+  $199 is a footnote. Price rises are much harder than price cuts, and this is the
+  direction that cannot easily be undone.
+- **The human in the loop.** The margin cannot fund ops review at scale, so release
+  quality becomes an engineering commitment rather than a staffing one.
+- **Standing against EvenUp.** At $300–800 a demand, a $49 report is a component in
+  somebody else's workflow rather than the work product. Fine if deliberate; worth
+  knowing it is the position being taken.
 
 ## 5. What to do next
 
-1. Decide the credit price. Nothing else here can move until that is a number.
-2. Set or reprice the three Stripe lookup keys in **live** mode. A test-mode price is the
-   wrong number and looks exactly like the right one.
-3. Write the three amounts into `REPORT_PACKS` in `src/config.ts`. The pricing page is
-   already built to render them, and a guard currently fails the build if any dollar
-   figure appears while they are null — so filling them in is the whole edit.
-4. Decide whether auto-release is granted at signup or earned. This is the single
-   largest lever on margin, and it is a trust decision rather than a pricing one.
-5. Backlog, not now: per-type credit weights, if a QME/AME should cost more than a
+1. Set the three Stripe lookup keys in **live** mode to $49, $235 and $450. A test-mode
+   price is the wrong number and looks exactly like the right one.
+2. Write those amounts into `REPORT_PACKS` in `src/config.ts`. The pricing page already
+   renders them and is tested in both states, so this is the whole edit.
+3. **Decide auto-release.** Condition 1 above is not a preference; at $49 it is what
+   separates an 85% margin from a loss. It is a trust-and-quality decision, and it is now
+   the critical path for this price.
+4. Measure the real numbers for 90 days: model cost per report, actual review minutes,
+   and how often records arrive inside the free window. Every figure in section 4 is an
+   estimate, and the refresh rate is the one most likely to be wrong.
+5. Then add page-banded credits (condition 3). Not before — it needs the page
+   distribution from step 4 to set the band.
+6. Backlog, unchanged: per-type credit weights, if a QME/AME should ever cost more than a
    chronology.
+
+## 6. The case for $149, kept on the record
+
+Not chosen, recorded so the trade stays legible if it is ever revisited.
+
+$149 held 65–90% margin in **both** cost regimes, needed no change to the credit model,
+and absorbed a 1,900-page file without anyone thinking about it. It priced the product
+against the $750–2,000 outsourced chronology rather than against the $0.05-a-page
+extraction tools — which is the category the output belongs to, given citations,
+conflict detection and missing-record flagging. Its weakness is the one that decided it:
+$149 needs somebody to approve a purchase, and $49 does not.
+
+If $49 proves out on volume but not on margin, the first move is not to reprice the
+credit. It is to add the page bands from condition 3 and let the large files pay for
+themselves.
 
 ## Sources
 
