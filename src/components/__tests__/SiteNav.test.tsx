@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { SiteNav } from '../SiteNav';
 import { APP_HOST_LIVE, APP_ORIGIN, APPROVED_CLOUD_RUN_LOGIN, LOGIN_URL, SCHEDULE_URL, TRIAL_URL } from '../../config';
 import { SITE_LINKS } from '../../navigation';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const config = vi.hoisted(() => ({ askAlEnabled: true, trialEnabled: false }));
 
@@ -171,5 +173,29 @@ describe('SiteNav', () => {
     await user.click(nav.querySelector<HTMLButtonElement>('[aria-controls="nav-mobile"]')!);
     const drawer = document.getElementById('nav-mobile')!;
     expect(within(drawer).getByRole('link', { name: /sign up/i })).toHaveAttribute('href', TRIAL_URL);
+  });
+
+  /*
+   * The bar has a width budget and the test suite cannot see it: jsdom has no layout, so
+   * a nav whose labels wrap onto two lines passes every assertion in this file.
+   *
+   * Measured in a browser on the built site: with seven flat links the bar is clean at
+   * 960px and visibly broken at 900px — Security, Log in and Schedule a call each wrap —
+   * while the drawer stayed hidden until 860. That band shipped looking broken because
+   * adding Reports and Pricing moved the requirement and nobody moved the breakpoint.
+   *
+   * So the two numbers are asserted together. Adding an eighth destination fails here,
+   * which is the point: it is a measurement, not a preference, and the only way to know
+   * is to open a browser.
+   */
+  it('collapses to the drawer before the bar runs out of room', () => {
+    const css = readFileSync(join(process.cwd(), 'src/components/SiteNav.css'), 'utf8');
+    const breakpoint = Number(css.match(/@media \(max-width: (\d+)px\) \{\s*\n\s*\.al-nav__links/)?.[1]);
+    expect(breakpoint, 'could not read the nav breakpoint from SiteNav.css').toBeGreaterThan(0);
+
+    /* Seven links were measured against 960. Fewer would permit a smaller number; more
+       has never been measured, so it must be before it ships. */
+    expect(SITE_LINKS.length).toBeLessThanOrEqual(7);
+    expect(breakpoint).toBeGreaterThanOrEqual(960);
   });
 });

@@ -267,7 +267,20 @@
   text-decoration: none;
 }
 
-@media (max-width: 860px) {
+/*
+ * Where the drawer takes over.
+ *
+ * 860px was right for five flat links. Reports and Pricing made it seven, and seven do
+ * not fit: measured in a browser, Security, Log in and Schedule a call all wrap their
+ * labels onto two lines at 900px while the drawer is still hidden, so between 861px and
+ * about 950px the bar rendered as a broken double-decker. Nothing caught it — jsdom has
+ * no layout, so the test suite cannot see a wrap.
+ *
+ * 960 is measured, not guessed: clean at 960, broken at 900. SiteNav.test.tsx holds this
+ * number against the length of SITE_LINKS, so an eighth destination has to be measured
+ * rather than assumed to fit.
+ */
+@media (max-width: 960px) {
   .al-nav__links,
   .al-nav__actions { display: none; }
   .al-nav__toggle { display: block; }
