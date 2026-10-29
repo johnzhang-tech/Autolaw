@@ -101,7 +101,7 @@ export function SampleReportsPage() {
       <Section
         id="chronology"
         heading="Inside the chronology"
-        intro={`Entries from the fictional ${CHRONOLOGY_SAMPLE.caseName} file, exactly as the report sets them out.`}
+        intro={`An extract from the fictional ${CHRONOLOGY_SAMPLE.caseName} chronology — a few entries of the eighty-four, set out exactly as the report sets them out.`}
       >
         <div className="al-sample__split">
           <aside className="al-sample__aside">

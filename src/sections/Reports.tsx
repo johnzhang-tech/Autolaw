@@ -1,15 +1,31 @@
 import { Section } from '../components/primitives/Section';
 import { ProductIcon } from '../components/ProductIcon';
-import { AVAILABILITY_LABEL, FEATURE_BY_ID, ORDERABLE_REPORTS } from '../data/product';
+import {
+  AVAILABILITY_LABEL,
+  FEATURE_BY_ID,
+  ORDERABLE_REPORTS,
+  type ReportPracticeArea,
+} from '../data/product';
 import { PRICING_URL, SAMPLE_REPORTS_URL } from '../config';
 import { track } from '../measure';
 import './Reports.css';
 
-const PRACTICE_LABEL: Record<string, string> = {
-  'PI,WC': 'Personal injury & workers’ compensation',
-  PI: 'Personal injury',
-  WC: 'Workers’ compensation',
-};
+/**
+ * Keyed on membership, not on the array's spelling.
+ *
+ * This was a Record looked up by `[...practiceAreas].join(',')`, so an entry written
+ * ['WC', 'PI'] missed every key and rendered an empty span — with noUncheckedIndexedAccess
+ * off, TypeScript types the miss as string and says nothing. The ordering convention was
+ * documented in a comment in product.ts, which is the weakest enforcement available.
+ */
+export function practiceLabel(areas: ReadonlyArray<ReportPracticeArea>): string {
+  const pi = areas.includes('PI');
+  const wc = areas.includes('WC');
+  if (pi && wc) return 'Personal injury & workers’ compensation';
+  if (pi) return 'Personal injury';
+  if (wc) return 'Workers’ compensation';
+  throw new Error('A report must offer at least one practice area');
+}
 
 /**
  * The three reports a firm can order, pulled out of the fourteen-card product grid.
@@ -40,7 +56,7 @@ export function Reports() {
             <div className="al-reports__cardHead">
               <ProductIcon featureId={report.featureId} icon={report.feature.icon} size="card" />
               <span className="al-reports__practice">
-                {PRACTICE_LABEL[[...report.practiceAreas].join(',')]}
+                {practiceLabel(report.practiceAreas)}
               </span>
             </div>
 

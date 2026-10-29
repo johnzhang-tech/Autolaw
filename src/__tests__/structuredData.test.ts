@@ -39,6 +39,20 @@ const blocksIn = (entry: string): unknown[] => {
 };
 
 describe('structured data', () => {
+  /*
+   * blocksIn matches `<script type="application/ld+json">` as an exact literal, so a
+   * reformat to single quotes or an added attribute would make every block invisible —
+   * and then the "claims no price" guard below passes because it found nothing to look
+   * at. Counting the raw occurrences first is what stops that being silent.
+   */
+  it('finds every block that is actually in the file', () => {
+    for (const entry of htmlEntries()) {
+      const raw = readFileSync(join(ROOT, entry), 'utf8');
+      const occurrences = (raw.match(/application\/ld\+json/g) ?? []).length;
+      expect(blocksIn(entry).length, `${entry} has ${occurrences} ld+json blocks`).toBe(occurrences);
+    }
+  });
+
   it('parses as JSON wherever it appears', () => {
     const offenders: string[] = [];
     for (const entry of htmlEntries()) {

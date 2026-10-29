@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
-import { Reports } from '../Reports';
+import { Reports, practiceLabel } from '../Reports';
 import { AVAILABILITY_LABEL, FEATURE_BY_ID, ORDERABLE_REPORTS } from '../../data/product';
 import { PRICING_URL, SAMPLE_REPORTS_URL, TRIAL_ENABLED, TRIAL_URL } from '../../config';
 import { renderedText } from '../../pages/__tests__/renderedText';
@@ -142,5 +142,22 @@ describe('Reports band', () => {
       report: ORDERABLE_REPORTS[0].featureId,
       destination: 'sample',
     });
+  });
+
+  /*
+   * The reorder case specifically. The previous implementation joined the array and
+   * looked the string up in a Record, so ['WC', 'PI'] matched no key and rendered an
+   * empty span — silently, because noUncheckedIndexedAccess is off and TypeScript typed
+   * the miss as string.
+   */
+  it('labels a practice pair whichever order it is written in', () => {
+    expect(practiceLabel(['PI', 'WC'])).toBe(practiceLabel(['WC', 'PI']));
+    expect(practiceLabel(['PI', 'WC'])).toMatch(/personal injury/i);
+    expect(practiceLabel(['PI'])).toBe('Personal injury');
+    expect(practiceLabel(['WC'])).toMatch(/workers/i);
+  });
+
+  it('refuses a report that offers no practice area at all', () => {
+    expect(() => practiceLabel([])).toThrow(/practice area/i);
   });
 });

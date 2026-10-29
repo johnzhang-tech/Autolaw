@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
-import { PricingPage, packPriceLabel } from '../PricingPage';
+import { FAQ, PricingPage, packPriceLabel } from '../PricingPage';
 import { REPORT_PACKS, REPORTS_ORDER_PAGE_LIMIT, REPORTS_FREE_REFRESH_DAYS } from '../../../config';
 import { ORDERABLE_REPORTS } from '../../../data/product';
 import { renderedText } from '../../__tests__/renderedText';
@@ -112,10 +112,24 @@ describe('PricingPage', () => {
     expect(renderedText(container)).not.toMatch(/buy now|add to cart|check\s?out|start free trial/i);
   });
 
+  /*
+   * Content, not a count. structuredData.test.ts checks the FAQPage markup against this
+   * same FAQ array, so if the section were removed from the page while the array stayed
+   * exported, that guard would still pass and the markup would be claiming content the
+   * page no longer shows — which is the exact thing Google penalises FAQ markup for.
+   * This is the half of the pair that watches the page.
+   */
   it('answers the questions a firm asks before it will book anything', () => {
     render(<PricingPage />);
     const faq = screen.getByRole('region', { name: /questions/i });
-    expect(within(faq).getAllByRole('heading', { level: 3 }).length).toBeGreaterThanOrEqual(8);
+    expect(within(faq).getAllByRole('heading', { level: 3 })).toHaveLength(FAQ.length);
+    expect(FAQ.length).toBeGreaterThanOrEqual(8);
+
+    const text = renderedText(faq);
+    FAQ.forEach((item) => {
+      expect(text, `question missing from the page: ${item.q}`).toContain(item.q);
+      expect(text, `answer missing from the page: ${item.q}`).toContain(item.a);
+    });
   });
 });
 
