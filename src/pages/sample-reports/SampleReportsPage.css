@@ -1,0 +1,305 @@
+/*
+ * Sample reports. The one page on the site that shows output rather than describing it,
+ * so the layout gets out of the way: record excerpts are set in the serif, citations sit
+ * directly under the text they support, and the two flag types are the only coloured
+ * blocks on the page.
+ *
+ * Conflicts use --al-amber and gaps use a dashed hairline rather than a second colour.
+ * They are different kinds of finding — one is "the record disagrees with itself", the
+ * other is "the record is not here" — and distinguishing them by fill versus border keeps
+ * them apart for a reader who does not see the hue.
+ */
+
+.al-sample__notice {
+  margin-top: var(--al-space-5);
+  max-width: 64ch;
+  background: var(--al-amber-wash);
+  border: 1px solid var(--al-hairline-strong);
+  border-left: 4px solid var(--al-amber);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+}
+
+.al-sample__noticeLead {
+  margin: 0 0 var(--al-space-2);
+  font-weight: var(--al-weight-bold);
+  color: var(--al-amber-text);
+}
+
+.al-sample__noticeBody {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+  color: var(--al-amber-text);
+}
+
+.al-sample__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-sample__card {
+  height: 100%;
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.al-sample__cardHead {
+  background: var(--al-navy);
+  padding: var(--al-space-3) var(--al-space-4);
+}
+
+.al-sample__practice {
+  margin: 0 0 var(--al-space-1);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-teal);
+}
+
+.al-sample__case {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-inverse-muted);
+}
+
+.al-sample__cardBody {
+  padding: var(--al-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-3);
+  flex: 1 1 auto;
+}
+
+.al-sample__cardTitle {
+  margin: 0;
+  font-size: var(--al-text-h3);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-sample__facts { margin: 0; display: flex; flex-direction: column; gap: var(--al-space-2); }
+.al-sample__facts > div { display: flex; gap: var(--al-space-2); font-size: var(--al-text-sm); }
+.al-sample__facts dt { flex: 0 0 90px; color: var(--al-ink-muted); }
+.al-sample__facts dd { margin: 0; font-weight: var(--al-weight-semibold); }
+
+.al-sample__cardLink {
+  margin-top: auto;
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+  color: var(--al-teal-text);
+}
+
+/*
+ * The index and the extracts, side by side where there is room. `flex: 999` on the
+ * stream and a 560px basis means the aside drops under it on a phone instead of
+ * squeezing the record excerpts to four words a line.
+ */
+.al-sample__split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-6);
+}
+
+.al-sample__aside { flex: 1 1 240px; min-width: 0; }
+
+.al-sample__aside h3 {
+  margin: 0 0 var(--al-space-3);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-ink-muted);
+}
+
+.al-sample__aside h3 + * { margin-bottom: var(--al-space-5); }
+
+.al-sample__inputs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__inputs li {
+  padding-left: var(--al-space-3);
+  border-left: 2px solid var(--al-hairline-strong);
+}
+
+.al-sample__sections {
+  margin: 0;
+  padding-left: var(--al-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__stream {
+  flex: 999 1 540px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-3);
+}
+
+.al-sample__entry,
+.al-sample__conflict,
+.al-sample__gap {
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+}
+
+.al-sample__entry {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+}
+
+.al-sample__entryHead {
+  margin: 0 0 var(--al-space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-1) var(--al-space-3);
+  align-items: baseline;
+}
+
+.al-sample__date { font-size: var(--al-text-sm); font-weight: var(--al-weight-bold); }
+.al-sample__event { font-size: var(--al-text-sm); color: var(--al-ink-muted); }
+
+/* The record's own words, in the record face. */
+.al-sample__quote {
+  margin: 0 0 var(--al-space-2);
+  font-family: var(--al-font-record);
+  font-size: var(--al-text-body-lg);
+  line-height: var(--al-leading-record);
+}
+
+.al-sample__quote::before { content: '\201C'; }
+.al-sample__quote::after { content: '\201D'; }
+
+.al-sample__cite {
+  margin: 0;
+  font-size: var(--al-text-xs);
+  color: var(--al-ink-muted);
+}
+
+.al-sample__conflict {
+  background: var(--al-amber-wash);
+  border: 1px solid var(--al-hairline-strong);
+  border-left: 4px solid var(--al-amber);
+}
+
+.al-sample__conflict--standalone { margin-top: var(--al-space-4); }
+
+.al-sample__gap {
+  background: var(--al-canvas);
+  border: 1px dashed var(--al-hairline-strong);
+}
+
+.al-sample__flagLabel {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-amber-text);
+}
+
+.al-sample__gap .al-sample__flagLabel { color: var(--al-ink-muted); }
+
+.al-sample__flagBody {
+  margin: 0 0 var(--al-space-3);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__statement {
+  background: var(--al-surface);
+  border-radius: var(--al-radius-sm);
+  padding: var(--al-space-3);
+}
+
+.al-sample__statement + .al-sample__statement { margin-top: var(--al-space-2); }
+
+.al-sample__needed { margin: 0; font-size: var(--al-text-sm); color: var(--al-ink-muted); }
+
+.al-sample__questions {
+  margin: 0;
+  padding-left: var(--al-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  background: var(--al-surface);
+}
+
+.al-sample__table { width: 100%; min-width: 720px; border-collapse: collapse; }
+
+.al-sample__table th,
+.al-sample__table td {
+  text-align: left;
+  padding: var(--al-space-3) var(--al-space-4);
+  border-bottom: 1px solid var(--al-hairline);
+  font-size: var(--al-text-sm);
+}
+
+.al-sample__table thead th {
+  background: var(--al-canvas);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-ink-muted);
+}
+
+.al-sample__table tbody th { font-weight: var(--al-weight-semibold); }
+
+.al-sample__table tfoot th,
+.al-sample__table tfoot td {
+  background: var(--al-canvas);
+  border-bottom: 0;
+  font-weight: var(--al-weight-bold);
+}
+
+/* Figures line up digit over digit, which is the only way a column can be added by eye. */
+.al-sample__num { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+.al-sample__source { color: var(--al-ink-muted); font-size: var(--al-text-xs) !important; }
+
+.al-sample__boundary {
+  margin: var(--al-space-4) 0 0;
+  max-width: 68ch;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__closing {
+  margin: 0 0 var(--al-space-4);
+  max-width: 54ch;
+  font-size: var(--al-text-body-lg);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-sample__closingCtas { display: flex; flex-wrap: wrap; gap: var(--al-space-3); }

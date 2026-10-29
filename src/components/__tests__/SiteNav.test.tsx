@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { SiteNav } from '../SiteNav';
 import { APP_HOST_LIVE, APP_ORIGIN, APPROVED_CLOUD_RUN_LOGIN, LOGIN_URL, SCHEDULE_URL, TRIAL_URL } from '../../config';
+import { SITE_LINKS } from '../../navigation';
 
 const config = vi.hoisted(() => ({ askAlEnabled: true, trialEnabled: false }));
 
@@ -31,12 +32,27 @@ describe('SiteNav', () => {
 
     expect(within(nav).getByRole('link', { name: 'Product overview' })).toHaveAttribute('href', '/#product');
     expect(within(nav).getByRole('button', { name: 'Product menu' })).toHaveAttribute('aria-expanded', 'false');
+    expect(within(nav).getByRole('link', { name: 'Reports' })).toHaveAttribute('href', '/#reports');
+    expect(within(nav).getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '/pricing/');
     expect(within(nav).getByRole('link', { name: 'Solutions' })).toHaveAttribute('href', '/#solutions');
     expect(within(nav).getByRole('link', { name: 'Security' })).toHaveAttribute('href', '/security/');
     expect(within(nav).getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about/');
     expect(within(nav).getByRole('link', { name: /log in/i })).toHaveAttribute('href', LOGIN_URL);
     expect(within(nav).getByRole('link', { name: /schedule a call/i })).toHaveAttribute('href', SCHEDULE_URL);
     expect(within(nav).getByTestId('security-mark')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  /*
+   * The flat links are the whole of SITE_LINKS less Product, which the nav splits into an
+   * overview link and a menu button. Asserted as the list so that a destination added to
+   * navigation.ts cannot quietly fail to render here while the footer shows it.
+   */
+  it('renders every site destination except Product as a flat link', () => {
+    render(<SiteNav />);
+    const nav = screen.getByRole('navigation', { name: /primary/i });
+    SITE_LINKS.filter((link) => link.label !== 'Product').forEach((link) => {
+      expect(within(nav).getByRole('link', { name: link.label })).toHaveAttribute('href', link.href);
+    });
   });
 
   it('opens the Product menu on click and exposes routed features in phase order', async () => {

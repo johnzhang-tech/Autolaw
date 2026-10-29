@@ -5,6 +5,8 @@ import { SecurityPage } from '../security/SecurityPage';
 import { SubprocessorsPage } from '../security/subprocessors/SubprocessorsPage';
 import { AiDataUsePage } from '../security/ai/AiDataUsePage';
 import { AboutPage } from '../about/AboutPage';
+import { PricingPage } from '../pricing/PricingPage';
+import { SampleReportsPage } from '../sample-reports/SampleReportsPage';
 import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../privacy/PrivacyPage';
 import { TermsPage } from '../terms/TermsPage';
@@ -24,6 +26,8 @@ import { POSTS } from '../../data/blog';
  * only App, so before this file existed three of the site's four pages were unasserted.
  */
 const PAGES: Array<[string, ReactElement]> = [
+  ['/pricing/', <PricingPage />],
+  ['/sample-reports/', <SampleReportsPage />],
   ['/security/', <SecurityPage />],
   ['/security/subprocessors/', <SubprocessorsPage />],
   ['/security/ai/', <AiDataUsePage />],
@@ -159,6 +163,8 @@ describe.each(PAGES)('%s', (path, element) => {
  */
 describe('subpage link integrity', () => {
   const SUBPAGES: Array<[string, () => ReactElement]> = [
+    ['pricing', () => <PricingPage />],
+    ['sample-reports', () => <SampleReportsPage />],
     ['security', () => <SecurityPage />],
     ['security/subprocessors', () => <SubprocessorsPage />],
     ['security/ai', () => <AiDataUsePage />],

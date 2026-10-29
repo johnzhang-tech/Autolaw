@@ -68,6 +68,8 @@ describe('credibility guards', () => {
     const entries = htmlEntries();
     expect(entries.map((f) => f.replace(`${ROOT}/`, ''))).toEqual([
       'index.html',
+      'pricing/index.html',
+      'sample-reports/index.html',
       'security/index.html',
       'security/subprocessors/index.html',
       'security/ai/index.html',
@@ -80,6 +82,24 @@ describe('credibility guards', () => {
       ...ROUTED_FEATURES.map((feature) => `product/${feature.slug}/index.html`),
     ]);
     entries.forEach((f) => expect(existsSync(f), `${f} is a build entry but does not exist`).toBe(true));
+  });
+
+  /*
+   * Vite names a shared chunk after the module the entry points have in common, so a file
+   * called analytics.ts shipped React itself as `assets/analytics-<hash>.js` on 26 of 27
+   * pages — plus an `analytics-<hash>.css` carrying the site's styles. uBlock Origin,
+   * EasyPrivacy and Brave Shields all match script paths on substrings like that. One
+   * matching rule would mean React never loads, every page renders an empty #root, and
+   * nothing in this suite or in the owner's own browser would show it.
+   *
+   * The module is now src/measure.ts. This keeps the next one from being named back.
+   */
+  it('names no module after something a content blocker matches on', () => {
+    const bait = /(analytics|tracking|telemetry|advert|pixel|beacon|gtag)/i;
+    const offenders = sourceFiles()
+      .filter((f) => bait.test(f.split('/').pop() ?? ''))
+      .map((f) => f.replace(`${ROOT}/`, ''));
+    expect(offenders).toEqual([]);
   });
 
   it('ships no placeholder customer logos', () => {

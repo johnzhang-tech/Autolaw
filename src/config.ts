@@ -181,3 +181,62 @@ export const PRIVACY_TEXT: ReadonlyArray<LegalSection> = [];
 export const TERMS_TEXT: ReadonlyArray<LegalSection> = [];
 export const PRIVACY_URL = '/privacy/';
 export const TERMS_URL = '/terms/';
+
+/**
+ * Report packs, mirroring case-app `apps/server/src/billing/reportPacks.ts`.
+ *
+ * `reports` is the credit count, which is in code in both repositories and safe to state.
+ * `priceUsd` is not: amounts live in Stripe, resolved at runtime from the lookup keys
+ * `case_app_reports_1 / _5 / _10`, so ops can reprice without a deploy and nothing in
+ * this repository can read what a pack currently costs.
+ *
+ * null is therefore not a placeholder waiting to be filled in with something plausible —
+ * it is the switch that decides whether the page shows an amount at all. While a pack is
+ * null the card states the structure and routes the visitor to a call for the figure, and
+ * PricingPage.test.tsx fails the build if any dollar figure reaches the page meanwhile.
+ *
+ * To fill one in: open the Stripe dashboard, confirm the lookup key resolves to an ACTIVE
+ * one-time price in LIVE mode, and write that number here. A test-mode price is the wrong
+ * number and looks exactly like the right one.
+ */
+export interface ReportPack {
+  packId: string;
+  reports: number;
+  priceUsd: number | null;
+}
+
+export const REPORT_PACKS: ReadonlyArray<ReportPack> = [
+  { packId: 'reports_1', reports: 1, priceUsd: null },
+  { packId: 'reports_5', reports: 5, priceUsd: null },
+  { packId: 'reports_10', reports: 10, priceUsd: null },
+];
+
+/**
+ * What one credit covers, from case-app `packages/shared/src/reports-tier.ts`.
+ *
+ * Unlike the prices, these are constants in code on both sides, so the site may state
+ * them outright. They are restated here rather than guessed because a firm will plan
+ * around them: a 1,800-page record either fits in one order or it does not.
+ */
+export const REPORTS_ORDER_PAGE_LIMIT = 2000;
+export const REPORTS_FREE_REFRESH_DAYS = 30;
+export const REPORTS_FREE_REFRESH_PAGE_LIMIT = 500;
+
+/** The pricing page. Trailing slash, as with the others. */
+export const PRICING_URL = '/pricing/';
+/** The public sample reports. Trailing slash, as with the others. */
+export const SAMPLE_REPORTS_URL = '/sample-reports/';
+
+/**
+ * The analytics provider, unchosen.
+ *
+ * null makes src/analytics.ts inert: events are defined and placed, and nothing is sent.
+ * That is the honest state — the events are worth getting right now, and picking an
+ * endpoint is a privacy decision with a privacy-policy consequence that nobody has taken.
+ *
+ * Whatever goes here must work without cookies and without a consent banner, because the
+ * site has neither. Setting it is also the moment src/analytics.ts `deliver` gains a body
+ * and the subprocessor list at /security/subprocessors/ gains a row — a tracker that
+ * ships without appearing on that list makes the Trust Center wrong.
+ */
+export const ANALYTICS_PROVIDER: string | null = null;

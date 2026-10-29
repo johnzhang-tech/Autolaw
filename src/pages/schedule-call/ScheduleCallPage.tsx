@@ -4,6 +4,7 @@ import { PageHero } from '../PageHero';
 import { Section } from '../../components/primitives/Section';
 import { Button } from '../../components/primitives/Button';
 import { BOOKING_URL, CONTACT_EMAIL, CONTACT_ENDPOINT, SECURITY_URL } from '../../config';
+import { storedAttribution, type Attribution } from '../../measure';
 import './ScheduleCallPage.css';
 
 /**
@@ -81,8 +82,19 @@ export function bookingEmbedSrc(url: string): string {
  * body is the entire product of this form, and a test that only clicked the button would
  * pass while the body silently lost a field.
  */
-export function composeMailto(values: Record<string, string>): string {
-  const body = `${composePreview(values)}\n\nSent from the schedule-a-call page on autolaw.ai.`;
+export function composeMailto(values: Record<string, string>, attribution: Attribution = {}): string {
+  /*
+   * Where the lead came from, appended for the person reading the mail. src/measure.ts
+   * records it on arrival but `track` is inert until a provider is named, so without
+   * this line the attribution is captured and then discarded when the tab closes — and
+   * the one question the owner has about a new lead goes unanswered.
+   *
+   * Below the answers and above the signature, so it never reads as something the
+   * visitor typed. The values are allowlisted campaign parameters, never free text.
+   */
+  const came = Object.entries(attribution).map(([k, v]) => `${k}=${v}`).join(', ');
+  const source = came ? `\n\nCame from: ${came}` : '';
+  const body = `${composePreview(values)}${source}\n\nSent from the schedule-a-call page on autolaw.ai.`;
   const subject = `Call request — ${values.practice ?? ''}`.trim();
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
@@ -240,6 +252,9 @@ function BookingEmbed({ url }: { url: string }) {
  * pointed at.
  */
 function QualifyingForm({ endpoint }: { endpoint: string | null }) {
+  /* Read once per render rather than per submit: the hidden fields below need it too,
+     and sessionStorage does not change under us mid-form. */
+  const attribution = storedAttribution();
   /*
    * Validation is the browser's: `required` and `type="email"` are the constraints, and
    * every message below is the browser's own `validationMessage`. What is added here is
@@ -322,7 +337,7 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
     const data = new FormData(e.currentTarget);
     const values = Object.fromEntries(FIELDS.map((f) => [f.name, String(data.get(f.name) ?? '')]));
     setErrors({});
-    setComposed({ href: composeMailto(values), preview: composePreview(values) });
+    setComposed({ href: composeMailto(values, storedAttribution()), preview: composePreview(values) });
   }
 
   /** Only ids that actually render — a dangling aria-describedby is silent and destructive. */
@@ -338,6 +353,12 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
       action={endpoint ?? undefined}
       method={endpoint ? 'post' : undefined}
     >
+      {/* The same attribution the mail body carries, for whatever CONTACT_ENDPOINT
+          eventually receives. Rendered only when there is some: an empty hidden
+          field is a field the endpoint has to learn to ignore. */}
+      {Object.entries(attribution).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
       {hasErrors && (
         /*
          * role="alert" so the summary is announced when it appears rather than only

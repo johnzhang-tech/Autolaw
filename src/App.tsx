@@ -1,6 +1,7 @@
 import { PageShell } from './pages/PageShell';
 import { PracticeProvider } from './practice/PracticeContext';
 import { HeroSection } from './sections/HeroSection';
+import { Reports } from './sections/Reports';
 import { Product } from './sections/product/Product';
 import { AskAl } from './sections/AskAl';
 import { Solutions } from './sections/Solutions';
@@ -13,6 +14,7 @@ export default function App() {
     <PageShell>
       <PracticeProvider>
         <HeroSection />
+        <Reports />
         <Product />
         {ASK_AL_ENABLED && <AskAl />}
         <Solutions />

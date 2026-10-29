@@ -8,6 +8,8 @@ import { SecurityPage } from '../pages/security/SecurityPage';
 import { SubprocessorsPage } from '../pages/security/subprocessors/SubprocessorsPage';
 import { AiDataUsePage } from '../pages/security/ai/AiDataUsePage';
 import { AboutPage } from '../pages/about/AboutPage';
+import { PricingPage } from '../pages/pricing/PricingPage';
+import { SampleReportsPage } from '../pages/sample-reports/SampleReportsPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
 import { TermsPage } from '../pages/terms/TermsPage';
@@ -88,6 +90,8 @@ type PageFactory = () => ReactElement;
 
 const PAGES: ReadonlyArray<[string, PageFactory]> = [
   ['home', () => <App />],
+  ['pricing', () => <PricingPage />],
+  ['sample-reports', () => <SampleReportsPage />],
   ['security', () => <SecurityPage />],
   ['security/subprocessors', () => <SubprocessorsPage />],
   ['security/ai', () => <AiDataUsePage />],
@@ -106,6 +110,8 @@ const PAGES: ReadonlyArray<[string, PageFactory]> = [
 const ROOT = process.cwd();
 const HTML = [
   'index.html',
+  'pricing/index.html',
+  'sample-reports/index.html',
   'security/index.html',
   'security/subprocessors/index.html',
   'security/ai/index.html',

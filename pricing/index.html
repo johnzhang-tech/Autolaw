@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Autolaw report credits are bought in packs and spent one per report. What a credit covers, which reports each practice area can order, and how to get a price for your firm." />
+    <meta name="theme-color" content="#0C2238" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Pricing — Autolaw</title>
+
+    <meta property="og:title" content="Pricing — Autolaw" />
+    <meta property="og:description" content="Report credits bought in packs and spent one per case. No seat licences and no annual minimum." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.autolaw.ai/pricing/" />
+    <meta property="og:site_name" content="Autolaw" />
+    <!-- public/og-card.png exists; the credibility guard fails the build if these
+         three tags and the file ever disagree. -->
+    <meta property="og:image" content="https://www.autolaw.ai/og-card.png" />
+    <meta property="og:image:alt" content="Autolaw — Know where every fact came from. Source-linked case intelligence for personal injury and workers&rsquo; compensation firms." />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="canonical" href="https://www.autolaw.ai/pricing/" />
+
+    <!-- FAQPage. Generated from the FAQ array in src/pages/pricing/PricingPage.tsx; the
+         structured-data guard fails the build if the two ever disagree, because Google
+         penalises FAQ markup that does not match the page. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What documents can be analysed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Medical records and bills, QME, AME and IME reports, narrative reports, and the case documents that arrive with them. Scanned PDFs are read, including handwriting where it is legible. Every report states how many files were read, partially read, or not read."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I verify a citation?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Every fact names the document and page it came from, and opens that page beside it with the quoted text highlighted. Where a figure has no source in the record, the report says so rather than asserting it."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens when records are missing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The gap is named rather than filled. A referral with no corresponding visit, a treatment window with no records, a bill from a provider whose chart is absent — each is listed as the document that is needed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long does a report take?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It depends on page count, and we would rather tell you on a call about your own file than publish an average that does not hold for an 1,800-page record."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is a subscription required?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Credits are a one-time purchase and do not expire. A firm-wide subscription exists for practices that want the whole platform, and it is a separate conversation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is confidential material handled?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Each firm’s data stays in its own workspace, and Autolaw trains no AI model on it. The Trust Center lists every subprocessor and sets out how AI processing works."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What can the firm do with a report?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It is your work product. Edit it, attach it to a demand, serve it, or build a mediation brief on it — the Word export keeps the citations so a reviewer can follow them back."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does this replace attorney review?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No, and it is not built to. Autolaw produces a draft from the record with its sources attached. An attorney reads it, corrects it, and takes responsibility for it."
+            }
+          }
+        ]
+      }
+    </script>
+    <link rel="preload" href="/fonts/manrope-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/manrope-700.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/pages/pricing/main.tsx"></script>
+  </body>
+</html>

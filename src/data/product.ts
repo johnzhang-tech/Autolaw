@@ -712,7 +712,7 @@ export const REPORT_PRODUCTS: ReadonlyArray<ReportProduct> = [
     deliverables: [
       'Date-ordered treatment timeline across every provider',
       'Diagnoses, restrictions, and work status as recorded',
-      'Document, page, and sentence on every entry',
+      'Document and page on every entry, with the line it quotes',
     ],
   },
   {
@@ -723,7 +723,7 @@ export const REPORT_PRODUCTS: ReadonlyArray<ReportProduct> = [
     deliverables: [
       'Billed against paid and adjusted, provider by provider',
       'Outstanding balances and the liens attached to them',
-      'Every figure traced to the bill or ledger it came from',
+      'Each figure carrying the bill row it was read from, and a count of how many are cited',
     ],
     boundary: 'Extracts and reconciles the figures. It does not advise on what is recoverable.',
   },

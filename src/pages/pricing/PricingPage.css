@@ -1,0 +1,216 @@
+/*
+ * Pricing page. Layout only — every colour, space, and radius comes from tokens.css.
+ *
+ * The pack grid, the credit-coverage row, and the FAQ are all "a few equal things side by
+ * side", so each is one auto-fit grid rather than three hand-tuned breakpoints. auto-fit
+ * with a minmax floor stacks them on a phone without a media query, and keeps the cards
+ * the same width as each other at every size in between.
+ */
+
+.al-price__packs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-price__pack {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+}
+
+.al-price__packName {
+  margin: 0;
+  font-size: var(--al-text-h3);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-price__packBlurb {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+/*
+ * The amount reads at display weight when there is one and as ordinary muted copy when
+ * there is not, so "Priced on a call" does not shout at the same volume as a figure.
+ */
+.al-price__amount {
+  margin: var(--al-space-3) 0 0;
+  font-size: 2rem;
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-display);
+  line-height: var(--al-leading-tight);
+  color: var(--al-ink-muted);
+}
+
+.al-price__credits {
+  margin: 0 0 var(--al-space-3);
+  padding-bottom: var(--al-space-3);
+  border-bottom: 1px solid var(--al-hairline);
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+}
+
+.al-price__points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__points li {
+  padding-left: var(--al-space-3);
+  border-left: 2px solid var(--al-teal-wash);
+}
+
+.al-price__note {
+  margin-top: var(--al-space-4);
+  background: var(--al-teal-wash);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--al-space-3);
+}
+
+.al-price__note p {
+  margin: 0;
+  max-width: 62ch;
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__noteLead { font-weight: var(--al-weight-semibold); }
+
+.al-price__covers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-price__covers li {
+  border-left: 1px solid var(--al-hairline-strong);
+  padding-left: var(--al-space-4);
+}
+
+.al-price__figure {
+  margin: 0 0 var(--al-space-2);
+  font-size: 1.75rem;
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-display);
+  line-height: var(--al-leading-tight);
+}
+
+.al-price__figureBody {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+/*
+ * The table is the one block that cannot stack: billed-against-offered only reads as a
+ * comparison in a grid. So it scrolls inside its own box rather than squeezing the
+ * columns to nothing, and the box is focusable so a keyboard user can reach the scroll.
+ */
+.al-price__tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  background: var(--al-surface);
+}
+
+.al-price__table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.al-price__table th,
+.al-price__table td {
+  text-align: left;
+  padding: var(--al-space-3) var(--al-space-4);
+  border-bottom: 1px solid var(--al-hairline);
+  font-size: var(--al-text-sm);
+  vertical-align: top;
+}
+
+.al-price__table thead th {
+  background: var(--al-canvas);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-ink-muted);
+}
+
+.al-price__table tbody th {
+  font-weight: var(--al-weight-semibold);
+}
+
+.al-price__table tbody tr:last-child th,
+.al-price__table tbody tr:last-child td {
+  border-bottom: 0;
+  color: var(--al-ink-muted);
+}
+
+.al-price__tableNote {
+  margin: var(--al-space-3) 0 0;
+  max-width: 68ch;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__faq {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--al-space-5) var(--al-space-7);
+}
+
+.al-price__faq h3 {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-body-lg);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-price__faq p {
+  margin: 0;
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__closing {
+  margin: 0 0 var(--al-space-4);
+  max-width: 54ch;
+  font-size: var(--al-text-body-lg);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__closingCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-3);
+}

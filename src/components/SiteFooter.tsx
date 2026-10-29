@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, LOGIN_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
+import { CONTACT_EMAIL, LOGIN_URL, SAMPLE_REPORTS_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
 import { SITE_LINKS } from '../navigation';
 import { SecurityMark } from './SecurityMark';
 import { Wordmark } from './Wordmark';
@@ -23,6 +23,11 @@ export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: str
               </a>
             </li>
           ))}
+          {/* Footer only, not in SITE_LINKS: the nav is already seven items, and this is
+              a page someone reaches for once rather than navigates by. Without it the
+              samples are unreachable from the product pages, the blog and the Trust
+              Center — every page a search result actually lands on. */}
+          <li><a href={SAMPLE_REPORTS_URL}>Sample reports</a></li>
           <li><a href={scheduleHref}>Schedule a call</a></li>
           {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}
           {TRIAL_ENABLED && <li><a href={TRIAL_URL}>Sign up</a></li>}

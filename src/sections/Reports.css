@@ -1,0 +1,142 @@
+/*
+ * The reports band. Three cards of equal weight, because the choice between them is a
+ * practice-area question rather than a good-better-best one — nothing here is featured,
+ * and no card is wider or brighter than its neighbours.
+ *
+ * The pilot block beneath them is deliberately the odd one out: dashed border, no fill,
+ * a label where the cards have none. It should not read as a fourth card.
+ */
+
+.al-reports__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-reports__card {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-3);
+}
+
+.al-reports__cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--al-space-3);
+}
+
+.al-reports__practice {
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-snug);
+}
+
+.al-reports__name {
+  margin: 0;
+  font-size: var(--al-text-h3);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-reports__problem {
+  margin: 0;
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-reports__deliverables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  /* Pushes the foot to the bottom so the two links line up across cards of unequal copy. */
+  flex: 1 1 auto;
+}
+
+.al-reports__deliverables li {
+  padding-left: var(--al-space-3);
+  border-left: 2px solid var(--al-teal-wash);
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+}
+
+.al-reports__cardFoot {
+  border-top: 1px solid var(--al-hairline);
+  padding-top: var(--al-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  align-items: flex-start;
+}
+
+.al-reports__boundary {
+  margin: 0 0 var(--al-space-1);
+  font-size: var(--al-text-xs);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-reports__link {
+  font-size: var(--al-text-sm);
+  font-weight: var(--al-weight-semibold);
+  color: var(--al-teal-text);
+  /* 44px of vertical target without pushing the two links apart visually. */
+  padding: var(--al-space-2) 0;
+  line-height: 1.6;
+}
+
+.al-reports__pilot {
+  margin-top: var(--al-space-4);
+  border: 1px dashed var(--al-hairline-strong);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4) var(--al-space-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--al-space-3) var(--al-space-4);
+}
+
+.al-reports__badge {
+  flex: 0 0 auto;
+  background: var(--al-amber-wash);
+  color: var(--al-amber-text);
+  border-radius: var(--al-radius-pill);
+  padding: var(--al-space-1) var(--al-space-3);
+  font-size: var(--al-text-xs);
+  font-weight: var(--al-weight-semibold);
+  letter-spacing: var(--al-tracking-eyebrow);
+  text-transform: uppercase;
+}
+
+.al-reports__pilotBody { flex: 999 1 420px; min-width: 0; }
+
+.al-reports__pilotName {
+  margin: 0 0 var(--al-space-2);
+  font-size: var(--al-text-body-lg);
+  font-weight: var(--al-weight-bold);
+}
+
+.al-reports__pilotBody p {
+  margin: 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-reports__pricing {
+  margin: var(--al-space-4) 0 0;
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}

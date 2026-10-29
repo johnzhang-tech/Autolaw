@@ -14,6 +14,7 @@ import { SecurityPage } from '../../security/SecurityPage';
 import { AboutPage } from '../../about/AboutPage';
 import App from '../../../App';
 import { CONTACT_EMAIL } from '../../../config';
+import { captureAttribution } from '../../../measure';
 
 /*
  * This page has three states and two config values choose between them, so the config is
@@ -648,5 +649,44 @@ describe('ScheduleCallPage — the practice parameter', () => {
     window.history.replaceState({}, '', '/schedule-call/?practice=wc');
     render(<ScheduleCallPage />);
     expect(screen.getByRole('radio', { name: /workers/i })).toBeChecked();
+  });
+});
+
+/*
+ * Attribution reaching the lead.
+ *
+ * src/measure.ts captures where a visitor came from, but `track` is inert until a
+ * provider is named — so without this the source of every lead was being recorded into
+ * sessionStorage and then thrown away when the visitor closed the tab. This is the one
+ * part of the measurement work that pays off whether or not an analytics vendor is ever
+ * chosen: the owner reading the mail wants to know the firm found them through the bar
+ * association newsletter.
+ */
+describe('ScheduleCallPage — where the lead came from', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  it('adds nothing to the message when there is no attribution', () => {
+    expect(composeMailto({ practice: 'Personal injury' }, {})).not.toMatch(/came from/i);
+  });
+
+  it('names the campaign in the message when there is one', () => {
+    const href = composeMailto({ practice: 'Personal injury' }, { utm_source: 'bar_assoc', utm_campaign: 'spring' });
+    const body = decodeURIComponent(href);
+    expect(body).toMatch(/Came from: utm_source=bar_assoc, utm_campaign=spring/);
+  });
+
+  it('carries the attribution into the form for whatever endpoint eventually receives it', () => {
+    captureAttribution('?utm_source=newsletter');
+    const { container } = render(<ScheduleCallPage />);
+    const hidden = container.querySelector<HTMLInputElement>('input[type="hidden"][name="utm_source"]');
+    expect(hidden).not.toBeNull();
+    expect(hidden).toHaveValue('newsletter');
+  });
+
+  it('renders no empty hidden fields for a visitor who arrived directly', () => {
+    const { container } = render(<ScheduleCallPage />);
+    expect(container.querySelectorAll('input[type="hidden"]')).toHaveLength(0);
   });
 });
