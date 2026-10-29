@@ -92,25 +92,73 @@ conditions that are not currently met.
 ### What $49 earns, per report
 
 Assumptions: a typical first order of 500–800 pages; model cost ~$3; storage, OCR and
-infrastructure ~$1; ops review 30 minutes at a $45/hour loaded rate; Stripe at
-2.9% + $0.30 on the pack, divided across its credits; and a 50% chance that records
-arrive inside the free window, which re-runs the pipeline **and** sends the report back
-to review.
+infrastructure ~$1; ops review costed throughout as minutes × a $45/hour loaded rate
+(so 30 minutes is $22.50, not a rounded $25); Stripe at
+2.9% + $0.30 on the pack, divided across its credits; a 50% chance records arrive inside
+the free window; and a refresh re-review costed at **40% of the initial review**, because
+the reviewer is checking what the new records changed rather than re-reading all 84
+entries.
 
 | Scenario | Price | Cost | Margin |
 | --- | ---: | ---: | ---: |
-| Single $49, auto-release, no refresh | $49 | $5.72 | **$43.28 (88%)** |
-| Single $49, auto-release, 50% refresh | $49 | $7.22 | **$41.78 (85%)** |
-| Single $49, ops review, no refresh | $49 | $30.72 | $18.28 (37%) |
-| Single $49, ops review, 50% refresh | $49 | $44.72 | $4.28 (9%) |
+| Single, auto-release, no refresh | $49 | $5.72 | **$43.28 (88%)** |
+| Single, auto-release, 50% refresh | $49 | $7.22 | **$41.78 (85%)** |
+| Single, 30 min review, no refresh | $49 | $28.22 | $20.78 (42%) |
+| Single, 30 min review, 50% refresh | $49 | $34.22 | $14.78 (30%) |
 | 10-pack at $36, auto-release, 50% refresh | $36 | $6.57 | **$29.43 (82%)** |
-| 10-pack at $36, ops review, 50% refresh | $36 | $44.07 | **−$8.07 (−22%)** |
-| 10-pack at $45, ops review, 50% refresh | $45 | $44.34 | $0.66 (1%) |
-| Single $49, ops review, 1,900-page file | $49 | $69.72 | **−$20.72 (−42%)** |
+| 10-pack at $36, 30 min review, 50% refresh | $36 | $33.57 | $2.43 (7%) |
+| 10-pack at $45, 30 min review, 50% refresh | $45 | $33.84 | $11.16 (25%) |
+| Single, 45 min review, 1,900-page file | $49 | $57.72 | **−$8.72 (−18%)** |
 
-Read the first and the last rows together. **$49 is not a price, it is a bet on
-automation.** Auto-released it is one of the better gross margins in software. With a
-human in the loop and any pack discount at all, it is a loss.
+### Read this table knowing which number is load-bearing
+
+Of the $28.22 in the third row, **$22.50 is the ops review, and it is a guess**: 30
+minutes at a $45/hour loaded rate, with no measurement behind either figure. Everything
+else is comparatively solid, and comparatively irrelevant — taking model cost from $3 to
+$8 moves the margin by $7.50, doubling the Stripe fee moves it by $1.72. The review line
+is 81% of the cost and 100% of the uncertainty.
+
+So the honest version of this table is a sensitivity surface, not a row. Margin at $49,
+holding the 50% refresh and the 40% delta:
+
+| Initial review | $20/hr | $30/hr | $45/hr | $65/hr |
+| --- | ---: | ---: | ---: | ---: |
+| none (auto-release) | 85% | 85% | 85% | 85% |
+| 10 min | 77% | 73% | 67% | 59% |
+| 20 min | 69% | 61% | 49% | 32% |
+| 30 min | 61% | 49% | **30%** | 6% |
+| 45 min | 49% | 30% | 3% | −34% |
+| 60 min | 36% | 12% | −25% | −74% |
+
+Break-even review time: **104 minutes** at $20/hour, **70** at $30, **46** at $45, **32**
+at $65. Who performs the review therefore matters more than how long they take, and both
+are measurable in a fortnight.
+
+### Three corrections to the first version of this table
+
+The 9% figure published for "single, ops review + refresh" was wrong. It charged a full
+second review for a refresh, as though the reviewer re-read the whole report rather than
+the delta. At 40% of the initial review that row is 30%.
+
+The review line was also a rounded $25 while being described as 30 minutes at $45/hour,
+which is $22.50. Small on its own, but it was applied to every row and it made the two
+tables on this page disagree with each other. Review is now minutes × rate throughout.
+
+Together those two corrections move the deep-discount ten-pack from −22% to **+7%**,
+which weakens the case against deep discounts without overturning it: $36 a report earns
+7% under a 30-minute review, $45 earns 25%. The argument for shallow discounts is now
+"this is not margin worth giving away", not "this loses money".
+
+The claim that a case with a chronology and a Howell live "gets two free re-runs and two
+re-reviews, and that is the difference between the 37% row and the 9% row" was also
+wrong, in a way worth naming. `planOrderCharges` does re-run every live report, but each
+of those reports sold its own credit, so per report the exposure is one refresh — which
+is exactly what the 50% figure already models. The multi-report effect raises the cost
+per *case* and leaves the cost per *report* alone, and these rows are per report.
+
+What survives all three corrections: auto-release is 82–88% and every reviewed scenario
+is a fraction of it; a 1,900-page file under review is still a real loss at −18%; and the
+whole page still turns on a number nobody has measured.
 
 ### The three conditions
 
@@ -121,15 +169,20 @@ they are the entire margin. Either the three launched report types release thems
 for everybody, or $49 only works for firms you have already learned to trust — which is
 the opposite of the firms a self-serve price is for.
 
-The budget, if a human stays: $49 single leaves **37 minutes** of actual review; a
-10-pack at $45 leaves **34 minutes**; a 10-pack at $36 leaves **26 minutes**. Those are
-the real ceilings, refresh included.
+The budget, if a human stays, is in the sensitivity table above: at a $45/hour loaded
+rate $49 breaks even at 46 minutes of initial review, so 20–25 minutes is the working
+ceiling if the price is to earn anything. At $20/hour — an offshore or contract reviewer —
+there is room for an hour and a half, and $49 with a human in the loop becomes a
+perfectly ordinary business. That choice is worth more than any discount decision on this
+page.
 
 **2. Pack discounts have to be shallow.** The 16% and 27% this document originally
-proposed were sized against a $149 credit. Applied to $49 they take the 10-pack to $36,
-which is under cost the moment a human touches it. Suggested instead: **$49 single,
-5 for $235 ($47 each), 10 for $450 ($45 each)** — about 4% and 8%. At this price a
-discount buys commitment, not margin, because there is no margin to spend.
+proposed were sized against a $149 credit. Applied to $49 they take the ten-pack to $36,
+which earns 7% under a 30-minute review against 25% at $45 — so the discount is not
+quite giving away the business, but it is giving away most of what is left of it.
+Suggested instead: **$49 single, 5 for $235 ($47 each), 10 for $450 ($45 each)** — about
+4% and 8%. At this price a discount should buy commitment, because there is not much
+margin to spend on it.
 
 **3. Credits have to scale with pages, or the biggest files arrive first.** A flat $49
 against per-page competitors at $0.05–0.10 means a 300-page file costs a firm $49 here
