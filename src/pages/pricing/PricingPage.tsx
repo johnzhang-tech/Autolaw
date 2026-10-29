@@ -131,13 +131,13 @@ export function PricingPage() {
     <PageShell>
       <PageHero
         eyebrow="Pricing"
-        title="Two ways to work with Autolaw."
+        title="One report, or the whole practice."
         intro={
           <>
-            Order individual reports on the cases that need them, or run the whole practice
-            on Autolaw. Reports are bought in packs and spent one per report, on whichever
-            case needs it, and nothing expires. The platform has no published price — it
-            starts with a conversation about how your practice actually runs.
+            Most firms start with the file that got away from them &mdash; six hundred pages,
+            four providers, a mediation on Thursday. Order one report and it comes back with
+            every fact cited to the page it came from. When that stops being the exception,
+            the platform reads every matter the same way.
           </>
         }
       />
@@ -147,8 +147,8 @@ export function PricingPage() {
           <li className="al-price__plan" data-testid="plan">
             <h3 className="al-price__planName">Reports</h3>
             <p className="al-price__planLine">
-              For a firm that wants a particular piece of work on a particular case. Your
-              team orders it; there is nothing to subscribe to.
+              One case, one report, cited to the page. Your team orders it themselves &mdash;
+              nothing to subscribe to, nothing to cancel, nothing that expires.
             </p>
             <p className="al-price__planPrice">{packPriceLabel(REPORT_PACKS[0]) ?? 'Priced on a call'}</p>
             <p className="al-price__planMeta">per report</p>
@@ -164,11 +164,11 @@ export function PricingPage() {
           <li className="al-price__plan al-price__plan--platform" data-testid="plan">
             <h3 className="al-price__planName">The platform</h3>
             <p className="al-price__planLine">
-              For a firm that wants Autolaw across every matter it runs, rather than a
-              report at a time.
+              Every matter the firm runs, read the same way &mdash; intake through demand,
+              with the whole file answerable.
             </p>
-            <p className="al-price__planPrice">No published price</p>
-            <p className="al-price__planMeta">we quote it against your practice</p>
+            <p className="al-price__planPrice">Quoted to your firm</p>
+            <p className="al-price__planMeta">tell us how it runs, we will tell you what it costs</p>
             <ul className="al-price__planPoints">
               <li>Everything in Reports, plus {PLATFORM_ADDS.length} more of the product</li>
               <li>Ask AL in full, not scoped to one read</li>
@@ -294,7 +294,7 @@ export function PricingPage() {
         tone="navy"
         eyebrow="The full platform"
         heading="Or run case intelligence across the whole practice."
-        intro="Intake, missing-record detection, damages, demand packages, deadlines, conflicting records, firm-wide roles and access — and Ask AL on every case rather than scoped to one read."
+        intro="Intake, missing records, damages, demand packages, deadlines, the contradictions nobody caught — on every matter at once, and Ask AL across the whole file rather than scoped to a single read."
       >
         <div className="al-price__closingCtas">
           <Button href={CONTACT_SALES_URL} variant="inverse" size="lg" withCaret>

@@ -48,7 +48,7 @@ export function Reports() {
       id="reports"
       eyebrow="Reports"
       heading="Three reports, built from the records you already have."
-      intro="Each one is assembled from the case file and nothing else. Dates, diagnoses, restrictions, and dollar figures carry the document and page they were read from, and every report says how much of it is cited — so your team can check the work, and see what is left to check, before it leaves the building."
+      intro="Each one is built from the case file and nothing else. Dates, diagnoses, restrictions and dollar figures carry the page they were read from, and the report tells you how much of it is cited — so you know what you can lean on, and what is still yours to check."
     >
       <ul className="al-reports__cards" data-testid="report-cards">
         {ORDERABLE_REPORTS.map((report) => (

@@ -29,10 +29,9 @@ export function PlatformPage() {
         title="Run the whole practice on one case file."
         intro={
           <>
-            Reports answer one question about one matter. The platform is Autolaw reading
-            every case the firm runs — intake through demand — with the same rule
-            underneath: every fact cites the document and page it came from, and an
-            attorney confirms it before it counts.
+            One report answers one question. The platform answers the file. Every matter
+            your firm runs, read end to end &mdash; intake through demand &mdash; every fact
+            cited to the page it came from, and nothing counted until an attorney says so.
           </>
         }
       >
@@ -49,7 +48,7 @@ export function PlatformPage() {
       <Section
         id="adds"
         heading="What the platform adds"
-        intro="Beyond the reports a firm can order one at a time. Every one of these is live today — this list is built from the product, not written beside it, so it cannot promise something that has been pulled."
+        intro="The work the reports tier never reaches. All of it live today, all of it on the same case file, all of it cited the same way."
       >
         <ul className="al-platform__adds" data-testid="platform-adds">
           {PLATFORM_ADDS.map((feature) => (
@@ -60,16 +59,16 @@ export function PlatformPage() {
           ))}
         </ul>
         <p className="al-platform__note">
-          Ask AL is in both. A firm ordering reports gets it scoped to reading and citing
-          that case; on the platform it answers across the whole file, and still declines
-          what the record cannot support.
+          Ask AL is in both tiers. Ordering reports, it reads and cites the case in front
+          of it. On the platform it answers across the whole file &mdash; and still tells you
+          when the record cannot support the question.
         </p>
       </Section>
 
       <Section
         id="firm"
-        heading="And the parts that are not features"
-        intro="These run under everything above rather than sitting beside it."
+        heading="And the floor it all stands on"
+        intro="Not features you switch on. The things that have to be true before any of the above is worth having."
       >
         <ul className="al-platform__strip" data-testid="platform-strip">
           {PLATFORM.map((item) => (
@@ -85,8 +84,8 @@ export function PlatformPage() {
         id="price"
         tone="navy"
         eyebrow="What it costs"
-        heading="There is no published price, and we would rather say so."
-        intro="A practice running two hundred open matters and one running twenty are not the same firm, and a number on a page would be wrong for one of them. Tell us how the practice actually runs and we will quote against that. The reports tier has a price per report, and it is on the pricing page."
+        heading="It depends on what you run, so we would rather ask."
+        intro="Twenty open matters and two hundred are not the same firm. Rather than publish a number that is wrong for one of you, we would sooner hear how the practice actually runs and quote against that. And if you would rather try it one case at a time, the reports tier has its own price and it is on the pricing page."
       >
         <div className="al-platform__heroCtas">
           <Button href={CONTACT_SALES_URL} variant="inverse" size="lg" withCaret>
