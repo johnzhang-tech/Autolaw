@@ -214,3 +214,108 @@
   flex-wrap: wrap;
   gap: var(--al-space-3);
 }
+
+/*
+ * The two plans. Deliberately NOT a good-better-best ladder: a firm picking between a
+ * report and the platform is answering "what is my practice like", not "how much do I
+ * want to spend". So the cards are the same width and weight, and the platform card is
+ * distinguished by surface rather than by a badge shouting that it is the real one.
+ */
+.al-price__plans {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-price__plan {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-3);
+}
+
+.al-price__plan--platform {
+  background: var(--al-teal-wash);
+  border-color: #B9DFD8;
+}
+
+.al-price__planName {
+  margin: 0;
+  font-size: var(--al-text-h3);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-price__planLine {
+  margin: 0;
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-price__plan--platform .al-price__planLine { color: #3B4F49; }
+
+/*
+ * "No published price" sits at the same size as a figure would. It is an answer, not an
+ * omission, and shrinking it would make the platform read as the one we are embarrassed
+ * about.
+ */
+.al-price__planPrice {
+  margin: var(--al-space-3) 0 0;
+  font-size: 1.75rem;
+  font-weight: var(--al-weight-bold);
+  letter-spacing: var(--al-tracking-display);
+  line-height: var(--al-leading-tight);
+  color: var(--al-ink-muted);
+}
+
+.al-price__planMeta {
+  margin: 0 0 var(--al-space-3);
+  padding-bottom: var(--al-space-3);
+  border-bottom: 1px solid var(--al-hairline);
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+}
+
+.al-price__plan--platform .al-price__planMeta { border-bottom-color: #B9DFD8; }
+
+.al-price__planPoints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--al-space-2);
+  font-size: var(--al-text-sm);
+  line-height: var(--al-leading-normal);
+  flex: 1 1 auto;
+}
+
+.al-price__planPoints li {
+  padding-left: var(--al-space-3);
+  border-left: 2px solid var(--al-hairline-strong);
+}
+
+.al-price__plan--platform .al-price__planPoints li { border-left-color: var(--al-teal); }
+
+.al-price__planCta {
+  font-size: var(--al-text-body);
+  font-weight: var(--al-weight-semibold);
+  color: var(--al-teal-text);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.al-price__planLink {
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}

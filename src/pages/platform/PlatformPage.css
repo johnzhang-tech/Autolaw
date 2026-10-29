@@ -1,0 +1,69 @@
+/*
+ * The platform page. Two lists and a closing band — the page's whole job is to show that
+ * the product is larger than the reports, so the inclusion list is the design.
+ */
+
+.al-platform__heroCtas {
+  margin-top: var(--al-space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--al-space-3);
+}
+
+.al-platform__adds,
+.al-platform__strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--al-space-4);
+}
+
+.al-platform__adds li {
+  background: var(--al-surface);
+  border: 1px solid var(--al-hairline);
+  border-radius: var(--al-radius-card);
+  padding: var(--al-space-4);
+}
+
+.al-platform__adds a {
+  font-size: var(--al-text-body-lg);
+  font-weight: var(--al-weight-bold);
+  color: var(--al-ink);
+  text-decoration: none;
+  /* The whole card is the link target in spirit; keep the hit area generous. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.al-platform__adds a:hover { color: var(--al-teal-text); }
+
+.al-platform__adds p,
+.al-platform__strip p {
+  margin: var(--al-space-1) 0 0;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}
+
+.al-platform__strip li {
+  border-left: 2px solid var(--al-teal-wash);
+  padding-left: var(--al-space-4);
+}
+
+.al-platform__strip h3 {
+  margin: 0;
+  font-size: var(--al-text-body-lg);
+  font-weight: var(--al-weight-bold);
+  line-height: var(--al-leading-snug);
+}
+
+.al-platform__note {
+  margin: var(--al-space-4) 0 0;
+  max-width: 68ch;
+  font-size: var(--al-text-sm);
+  color: var(--al-ink-muted);
+  line-height: var(--al-leading-normal);
+}

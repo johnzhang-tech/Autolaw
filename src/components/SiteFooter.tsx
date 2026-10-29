@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, LOGIN_URL, SAMPLE_REPORTS_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
+import { CONTACT_EMAIL, LOGIN_URL, PLATFORM_URL, SAMPLE_REPORTS_URL, SCHEDULE_URL, TRIAL_ENABLED, TRIAL_URL, PRIVACY_TEXT, TERMS_TEXT, PRIVACY_URL, TERMS_URL } from '../config';
 import { SITE_LINKS } from '../navigation';
 import { SecurityMark } from './SecurityMark';
 import { Wordmark } from './Wordmark';
@@ -27,6 +27,7 @@ export function SiteFooter({ scheduleHref = SCHEDULE_URL }: { scheduleHref?: str
               a page someone reaches for once rather than navigates by. Without it the
               samples are unreachable from the product pages, the blog and the Trust
               Center — every page a search result actually lands on. */}
+          <li><a href={PLATFORM_URL}>Platform</a></li>
           <li><a href={SAMPLE_REPORTS_URL}>Sample reports</a></li>
           <li><a href={scheduleHref}>Schedule a call</a></li>
           {LOGIN_URL && <li><a href={LOGIN_URL}>Log in</a></li>}

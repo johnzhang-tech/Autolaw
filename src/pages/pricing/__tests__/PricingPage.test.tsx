@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import { FAQ, PricingPage, packPriceLabel } from '../PricingPage';
 import { REPORT_PACKS, REPORTS_ORDER_PAGE_LIMIT, REPORTS_FREE_REFRESH_DAYS } from '../../../config';
 import { ORDERABLE_REPORTS } from '../../../data/product';
+import { CONTACT_SALES_URL, PLATFORM_URL } from '../../../config';
 import { renderedText } from '../../__tests__/renderedText';
 
 /*
@@ -198,5 +199,58 @@ describe('PricingPage once the prices are known', () => {
     expect(scroller).toHaveAttribute('tabindex', '0');
     expect(scroller).toHaveAttribute('role', 'region');
     expect(scroller).toHaveAccessibleName(/availability/i);
+  });
+});
+
+/*
+ * The page used to sell one thing.
+ *
+ * It was titled "Pay for the reports you order" and gave the platform one navy band, one
+ * sentence and a button pointing at the same generic "Schedule a call" as everything
+ * else — so a firm that wanted the whole product learned nothing, and the enquiry arrived
+ * with no indication of what they were after. case-app's reports_tier is a RESTRICTION
+ * (reports-tier-routes.ts is an allowlist; everything else 403s), so reports are the
+ * cut-down tier and the page was selling the smaller half as though it were the offer.
+ */
+describe('PricingPage — both halves of the business', () => {
+  it('presents two plans, not one', () => {
+    render(<PricingPage />);
+    const plans = screen.getByTestId('plans');
+    expect(within(plans).getAllByTestId('plan')).toHaveLength(2);
+    expect(within(plans).getByRole('heading', { name: /reports/i })).toBeInTheDocument();
+    expect(within(plans).getByRole('heading', { name: /platform/i })).toBeInTheDocument();
+  });
+
+  it('sends a platform enquiry somewhere that knows what it is about', () => {
+    render(<PricingPage />);
+    const plans = screen.getByTestId('plans');
+    expect(within(plans).getByRole('link', { name: /talk to sales/i })).toHaveAttribute(
+      'href',
+      CONTACT_SALES_URL,
+    );
+    expect(CONTACT_SALES_URL).toContain('interest=platform');
+  });
+
+  it('offers somewhere to read about the platform before talking to anyone', () => {
+    render(<PricingPage />);
+    expect(
+      within(screen.getByTestId('plans')).getByRole('link', { name: /what the platform/i }),
+    ).toHaveAttribute('href', PLATFORM_URL);
+  });
+
+  /*
+   * The retired claim. "Priced per firm rather than per report" was on the page and is
+   * not supported: Stripe sells report packs and nothing else, every platform tenant is
+   * provisioned by hand, and no code anywhere prices anything per firm, per seat or per
+   * year. Saying nothing about structure is the only honest option until that changes.
+   */
+  it('claims no pricing structure for the platform at all', () => {
+    const { container } = render(<PricingPage />);
+    /* Anchored on *priced*, not on "per firm" alone: the preview-reports paragraph
+       correctly says those types are switched on per firm, which is how the
+       reports_preview capability is granted and nothing to do with money. */
+    expect(renderedText(container)).not.toMatch(
+      /priced per|\bper seat\b|\bper user\b|\bper month\b|\bper year\b|annual (?:licen[cs]e|contract|subscription|minimum)/i,
+    );
   });
 });

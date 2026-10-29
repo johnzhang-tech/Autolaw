@@ -159,11 +159,11 @@ describe('keyboard reachability', () => {
     // Comparison scroller — focusable so a keyboard user can scroll it
     reachable(screen.getByTestId('comparison-scroller'));
 
-    // Footer links: seven site links, sample reports, schedule a call, Login, contact. Sign up is absent
+    // Footer links: seven site links, platform, sample reports, schedule a call, Login, contact. Sign up is absent
     // while TRIAL_ENABLED is false, as are Privacy and Terms while their slots are empty.
     const footer = screen.getByRole('contentinfo');
     const footerLinks = within(footer).getAllByRole('link');
-    expect(footerLinks.length).toBe(11);
+    expect(footerLinks.length).toBe(12);
     footerLinks.forEach(reachable);
   });
 

@@ -7,12 +7,14 @@ import {
   REPORTS_FREE_REFRESH_DAYS,
   REPORTS_FREE_REFRESH_PAGE_LIMIT,
   REPORTS_ORDER_PAGE_LIMIT,
+  CONTACT_SALES_URL,
+  PLATFORM_URL,
   SAMPLE_REPORTS_URL,
   SCHEDULE_URL,
   SECURITY_URL,
   type ReportPack,
 } from '../../config';
-import { ORDERABLE_REPORTS } from '../../data/product';
+import { ORDERABLE_REPORTS, PLATFORM, PLATFORM_ADDS } from '../../data/product';
 import './PricingPage.css';
 
 /**
@@ -129,15 +131,56 @@ export function PricingPage() {
     <PageShell>
       <PageHero
         eyebrow="Pricing"
-        title="Pay for the reports you order."
+        title="Two ways to work with Autolaw."
         intro={
           <>
-            Report credits are bought in packs and spent one per report, on whichever case
-            needs it. No seat licences, no annual minimum, and nothing expires at the end of
-            a quarter.
+            Order individual reports on the cases that need them, or run the whole practice
+            on Autolaw. Reports are bought in packs and spent one per report, on whichever
+            case needs it, and nothing expires. The platform has no published price — it
+            starts with a conversation about how your practice actually runs.
           </>
         }
       />
+
+      <Section id="plans" heading="Which one is your firm">
+        <ul className="al-price__plans" data-testid="plans">
+          <li className="al-price__plan" data-testid="plan">
+            <h3 className="al-price__planName">Reports</h3>
+            <p className="al-price__planLine">
+              For a firm that wants a particular piece of work on a particular case. Your
+              team orders it; there is nothing to subscribe to.
+            </p>
+            <p className="al-price__planPrice">{packPriceLabel(REPORT_PACKS[0]) ?? 'Priced on a call'}</p>
+            <p className="al-price__planMeta">per report</p>
+            <ul className="al-price__planPoints">
+              <li>{ORDERABLE_REPORTS.length} report types, by practice area</li>
+              <li>Word export with the citations intact</li>
+              <li>Ask AL on the case, scoped to reading and citing it</li>
+              <li>No subscription, and credits that do not expire</li>
+            </ul>
+            <a className="al-price__planCta" href="#packs">See report packs</a>
+          </li>
+
+          <li className="al-price__plan al-price__plan--platform" data-testid="plan">
+            <h3 className="al-price__planName">The platform</h3>
+            <p className="al-price__planLine">
+              For a firm that wants Autolaw across every matter it runs, rather than a
+              report at a time.
+            </p>
+            <p className="al-price__planPrice">No published price</p>
+            <p className="al-price__planMeta">we quote it against your practice</p>
+            <ul className="al-price__planPoints">
+              <li>Everything in Reports, plus {PLATFORM_ADDS.length} more of the product</li>
+              <li>Ask AL in full, not scoped to one read</li>
+              {PLATFORM.map((item) => (
+                <li key={item.id}>{item.name}</li>
+              ))}
+            </ul>
+            <a className="al-price__planCta" href={CONTACT_SALES_URL}>Talk to sales</a>
+            <a className="al-price__planLink" href={PLATFORM_URL}>What the platform includes</a>
+          </li>
+        </ul>
+      </Section>
 
       <Section id="packs" heading="Report packs">
         <ul className="al-price__packs">
@@ -251,11 +294,16 @@ export function PricingPage() {
         tone="navy"
         eyebrow="The full platform"
         heading="Or run case intelligence across the whole practice."
-        intro="Ask AL on every case, intake, missing-record detection, damages, demand packages, deadlines, and firm-wide roles and access. Priced per firm rather than per report."
+        intro="Intake, missing-record detection, damages, demand packages, deadlines, conflicting records, firm-wide roles and access — and Ask AL on every case rather than scoped to one read."
       >
-        <Button href={SCHEDULE_URL} variant="inverse" size="lg" withCaret>
-          Talk about the platform
-        </Button>
+        <div className="al-price__closingCtas">
+          <Button href={CONTACT_SALES_URL} variant="inverse" size="lg" withCaret>
+            Talk to sales
+          </Button>
+          <Button href={PLATFORM_URL} variant="inverse-secondary" size="lg">
+            What the platform includes
+          </Button>
+        </div>
       </Section>
 
       <Section id="faq" heading="Questions firms ask first">

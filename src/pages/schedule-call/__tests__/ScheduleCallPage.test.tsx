@@ -6,6 +6,7 @@ import {
   ScheduleCallPage,
   bookingEmbedSrc,
   composeMailto,
+  interestFromSearch,
   composePreview,
   practiceFromSearch,
   scheduleMode,
@@ -688,5 +689,56 @@ describe('ScheduleCallPage — where the lead came from', () => {
   it('renders no empty hidden fields for a visitor who arrived directly', () => {
     const { container } = render(<ScheduleCallPage />);
     expect(container.querySelectorAll('input[type="hidden"]')).toHaveLength(0);
+  });
+});
+
+/*
+ * Which half of the business the enquiry is about.
+ *
+ * The site sells two things now — reports per case, and the whole platform — and until
+ * this they arrived through the same "Schedule a call" with nothing to tell them apart.
+ * Whoever answers had to guess, or ask, which is the worst first question to put to a
+ * firm that has already told you on the page they came from.
+ */
+describe('ScheduleCallPage — which offering the enquiry is about', () => {
+  it('reads the interest the link carried', () => {
+    expect(interestFromSearch('?interest=platform')).toBe('the full platform');
+    expect(interestFromSearch('?interest=reports')).toBe('reports, per case');
+  });
+
+  it('presumes nothing when the link said nothing', () => {
+    expect(interestFromSearch('')).toBeNull();
+    expect(interestFromSearch('?interest=something-else')).toBeNull();
+    expect(interestFromSearch('?practice=pi')).toBeNull();
+  });
+
+  it('names the interest in the composed message', () => {
+    const body = decodeURIComponent(composeMailto({ practice: 'Personal injury' }, {}, 'the full platform'));
+    expect(body).toMatch(/Interested in: the full platform/);
+  });
+
+  /*
+   * The rendered field, not just the parser. The first version of these tests asserted
+   * interestFromSearch and composeMailto directly and passed while the hidden input was
+   * never rendered at all — the edit that was supposed to add it had silently not
+   * applied. Browser verification caught it; this is what should have.
+   */
+  it('carries the interest into the form for whatever endpoint receives it', () => {
+    window.history.replaceState({}, '', '/schedule-call/?interest=platform');
+    const { container } = render(<ScheduleCallPage />);
+    const hidden = container.querySelector<HTMLInputElement>('input[type="hidden"][name="interest"]');
+    expect(hidden).not.toBeNull();
+    expect(hidden).toHaveValue('the full platform');
+    window.history.replaceState({}, '', '/schedule-call/');
+  });
+
+  it('renders no interest field for a visitor who arrived without one', () => {
+    window.history.replaceState({}, '', '/schedule-call/');
+    const { container } = render(<ScheduleCallPage />);
+    expect(container.querySelector('input[type="hidden"][name="interest"]')).toBeNull();
+  });
+
+  it('leaves the message alone when there is no interest to name', () => {
+    expect(decodeURIComponent(composeMailto({ practice: 'Personal injury' }, {}))).not.toMatch(/Interested in/);
   });
 });

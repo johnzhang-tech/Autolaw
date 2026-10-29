@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import App from '../../App';
 import { SiteFooter } from '../SiteFooter';
-import { CONTACT_EMAIL, LOGIN_URL, SAMPLE_REPORTS_URL, SCHEDULE_URL } from '../../config';
+import { CONTACT_EMAIL, LOGIN_URL, PLATFORM_URL, SAMPLE_REPORTS_URL, SCHEDULE_URL } from '../../config';
 import { SITE_LINKS } from '../../navigation';
 
 describe('SiteFooter', () => {
@@ -14,6 +14,7 @@ describe('SiteFooter', () => {
       /* Footer only. The samples are the page that shows the work product, and the nav
          is already seven items; without this they cannot be reached from a product page,
          the blog or the Trust Center, which is where search drops most visitors. */
+      PLATFORM_URL,
       SAMPLE_REPORTS_URL,
       SCHEDULE_URL,
       LOGIN_URL,

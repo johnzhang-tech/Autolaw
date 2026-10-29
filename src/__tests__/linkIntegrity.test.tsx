@@ -9,6 +9,7 @@ import { SubprocessorsPage } from '../pages/security/subprocessors/Subprocessors
 import { AiDataUsePage } from '../pages/security/ai/AiDataUsePage';
 import { AboutPage } from '../pages/about/AboutPage';
 import { PricingPage } from '../pages/pricing/PricingPage';
+import { PlatformPage } from '../pages/platform/PlatformPage';
 import { SampleReportsPage } from '../pages/sample-reports/SampleReportsPage';
 import { ScheduleCallPage } from '../pages/schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../pages/privacy/PrivacyPage';
@@ -58,6 +59,7 @@ const PUBLIC_FILES = new Set([
 const PAGES: ReadonlyArray<[string, () => ReactElement]> = [
   ['home', () => <App />],
   ['pricing', () => <PricingPage />],
+  ['platform', () => <PlatformPage />],
   ['sample-reports', () => <SampleReportsPage />],
   ['security', () => <SecurityPage />],
   ['security/subprocessors', () => <SubprocessorsPage />],

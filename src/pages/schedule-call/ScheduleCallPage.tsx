@@ -36,6 +36,27 @@ export function practiceFromSearch(search: string): number | null {
   return v === 'pi' ? 0 : v === 'wc' ? 1 : v === 'both' ? 2 : null;
 }
 
+/**
+ * `?interest=platform|reports` → the phrase that goes in the message, or null.
+ *
+ * The site sells two things, and until this they arrived through the same "Schedule a
+ * call" with nothing to tell them apart — so whoever answered had to open with "which
+ * were you after?", to a firm that had already said so on the page they came from.
+ *
+ * A closed map rather than echoing the parameter: this string is composed into a mail
+ * body, and a query parameter is not something a visitor should be able to write into
+ * one.
+ */
+const INTERESTS: Record<string, string> = {
+  platform: 'the full platform',
+  reports: 'reports, per case',
+};
+
+export function interestFromSearch(search: string): string | null {
+  const value = new URLSearchParams(search).get('interest');
+  return (value && INTERESTS[value]) ?? null;
+}
+
 const VOLUMES = ['Under 50', '50–200', '200–500', 'More than 500'];
 
 /** Ids are derived, never spelled twice — a label and its control drifting apart is silent. */
@@ -82,7 +103,11 @@ export function bookingEmbedSrc(url: string): string {
  * body is the entire product of this form, and a test that only clicked the button would
  * pass while the body silently lost a field.
  */
-export function composeMailto(values: Record<string, string>, attribution: Attribution = {}): string {
+export function composeMailto(
+  values: Record<string, string>,
+  attribution: Attribution = {},
+  interest: string | null = null,
+): string {
   /*
    * Where the lead came from, appended for the person reading the mail. src/measure.ts
    * records it on arrival but `track` is inert until a provider is named, so without
@@ -94,7 +119,8 @@ export function composeMailto(values: Record<string, string>, attribution: Attri
    */
   const came = Object.entries(attribution).map(([k, v]) => `${k}=${v}`).join(', ');
   const source = came ? `\n\nCame from: ${came}` : '';
-  const body = `${composePreview(values)}${source}\n\nSent from the schedule-a-call page on autolaw.ai.`;
+  const about = interest ? `\n\nInterested in: ${interest}` : '';
+  const body = `${composePreview(values)}${about}${source}\n\nSent from the schedule-a-call page on autolaw.ai.`;
   const subject = `Call request — ${values.practice ?? ''}`.trim();
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
@@ -255,6 +281,8 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
   /* Read once per render rather than per submit: the hidden fields below need it too,
      and sessionStorage does not change under us mid-form. */
   const attribution = storedAttribution();
+  /* Read once, like `preset` below: both come off the URL the visitor arrived on. */
+  const interest = typeof window === 'undefined' ? null : interestFromSearch(window.location.search);
   /*
    * Validation is the browser's: `required` and `type="email"` are the constraints, and
    * every message below is the browser's own `validationMessage`. What is added here is
@@ -337,7 +365,7 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
     const data = new FormData(e.currentTarget);
     const values = Object.fromEntries(FIELDS.map((f) => [f.name, String(data.get(f.name) ?? '')]));
     setErrors({});
-    setComposed({ href: composeMailto(values, storedAttribution()), preview: composePreview(values) });
+    setComposed({ href: composeMailto(values, storedAttribution(), interest), preview: composePreview(values) });
   }
 
   /** Only ids that actually render — a dangling aria-describedby is silent and destructive. */
@@ -359,6 +387,9 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
       {Object.entries(attribution).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
+      {/* Which half of the business, from ?interest=. Same reasoning as the attribution
+          above: rendered only when the link carried one. */}
+      {interest && <input type="hidden" name="interest" value={interest} />}
       {hasErrors && (
         /*
          * role="alert" so the summary is announced when it appears rather than only

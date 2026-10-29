@@ -6,6 +6,7 @@ import { SubprocessorsPage } from '../security/subprocessors/SubprocessorsPage';
 import { AiDataUsePage } from '../security/ai/AiDataUsePage';
 import { AboutPage } from '../about/AboutPage';
 import { PricingPage } from '../pricing/PricingPage';
+import { PlatformPage } from '../platform/PlatformPage';
 import { SampleReportsPage } from '../sample-reports/SampleReportsPage';
 import { ScheduleCallPage } from '../schedule-call/ScheduleCallPage';
 import { PrivacyPage } from '../privacy/PrivacyPage';
@@ -27,6 +28,7 @@ import { POSTS } from '../../data/blog';
  */
 const PAGES: Array<[string, ReactElement]> = [
   ['/pricing/', <PricingPage />],
+  ['/platform/', <PlatformPage />],
   ['/sample-reports/', <SampleReportsPage />],
   ['/security/', <SecurityPage />],
   ['/security/subprocessors/', <SubprocessorsPage />],
@@ -164,6 +166,7 @@ describe.each(PAGES)('%s', (path, element) => {
 describe('subpage link integrity', () => {
   const SUBPAGES: Array<[string, () => ReactElement]> = [
     ['pricing', () => <PricingPage />],
+    ['platform', () => <PlatformPage />],
     ['sample-reports', () => <SampleReportsPage />],
     ['security', () => <SecurityPage />],
     ['security/subprocessors', () => <SubprocessorsPage />],

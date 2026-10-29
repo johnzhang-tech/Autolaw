@@ -766,3 +766,35 @@ export function resolveReport(product: ReportProduct): OrderableReport {
 }
 
 export const ORDERABLE_REPORTS: ReadonlyArray<OrderableReport> = REPORT_PRODUCTS.map(resolveReport);
+
+/**
+ * The line case-app actually draws between the two tiers.
+ *
+ * `packages/shared/src/reports-tier-routes.ts` is an allowlist enforced inside
+ * `isAuthenticated`: a firm holding the `reports_tier` entitlement may order reports, buy
+ * packs, list its cases and call the Ask AL ai-zone route, and every other API route
+ * returns 403. A firm without that row has the whole product. So the platform is not an
+ * upsell bolted onto reports — reports are the restricted tier, and what the platform
+ * "adds" is simply everything the allowlist leaves out.
+ *
+ * `ask-al` belongs to both on purpose. A reports-tier firm gets it scoped to reading and
+ * citing the case; a platform firm gets it whole. Listing it as platform-only would be
+ * the easy lie here, and the first thing a trial user would catch.
+ */
+export const REPORTS_TIER_FEATURE_IDS: ReadonlyArray<string> = [
+  ...REPORT_PRODUCTS.map((report) => report.featureId),
+  ASK_AL_FEATURE_ID,
+];
+
+/**
+ * Derived, never written down. A hand-kept inclusion list drifts from the product the
+ * first time a feature moves, and nothing notices until a firm asks for something the
+ * page promised. product.test.ts asserts that these two sets together account for every
+ * live feature, so a new one cannot end up advertised by neither page.
+ */
+export const PLATFORM_ADDS: ReadonlyArray<Feature & { slug: string }> = FEATURES.filter(
+  (feature): feature is Feature & { slug: string } =>
+    feature.availability === 'live' &&
+    Boolean(feature.slug) &&
+    !REPORTS_TIER_FEATURE_IDS.includes(feature.id),
+);

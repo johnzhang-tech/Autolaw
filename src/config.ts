@@ -240,3 +240,17 @@ export const SAMPLE_REPORTS_URL = '/sample-reports/';
  * ships without appearing on that list makes the Trust Center wrong.
  */
 export const ANALYTICS_PROVIDER: string | null = null;
+
+/** The platform overview. Trailing slash, as with the others. */
+export const PLATFORM_URL = '/platform/';
+
+/**
+ * Contact sales. The schedule-a-call page with the half of the business named, mirroring
+ * the `?practice=pi` parameter it already reads.
+ *
+ * Not a second contact system: one form, one inbox, one set of validation rules. The
+ * parameter only decides a line in the composed message, so an enquiry arrives saying
+ * whether it is about reports or the whole platform instead of making whoever answers
+ * open with "which were you after?".
+ */
+export const CONTACT_SALES_URL = `${SCHEDULE_URL}?interest=platform`;

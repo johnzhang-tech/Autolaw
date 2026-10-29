@@ -29,6 +29,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
         pricing: path.resolve(__dirname, 'pricing/index.html'),
+        platform: path.resolve(__dirname, 'platform/index.html'),
         sampleReports: path.resolve(__dirname, 'sample-reports/index.html'),
         security: path.resolve(__dirname, 'security/index.html'),
         securitySubprocessors: path.resolve(__dirname, 'security/subprocessors/index.html'),

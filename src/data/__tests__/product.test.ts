@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   FEATURE_BY_ID,
+  PLATFORM_ADDS,
+  REPORTS_TIER_FEATURE_IDS,
   FEATURES,
   ORDERABLE_REPORTS,
   PLATFORM,
@@ -213,5 +215,50 @@ describe('orderable report catalog', () => {
       ...report.deliverables,
     ]).join(' ');
     expect(copy).not.toMatch(/\d+(?:\.\d+)?\s*%/);
+  });
+});
+
+/*
+ * The two tiers, as the product actually draws the line.
+ *
+ * reports-tier-routes.ts in case-app is an allowlist enforced inside isAuthenticated: a
+ * Reports-tier firm may order reports, buy packs, list cases and call the Ask AL ai-zone
+ * route, and everything else returns 403. So the platform is not an upsell bolted on top
+ * of reports — reports are the cut-down tier, and the comparison on /platform is the
+ * difference between the two.
+ *
+ * Derived rather than written down, because a hand-kept inclusion list drifts from the
+ * product the first time a feature moves and nothing notices. The coverage assertion is
+ * the one that matters: a new live feature must land in one side or the other, so it
+ * cannot quietly end up advertised by neither page.
+ */
+describe('platform tier', () => {
+  it('gives the reports tier the orderable reports and Ask AL, and nothing else', () => {
+    expect([...REPORTS_TIER_FEATURE_IDS].sort()).toEqual(
+      ['ask-al', 'case-value', 'medical-chronologies', 'qme-ame'].sort(),
+    );
+  });
+
+  it('advertises only live, routed features as what the platform adds', () => {
+    expect(PLATFORM_ADDS.length).toBeGreaterThan(5);
+    PLATFORM_ADDS.forEach((feature) => {
+      expect(feature.availability, `${feature.id} is not live`).toBe('live');
+      expect(feature.slug, `${feature.id} has no page to link to`).toBeTruthy();
+    });
+  });
+
+  it('never lists a feature as both included and added', () => {
+    const overlap = PLATFORM_ADDS.filter((feature) => REPORTS_TIER_FEATURE_IDS.includes(feature.id));
+    expect(overlap.map((feature) => feature.id)).toEqual([]);
+  });
+
+  /*
+   * The guard with teeth. Add a live feature and forget to classify it and this fails,
+   * rather than the feature silently appearing on neither tier's page.
+   */
+  it('accounts for every live feature on one side or the other', () => {
+    const live = FEATURES.filter((feature) => feature.availability === 'live').map((f) => f.id);
+    const classified = [...REPORTS_TIER_FEATURE_IDS, ...PLATFORM_ADDS.map((f) => f.id)];
+    expect([...live].sort()).toEqual([...classified].sort());
   });
 });
