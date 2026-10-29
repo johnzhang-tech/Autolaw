@@ -9,7 +9,7 @@ describe('AboutPage — what it says', () => {
     const h1 = within(screen.getByRole('main')).getByRole('heading', { level: 1 });
     expect(h1).toHaveTextContent(/what autolaw is/i);
     expect(
-      within(screen.getByRole('main')).getByText(/every fact cites the document, page, and sentence/i)
+      within(screen.getByRole('main')).getByText(/every fact cites\s+the document and page/i)
     ).toBeInTheDocument();
   });
 

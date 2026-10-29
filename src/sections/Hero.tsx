@@ -40,7 +40,7 @@ export function Hero() {
       <h1 id={HERO_HEADING_ID} className="al-hero__title">Know where every fact came from.</h1>
       <p className="al-hero__sub">
         Autolaw reads the medical records, expert reports, and case documents in a file and
-        builds one connected case file. Every fact cites its document, page, and sentence.
+        builds one connected case file. Every fact cites its document and page.
         Where two records disagree, you see both.
       </p>
       <div className="al-hero__ctas">

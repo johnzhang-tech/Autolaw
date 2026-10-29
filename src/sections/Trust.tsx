@@ -21,7 +21,7 @@ const CONTROLS: Array<{ title: string; body: string; privacyLink?: boolean }> = 
 ];
 
 const ROWS: Array<[string, string, string]> = [
-  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the exact sentence — one click opens it'],
+  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the quoted line — one click opens it'],
   ['Two documents disagree', 'Picks one, silently', 'Surfaced as a conflict with both sources and dates'],
   ['A fact with no support', 'Reads identically to a supported one', 'Kept apart from cited facts and labeled uncited'],
   ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and lists what is needed'],

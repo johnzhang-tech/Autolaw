@@ -66,7 +66,7 @@ export const POSTS: ReadonlyArray<Post> = [
           'Ask to click a single number in the demo. Watch whether it lands you on the document and the line, or on a 400-page PDF and a search box.',
         ],
         points: [
-          'Every fact resolves to a document, a page, and the sentence it came from.',
+          'Every fact resolves to a document and a page, with the line it quotes.',
           'The link works from inside the export, not only inside the vendor’s own viewer.',
           'A fact with no source is shown as having no source, rather than quietly omitted.',
         ],

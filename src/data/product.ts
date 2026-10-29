@@ -154,7 +154,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
       promise: 'Put the whole case on call, with every answer traceable to the record.',
       body: [
         'Ask AL gives the team one place to question the case file in plain language instead of reopening the same stack of records for every new issue.',
-        'Its answer stays attached to the evidence: each supported statement names the document, page, and sentence, so the attorney can move from answer to source without taking the software on faith.',
+        'Its answer stays attached to the evidence: each supported statement names the document and page, so the attorney can move from answer to source without taking the software on faith.',
       ],
       steps: [
         { heading: 'Ask the case', body: 'Type the question the way you would ask another attorney on the matter.' },
@@ -169,7 +169,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
       related: ['medical-chronologies', 'conflicts', 'missing-records'],
       meta: {
         title: 'Ask AL — Cited Answers From the Case File | Autolaw',
-        description: 'Ask questions across the case file and open the document, page, and sentence behind every supported answer with Ask AL.',
+        description: 'Ask questions across the case file and open the document and page behind every supported answer with Ask AL.',
       },
     },
   },
@@ -183,7 +183,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
     availability: 'live',
     detail: [
       'Every visit, procedure, and opinion in date order.',
-      'Each entry names the document, page, and sentence it came from.',
+      'Each entry names the document and page it came from.',
       'Split at the date of loss, so before and after read separately.',
     ],
     output: 'Word export',
@@ -207,7 +207,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
       related: ['significance-brief', 'missing-records', 'case-management-summary'],
       meta: {
         title: 'Medical Chronologies With Page-Level Citations | Autolaw',
-        description: 'Turn a large medical record into a dated treatment story with document, page, and sentence citations and a Word export.',
+        description: 'Turn a large medical record into a dated treatment story with document and page citations and a Word export.',
       },
     },
   },

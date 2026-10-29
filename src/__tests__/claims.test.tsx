@@ -81,6 +81,11 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     reason: 'no deletion procedure exists to meet a 90-day window; the privacy-policy wording is with legal (case-app evidence annex, blocker 3)',
   },
   {
+    pattern: /document,?\s+(?:a\s+|the\s+)?page,?\s+and\s+(?:the\s+)?(?:exact\s+)?sentence/i,
+    reason:
+      'no citation in case-app carries a sentence locator: ChronologyCitation, GraphEventCitation, CitedCitation and MedicalNarrativeCitation are each {document, page, snippet}, and citationText() renders "(file, p. N)" or "(file, quoted)" (checked 2026-10-28). This does NOT retire "every sentence carries a citation", which is a claim about how densely an Ask AL answer is cited and is a different thing.',
+  },
+  {
     pattern: /encrypt\w*\s+(?:in\s+transit\s+(?:and|&)\s+at\s+rest|at\s+rest\s+(?:and|&)\s+in\s+transit)|end[\s-]to[\s-]end\s+encrypt/i,
     reason: 'encryption is stated per connection and per store (case-app evidence EN-1, EN-2); the job queue and the graph host’s disks are not evidenced',
   },
