@@ -93,10 +93,12 @@ describe('credibility guards', () => {
    * matching rule would mean React never loads, every page renders an empty #root, and
    * nothing in this suite or in the owner's own browser would show it.
    *
-   * The module is now src/measure.ts. This keeps the next one from being named back.
+   * The module is now src/measure.ts. This keeps the next one from being named back. The
+   * vendor's name joined the list when Umami was chosen: a module called umami.ts would be
+   * the same bait.
    */
   it('names no module after something a content blocker matches on', () => {
-    const bait = /(analytics|tracking|telemetry|advert|pixel|beacon|gtag)/i;
+    const bait = /(analytics|tracking|telemetry|advert|pixel|beacon|gtag|umami)/i;
     const offenders = sourceFiles()
       .filter((f) => bait.test(f.split('/').pop() ?? ''))
       .map((f) => f.replace(`${ROOT}/`, ''));

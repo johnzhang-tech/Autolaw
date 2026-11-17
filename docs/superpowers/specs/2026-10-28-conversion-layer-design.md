@@ -227,6 +227,43 @@ written into hidden fields on `/schedule-call/` so attribution survives into wha
 `CONTACT_ENDPOINT` eventually receives. A guard asserts the event payload type permits
 only scalars, so a case name or document cannot be passed by accident.
 
+#### Provider: Umami Cloud (2026-11-17)
+
+The owner chose Umami Cloud, free plan, in the account that already holds CIDSnap; each
+site has its own website id. It sets no cookie, needs no consent banner and does not
+identify visitors. `ANALYTICS_PROVIDER` is gone. The switch is now a website id read at
+build time:
+
+- **Build config.** `VITE_UMAMI_WEBSITE_ID` in `.env.production`, which `vite build` reads
+  and dev and tests do not. The Dockerfile copies it in and the Cloud Build trigger builds
+  that Dockerfile, so committing the id is the whole deploy step. Empty, or anything that
+  is not exactly a UUID, ships the site exactly as before: no script, no request.
+- **Tracker.** `startPageAnalytics` (every page entry) adds `https://cloud.umami.is/script.js`
+  with `data-domains="www.autolaw.ai"`, `data-do-not-track`, `data-exclude-search` and
+  `data-exclude-hash`. The tracker sends its own page view; error and performance
+  reporting stay off. It normalises the referrer the same way as the page address, so
+  neither carries a query string.
+- **Events.** `deliver()` hands the event and its scalar props (attribution included) to
+  `window.umami.track`, inside a try/catch with any rejected promise swallowed. Events
+  emitted before the tracker loads, which is nearly always the page view, are held in a
+  queue of at most ten, earliest kept, and released in order on load. If the script
+  errors (content blocker, network, CSP), the queue is dropped and nothing more is held.
+- **CSP.** `script-src` adds `https://cloud.umami.is`; `connect-src` adds
+  `https://gateway.umami.is`. That endpoint was read from the live tracker (it posts
+  to `${data-host-url || "https://gateway.umami.is"}/api/send`) and then watched in a
+  browser under this CSP, with no redirect. `src/__tests__/csp.test.ts` ties the header to
+  the constants in `src/config.ts`.
+- **Trust Center.** The Umami row on `/security/subprocessors/`, and version 1.1 of the
+  list, appear on exactly the builds that set the website id.
+
+Draft privacy-policy sentence, for `PRIVACY_TEXT` when the policy is published (wording
+pending the owner's approval):
+
+> We measure visits to autolaw.ai with Umami, a tool that sets no cookie and does not
+> identify you. It records the page you opened without its query string, the site that
+> sent you, your browser, device, language and country, and a few named actions such as a
+> click on "Schedule a call". Nothing from the Autolaw application is sent to it.
+
 ### Step 7 — Structured data
 
 JSON-LD on three page types only, where it is accurate: `Organization` on the homepage,
@@ -315,7 +352,7 @@ Actionable, with the owner named.
 | Live Stripe prices for the three packs have not been read | Owner | Real amounts on `/pricing`; the page ships without them |
 | `app.autolaw.ai` DNS record and Cloud Run domain mapping | Owner | `APP_HOST_LIVE`, and every CTA that would point into the app |
 | `TRIAL_SIGNUP_ENABLED` is false | Owner | Any self-service signup CTA |
-| No analytics provider chosen | Owner | Step 6 ships inert until one is named |
+| Umami website id for autolaw.ai not yet created (provider chosen 2026-11-17) | Owner | Step 6 ships inert until the id is in `.env.production` |
 | Privacy policy and terms not drafted | Owner / legal | `/privacy/`, `/terms/`, and the footer links to them |
 
 Nothing in steps 1 through 8 is blocked by any of the above.

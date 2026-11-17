@@ -228,18 +228,52 @@ export const PRICING_URL = '/pricing/';
 export const SAMPLE_REPORTS_URL = '/sample-reports/';
 
 /**
- * The analytics provider, unchosen.
+ * Website analytics: Umami Cloud, switched on by one build-time value.
  *
- * null makes src/analytics.ts inert: events are defined and placed, and nothing is sent.
- * That is the honest state — the events are worth getting right now, and picking an
- * endpoint is a privacy decision with a privacy-policy consequence that nobody has taken.
+ * The provider was chosen on 2026-11-17 because it works without cookies and without a
+ * consent banner, which the site has neither of, and because it does not identify the
+ * visitor. The same account counts CIDSnap, under a website id of its own.
  *
- * Whatever goes here must work without cookies and without a consent banner, because the
- * site has neither. Setting it is also the moment src/analytics.ts `deliver` gains a body
- * and the subprocessor list at /security/subprocessors/ gains a row — a tracker that
- * ships without appearing on that list makes the Trust Center wrong.
+ * UMAMI_WEBSITE_ID is read from VITE_UMAMI_WEBSITE_ID when the site is built, and the
+ * production build reads it from .env.production in the repo root. That file is the build
+ * config: the Dockerfile copies it in, and the Cloud Build trigger builds that Dockerfile
+ * on every push to main. Unset, or anything that is not exactly a UUID, means what it
+ * meant before a provider was chosen: no script loads and src/measure.ts sends nothing.
+ *
+ * The same value adds the Umami row to /security/subprocessors/ (src/data/trust.ts), so
+ * the Trust Center lists the tracker on exactly the builds that run it.
  */
-export const ANALYTICS_PROVIDER: string | null = null;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A website id, trimmed, or null for anything else: the value goes into a script attribute. */
+export function umamiWebsiteId(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const id = raw.trim();
+  return UUID.test(id) ? id : null;
+}
+
+export const UMAMI_WEBSITE_ID: string | null = umamiWebsiteId(import.meta.env.VITE_UMAMI_WEBSITE_ID);
+
+/** Umami Cloud's tracker. Its host is the one third party in the CSP's script-src. */
+export const UMAMI_SCRIPT_URL = 'https://cloud.umami.is/script.js';
+
+/**
+ * Where that tracker posts page views and events, which is the CSP's connect-src.
+ *
+ * Read from the tracker, not assumed: script.js builds its endpoint as
+ * `${data-host-url || "https://gateway.umami.is"}/api/send`, and a page served under this
+ * site's CSP was watched posting there on 2026-11-17. If Umami moves it, the symptom is a
+ * CSP violation in the console and a dashboard that stops counting; re-check both here and
+ * in nginx.conf, and src/__tests__/csp.test.ts holds them together.
+ */
+export const UMAMI_COLLECT_ORIGIN = 'https://gateway.umami.is';
+
+/**
+ * The host every page declares canonical, and the only one visits are counted on. A tagged
+ * Cloud Run preview, the raw run.app URL and a local build all load the tracker and send
+ * nothing, which is the tracker's data-domains check doing its job.
+ */
+export const CANONICAL_HOST = 'www.autolaw.ai';
 
 /** The platform overview. Trailing slash, as with the others. */
 export const PLATFORM_URL = '/platform/';

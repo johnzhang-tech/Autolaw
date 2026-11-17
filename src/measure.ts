@@ -1,4 +1,4 @@
-import { ANALYTICS_PROVIDER } from './config';
+import { CANONICAL_HOST, UMAMI_SCRIPT_URL, UMAMI_WEBSITE_ID } from './config';
 
 /**
  * Conversion measurement for the public site.
@@ -13,11 +13,12 @@ import { ANALYTICS_PROVIDER } from './config';
  * allowlist of exact keys rather than a prefix match. Anything else throws in
  * development rather than being quietly forwarded.
  *
- * The second is that no vendor has been chosen. ANALYTICS_PROVIDER is null, so `track`
- * is a no-op in production and a console line in development. That is not a stub waiting
- * to be finished: placing the events correctly is this phase's work, and picking an
- * endpoint is a privacy decision for the owner. When one is named, `deliver` below is the
- * only function that changes.
+ * The second is that measurement is off unless a build says otherwise. The vendor is
+ * Umami Cloud, chosen because it sets no cookie and does not identify the visitor, and it
+ * is switched on only by a website id in the build config (src/config.ts says where).
+ * Without one, `track` is a no-op in production and a console line in development, and no
+ * script is loaded. `loadTracker` and `deliver` below are the only code that knows Umami
+ * exists; everything above them is the same whichever vendor is behind them.
  */
 
 /**
@@ -148,13 +149,111 @@ function assertScalarProps(props: AnalyticsProps): void {
   }
 }
 
-/** The only place a provider is spoken to. Replacing this is the whole integration. */
+/** The part of Umami's tracker this module calls: `umami.track(name, data?)`. */
+interface UmamiTracker {
+  track(event: string, data?: AnalyticsProps): unknown;
+}
+
+/**
+ * Events sent before the tracker has loaded, held until it does.
+ *
+ * The tracker is a script fetched from another host, so it arrives after the entry module
+ * has run — and the entry module is what emits the page view. Without this, landing_viewed
+ * and pricing_viewed would be lost on nearly every visit, which is every funnel's first
+ * step. With it they are sent, in order, as soon as window.umami exists.
+ *
+ * Bounded and earliest-first: a page emits its view and perhaps a click or two before a
+ * tracker that is going to load has loaded, so ten is generous, and a tracker that stalls
+ * without ever erroring cannot grow this for the life of the tab. The view is first and is
+ * the one worth keeping. A visitor who leaves before the tracker arrives takes the held
+ * events with them, which is the right outcome for a visit that never finished loading.
+ */
+const MAX_HELD = 10;
+const held: Array<[AnalyticsEvent, AnalyticsProps]> = [];
+/* Blocked, offline, or refused by the CSP: nothing will be delivered, so nothing is held. */
+let trackerFailed = false;
+
+function umami(): UmamiTracker | null {
+  try {
+    const candidate = (window as Window & { umami?: UmamiTracker }).umami;
+    return candidate && typeof candidate.track === 'function' ? candidate : null;
+  } catch {
+    return null;
+  }
+}
+
+/*
+ * Never the page's problem. The tracker catches its own network errors today, but it
+ * returns a promise, and a later version that let one reject would otherwise surface as an
+ * unhandled rejection on a law firm's screen.
+ */
+function send(tracker: UmamiTracker, event: AnalyticsEvent, props: AnalyticsProps): void {
+  try {
+    const result = Object.keys(props).length > 0 ? tracker.track(event, props) : tracker.track(event);
+    if (result instanceof Promise) result.catch(() => {});
+  } catch {
+    /* Analytics never gets in the way of what the visitor was doing. */
+  }
+}
+
+function releaseHeld(): void {
+  const tracker = umami();
+  if (!tracker) return;
+  for (const [event, props] of held.splice(0)) send(tracker, event, props);
+}
+
+function trackerUnavailable(): void {
+  trackerFailed = true;
+  held.length = 0;
+}
+
+/**
+ * Adds Umami's tracker to the page, once, when a website id is configured.
+ *
+ * Every attribute is a privacy setting. data-domains counts visits on the canonical host
+ * only, so a Cloud Run preview or a local build sends nothing. data-do-not-track honours a
+ * browser that asks. data-exclude-search and data-exclude-hash send page addresses — and
+ * the referrer, which the tracker normalises the same way — without their query string or
+ * fragment, for the reason safeHref below gives: a query says what someone typed. Error
+ * and performance reporting are left at their default of off, so no stack trace or timing
+ * data leaves the page. Campaign tags still arrive, through the allowlist above, as
+ * properties of each event.
+ */
+export function loadTracker(doc: Document = document): void {
+  if (!UMAMI_WEBSITE_ID) return;
+  try {
+    if (doc.querySelector('script[data-website-id]')) return;
+    const script = doc.createElement('script');
+    script.src = UMAMI_SCRIPT_URL;
+    script.defer = true;
+    script.dataset.websiteId = UMAMI_WEBSITE_ID;
+    script.dataset.domains = CANONICAL_HOST;
+    script.dataset.doNotTrack = 'true';
+    script.dataset.excludeSearch = 'true';
+    script.dataset.excludeHash = 'true';
+    /* A script that loads but defines no tracker is as unavailable as one that fails. */
+    script.addEventListener('load', () => (umami() ? releaseHeld() : trackerUnavailable()));
+    script.addEventListener('error', trackerUnavailable);
+    doc.head.appendChild(script);
+  } catch {
+    trackerUnavailable();
+  }
+}
+
+/** The only place a provider is spoken to. */
 function deliver(event: AnalyticsEvent, props: AnalyticsProps): void {
-  if (!ANALYTICS_PROVIDER) {
+  if (!UMAMI_WEBSITE_ID) {
     if (import.meta.env?.DEV) console.debug('[analytics:inert]', event, props);
     return;
   }
-  /* No provider is configured yet, so there is deliberately nothing here to call. */
+  const tracker = umami();
+  if (tracker) {
+    /* window.umami exists from the moment the script runs, a tick before its load event. */
+    releaseHeld();
+    send(tracker, event, props);
+    return;
+  }
+  if (!trackerFailed && held.length < MAX_HELD) held.push([event, props]);
 }
 
 export function track(event: AnalyticsEvent, props: AnalyticsProps = {}): void {
@@ -238,6 +337,10 @@ export function installClickTracking(
  * page or the samples as on the root. A page with no view event of its own still calls
  * this, for exactly that reason.
  *
+ * It is also where the tracker is loaded, so every entry point that measures anything
+ * loads it, and src/__tests__/measure.test.ts checks that every page the build ships calls
+ * this.
+ *
  * Returns a disposer so a test can stop listening; entry points do not need it, since
  * the listener dies with the document.
  */
@@ -250,7 +353,9 @@ export function startPageAnalytics(
   } = {},
 ): () => void {
   const emit = opts.emit ?? track;
+  const root = opts.root ?? document;
+  loadTracker(root);
   captureAttribution(opts.search ?? (typeof location === 'undefined' ? '' : location.search));
   if (view) emit(view, {});
-  return installClickTracking(opts.root ?? document, emit);
+  return installClickTracking(root, emit);
 }

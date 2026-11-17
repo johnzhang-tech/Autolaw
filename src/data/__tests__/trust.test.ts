@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
   AI_CARDS,
   AI_QUESTIONS,
@@ -78,5 +78,59 @@ describe('trust data', () => {
 
   it('answers every AI question with a statement or a commitment', () => {
     AI_QUESTIONS.forEach((q) => expect(q.answers.length + (q.commitments ?? []).length, q.question).toBeGreaterThan(0));
+  });
+});
+
+/*
+ * The visit counter on autolaw.ai is listed exactly when it runs.
+ *
+ * Both switch on the same build-time website id, so the Trust Center cannot list a vendor
+ * that receives nothing, or omit one that receives every page view. Each state is
+ * rebuilt from a fresh import with the id stubbed, since the list is fixed when the
+ * module loads.
+ */
+describe('website analytics on the subprocessor list', () => {
+  const TEST_ID = '0b5e2f8c-1d3a-4c6e-9f70-2a4b6c8d0e1f';
+  async function trustWith(id: string) {
+    vi.stubEnv('VITE_UMAMI_WEBSITE_ID', id);
+    vi.resetModules();
+    return import('../trust');
+  }
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it('is absent while no website id is set', async () => {
+    const t = await trustWith('');
+    expect(t.SUBPROCESSORS.map((s) => s.vendor).join(' ')).not.toMatch(/umami/i);
+    expect(t.SUBPROCESSOR_CHANGES.map((c) => c.version)).toEqual(['1.0']);
+  });
+
+  it('is listed, with a new version of the list, once a website id is set', async () => {
+    const t = await trustWith(TEST_ID);
+    const row = t.SUBPROCESSORS.find((s) => /umami/i.test(s.vendor));
+    expect(row).toBeDefined();
+    expect(t.SUBPROCESSORS).toHaveLength(11);
+    expect(row!.claims).toContain('SP-table');
+    expect(t.SUBPROCESSOR_CHANGES.at(-1)?.change).toMatch(/umami/i);
+    expect(t.SUBPROCESSOR_CHANGES.map((c) => c.version)).toEqual(['1.0', '1.1']);
+  });
+
+  /*
+   * What a firm reading the row needs to be able to rely on: it is about the website, not
+   * the application; page addresses go without their query; and nothing identifies them.
+   */
+  it('says what it receives and what it does not', async () => {
+    const { SUBPROCESSORS } = await trustWith(TEST_ID);
+    const row = SUBPROCESSORS.find((s) => /umami/i.test(s.vendor))!;
+    expect(row.when).toMatch(/autolaw\.ai/);
+    expect(row.when).toMatch(/never .*application/i);
+    expect(row.receives).toMatch(/without its query/i);
+    expect(row.receives).toMatch(/referring site/i);
+    expect(row.receives).toMatch(/country/i);
+    expect(row.receives).toMatch(/IP address/i);
+    expect(row.receives).toMatch(/no cookies?/i);
+    expect(row.receives).toMatch(/no names/i);
   });
 });

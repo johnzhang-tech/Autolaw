@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   ATTRIBUTION_KEYS,
   attributionFrom,
@@ -9,7 +11,7 @@ import {
   storedAttribution,
   track,
 } from '../measure';
-import { ANALYTICS_PROVIDER } from '../config';
+import { UMAMI_WEBSITE_ID } from '../config';
 
 /*
  * Marketing analytics on a site whose visitors are law firms.
@@ -21,9 +23,9 @@ import { ANALYTICS_PROVIDER } from '../config';
  * client name, or a document title must not be able to reach a marketing endpoint even
  * if somebody later appends one to a link.
  *
- * The module is inert until ANALYTICS_PROVIDER names one. That is deliberate: the events
- * are worth defining and placing now, and choosing a vendor is a decision with privacy
- * consequences that nobody has made yet.
+ * The module is inert until a build supplies an Umami website id. Unset, which is how
+ * these tests run by default, nothing loads and nothing is sent; the "Umami" block at the
+ * bottom rebuilds the module with an id to show what changes when one is set.
  */
 
 beforeEach(() => {
@@ -100,10 +102,14 @@ describe('attribution', () => {
 });
 
 describe('track', () => {
-  it('does nothing, and throws nothing, while no provider is configured', () => {
-    expect(ANALYTICS_PROVIDER).toBeNull();
+  /*
+   * A tracker that some other script put on the page is still not ours to feed. With no
+   * website id the module must not reach for window.umami at all.
+   */
+  it('does nothing, and throws nothing, while no website id is configured', () => {
+    expect(UMAMI_WEBSITE_ID).toBeNull();
     const sink = vi.fn();
-    vi.stubGlobal('__alAnalytics', sink);
+    vi.stubGlobal('umami', { track: sink });
     expect(() => track('pricing_viewed')).not.toThrow();
     expect(sink).not.toHaveBeenCalled();
   });
@@ -224,5 +230,218 @@ describe('startPageAnalytics', () => {
     expect(storedAttribution()).toEqual({ utm_campaign: 'spring' });
     expect(emit).not.toHaveBeenCalled();
     stop();
+  });
+});
+
+/*
+ * Umami, once a build supplies a website id.
+ *
+ * config.ts reads the id when the module is evaluated, which is build time in production.
+ * Each test here stubs the variable and imports a fresh copy of measure.ts, so the state
+ * the module keeps (the queue, whether the tracker failed) starts empty every time.
+ */
+describe('Umami', () => {
+  const TEST_ID = '0b5e2f8c-1d3a-4c6e-9f70-2a4b6c8d0e1f';
+  const SCRIPT = 'script[src="https://cloud.umami.is/script.js"]';
+
+  async function measureWith(id: string) {
+    vi.stubEnv('VITE_UMAMI_WEBSITE_ID', id);
+    vi.resetModules();
+    return import('../measure');
+  }
+
+  const tracker = () => document.head.querySelector<HTMLScriptElement>(SCRIPT);
+
+  /* What the tracker does on load: define window.umami, then fire the load event. */
+  function trackerLoads(track = vi.fn()) {
+    vi.stubGlobal('umami', { track });
+    tracker()!.dispatchEvent(new Event('load'));
+    return track;
+  }
+
+  afterEach(() => {
+    document.head.querySelectorAll('script').forEach((s) => s.remove());
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it('loads nothing when the id is unset or is not a website id', async () => {
+    for (const id of ['', 'not-an-id', `${TEST_ID}"><script>`, '0b5e2f8c1d3a4c6e9f702a4b6c8d0e1f']) {
+      const m = await measureWith(id);
+      const stop = m.startPageAnalytics('landing_viewed', { emit: vi.fn() });
+      stop();
+      expect(tracker(), `id ${JSON.stringify(id)}`).toBeNull();
+    }
+  });
+
+  /*
+   * Every attribute is a privacy setting, not a preference. data-domains keeps a preview,
+   * the run.app host, or a copy of the site from counting as visits to www.autolaw.ai.
+   * do-not-track honours a browser that asks. exclude-search keeps page addresses free of
+   * query strings, which is where a pasted link would carry anything typed into it, and
+   * exclude-hash does the same for fragments. Error and performance reporting stay off: a
+   * stack trace is not something a marketing tool needs from a law firm's browser.
+   */
+  it('loads the tracker once per page, with every privacy setting on', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    m.loadTracker();
+    expect(document.head.querySelectorAll(SCRIPT)).toHaveLength(1);
+    const script = tracker()!;
+    expect({ ...script.dataset }).toEqual({
+      websiteId: TEST_ID,
+      domains: 'www.autolaw.ai',
+      doNotTrack: 'true',
+      excludeSearch: 'true',
+      excludeHash: 'true',
+    });
+    expect(script.async || script.defer).toBe(true);
+  });
+
+  it('is loaded by every page entry', async () => {
+    const m = await measureWith(TEST_ID);
+    const stop = m.startPageAnalytics(undefined, { emit: vi.fn() });
+    expect(tracker()).not.toBeNull();
+    stop();
+  });
+
+  /*
+   * The tracker arrives asynchronously, and the page view is emitted as the entry module
+   * runs, so landing_viewed is nearly always sent before window.umami exists. Dropping it
+   * would undercount the one event every funnel starts from. It is held until the tracker
+   * loads and then sent, in order, with whatever came after it.
+   */
+  it('holds events sent before the tracker loads and delivers them in order', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    m.track('landing_viewed');
+    m.track('cta_clicked', { label: 'Schedule a call', href: '/schedule-call/' });
+    const send = trackerLoads();
+    expect(send.mock.calls).toEqual([
+      ['landing_viewed'],
+      ['cta_clicked', { label: 'Schedule a call', href: '/schedule-call/' }],
+    ]);
+    m.track('pricing_viewed');
+    expect(send).toHaveBeenLastCalledWith('pricing_viewed');
+    expect(send).toHaveBeenCalledTimes(3);
+  });
+
+  it('sends the visit’s campaign attribution with each event', async () => {
+    const m = await measureWith(TEST_ID);
+    m.startPageAnalytics(undefined, { search: '?utm_source=bar_assoc&client=Rivera', emit: vi.fn() });
+    const send = trackerLoads();
+    m.track('report_card_selected', { report: 'chronology', destination: 'sample' });
+    expect(send).toHaveBeenCalledWith('report_card_selected', {
+      utm_source: 'bar_assoc',
+      report: 'chronology',
+      destination: 'sample',
+    });
+    expect(JSON.stringify(send.mock.calls)).not.toMatch(/Rivera/);
+  });
+
+  /*
+   * Bounded, so a tracker that never loads and never errors (a stalled request, a proxy
+   * that swallows it) cannot grow a list for the life of the tab. Ten is several times what
+   * a page emits before a tracker that does load has arrived. The earliest are kept: the
+   * page view is first, and it is the one that matters.
+   */
+  it('holds at most ten events, keeping the earliest', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    m.track('landing_viewed');
+    for (let i = 0; i < 30; i += 1) m.track('cta_clicked', { label: `link ${i}`, href: '/x/' });
+    const send = trackerLoads();
+    expect(send).toHaveBeenCalledTimes(10);
+    expect(send.mock.calls[0]).toEqual(['landing_viewed']);
+  });
+
+  /*
+   * A content blocker, a network failure, or a CSP that does not list the host all end in
+   * the script's error event. Nothing can be delivered after that, so nothing is kept.
+   */
+  it('drops what it was holding, and holds nothing more, when the tracker fails', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    m.track('landing_viewed');
+    tracker()!.dispatchEvent(new Event('error'));
+    m.track('pricing_viewed');
+    const send = vi.fn();
+    vi.stubGlobal('umami', { track: send });
+    tracker()!.dispatchEvent(new Event('load'));
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('never throws into the page when the tracker does', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    trackerLoads(
+      vi.fn(() => {
+        throw new Error('tracker broke');
+      }),
+    );
+    expect(() => m.track('pricing_viewed')).not.toThrow();
+  });
+
+  it('swallows a rejected send rather than leaving an unhandled rejection', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    const rejected = Promise.reject(new Error('offline'));
+    const caught = vi.spyOn(rejected, 'catch');
+    trackerLoads(vi.fn(() => rejected));
+    m.track('pricing_viewed');
+    expect(caught).toHaveBeenCalled();
+    await rejected.catch(() => {});
+  });
+
+  /* The guards hold whichever transport is behind them. */
+  it('still refuses a non-scalar or over-long property with a tracker on the page', async () => {
+    const m = await measureWith(TEST_ID);
+    m.loadTracker();
+    const send = trackerLoads();
+    // @ts-expect-error — the union forbids this at compile time; this asserts runtime too.
+    expect(() => m.track('cta_clicked', { records: ['Rivera'] })).toThrow(/scalar/i);
+    expect(() => m.track('cta_clicked', { label: 'x'.repeat(200) })).toThrow(/too long/i);
+    expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe('page entries', () => {
+  const ROOT = process.cwd();
+  const entries = (): string[] => {
+    const config = readFileSync(join(ROOT, 'vite.config.ts'), 'utf8');
+    const inputs = config.slice(config.indexOf('rollupOptions'));
+    return [...inputs.matchAll(/__dirname,\s*['"]([^'"]+\.html)['"]/g)].map((m) => m[1]);
+  };
+
+  /*
+   * The tracker is loaded by startPageAnalytics, so a page whose entry module forgets to
+   * call it is a page no visit is ever counted on — and nothing else would notice.
+   */
+  it('start analytics from every page the build ships', () => {
+    const pages = entries();
+    expect(pages.length).toBeGreaterThan(20);
+    const missing = pages.filter((page) => {
+      const html = readFileSync(join(ROOT, page), 'utf8');
+      const entry = /<script type="module" src="\/([^"]+)"/.exec(html)?.[1];
+      return !entry || !/startPageAnalytics\(/.test(readFileSync(join(ROOT, entry), 'utf8'));
+    });
+    expect(missing).toEqual([]);
+  });
+
+  /*
+   * Umami handles a click on any element carrying data-umami-event in the capture phase,
+   * and on a link it cancels the navigation to send the event first. Every event on this
+   * site goes through track() instead, so the attribute has no reason to appear.
+   */
+  it('use no data-umami-event attribute', () => {
+    const walk = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+        d.isDirectory() ? (d.name === '__tests__' ? [] : walk(join(dir, d.name))) : [join(dir, d.name)],
+      );
+    const files = [...entries().map((page) => join(ROOT, page)), ...walk(join(ROOT, 'src')), ...walk(join(ROOT, 'product')), ...walk(join(ROOT, 'blog'))];
+    const offenders = files.filter((f) => /\.(tsx?|html)$/.test(f) && readFileSync(f, 'utf8').includes('data-umami-event'));
+    expect(files.length).toBeGreaterThan(50);
+    expect(offenders).toEqual([]);
   });
 });

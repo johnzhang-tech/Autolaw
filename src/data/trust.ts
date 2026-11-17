@@ -12,6 +12,8 @@
  * ai-data-use.html, reviewed 2026-10-03. Change the evidence first, then this file.
  */
 
+import { UMAMI_WEBSITE_ID } from '../config';
+
 export const TRUST_LAST_VERIFIED = '3 October 2026';
 
 export type ClaimId = string;
@@ -127,6 +129,30 @@ export interface Subprocessor {
 
 const NOT_AI = 'Not an AI model service';
 
+/**
+ * The visit counter on this website, which is not part of the Autolaw application.
+ *
+ * Listed only on builds that set the Umami website id, the same value that loads the
+ * tracker, so the list never names a vendor that receives nothing or omits one that
+ * receives every page view. What it receives is what src/measure.ts sends plus what the
+ * tracker reads itself; wording drafted 2026-11-17 for the owner's approval.
+ *
+ * Its claim id is SP-table, as for every row, but case-app's evidence record covers the
+ * application's vendors and does not yet have a line for the website's.
+ */
+const WEBSITE_ANALYTICS: Subprocessor = {
+  vendor: 'Umami',
+  purpose: 'Counts visits to this website and which pages lead people to schedule a call',
+  receives:
+    'The page address without its query string, the referring site, browser, device, language and country (looked up from your IP address, which its analytics records do not keep), the campaign tags on the link you arrived by, and named site events such as a click on a link, with its text and address. No cookies, no names or email addresses.',
+  when: 'When you visit autolaw.ai; never in the Autolaw application',
+  region: 'Not stated by Umami; its providers are in the US and EU',
+  training: NOT_AI,
+  claims: ['SP-table'],
+};
+
+const SITE_ANALYTICS_ON = UMAMI_WEBSITE_ID !== null;
+
 export const SUBPROCESSORS: ReadonlyArray<Subprocessor> = [
   { vendor: 'Google Cloud', purpose: 'Hosts the application, file storage, database and secrets', receives: 'All firm data', when: 'Always', region: 'US', training: NOT_AI, claims: ['SP-table'] },
   { vendor: 'Google Gemini API (paid tier)', purpose: 'Extraction, transcription, search index, drafting, storyboard images', receives: 'Document text, page images, intake recordings', when: 'Always', region: 'Not region-pinned', training: 'Not used to improve Google’s products under paid terms; kept for a limited period to detect abuse', claims: ['SP-table', 'MT-2'] },
@@ -138,6 +164,7 @@ export const SUBPROCESSORS: ReadonlyArray<Subprocessor> = [
   { vendor: 'Stripe', purpose: 'Billing', receives: 'Billing identity; no case data', when: 'When your firm pays through Autolaw', region: 'US', training: NOT_AI, claims: ['SP-table'] },
   { vendor: 'Langfuse', purpose: 'AI usage metering', receives: 'Model names, token counts, cost and internal identifiers; no prompt or document text', when: 'Always', region: 'US (Oregon)', training: NOT_AI, claims: ['SP-table', 'DF-5'] },
   { vendor: 'Dropbox', purpose: 'File sync', receives: 'The folders you select', when: 'Only when your firm connects it', region: 'Your Dropbox account', training: NOT_AI, claims: ['SP-table'] },
+  ...(SITE_ANALYTICS_ON ? [WEBSITE_ANALYTICS] : []),
 ];
 
 export const SUBPROCESSOR_NOTICE: Commitment = {
@@ -147,6 +174,10 @@ export const SUBPROCESSOR_NOTICE: Commitment = {
 
 export const SUBPROCESSOR_CHANGES: ReadonlyArray<{ version: string; date: string; change: string }> = [
   { version: '1.0', date: '3 October 2026', change: 'First published list.' },
+  /* The date the tracker was added to the site; set it to the deploy date if that differs. */
+  ...(SITE_ANALYTICS_ON
+    ? [{ version: '1.1', date: '17 November 2026', change: 'Added Umami, which counts visits to this website. It receives nothing from the Autolaw application.' }]
+    : []),
 ];
 
 /** Shown under the vendor table. */
