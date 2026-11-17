@@ -135,7 +135,7 @@ const NOT_AI = 'Not an AI model service';
  * Listed only on builds that set the Umami website id, the same value that loads the
  * tracker, so the list never names a vendor that receives nothing or omits one that
  * receives every page view. What it receives is what src/measure.ts sends plus what the
- * tracker reads itself; wording drafted 2026-11-17 for the owner's approval.
+ * tracker reads itself; wording approved by the owner on 2026-11-17.
  *
  * Its claim id is SP-table, as for every row, but case-app's evidence record covers the
  * application's vendors and does not yet have a line for the website's.

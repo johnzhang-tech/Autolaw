@@ -256,8 +256,8 @@ build time:
 - **Trust Center.** The Umami row on `/security/subprocessors/`, and version 1.1 of the
   list, appear on exactly the builds that set the website id.
 
-Draft privacy-policy sentence, for `PRIVACY_TEXT` when the policy is published (wording
-pending the owner's approval):
+Privacy-policy sentence, for `PRIVACY_TEXT` when the policy is published. The owner
+approved this wording, and the subprocessor row's, on 2026-11-17:
 
 > We measure visits to autolaw.ai with Umami, a tool that sets no cookie and does not
 > identify you. It records the page you opened without its query string, the site that
