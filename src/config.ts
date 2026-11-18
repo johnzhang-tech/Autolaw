@@ -45,6 +45,15 @@ export const APP_HOST_LIVE = false;
 export const LOGIN_URL = APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_RUN_LOGIN;
 
 /**
+ * Where the schedule-a-call form posts (case-app POST /api/leads). The case-app origin, derived rather than spelled:
+ * the credibility guard permits the raw Cloud Run host only inside APPROVED_CLOUD_RUN_LOGIN, and the API follows
+ * APP_HOST_LIVE exactly as the login door does. nginx.conf's connect-src must list this origin; csp.test.ts holds
+ * them together, so flipping APP_HOST_LIVE fails the build until nginx is updated in the same change.
+ */
+export const LEADS_API_ORIGIN = APP_HOST_LIVE ? APP_ORIGIN : new URL(APPROVED_CLOUD_RUN_LOGIN).origin;
+export const LEADS_API_URL = `${LEADS_API_ORIGIN}/api/leads`;
+
+/**
  * The self-serve trial, off. Two things have to be true before this flips: app.autolaw.ai
  * must resolve, and TRIAL_SIGNUP_ENABLED=true must be set on the case-app service, or
  * /trial returns 404. While false, no trial CTA renders anywhere — the claim guard asserts
@@ -143,9 +152,12 @@ export const ASK_AL_ENABLED = true;
  * visitor believes they have made contact, stops looking for another route, and the lead
  * is lost silently — which for a firm evaluating vendors is the last impression you get.
  *
- * When a real endpoint exists, set it here. The form then POSTs to it natively
- * (method="post", no fetch), so whatever the endpoint returns is what the visitor sees —
- * which means the endpoint must respond with a confirmation page, not a bare 200.
+ * When set, the form submits its answers with `fetch` as JSON (no cookies) and shows the
+ * answer on the page. A failure of any kind — network, timeout, an error status — shows the
+ * same composed mail message instead, so a request is never lost silently.
+ *
+ * It is set to LEADS_API_URL once case-app serves POST /api/leads. Spec:
+ * case-app/docs/superpowers/specs/2026-11-18-autolaw-lead-capture-design.md.
  */
 export const CONTACT_ENDPOINT: string | null = null;
 
