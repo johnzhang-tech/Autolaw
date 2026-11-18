@@ -336,6 +336,11 @@ In rough dependency order.
    marketing site, carried into signup, so a visitor does not land in an empty app.
 6. Replace the `mailto` lead path with a real endpoint, persisting before notifying, with
    rate limiting and bot protection. Then set `CONTACT_ENDPOINT`.
+
+   Built 2026-11-18: case-app POST /api/leads persists before notifying, rate-limited,
+   honeypot; the form posts with fetch and falls back to this composer on any failure.
+   Design: case-app docs/superpowers/specs/2026-11-18-autolaw-lead-capture-design.md. Live
+   when CONTACT_ENDPOINT = LEADS_API_URL.
 7. Trial quota and entitlement display, so a firm can see what it has left.
 8. Failure handling a stranger can understand: a refused page limit, a file that will not
    parse, a generation that fails after payment.
