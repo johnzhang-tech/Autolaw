@@ -59,6 +59,44 @@ export function interestFromSearch(search: string): string | null {
 
 const VOLUMES = ['Under 50', '50–200', '200–500', 'More than 500'];
 
+/** Index-aligned with PRACTICES and VOLUMES: the API takes closed codes, never display text (case-app submitLeadSchema). */
+const PRACTICE_CODES = ['pi', 'wc', 'both'] as const;
+const VOLUME_CODES = ['under_50', '50_200', '200_500', 'over_500'] as const;
+type InterestKey = 'platform' | 'reports';
+export function interestKeyFromSearch(search: string): InterestKey | null {
+  const v = new URLSearchParams(search).get('interest');
+  return v === 'platform' || v === 'reports' ? v : null;
+}
+export const LEAD_SUBMIT_TIMEOUT_MS = 30_000;
+/** First word, letters only, as the server's confirmation email does; otherwise no name at all. */
+export function firstNameOf(name: string): string | null {
+  const word = name.trim().split(/\s+/)[0] ?? '';
+  return /^[\p{L}][\p{L}'’-]{0,29}$/u.test(word) ? word : null;
+}
+export function leadPayload(values: Record<string, string>, attribution: Attribution, interest: InterestKey | null, honeypot: string) {
+  const p = PRACTICES.indexOf(values.practice);
+  const v = VOLUMES.indexOf(values.volume);
+  if (p < 0 || v < 0) return null;
+  return {
+    practiceArea: PRACTICE_CODES[p], fullName: values.name, firm: values.firm, email: values.email, openCases: VOLUME_CODES[v],
+    ...(interest ? { interest } : {}), website: honeypot, ...(Object.keys(attribution).length ? { attribution } : {}),
+  };
+}
+/** True only for an answer the API gives when it has the request (201) or quietly refused a bot (200). */
+export async function submitLead(endpoint: string, payload: object): Promise<boolean> {
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST', mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      // Every target browser has AbortSignal.timeout; the guard keeps an older one (and any test DOM without it) submitting.
+      signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(LEAD_SUBMIT_TIMEOUT_MS) : undefined,
+    });
+    return res.status === 201 || res.status === 200;
+  } catch {
+    return false;
+  }
+}
+
 /** Ids are derived, never spelled twice — a label and its control drifting apart is silent. */
 const inputId = (name: FieldName) => `field-${name}`;
 const errorId = (name: FieldName) => `field-${name}-error`;
@@ -75,7 +113,8 @@ const anchorFor = (name: FieldName) => (name === 'practice' ? radioId(0) : input
  * How this page behaves, in priority order.
  *
  * `booking`  — BOOKING_URL is set: the Google appointment schedule is the whole funnel.
- * `endpoint` — CONTACT_ENDPOINT is set and BOOKING_URL is not: the form POSTs natively.
+ * `endpoint` — CONTACT_ENDPOINT is set and BOOKING_URL is not: the form submits with fetch,
+ *              and composes the message instead if that fails.
  * `compose`  — neither: the form composes a message the visitor sends themselves.
  *
  * Booking wins over endpoint deliberately. Google's booking form already collects the
@@ -198,7 +237,7 @@ const ASIDE_HEADING_ID = 'security-review-aside-heading';
  * The same aside in every mode. A firm that runs a security review before a first call is
  * doing it whether the call is booked in a calendar or requested by email.
  */
-function SecurityReviewAside() {
+function SecurityReviewAside({ mode }: { mode: ScheduleMode }) {
   return (
     /* al-on-navy flips the inherited --al-ring: the default teal-on-canvas ring is
        2.68:1 against this panel and effectively invisible.
@@ -217,7 +256,8 @@ function SecurityReviewAside() {
       </Button>
       <p className="al-sched__aside-note">
         The full Trust Pack, with the evidence behind each control, is sent under a
-        confidentiality agreement &mdash; ask in the message and we will start one.
+        confidentiality agreement &mdash; ask{' '}
+        {mode === 'endpoint' ? 'when you reply to our email' : 'in the message'} and we will start one.
       </p>
     </aside>
   );
@@ -293,7 +333,11 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
    */
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [composed, setComposed] = useState<{ href: string; preview: string } | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<{ first: string | null; email: string } | null>(null);
+  const [fellBack, setFellBack] = useState(false);
   const readyRef = useRef<HTMLDivElement>(null);
+  const sentRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
 
   /*
@@ -314,6 +358,10 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
   useEffect(() => {
     if (composed) readyRef.current?.focus();
   }, [composed]);
+
+  useEffect(() => {
+    if (sent) sentRef.current?.focus();
+  }, [sent]);
 
   /*
    * And focus moves to the error summary when a submission is rejected, because nothing
@@ -355,17 +403,36 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
     }
     // Any edit invalidates a message composed from the answers as they were.
     setComposed(null);
+    setFellBack(false);
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     // Reached only once every constraint is satisfied; the browser blocks it otherwise.
-    if (endpoint) return; // A real endpoint exists: let the browser POST to it.
-
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const values = Object.fromEntries(FIELDS.map((f) => [f.name, String(data.get(f.name) ?? '')]));
     setErrors({});
-    setComposed({ href: composeMailto(values, storedAttribution(), interest), preview: composePreview(values) });
+    if (!endpoint) {
+      setComposed({ href: composeMailto(values, storedAttribution(), interest), preview: composePreview(values) });
+      return;
+    }
+
+    if (sending) return;
+    setSending(true);
+    const payload = leadPayload(
+      values,
+      storedAttribution(),
+      interestKeyFromSearch(window.location.search),
+      String(data.get('website') ?? ''),
+    );
+    const ok = payload ? await submitLead(endpoint, payload) : false;
+    setSending(false);
+    if (ok) {
+      setSent({ first: firstNameOf(values.name), email: values.email });
+    } else {
+      setFellBack(true);
+      setComposed({ href: composeMailto(values, storedAttribution(), interest), preview: composePreview(values) });
+    }
   }
 
   /** Only ids that actually render — a dangling aria-describedby is silent and destructive. */
@@ -374,13 +441,17 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
       .filter(Boolean)
       .join(' ') || undefined;
 
+  if (sent) {
+    return (
+      <div className="al-sched__ready" role="status" ref={sentRef} tabIndex={-1} data-testid="sent">
+        <h3>{sent.first ? `Thanks, ${sent.first} — your request reached us` : 'Thanks — your request reached us'}</h3>
+        <p>We&rsquo;ll reply to {sent.email}, usually the next business day, with times that fit your week.</p>
+      </div>
+    );
+  }
+
   return (
-    <form
-      className="al-sched__form"
-      onSubmit={onSubmit}
-      action={endpoint ?? undefined}
-      method={endpoint ? 'post' : undefined}
-    >
+    <form className="al-sched__form" onSubmit={onSubmit}>
       {/* The same attribution the mail body carries, for whatever CONTACT_ENDPOINT
           eventually receives. Rendered only when there is some: an empty hidden
           field is a field the endpoint has to learn to ignore. */}
@@ -390,6 +461,12 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
       {/* Which half of the business, from ?interest=. Same reasoning as the attribution
           above: rendered only when the link carried one. */}
       {interest && <input type="hidden" name="interest" value={interest} />}
+      {endpoint && (
+        <div className="al-sched__hp" aria-hidden="true">
+          <label htmlFor="field-website">Leave this empty</label>
+          <input id="field-website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </div>
+      )}
       {hasErrors && (
         /*
          * role="alert" so the summary is announced when it appears rather than only
@@ -537,8 +614,8 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
             until you press send there.
           </p>
         )}
-        <Button type="submit" variant="primary" size="lg">
-          {endpoint ? 'Request a call' : 'Compose this as an email'}
+        <Button type="submit" variant="primary" size="lg" disabled={sending}>
+          {sending ? 'Sending…' : endpoint ? 'Request a call' : 'Compose this as an email'}
         </Button>
       </div>
 
@@ -555,11 +632,23 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
           tabIndex={-1}
           data-testid="composed"
         >
-          <h3>Your message is ready &mdash; nothing has been sent yet</h3>
-          <p>
-            Open it in your mail app, check it reads the way you want, and send it from your
-            own address so our reply lands in the right thread.
-          </p>
+          {fellBack ? (
+            <>
+              <h3>We couldn&rsquo;t confirm your request reached us</h3>
+              <p>
+                Send it from your own mail app instead, so it certainly does. Check it reads the
+                way you want first.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3>Your message is ready &mdash; nothing has been sent yet</h3>
+              <p>
+                Open it in your mail app, check it reads the way you want, and send it from your
+                own address so our reply lands in the right thread.
+              </p>
+            </>
+          )}
           <pre className="al-sched__preview">{composed.preview}</pre>
           <div className="al-sched__ready-ctas">
             <Button href={composed.href} variant="primary" size="lg">
@@ -634,7 +723,7 @@ export function ScheduleCallPage() {
           ) : (
             <QualifyingForm endpoint={mode === 'endpoint' ? endpoint : null} />
           )}
-          <SecurityReviewAside />
+          <SecurityReviewAside mode={mode} />
         </div>
       </Section>
     </PageShell>

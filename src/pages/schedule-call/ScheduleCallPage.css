@@ -205,6 +205,9 @@
 }
 .al-sched__ready-ctas { display: grid; gap: var(--al-space-3); justify-items: start; }
 
+/* The honeypot, in endpoint mode only: off-screen, so a person never fills it in. */
+.al-sched__hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
 /*
  * The booking embed. max-width matches the form's measure so the two states of this page
  * occupy the same column and the layout does not shift when BOOKING_URL is set.

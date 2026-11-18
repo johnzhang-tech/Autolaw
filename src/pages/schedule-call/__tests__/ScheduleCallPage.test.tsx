@@ -58,7 +58,8 @@ const form = () => screen.getByRole('main').querySelector('form')!;
 
 /** Every control the browser will validate and submit, in document order. */
 const controls = () =>
-  [...form().querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select, textarea')];
+  // The honeypot is not a control the visitor validates or sees.
+  [...form().querySelectorAll<HTMLInputElement | HTMLSelectElement>('input:not([name="website"]), select, textarea')];
 
 async function fillValidly(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('radio', { name: 'Personal injury' }));
@@ -384,24 +385,107 @@ describe('ScheduleCallPage — with a form endpoint configured', () => {
     config.contactEndpoint = ENDPOINT;
   });
 
-  it('posts natively to the endpoint rather than through a script', () => {
-    render(<ScheduleCallPage />);
-    expect(form()).toHaveAttribute('action', ENDPOINT);
-    expect(form()).toHaveAttribute('method', 'post');
-    expect(screen.getByRole('button', { name: /request a call/i })).toHaveAttribute('type', 'submit');
-  });
+  const fetchMock = vi.fn();
+  /** submitLead reads only `.status`, so a plain object stands in for a Response in jsdom. */
+  const answer = (status: number) => ({ status }) as Response;
+  beforeEach(() => { fetchMock.mockReset(); vi.stubGlobal('fetch', fetchMock); sessionStorage.clear(); });
+  afterEach(() => { vi.unstubAllGlobals(); });
 
-  it('lets the submission through instead of composing a message', async () => {
+  it('posts the answers as JSON, without cookies, and never navigates', async () => {
+    fetchMock.mockResolvedValue(answer(201));
     const user = userEvent.setup();
     const watcher = watchSubmit();
     render(<ScheduleCallPage />);
+    // Checked before submitting: a 201 replaces the form with the confirmation.
+    expect(form()).not.toHaveAttribute('action');
     await fillValidly(user);
     await user.click(screen.getByRole('button', { name: /request a call/i }));
     watcher.stop();
+    expect(watcher.cancelledByPage).toEqual([true]);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(ENDPOINT);
+    expect(init).toMatchObject({ method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' } });
+    expect(JSON.parse(init.body)).toEqual({
+      practiceArea: 'pi', fullName: 'Jane Roe', firm: 'Roe & Partners', email: 'jane@roe.example', openCases: '50_200', website: '',
+    });
+  });
 
-    // Not cancelled by the page: the browser would have performed the POST.
-    expect(watcher.cancelledByPage).toEqual([false]);
-    expect(screen.queryByTestId('composed')).not.toBeInTheDocument();
+  it('confirms on the page and moves focus there', async () => {
+    fetchMock.mockResolvedValue(answer(201));
+    const user = userEvent.setup();
+    render(<ScheduleCallPage />);
+    await fillValidly(user);
+    await user.click(screen.getByRole('button', { name: /request a call/i }));
+    const done = await screen.findByTestId('sent');
+    expect(done).toHaveTextContent(/thanks, jane/i);
+    expect(done).toHaveTextContent('jane@roe.example');
+    expect(done).toHaveFocus();
+    expect(screen.queryByRole('button', { name: /request a call/i })).not.toBeInTheDocument();
+  });
+
+  it('treats the honeypot answer (200) as success too', async () => {
+    fetchMock.mockResolvedValue(answer(200));
+    const user = userEvent.setup();
+    render(<ScheduleCallPage />);
+    await fillValidly(user);
+    await user.click(screen.getByRole('button', { name: /request a call/i }));
+    expect(await screen.findByTestId('sent')).toBeInTheDocument();
+  });
+
+  for (const [why, outcome] of [
+    ['a server error', () => Promise.resolve(answer(500))],
+    ['a rate limit', () => Promise.resolve(answer(429))],
+    ['a rejected payload', () => Promise.resolve(answer(400))],
+    ['no network', () => Promise.reject(new TypeError('Failed to fetch'))],
+  ] as const) {
+    it(`falls back to the composed email on ${why}, so the request is not lost`, async () => {
+      fetchMock.mockImplementation(outcome);
+      const user = userEvent.setup();
+      render(<ScheduleCallPage />);
+      await fillValidly(user);
+      await user.click(screen.getByRole('button', { name: /request a call/i }));
+      const panel = await screen.findByTestId('composed');
+      expect(panel).toHaveTextContent(/couldn.t confirm your request reached us/i);
+      expect(within(panel).getByRole('link', { name: /open this in your email app/i }).getAttribute('href')).toMatch(/^mailto:/);
+      expect(screen.queryByTestId('sent')).not.toBeInTheDocument();
+    });
+  }
+
+  it('sends once however often the button is pressed', async () => {
+    let resolve!: (r: Response) => void;
+    fetchMock.mockReturnValue(new Promise<Response>((r) => { resolve = r; }));
+    const user = userEvent.setup();
+    render(<ScheduleCallPage />);
+    await fillValidly(user);
+    const button = screen.getByRole('button', { name: /request a call/i });
+    await user.click(button);
+    expect(screen.getByRole('button', { name: /sending/i })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /sending/i }));
+    resolve(answer(201));
+    await screen.findByTestId('sent');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('carries the interest and the stored attribution', async () => {
+    fetchMock.mockResolvedValue(answer(201));
+    window.history.replaceState({}, '', '/schedule-call/?interest=platform');
+    captureAttribution('?utm_source=newsletter');
+    const user = userEvent.setup();
+    render(<ScheduleCallPage />);
+    await fillValidly(user);
+    await user.click(screen.getByRole('button', { name: /request a call/i }));
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.interest).toBe('platform');
+    expect(body.attribution).toEqual({ utm_source: 'newsletter' });
+    window.history.replaceState({}, '', '/');
+    sessionStorage.clear();
+  });
+
+  it('hides the honeypot from people and assistive tech', () => {
+    render(<ScheduleCallPage />);
+    const hp = form().querySelector<HTMLInputElement>('input[name="website"]')!;
+    expect(hp).toHaveAttribute('tabindex', '-1');
+    expect(hp.closest('[aria-hidden="true"]')).not.toBeNull();
   });
 
   it('drops the "does not submit anywhere" notice, which is no longer true', () => {

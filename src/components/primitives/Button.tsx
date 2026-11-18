@@ -18,11 +18,13 @@ interface Props {
    * mostly for navigation. A form's own submit control passes type="submit" explicitly.
    */
   type?: 'button' | 'submit';
+  /** Buttons only; a link has no disabled state. */
+  disabled?: boolean;
 }
 
 export function Button({
   children, href, onClick, variant = 'primary', size = 'md', withCaret = false, className = '',
-  type = 'button',
+  type = 'button', disabled,
 }: Props) {
   const cls = `al-btn al-btn--${variant} al-btn--${size} ${className}`.trim();
   const inner = (
@@ -35,5 +37,5 @@ export function Button({
   if (href) {
     return <a className={cls} href={href}>{inner}</a>;
   }
-  return <button type={type} className={cls} onClick={onClick}>{inner}</button>;
+  return <button type={type} className={cls} onClick={onClick} disabled={disabled}>{inner}</button>;
 }
