@@ -48,7 +48,7 @@ export const LOGIN_URL = APP_HOST_LIVE ? `${APP_ORIGIN}/login` : APPROVED_CLOUD_
  * Where the schedule-a-call form posts (case-app POST /api/leads). The case-app origin, derived rather than spelled:
  * the credibility guard permits the raw Cloud Run host only inside APPROVED_CLOUD_RUN_LOGIN, and the API follows
  * APP_HOST_LIVE exactly as the login door does. nginx.conf's connect-src must list this origin; csp.test.ts holds
- * them together, so flipping APP_HOST_LIVE fails the build until nginx is updated in the same change.
+ * them together, so flipping APP_HOST_LIVE fails `npm test` until nginx is updated in the same change.
  */
 export const LEADS_API_ORIGIN = APP_HOST_LIVE ? APP_ORIGIN : new URL(APPROVED_CLOUD_RUN_LOGIN).origin;
 export const LEADS_API_URL = `${LEADS_API_ORIGIN}/api/leads`;

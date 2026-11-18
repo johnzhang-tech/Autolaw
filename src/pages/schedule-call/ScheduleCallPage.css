@@ -183,6 +183,8 @@
   border-radius: var(--al-radius-card);
   background: var(--al-teal-wash);
   padding: var(--al-space-4);
+  /* A long work address in the confirmation must wrap, not push the page sideways. */
+  overflow-wrap: anywhere;
   --al-ring: 0 0 0 2px var(--al-teal-wash), 0 0 0 4px var(--al-teal-text);
 }
 .al-sched__ready h3 { margin: 0 0 var(--al-space-2); font-size: var(--al-text-h3); line-height: var(--al-leading-snug); }

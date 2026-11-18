@@ -452,9 +452,9 @@ function QualifyingForm({ endpoint }: { endpoint: string | null }) {
 
   return (
     <form className="al-sched__form" onSubmit={onSubmit}>
-      {/* The same attribution the mail body carries, for whatever CONTACT_ENDPOINT
-          eventually receives. Rendered only when there is some: an empty hidden
-          field is a field the endpoint has to learn to ignore. */}
+      {/* The same attribution the mail body carries, as hidden fields. Neither mode
+          submits them: the composed message and endpoint mode's JSON (leadPayload)
+          each read storedAttribution() directly. Rendered only when there is some. */}
       {Object.entries(attribution).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}

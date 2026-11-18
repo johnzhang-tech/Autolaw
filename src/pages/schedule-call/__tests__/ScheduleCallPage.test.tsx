@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import {
   ScheduleCallPage,
+  LEAD_SUBMIT_TIMEOUT_MS,
   bookingEmbedSrc,
   composeMailto,
   interestFromSearch,
@@ -437,6 +438,7 @@ describe('ScheduleCallPage — with a form endpoint configured', () => {
     ['a rate limit', () => Promise.resolve(answer(429))],
     ['a rejected payload', () => Promise.resolve(answer(400))],
     ['no network', () => Promise.reject(new TypeError('Failed to fetch'))],
+    ['a timeout', () => Promise.reject(new DOMException('The operation timed out.', 'TimeoutError'))],
   ] as const) {
     it(`falls back to the composed email on ${why}, so the request is not lost`, async () => {
       fetchMock.mockImplementation(outcome);
@@ -450,6 +452,28 @@ describe('ScheduleCallPage — with a form endpoint configured', () => {
       expect(screen.queryByTestId('sent')).not.toBeInTheDocument();
     });
   }
+
+  /*
+   * The timeout is what turns a hung server into the fallback panel. Without the signal,
+   * fetch waits as long as the browser does and the button reads "Sending…" until then.
+   */
+  it(`gives up after ${LEAD_SUBMIT_TIMEOUT_MS} ms, so a hung server cannot hold the request`, async () => {
+    fetchMock.mockResolvedValue(answer(201));
+    const signal = new AbortController().signal;
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
+    try {
+      const user = userEvent.setup();
+      render(<ScheduleCallPage />);
+      await fillValidly(user);
+      await user.click(screen.getByRole('button', { name: /request a call/i }));
+      await screen.findByTestId('sent');
+      expect(LEAD_SUBMIT_TIMEOUT_MS).toBe(30_000);
+      expect(timeout).toHaveBeenCalledWith(LEAD_SUBMIT_TIMEOUT_MS);
+      expect(fetchMock.mock.calls[0][1].signal).toBe(signal);
+    } finally {
+      timeout.mockRestore();
+    }
+  });
 
   it('sends once however often the button is pressed', async () => {
     let resolve!: (r: Response) => void;
@@ -486,6 +510,23 @@ describe('ScheduleCallPage — with a form endpoint configured', () => {
     const hp = form().querySelector<HTMLInputElement>('input[name="website"]')!;
     expect(hp).toHaveAttribute('tabindex', '-1');
     expect(hp.closest('[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  /*
+   * The honeypot is the one input here that is neither labelled for a person nor required,
+   * so controls() leaves it out. This is the mode where it renders, so this is where that
+   * exclusion is exercised: every other control is still labelled and still required.
+   */
+  it('keeps every control the visitor sees labelled and required', () => {
+    render(<ScheduleCallPage />);
+    expect(form().querySelector('input[name="website"]')).not.toBeNull();
+    expect(controls().length).toBeGreaterThan(0);
+    const unlabelled = controls().filter((el) => !el.labels?.length);
+    expect(unlabelled.map((el) => el.outerHTML.slice(0, 80))).toEqual([]);
+    controls().forEach((el) => {
+      expect(el).toHaveAccessibleName();
+      expect(el).toBeRequired();
+    });
   });
 
   it('drops the "does not submit anywhere" notice, which is no longer true', () => {
@@ -712,6 +753,28 @@ describe('ScheduleCallPage — the security-review aside', () => {
     expect(aside).not.toHaveAttribute('aria-label');
     expect(aside).toHaveAccessibleName(heading.textContent!);
     expect(heading).toHaveTextContent('If your security review comes first');
+  });
+
+  /*
+   * Where to ask for the Trust Pack depends on what the visitor sends. A composed message
+   * is something they write, so they ask in it; a request the form submits for them has
+   * no message to ask in, and the next thing they write is the reply to ours.
+   */
+  it('asks for the Trust Pack in the message while the form composes one', () => {
+    render(<ScheduleCallPage />);
+    expect(screen.getByRole('complementary')).toHaveTextContent(
+      'confidentiality agreement — ask in the message and we will start one.'
+    );
+  });
+
+  it('asks for it in the reply once the form submits the request itself', () => {
+    config.contactEndpoint = 'https://forms.example.test/autolaw-call';
+    render(<ScheduleCallPage />);
+    const aside = screen.getByRole('complementary');
+    expect(aside).toHaveTextContent(
+      'confidentiality agreement — ask when you reply to our email and we will start one.'
+    );
+    expect(aside).not.toHaveTextContent(/ask in the message/);
   });
 });
 
