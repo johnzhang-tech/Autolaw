@@ -142,9 +142,9 @@ export const WALKTHROUGH_URL: string | null = null;
 export const ASK_AL_ENABLED = true;
 
 /**
- * Where the schedule-a-call form submits. There is no form backend yet, so this is null,
- * and null is not a placeholder to be filled in with a guess — it is the switch that
- * decides how the form behaves.
+ * Where the schedule-a-call form submits: case-app's POST /api/leads (LEADS_API_URL),
+ * live since 2026-11-19. Null is not a placeholder to be filled in with a guess — it is
+ * the switch that decides how the form behaves.
  *
  * While null, /schedule-call/ validates natively and then composes the answers into a
  * mail message the visitor sends themselves, from their own address. It never appears to
@@ -156,10 +156,10 @@ export const ASK_AL_ENABLED = true;
  * answer on the page. A failure of any kind — network, timeout, an error status — shows the
  * same composed mail message instead, so a request is never lost silently.
  *
- * It is set to LEADS_API_URL once case-app serves POST /api/leads. Spec:
+ * Reverting the commit that set it restores the composed mail message alone. Spec:
  * case-app/docs/superpowers/specs/2026-11-18-autolaw-lead-capture-design.md.
  */
-export const CONTACT_ENDPOINT: string | null = null;
+export const CONTACT_ENDPOINT: string | null = LEADS_API_URL;
 
 /**
  * Google Calendar appointment schedule booking page.
