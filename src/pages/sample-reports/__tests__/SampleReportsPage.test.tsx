@@ -1,127 +1,95 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen, within } from '@testing-library/react';
 import { SampleReportsPage } from '../SampleReportsPage';
 import {
-  CHRONOLOGY_SAMPLE,
-  HOWELL_SAMPLE,
-  QME_SAMPLE,
-  SAMPLE_CARDS,
-  howellTotals,
+  FICTIONAL_NOTICE,
+  REPORT_SAMPLES,
+  SAMPLE_FILES,
+  sampleHref,
+  samplePriceLine,
 } from '../../../data/sampleReports';
-import { FEATURE_BY_ID } from '../../../data/product';
+import { REPORT_PRICES_USD, SAMPLE_REPORTS_URL } from '../../../config';
+import { FEATURE_BY_ID, ORDERABLE_REPORTS } from '../../../data/product';
 import { renderedText } from '../../__tests__/renderedText';
+import { track } from '../../../measure';
 
-/*
- * The sample page is the only place on the site that shows output rather than describing
- * it, which makes it the most persuasive page and the most dangerous one.
- *
- * Two failures would be unrecoverable. The first is a visitor mistaking invented material
- * for a real client's file, so the fictional notice is asserted here rather than trusted
- * to survive a copy edit. The second is arithmetic: an attorney reads a reconciliation
- * table by adding the column up, and a total that disagrees with its own rows ends the
- * evaluation on the spot. Totals are therefore derived from the rows and never stored,
- * and this file checks the derivation rather than the printed figure.
- */
+vi.mock('../../../measure', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../measure')>();
+  return { ...actual, track: vi.fn() };
+});
+
+/* jsdom logs a "Not implemented: navigation" error when an anchor's default action
+   runs. Cancelling it changes nothing about the handlers under test. */
+const swallowNavigation = (event: Event) => event.preventDefault();
+
+beforeEach(() => {
+  vi.mocked(track).mockClear();
+  document.addEventListener('click', swallowNavigation);
+});
+
+afterEach(() => {
+  document.removeEventListener('click', swallowNavigation);
+});
+
+const PUBLIC = join(process.cwd(), 'public');
+const publicFile = (href: string) => join(PUBLIC, href.replace(/^\//, ''));
+const pdfPageCount = (href: string) =>
+  (readFileSync(publicFile(href)).toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+/* A PNG's IHDR chunk carries its width and height, big-endian, at bytes 16-23. */
+const pngSize = (src: string) => {
+  const bytes = readFileSync(publicFile(src));
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+};
 
 describe('sample report data', () => {
-  it('names a live, orderable report for every sample', () => {
-    expect(SAMPLE_CARDS.length).toBeGreaterThan(0);
-    SAMPLE_CARDS.forEach((card) => {
-      const feature = FEATURE_BY_ID.get(card.featureId);
-      expect(feature, `${card.featureId} is not a feature`).toBeDefined();
-      expect(feature?.availability).toBe('live');
-    });
+  it('names a live product page for every report sample', () => {
+    REPORT_SAMPLES.forEach((report) => expect(FEATURE_BY_ID.get(report.featureId)).toBeDefined());
   });
 
-  it('cites a document and a page on every chronology entry', () => {
-    expect(CHRONOLOGY_SAMPLE.entries.length).toBeGreaterThanOrEqual(2);
-    CHRONOLOGY_SAMPLE.entries.forEach((entry) => {
-      expect(entry.cite.document.length).toBeGreaterThan(0);
-      expect(entry.cite.page).toBeGreaterThan(0);
+  it('describes every PDF by its real page count', () => {
+    Object.values(SAMPLE_FILES).forEach((file) => {
+      expect(existsSync(publicFile(file.href))).toBe(true);
+      expect(pdfPageCount(file.href)).toBe(file.pages);
     });
   });
 
   /*
-   * A conflict with one side quoted is not a conflict, it is a finding. Both statements
-   * carry their own citation because the whole claim being demonstrated is that Autolaw
-   * reproduces the disagreement instead of silently resolving it.
+   * The page reserves each image's box from the width and height it declares, so a
+   * re-export at another size would distort every preview until someone noticed.
    */
-  it('quotes both sides of every conflict, each with its own citation', () => {
-    expect(CHRONOLOGY_SAMPLE.conflicts.length).toBeGreaterThanOrEqual(1);
-    CHRONOLOGY_SAMPLE.conflicts.forEach((conflict) => {
-      expect(conflict.statements.length).toBeGreaterThanOrEqual(2);
-      conflict.statements.forEach((statement) => {
-        expect(statement.quote.length).toBeGreaterThan(10);
-        expect(statement.cite.page).toBeGreaterThan(0);
-      });
+  it('ships every preview image it names, at the size it declares', () => {
+    REPORT_SAMPLES.flatMap((report) => report.previews).forEach((preview) => {
+      expect(existsSync(publicFile(preview.src))).toBe(true);
+      expect(preview.alt.length).toBeGreaterThan(40);
+      expect(pngSize(preview.src), preview.src).toEqual({ width: preview.width, height: preview.height });
     });
   });
 
-  it('names the document each gap needs rather than describing it vaguely', () => {
-    expect(CHRONOLOGY_SAMPLE.gaps.length).toBeGreaterThanOrEqual(1);
-    CHRONOLOGY_SAMPLE.gaps.forEach((gap) => {
-      expect(gap.needed.length).toBeGreaterThan(10);
-    });
+  it('says every second report is ordered with a chronology', () => {
+    REPORT_SAMPLES.filter((report) => report.id !== 'chronology').forEach((report) =>
+      expect(report.howBought).toMatch(/with a medical chronology/i),
+    );
   });
 
-  /*
-   * The citation a reader checks first is the one with a surprising page number, and an
-   * invented file cannot survive that check by accident: an earlier draft cited
-   * Northside Orthopedics at p. 412 while printing, four inches to the left, that
-   * Northside is 168 pages. On the one page whose entire pitch is "follow a citation",
-   * read by the one profession that adds columns up for a living.
-   */
-  it('cites no page beyond the length of the document it names', () => {
-    const lengths = new Map(CHRONOLOGY_SAMPLE.inputs.map((input) => [input.cites, input.pages]));
-    const cites = [
-      ...CHRONOLOGY_SAMPLE.entries.map((entry) => entry.cite),
-      ...CHRONOLOGY_SAMPLE.conflicts.flatMap((conflict) => conflict.statements.map((s) => s.cite)),
-    ];
-    expect(cites.length).toBeGreaterThan(2);
-    cites.forEach((cite) => {
-      const pages = lengths.get(cite.document);
-      expect(pages, `${cite.document} is cited but is not in the input list`).toBeDefined();
-      expect(cite.page, `${cite.document} p. ${cite.page} exceeds its ${pages} pages`).toBeLessThanOrEqual(pages!);
-    });
+  it('prices a second report as the order total once prices exist', () => {
+    const prices = { chronology: 30, howell: 30, qme_ame_memo: 30 };
+    expect(samplePriceLine('chronology', prices)).toBe('$30 per report');
+    expect(samplePriceLine('howell', prices)).toBe('+$30 with a chronology · $60 per order');
+    expect(samplePriceLine('qme_ame_memo', { ...prices, chronology: null })).toBe('Priced on a call');
   });
 
-  it('cites no page beyond the length of the QME it names', () => {
-    QME_SAMPLE.findings.forEach((finding) => {
-      expect(finding.cite.document).toBe(QME_SAMPLE.document.cites);
-      expect(finding.cite.page).toBeLessThanOrEqual(QME_SAMPLE.document.pages);
-    });
+  /* "$29.5" is a malformed price; the pricing page's packPriceLabel follows the same rule. */
+  it('shows cents only when a figure has them, and then both digits', () => {
+    const prices = { chronology: 30, howell: 29.5, qme_ame_memo: null };
+    expect(samplePriceLine('howell', prices)).toBe('+$29.50 with a chronology · $59.50 per order');
+    expect(samplePriceLine('chronology', prices)).toBe('$30 per report');
   });
 
-  it('cites each page once, so no source reads as two', () => {
-    const pages = [
-      ...CHRONOLOGY_SAMPLE.entries.map((entry) => entry.cite.page),
-      ...CHRONOLOGY_SAMPLE.conflicts.flatMap((c) => c.statements.map((s) => s.cite.page)),
-    ];
-    expect(new Set(pages).size).toBe(pages.length);
-  });
-
-  it('derives every Howell total from its rows', () => {
-    const totals = howellTotals(HOWELL_SAMPLE.rows);
-    const sum = (key: 'billedCents' | 'paidCents' | 'adjustedCents' | 'outstandingCents') =>
-      HOWELL_SAMPLE.rows.reduce((run, row) => run + row[key], 0);
-    expect(totals.billedCents).toBe(sum('billedCents'));
-    expect(totals.paidCents).toBe(sum('paidCents'));
-    expect(totals.adjustedCents).toBe(sum('adjustedCents'));
-    expect(totals.outstandingCents).toBe(sum('outstandingCents'));
-  });
-
-  /*
-   * Per provider, billed is what was charged and paid + adjusted + outstanding is what
-   * became of it. A row where those disagree is not a reconciliation, and a reader
-   * checking one row by hand is exactly who this page is for.
-   */
-  it('reconciles every Howell row against what it says was billed', () => {
-    HOWELL_SAMPLE.rows.forEach((row) => {
-      expect(
-        row.paidCents + row.adjustedCents + row.outstandingCents,
-        `${row.provider} does not reconcile`,
-      ).toBe(row.billedCents);
-    });
+  it('deep-links each report to its own section', () => {
+    expect(sampleHref('qme-ame')).toBe(`${SAMPLE_REPORTS_URL}#qme`);
+    expect(sampleHref('no-such-report')).toBe(SAMPLE_REPORTS_URL);
   });
 });
 
@@ -130,66 +98,145 @@ describe('SampleReportsPage', () => {
     const { container } = render(<SampleReportsPage />);
     const main = screen.getByRole('main');
     const notice = within(main).getByTestId('fictional-notice');
-    expect(notice).toHaveTextContent(/fictional/i);
-
-    /* Before, not merely present: a disclaimer under the sample is a disclaimer the
-       reader meets after they have already believed it. */
-    const firstSample = within(main).getAllByRole('article')[0];
-    expect(notice.compareDocumentPosition(firstSample) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(notice).toHaveTextContent(FICTIONAL_NOTICE.heading);
+    const firstCard = within(main).getAllByRole('article')[0];
+    expect(notice.compareDocumentPosition(firstCard) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(renderedText(container)).toMatch(/no client file|no real (medical )?record/i);
   });
 
-  it('renders every sample as its own article', () => {
+  it('shows one card per report, each linking its own section', () => {
     render(<SampleReportsPage />);
-    expect(within(screen.getByRole('main')).getAllByRole('article')).toHaveLength(
-      SAMPLE_CARDS.length,
-    );
-  });
-
-  it('prints a page citation beside every quoted chronology entry', () => {
-    render(<SampleReportsPage />);
-    const preview = screen.getByRole('region', { name: /inside the chronology/i });
-    CHRONOLOGY_SAMPLE.entries.forEach((entry) => {
-      expect(within(preview).getByText(new RegExp(`p\\.\\s*${entry.cite.page}\\b`))).toBeInTheDocument();
+    const cards = within(screen.getByRole('main')).getAllByRole('article');
+    expect(cards).toHaveLength(REPORT_SAMPLES.length);
+    REPORT_SAMPLES.forEach((report, i) => {
+      expect(within(cards[i]).getByRole('heading', { name: report.title })).toBeInTheDocument();
+      expect(within(cards[i]).getByRole('link', { name: /see the sample/i })).toHaveAttribute('href', `#${report.anchor}`);
+      expect(document.getElementById(report.anchor)).not.toBeNull();
     });
   });
 
-  it('prints the derived Howell totals, not a stored figure', () => {
+  it('offers every sample PDF for download from each report that uses it', () => {
     render(<SampleReportsPage />);
-    const table = screen.getByRole('table', { name: /medical specials/i });
-    const totals = howellTotals(HOWELL_SAMPLE.rows);
-    const row = within(table).getByRole('row', { name: /total/i });
-    /* All four columns: asserting only `billed` would pass if the cells were reordered. */
-    (['billedCents', 'paidCents', 'adjustedCents', 'outstandingCents'] as const).forEach((key) => {
-      expect(row).toHaveTextContent(
-        `$${(totals[key] / 100).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      );
+    REPORT_SAMPLES.forEach((report) => {
+      const section = document.getElementById(report.anchor)!;
+      report.samples.forEach((file) => {
+        const link = within(section).getByRole('link', { name: new RegExp(`PDF, ${file.pages} pages`) });
+        expect(link).toHaveAttribute('href', file.href);
+      });
     });
-  });
-
-  it('offers a call as the next step, and claims no real customer', () => {
-    const { container } = render(<SampleReportsPage />);
-    const main = screen.getByRole('main');
-    expect(
-      within(main)
-        .getAllByRole('link')
-        .some((link) => /schedule a call/i.test(link.textContent ?? '')),
-    ).toBe(true);
-    expect(renderedText(container)).not.toMatch(/case study|our client|testimonial/i);
   });
 
   /*
-   * The table is the one block that cannot stack, so it scrolls inside its own box — and
-   * a box that scrolls only with a mouse hides its right-hand columns from a keyboard
-   * user completely. Measured at 375px the content runs several hundred pixels past the
-   * viewport, so this is real content, not an edge case. Same WCAG 2.1.1 pattern as the
-   * comparison scroller in src/sections/Trust.tsx.
+   * An implication, not a precondition, as in PricingPage.test.tsx: asserting "every price
+   * is null" first would turn this red the day a live price is entered, which is the
+   * transition it exists to protect. The priced state is asserted at the end of this file.
    */
-  it('lets a keyboard user scroll the table', () => {
+  it('prints no dollar figure while every price is unset', () => {
+    const { container } = render(<SampleReportsPage />);
+    const text = renderedText(container);
+    if (Object.values(REPORT_PRICES_USD).every((price) => price === null)) {
+      expect(text).not.toMatch(/\$\s?\d/);
+      expect(text).toMatch(/Priced on a call/);
+    } else {
+      REPORT_SAMPLES.forEach((report) => expect(text).toContain(samplePriceLine(report.id)));
+    }
+  });
+
+  /*
+   * Keyed by the FEATURES id, as report_card_selected is, so a download can be joined to
+   * the card a visitor chose on the home page. The price id ('qme_ame_memo') joins nothing.
+   */
+  it('records which report and practice each sample download came from', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
     render(<SampleReportsPage />);
-    const scroller = screen.getByTestId('howell-table-scroller');
-    expect(scroller).toHaveAttribute('tabindex', '0');
-    expect(scroller).toHaveAttribute('role', 'region');
-    expect(scroller).toHaveAccessibleName(/specials/i);
+    const orderable = ORDERABLE_REPORTS.map((report) => report.featureId);
+
+    for (const report of REPORT_SAMPLES) {
+      const section = document.getElementById(report.anchor)!;
+      for (const file of report.samples) {
+        vi.mocked(track).mockClear();
+        await user.click(within(section).getByRole('link', { name: new RegExp(`PDF, ${file.pages} pages`) }));
+        expect(track).toHaveBeenCalledWith('sample_downloaded', { report: report.featureId, practice: file.practice });
+        expect(orderable).toContain(report.featureId);
+      }
+    }
+    expect(REPORT_SAMPLES.find((report) => report.anchor === 'qme')?.featureId).toBe('qme-ame');
+  });
+
+  it('says how the samples were made, and claims no real customer', () => {
+    const { container } = render(<SampleReportsPage />);
+    expect(renderedText(container)).toMatch(/extraction was not run/i);
+    expect(renderedText(container)).not.toMatch(/case study|our client|testimonial/i);
+  });
+
+  it('offers a call as the next step', () => {
+    render(<SampleReportsPage />);
+    expect(
+      within(screen.getByRole('main'))
+        .getAllByRole('link')
+        .some((link) => /schedule a call/i.test(link.textContent ?? '')),
+    ).toBe(true);
+  });
+});
+
+/*
+ * The other state of the price switch. Everything above runs with REPORT_PRICES_USD as
+ * shipped, which is all null, so without this the day a live price is entered would be the
+ * first time the priced card lines ever rendered. Same pattern as PricingPage.test.tsx.
+ */
+describe('SampleReportsPage once the prices are known', () => {
+  const priced = vi.hoisted(() => ({
+    prices: { chronology: 30, howell: 30, qme_ame_memo: 30 },
+  }));
+
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('prints each card’s price, and a second report as the order total', async () => {
+    vi.doMock('../../../config', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('../../../config')>()),
+      REPORT_PRICES_USD: priced.prices,
+    }));
+    const { SampleReportsPage: Priced } = await import('../SampleReportsPage');
+    const { container } = render(<Priced />);
+    const text = renderedText(container);
+
+    expect(text).toContain('$30 per report');
+    expect(text).toContain('+$30 with a chronology · $60 per order');
+    expect(text).not.toContain('Priced on a call');
+  });
+});
+
+describe('arriving on a deep link', () => {
+  const original = Element.prototype.scrollIntoView;
+  let scrollIntoView: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView as unknown as typeof original;
+  });
+
+  afterEach(() => {
+    Element.prototype.scrollIntoView = original;
+    window.history.replaceState(null, '', '/');
+  });
+
+  /* The page renders in the browser, so the browser looks for #qme before it exists. */
+  it('scrolls to the section named in the hash', () => {
+    window.history.replaceState(null, '', '/sample-reports/#qme');
+    render(<SampleReportsPage />);
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    const target = scrollIntoView.mock.contexts[0] as Element;
+    expect(target.id).toBe('qme');
+  });
+
+  it('does not scroll when there is no hash', () => {
+    window.history.replaceState(null, '', '/sample-reports/');
+    render(<SampleReportsPage />);
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

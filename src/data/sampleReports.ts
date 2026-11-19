@@ -1,284 +1,202 @@
 /**
- * The public sample reports: one invented personal-injury matter and one invented
- * workers' compensation matter, written to demonstrate the shape of the work product.
+ * The public sample orders: one invented personal-injury order and one invented workers'
+ * compensation order, each EXACTLY as Autolaw's report builders produce it. The PDFs and page
+ * images in public/sample-reports/ are generated, never hand-edited.
  *
- * Everything here is fabricated. The patients, providers, insurers, dates, bills, and the
- * QME do not exist and are not modelled on anyone; the names were chosen not to match a
- * real practice, provider group, or reported decision. No client file, no record, and no
- * identifiable person may ever enter this module or public/ — a redacted real record is
- * still a real record, and redaction is not a thing to be reviewed in a marketing asset.
+ * Where they come from, said plainly because only part of it is in a repository:
+ *   - WC: the Word reports come from case-app apps/server/scripts/generate-sample-reports.ts,
+ *     rendering the order in sampleOrders/wcBrightwaterOrder.ts with the production builders.
+ *   - PI: the packet is run through real ledger promotion and the same builders by the
+ *     scripts in pi-sample-scripts/ (below).
+ *   - Page assembly, the citation check, printing and the export into this repository live
+ *     ON DISK ONLY, in case-app's git-ignored docs/samples/wc-sample-scripts/ and
+ *     docs/samples/pi-sample-scripts/. Today they are not in any repository.
+ * Rebuild both whenever a report builder changes. A sample that no longer matches what an
+ * order delivers is the one thing this page exists to avoid.
  *
- * Money is held in cents and totals are derived, never stored. An attorney reads a
- * reconciliation by adding the column up, and a printed total that disagrees with its own
- * rows ends the evaluation there — so the one number most likely to be edited by hand is
- * the one number this module refuses to let anybody type.
+ * Everything in them is fabricated: patients, the applicant, employers, providers, insurers,
+ * dates, bills and the QME do not exist. No client file, no record, and no identifiable person
+ * may ever enter this module or public/ — a redacted real record is still a real record.
  *
- * Page numbers are per document and must fall inside that document's own page count
- * above — Northside is 168 pages, so a citation to its p. 412 is impossible, and the
- * reader this page is written for is the one profession that checks. chronologyPages in
- * SampleReportsPage.test.tsx enforces it.
+ * Naming rule: a provider, employer or insurer name in a sample must not match a real
+ * practice, provider group or reported decision, and must be checked against public listings
+ * before the sample is published.
  *
- * They are also unique across the chronology preview. That is not presentation: two
- * entries citing the same page read as one source quoted twice, which is the opposite of
- * what the page is demonstrating.
- *
- * Citations carry a document and a page and nothing finer, because that is all the
- * product has: every citation type in case-app — ChronologyCitation, GraphEventCitation,
- * CitedCitation, MedicalNarrativeCitation — is {document, page, snippet}, and
- * citationText() renders "(file, p. N)". An earlier draft of this file cited "sentence 3"
- * under a heading promising the entries are shown exactly as the report sets them out,
- * which would have sold a precision the Word export does not deliver.
+ * Page counts are the PDFs' real counts; SampleReportsPage.test.tsx reads the files and
+ * fails if a number here drifts from the file it describes.
  */
+import { REPORT_PRICES_USD, SAMPLE_REPORTS_URL, type ReportPriceId } from '../config';
 
-export interface Cite {
-  document: string;
-  page: number;
-}
+export type Practice = 'PI' | 'WC';
 
-export interface ChronologyEntry {
-  date: string;
-  event: string;
-  quote: string;
-  cite: Cite;
-}
-
-export interface Conflict {
-  summary: string;
-  statements: ReadonlyArray<{ quote: string; cite: Cite }>;
-}
-
-export interface Gap {
-  summary: string;
-  /** The document to go and request, named. "Records are incomplete" helps nobody. */
-  needed: string;
-}
-
-export interface SampleCard {
-  /** A FEATURES id. Asserted live in SampleReportsPage.test.tsx. */
-  featureId: string;
-  caseName: string;
-  practice: 'PI' | 'WC';
-  builtFrom: string;
-  produced: string;
-  flags: string;
-  /** Where the card goes: a fragment on this page, or a download once one exists. */
+export interface SampleFile {
+  /** Served path; the file lives at public/<href>. */
   href: string;
+  practice: Practice;
+  caseName: string;
+  /** Pages in the PDF, cover and appendix included. */
+  pages: number;
 }
 
-export const SAMPLE_CARDS: ReadonlyArray<SampleCard> = [
-  {
-    featureId: 'medical-chronologies',
-    caseName: 'Rivera v. Cascade Haulage',
+export interface PreviewImage {
+  src: string;
+  /** What the page shows, specifically enough to stand in for the image. */
+  alt: string;
+  /** The PNG's own pixel size; the page test reads it from the file. */
+  width: number;
+  height: number;
+}
+
+export interface ReportSample {
+  id: ReportPriceId;
+  /** A FEATURES id, asserted live in the page test. */
+  featureId: string;
+  /** The title printed on the Word report a buyer receives. */
+  title: string;
+  /** The section on this page. */
+  anchor: 'chronology' | 'howell' | 'qme';
+  practices: ReadonlyArray<Practice>;
+  /** How it is bought. Every order includes the chronology. */
+  howBought: string;
+  /** What the report contains. */
+  contains: ReadonlyArray<string>;
+  previews: ReadonlyArray<PreviewImage>;
+  samples: ReadonlyArray<SampleFile>;
+}
+
+export const SAMPLE_FILES = {
+  pi: {
+    href: '/sample-reports/autolaw-sample-pi-order.pdf',
     practice: 'PI',
-    builtFrom: '612 pages, four providers',
-    produced: '84 entries, every one cited',
-    flags: 'Two conflicts, three gaps',
-    href: '#chronology',
+    caseName: 'Renata K. Halvorsen v. Pellman Courier Co.',
+    pages: 26,
   },
-  {
-    featureId: 'case-value',
-    caseName: 'Rivera v. Cascade Haulage',
-    practice: 'PI',
-    builtFrom: '41 bills and two lien letters',
-    produced: 'Billed, paid, adjusted, outstanding',
-    flags: 'One possible duplicate charge',
-    href: '#howell',
-  },
-  {
-    featureId: 'qme-ame',
-    caseName: 'Okonkwo v. Harbor Logistics',
+  wc: {
+    href: '/sample-reports/autolaw-sample-wc-order.pdf',
     practice: 'WC',
-    builtFrom: 'A 58-page panel QME',
-    produced: 'Causation, impairment, apportionment',
-    flags: 'Two unresolved questions',
-    href: '#qme',
+    caseName: 'Leona Brightwater v. Calder Row Supply Co.',
+    pages: 17,
+  },
+} as const satisfies Record<string, SampleFile>;
+
+export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
+  {
+    id: 'chronology',
+    featureId: 'medical-chronologies',
+    title: 'Medical Chronology',
+    anchor: 'chronology',
+    practices: ['PI', 'WC'],
+    howBought: 'Included in every order. Can also be ordered on its own.',
+    contains: [
+      'Executive summary: visits, providers, diagnoses, and what needs follow-up, such as periods with no records or items flagged for review',
+      'Records reviewed, with each file’s status, and what the report could not use',
+      'Every visit in date order: complaints, findings, diagnoses, treatment and work status, each cited to its file and page, or quoted from the evaluator’s report',
+      'Periods with no records, review flags and contradictions',
+      'Next steps and an exhibit list',
+    ],
+    previews: [
+      {
+        src: '/sample-reports/chronology-p1.png',
+        alt: 'First page of the personal-injury sample’s Medical Chronology: the case header, the executive summary, records reviewed with each file’s status, limitations, and the providers with their first and last visits, each cited to its file and page.',
+        width: 850,
+        height: 1100,
+      },
+    ],
+    samples: [SAMPLE_FILES.pi, SAMPLE_FILES.wc],
+  },
+  {
+    id: 'howell',
+    featureId: 'case-value',
+    title: 'Howell Recoverable Specials',
+    anchor: 'howell',
+    practices: ['PI'],
+    howBought: 'Ordered with a medical chronology: two reports per order.',
+    contains: [
+      'Executive summary and limitations',
+      'Totals: billed, adjustments, paid, patient balance and recoverable',
+      'Bills by provider, each row cited to the bill it was read from',
+      'What the recoverable figure rests on, duplicates, and bills with no matching record',
+    ],
+    previews: [
+      {
+        src: '/sample-reports/howell-p1.png',
+        alt: 'First page of the sample Howell Recoverable Specials: the executive summary; limitations, led by the note that 2 bills need review before the recoverable total can be relied on; the contradictions check; the totals; and the bills by provider, each cited to the statement and page it was read from.',
+        width: 850,
+        height: 1100,
+      },
+    ],
+    samples: [SAMPLE_FILES.pi],
+  },
+  {
+    id: 'qme_ame_memo',
+    featureId: 'qme-ame',
+    title: 'QME/AME Action Memo',
+    anchor: 'qme',
+    practices: ['WC'],
+    howBought: 'Ordered with a medical chronology: two reports per order.',
+    contains: [
+      'Attorney next actions',
+      'The evaluator’s findings as stated: diagnosis, causation, permanent and stationary status, impairment, apportionment, work restrictions and future medical care',
+      'A PD rating cross-check computed from the evaluator’s own figures',
+      'Records the evaluator did not have, the evidence index and coverage',
+      'Treating-versus-QME conflicts, marked Not checked until an attorney approves findings on both sides',
+    ],
+    previews: [
+      {
+        src: '/sample-reports/qme-memo-p1.png',
+        alt: 'First page of the sample QME/AME Action Memo: the summary, next actions, missing evidence and the first medical-legal findings.',
+        width: 850,
+        height: 1100,
+      },
+      {
+        src: '/sample-reports/qme-memo-p2.png',
+        alt: 'Second page of the sample QME/AME Action Memo: the remaining findings, the PD rating cross-check, conflicts marked Not checked, the evidence index and coverage.',
+        width: 850,
+        height: 1100,
+      },
+    ],
+    samples: [SAMPLE_FILES.wc],
   },
 ];
-
-export const CHRONOLOGY_SAMPLE = {
-  caseName: 'Rivera v. Cascade Haulage',
-  /**
-   * `cites` is the exact string the citations use for this document, so the page-count
-   * guard can resolve a citation to the document it names instead of guessing from a
-   * prefix. A document nothing cites still carries one — it is the file's identity here,
-   * not a display concern.
-   */
-  inputs: [
-    { source: 'Mercy Valley Hospital — emergency and imaging', cites: 'Mercy Valley records', pages: 214 },
-    { source: 'Northside Orthopedics — chart notes', cites: 'Northside Orthopedics', pages: 168 },
-    { source: 'Bayfront Physical Therapy', cites: 'Bayfront Physical Therapy', pages: 142 },
-    { source: 'Defence QME', cites: 'Defence QME', pages: 88 },
-  ],
-  sections: [
-    'Treatment chronology',
-    'Diagnoses and restrictions',
-    'Conflicts between records',
-    'Records not in the file',
-    'Source index',
-  ],
-  entries: [
-    {
-      date: '11 February 2025',
-      event: 'Emergency department — Mercy Valley Hospital',
-      quote:
-        'Patient presents following rear-end collision. Cervical and lumbar strain. Radiographs negative for acute fracture. Discharged with NSAIDs and instruction to follow up in one week.',
-      cite: { document: 'Mercy Valley records', page: 17 },
-    },
-    {
-      date: '14 March 2025',
-      event: 'Orthopedic consult — Northside Orthopedics',
-      quote:
-        'Lumbar MRI demonstrates a 4 mm disc protrusion at L4–L5 with mild impingement of the left L5 nerve root. Recommend epidural steroid injection.',
-      cite: { document: 'Northside Orthopedics', page: 46 },
-    },
-  ] as ReadonlyArray<ChronologyEntry>,
-  conflicts: [
-    {
-      summary:
-        'Work status on 30 April 2025 is recorded differently in two documents. Both are reproduced, and neither is preferred.',
-      statements: [
-        {
-          quote: 'Patient released to modified duty, no lifting over 15 lb.',
-          cite: { document: 'Northside Orthopedics', page: 97 },
-        },
-        {
-          quote: 'No work restriction is medically supported as of this examination.',
-          cite: { document: 'Defence QME', page: 22 },
-        },
-      ],
-    },
-  ] as ReadonlyArray<Conflict>,
-  gaps: [
-    {
-      summary:
-        'The 14 March consult refers the patient for an epidural steroid injection. No injection record, operative note, or pain-management chart appears anywhere in the 612 pages provided.',
-      needed: 'Pain-management records, March to June 2025',
-    },
-  ] as ReadonlyArray<Gap>,
-};
-
-export interface HowellRow {
-  provider: string;
-  billedCents: number;
-  paidCents: number;
-  adjustedCents: number;
-  outstandingCents: number;
-  source: string;
-}
-
-export const HOWELL_SAMPLE = {
-  caseName: 'Rivera v. Cascade Haulage',
-  rows: [
-    {
-      provider: 'Mercy Valley Hospital',
-      billedCents: 1_842_000,
-      paidCents: 418_560,
-      adjustedCents: 1_423_440,
-      outstandingCents: 0,
-      source: 'Bill 1, p. 3',
-    },
-    {
-      provider: 'Northside Orthopedics',
-      billedCents: 1_176_000,
-      paidCents: 294_000,
-      adjustedCents: 682_000,
-      outstandingCents: 200_000,
-      source: 'Bills 4–9, pp. 11–26',
-    },
-    {
-      provider: 'Bayfront Physical Therapy',
-      billedCents: 735_000,
-      paidCents: 0,
-      adjustedCents: 0,
-      outstandingCents: 735_000,
-      source: 'Lien letter, p. 2',
-    },
-  ] as ReadonlyArray<HowellRow>,
-  flag: {
-    heading: 'Possible duplicate',
-    body:
-      'CPT 72148 appears on Bill 4 (p. 11) and again on Bill 7 (p. 19), both dated 14 March 2025 and both for the same amount. Both are counted in the billed column above and flagged for review rather than removed.',
-  },
-  boundary:
-    'The report extracts and reconciles what the bills say. It does not opine on what is recoverable under Howell v. Hamilton Meats; that judgement is the attorney’s.',
-};
-
-export interface HowellTotals {
-  billedCents: number;
-  paidCents: number;
-  adjustedCents: number;
-  outstandingCents: number;
-}
-
-/** Derived on every render. Nothing in this module stores a total. */
-export function howellTotals(rows: ReadonlyArray<HowellRow>): HowellTotals {
-  return rows.reduce<HowellTotals>(
-    (run, row) => ({
-      billedCents: run.billedCents + row.billedCents,
-      paidCents: run.paidCents + row.paidCents,
-      adjustedCents: run.adjustedCents + row.adjustedCents,
-      outstandingCents: run.outstandingCents + row.outstandingCents,
-    }),
-    { billedCents: 0, paidCents: 0, adjustedCents: 0, outstandingCents: 0 },
-  );
-}
-
-const USD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-export const usd = (cents: number) => USD.format(cents / 100);
 
 /** Rendered above every sample, and asserted by the page's test rather than trusted. */
 export const FICTIONAL_NOTICE = {
   heading: 'Every sample here is a fictional case.',
-  body: 'The patient, providers, dates, bills, and the QME are invented for demonstration. No client file, no real medical record, and no identifiable person appears on this page or in anything downloaded from it.',
+  body: 'The patient, the applicant, employers, providers, insurers, dates, bills and the QME are invented for demonstration. No client file, no real medical record, and no identifiable person appears on this page or in anything downloaded from it.',
 };
 
-export interface QmeFinding {
-  label: string;
-  quote: string;
-  cite: Cite;
-}
+/** How the samples were made, said plainly, so no one mistakes them for a reviewed production result. */
+export const HOW_MADE =
+  'Each PDF shows the Word reports Autolaw delivers for an order, rendered as pages. Autolaw’s report builders produced them from the invented records in the PDF’s appendix. The facts the builders read were entered in the form Autolaw’s extraction step stores them; extraction was not run, and no one reviewed the order, so the reports show what an unreviewed order prints.';
 
 /**
- * The workers' compensation sample. Invented on the same terms as the Rivera matter:
- * no real evaluator, employer, or claim.
- *
- * The open questions are the point of the report rather than a caveat on it. A QME that
- * apportions without naming the records it relied on is the ordinary case, and the thing
- * an applicant's attorney has to notice before the deposition rather than after.
+ * The same rule as packPriceLabel in PricingPage.tsx, mirrored rather than imported so this
+ * data module does not pull a page in: cents only when the amount has them, so 30 reads
+ * "$30" and 29.5 reads "$29.50", never "$29.5".
  */
-export const QME_SAMPLE = {
-  caseName: 'Okonkwo v. Harbor Logistics',
-  /** The one document, and its length. Every citation below must fall inside it. */
-  document: { cites: 'Panel QME', pages: 58 },
-  findings: [
-    {
-      label: 'Causation',
-      quote:
-        'The lumbar condition is industrial in origin, arising from the cumulative lifting duties described by the applicant over an eleven-year period.',
-      cite: { document: 'Panel QME', page: 31 },
-    },
-    {
-      label: 'Whole person impairment',
-      quote:
-        'Applying the AMA Guides, 5th Edition, the applicant falls within DRE Lumbar Category II, yielding 8% whole person impairment.',
-      cite: { document: 'Panel QME', page: 44 },
-    },
-    {
-      label: 'Apportionment',
-      quote:
-        'Thirty percent of the current disability is apportioned to a pre-existing degenerative condition.',
-      cite: { document: 'Panel QME', page: 47 },
-    },
-    {
-      label: 'Work restrictions',
-      quote:
-        'Precluded from repetitive bending and from lifting in excess of 25 pounds on a sustained basis.',
-      cite: { document: 'Panel QME', page: 49 },
-    },
-  ] as ReadonlyArray<QmeFinding>,
-  openQuestions: [
-    'The thirty percent apportionment at p. 47 names no records as its basis, and no prior imaging or treatment history appears anywhere else in the report.',
-    'Future medical care is called “likely to be required” at p. 52 without naming a modality, a frequency, or a duration, so nothing in the report supports a figure.',
-  ],
-};
+const dollars = (usd: number) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: Number.isInteger(usd) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(usd);
+
+/**
+ * The price line on a report card. A Howell or QME/AME order always includes the chronology,
+ * so its line leads with the add-on and states the order total; with any price unknown it
+ * says what the pricing page says.
+ */
+export function samplePriceLine(id: ReportPriceId, prices: Readonly<Record<ReportPriceId, number | null>> = REPORT_PRICES_USD): string {
+  const own = prices[id];
+  if (id === 'chronology') return own === null ? 'Priced on a call' : `${dollars(own)} per report`;
+  const chronology = prices.chronology;
+  if (own === null || chronology === null) return 'Priced on a call';
+  return `+${dollars(own)} with a chronology · ${dollars(own + chronology)} per order`;
+}
+
+/** Where a report's "Read a sample" link goes: straight to its section on this page. */
+export function sampleHref(featureId: string): string {
+  const anchor = REPORT_SAMPLES.find((report) => report.featureId === featureId)?.anchor;
+  return anchor ? `${SAMPLE_REPORTS_URL}#${anchor}` : SAMPLE_REPORTS_URL;
+}

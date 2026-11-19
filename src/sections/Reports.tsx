@@ -6,8 +6,9 @@ import {
   ORDERABLE_REPORTS,
   type ReportPracticeArea,
 } from '../data/product';
-import { PRICING_URL, SAMPLE_REPORTS_URL } from '../config';
+import { PRICING_URL } from '../config';
 import { track } from '../measure';
+import { sampleHref } from '../data/sampleReports';
 import './Reports.css';
 
 /**
@@ -92,7 +93,7 @@ export function Reports() {
               </a>
               <a
                 className="al-reports__link"
-                href={SAMPLE_REPORTS_URL}
+                href={sampleHref(report.featureId)}
                 onClick={() =>
                   track('report_card_selected', { report: report.featureId, destination: 'sample' })
                 }

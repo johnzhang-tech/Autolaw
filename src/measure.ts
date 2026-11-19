@@ -30,6 +30,7 @@ export type AnalyticsEvent =
   | 'landing_viewed'
   | 'report_card_selected'
   | 'sample_viewed'
+  | 'sample_downloaded'
   | 'pricing_viewed'
   | 'cta_clicked'
   | 'schedule_started';

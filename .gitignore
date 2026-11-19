@@ -20,6 +20,8 @@ attached_assets/*.txt
 # Local uploads / sample docs
 uploads/
 *.pdf
+# The public sample orders are generated, fictional, and meant to be served.
+!public/sample-reports/*.pdf
 
 .env
 # design system build output

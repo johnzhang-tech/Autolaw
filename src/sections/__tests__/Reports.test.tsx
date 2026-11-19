@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import { Reports, practiceLabel } from '../Reports';
 import { AVAILABILITY_LABEL, FEATURE_BY_ID, ORDERABLE_REPORTS } from '../../data/product';
-import { PRICING_URL, SAMPLE_REPORTS_URL, TRIAL_ENABLED, TRIAL_URL } from '../../config';
+import { PRICING_URL, TRIAL_ENABLED, TRIAL_URL } from '../../config';
 import { renderedText } from '../../pages/__tests__/renderedText';
 import { track } from '../../measure';
 
@@ -10,6 +10,14 @@ vi.mock('../../measure', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../measure')>();
   return { ...actual, track: vi.fn() };
 });
+
+/* Literal anchors, not sampleHref(): that helper falls back to the bare URL when an id is
+   missing, so using it on both sides would pass a wrong mapping. */
+const SAMPLE_ANCHOR: Record<string, string> = {
+  'medical-chronologies': '/sample-reports/#chronology',
+  'case-value': '/sample-reports/#howell',
+  'qme-ame': '/sample-reports/#qme',
+};
 
 /* jsdom logs a "Not implemented: navigation" error when an anchor's default action
    runs. Cancelling it changes nothing about the handlers under test. */
@@ -65,9 +73,10 @@ describe('Reports band', () => {
           'href',
           `/product/${report.feature.slug}/`,
         );
+        expect(SAMPLE_ANCHOR[report.featureId]).toBeDefined();
         expect(within(card).getByRole('link', { name: /sample/i })).toHaveAttribute(
           'href',
-          SAMPLE_REPORTS_URL,
+          SAMPLE_ANCHOR[report.featureId],
         );
       });
   });

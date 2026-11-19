@@ -224,6 +224,26 @@ export const REPORT_PACKS: ReadonlyArray<ReportPack> = [
 ];
 
 /**
+ * Per-report prices, mirroring the three named-report packs in case-app
+ * `apps/server/src/billing/reportPacks.ts` (`case_app_report_chronology`, `_howell`,
+ * `_qme_ame_memo`). Same rule as REPORT_PACKS above: null is the switch, not a placeholder —
+ * while null the samples page states how a report is bought and routes to a call. Fill a
+ * number in only from an ACTIVE live-mode Stripe price.
+ *
+ * Every order includes the chronology, so a Howell or QME/AME order costs its own price plus
+ * the chronology's. The samples page prints that order total and never the add-on alone.
+ *
+ * Not yet read by the pricing page: when these are filled in, wire PricingPage to them in the
+ * same change, so the pricing page and the sample cards show prices together.
+ */
+export type ReportPriceId = 'chronology' | 'howell' | 'qme_ame_memo';
+export const REPORT_PRICES_USD: Readonly<Record<ReportPriceId, number | null>> = {
+  chronology: null,
+  howell: null,
+  qme_ame_memo: null,
+};
+
+/**
  * What one credit covers, from case-app `packages/shared/src/reports-tier.ts`.
  *
  * Unlike the prices, these are constants in code on both sides, so the site may state
