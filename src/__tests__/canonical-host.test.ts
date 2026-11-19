@@ -5,9 +5,9 @@ import { join } from 'node:path';
 /**
  * The site answers to more hostnames than the one it advertises.
  *
- * `www.autolaw.ai` is the name every page declares in <link rel="canonical"> and og:url,
- * the only one with a Cloud Run domain mapping, and the only one that reaches nginx — the
- * apex is a 301 at the registrar and never arrives. But the service is also reachable at
+ * `www.autolaw.ai` is the name every page declares in <link rel="canonical"> and og:url.
+ * The bare `autolaw.ai` reaches nginx too, through its own domain mapping, and is sent on to
+ * www with its path by a server block of its own. But the service is also reachable at
  * `autolaw-<project>.<region>.run.app`, and every `gcloud run deploy --tag` preview adds
  * another hostname serving byte-identical HTML: real, public, crawlable copies competing
  * with the brand for its own name, which is how the apex ended up pointing at a run.app URL
@@ -28,6 +28,10 @@ import { join } from 'node:path';
 
 const ROOT = process.cwd();
 const nginxConf = () => readFileSync(join(ROOT, 'nginx.conf'), 'utf8');
+
+/** The server block for the bare domain. It holds no location, so it ends at its first `}`. */
+const apexBlock = (): string | null =>
+  nginxConf().match(/^server\s*\{[^{}]*\bserver_name\s+autolaw\.ai\s*;[^{}]*\}/m)?.[0] ?? null;
 
 /** Every HTML file the build ships, read out of vite.config.ts rather than listed here. */
 const htmlEntries = (): string[] => {
@@ -128,5 +132,34 @@ describe('canonical host', () => {
     expect(firstLocation).toBeGreaterThan(-1);
     expect(header).toBeLessThan(firstLocation);
     expect(conf).toMatch(/add_header X-Robots-Tag \$robots_tag always;/);
+  });
+
+  /*
+   * The bare domain reaches nginx through its own Cloud Run domain mapping (since
+   * 2026-11-19), so GoDaddy's forwarder — which carried the root and served a 404 for every
+   * other path — no longer answers for it. Every path goes on to the declared host: a deep
+   * link to autolaw.ai lands on the page, and the schedule-call form only ever runs on the one
+   * origin case-app's lead endpoint accepts.
+   */
+  it('sends the bare domain to the declared host, path and query intact', () => {
+    const block = apexBlock();
+    expect(block).not.toBeNull();
+    const host = declaredHosts()[0].replace(/\./g, '\\.');
+    expect(block).toMatch(new RegExp(`\\breturn\\s+301\\s+https://${host}\\$request_uri\\s*;`));
+  });
+
+  /*
+   * nginx hands a name no server_name claims to the first server block for the port. The
+   * catch-all must stay that block: put the apex redirect first, or mark it default_server,
+   * and every run.app URL and tag preview would bounce to www — breaking the one thing those
+   * hosts are for (see the top of nginx.conf).
+   */
+  it('keeps the catch-all block first, so no other host is redirected', () => {
+    const conf = nginxConf();
+    const first = conf.search(/^server\s*\{/m);
+    const apex = conf.search(/^server\s*\{[^{}]*\bserver_name\s+autolaw\.ai\s*;/m);
+    expect(apex).toBeGreaterThan(first);
+    expect(conf.slice(first, conf.indexOf('}', first))).toMatch(/\bserver_name\s+_\s*;/);
+    expect(conf).not.toMatch(/\bdefault_server\b/);
   });
 });

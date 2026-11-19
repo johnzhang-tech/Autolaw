@@ -149,7 +149,17 @@ This resolves the reported symptom in full. The address bar will read `www.autol
 also what every canonical tag, `og:url` and `sitemap.xml` entry in this repo already declares, and
 it is precisely the behaviour `cidsnap.com` has.
 
-### Tier 2 — Map the apex to Cloud Run — **considered and declined 2026-10-20**
+### Tier 2 — Map the apex to Cloud Run — **considered and declined 2026-10-20; taken 2026-11-19**
+
+> **2026-11-19 — the owner took Tier 2 after all.** The trigger: the schedule-a-call form now posts to
+> case-app, which accepts only `https://www.autolaw.ai`, and `autolaw.ai/schedule-call/` was a 404. This
+> time nginx does not serve the apex as a second indexable copy: a `server_name autolaw.ai` block after
+> the catch-all answers every path with `301 https://www.autolaw.ai$request_uri` (held by
+> `src/__tests__/canonical-host.test.ts`; checked in an nginx container: apex → 301 with path and query,
+> www → 200, run.app → 200 + noindex). The domain mapping left in place below is the one used. DNS side,
+> at GoDaddy: domain forwarding off, and the apex A/AAAA records set to the eight Google addresses the
+> mapping lists (`gcloud beta run domain-mappings describe --domain autolaw.ai --region us-west1`). The
+> text below is the 2026-10-20 record, kept as written.
 
 This would have made the apex serve the site directly, deep links included. It was built
 far enough to be certain it works — the domain mapping was created, `nginx.conf` was changed
