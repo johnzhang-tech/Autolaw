@@ -54,7 +54,6 @@ const PUBLIC_FILES = new Set([
   '/robots.txt',
   '/sitemap.xml',
   '/og-card.png',
-  '/sample-reports/autolaw-sample-pi-order.pdf',
   '/sample-reports/autolaw-sample-wc-order.pdf',
 ]);
 

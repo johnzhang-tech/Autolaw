@@ -8,7 +8,7 @@ import {
 } from '../data/product';
 import { PRICING_URL } from '../config';
 import { track } from '../measure';
-import { sampleHref } from '../data/sampleReports';
+import { hasSample, sampleHref } from '../data/sampleReports';
 import './Reports.css';
 
 /**
@@ -91,15 +91,17 @@ export function Reports() {
               >
                 What is in this report
               </a>
-              <a
-                className="al-reports__link"
-                href={sampleHref(report.featureId)}
-                onClick={() =>
-                  track('report_card_selected', { report: report.featureId, destination: 'sample' })
-                }
-              >
-                Read a sample
-              </a>
+              {hasSample(report.featureId) && (
+                <a
+                  className="al-reports__link"
+                  href={sampleHref(report.featureId)}
+                  onClick={() =>
+                    track('report_card_selected', { report: report.featureId, destination: 'sample' })
+                  }
+                >
+                  Read a sample
+                </a>
+              )}
             </div>
           </li>
         ))}

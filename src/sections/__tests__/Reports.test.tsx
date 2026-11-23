@@ -15,7 +15,6 @@ vi.mock('../../measure', async (importOriginal) => {
    missing, so using it on both sides would pass a wrong mapping. */
 const SAMPLE_ANCHOR: Record<string, string> = {
   'medical-chronologies': '/sample-reports/#chronology',
-  'case-value': '/sample-reports/#howell',
   'qme-ame': '/sample-reports/#qme',
 };
 
@@ -73,11 +72,16 @@ describe('Reports band', () => {
           'href',
           `/product/${report.feature.slug}/`,
         );
-        expect(SAMPLE_ANCHOR[report.featureId]).toBeDefined();
-        expect(within(card).getByRole('link', { name: /sample/i })).toHaveAttribute(
-          'href',
-          SAMPLE_ANCHOR[report.featureId],
-        );
+        /* A report with no sample on the page offers no "Read a sample" link: a link to a
+           page that does not show that report would be a broken promise. */
+        if (SAMPLE_ANCHOR[report.featureId] === undefined) {
+          expect(within(card).queryByRole('link', { name: /sample/i })).toBeNull();
+        } else {
+          expect(within(card).getByRole('link', { name: /sample/i })).toHaveAttribute(
+            'href',
+            SAMPLE_ANCHOR[report.featureId],
+          );
+        }
       });
   });
 

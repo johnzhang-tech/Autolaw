@@ -64,13 +64,12 @@ export interface ReportSample {
   samples: ReadonlyArray<SampleFile>;
 }
 
+/*
+ * The personal-injury sample order (and with it the Howell card) is withdrawn while its Howell
+ * figures are fixed at the source: it counted one visit twice, missed a patient payment and
+ * dropped an EOB. It returns, rebuilt, once the product prints the documents' figures.
+ */
 export const SAMPLE_FILES = {
-  pi: {
-    href: '/sample-reports/autolaw-sample-pi-order.pdf',
-    practice: 'PI',
-    caseName: 'Renata K. Halvorsen v. Pellman Courier Co.',
-    pages: 26,
-  },
   wc: {
     href: '/sample-reports/autolaw-sample-wc-order.pdf',
     practice: 'WC',
@@ -97,35 +96,12 @@ export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
     previews: [
       {
         src: '/sample-reports/chronology-p1.png',
-        alt: 'First page of the personal-injury sample’s Medical Chronology: the case header, the executive summary, records reviewed with each file’s status, limitations, and the providers with their first and last visits, each cited to its file and page.',
+        alt: 'First page of the workers’ compensation sample’s Medical Chronology: the case header, the executive summary, records reviewed with each file’s status, limitations, the providers with their first and last visits, and the first diagnostic highlights, each cited to its file and page.',
         width: 850,
         height: 1100,
       },
     ],
-    samples: [SAMPLE_FILES.pi, SAMPLE_FILES.wc],
-  },
-  {
-    id: 'howell',
-    featureId: 'case-value',
-    title: 'Howell Recoverable Specials',
-    anchor: 'howell',
-    practices: ['PI'],
-    howBought: 'Ordered with a medical chronology: two reports per order.',
-    contains: [
-      'Executive summary and limitations',
-      'Totals: billed, adjustments, paid, patient balance and recoverable',
-      'Bills by provider, each row cited to the bill it was read from',
-      'What the recoverable figure rests on, duplicates, and bills with no matching record',
-    ],
-    previews: [
-      {
-        src: '/sample-reports/howell-p1.png',
-        alt: 'First page of the sample Howell Recoverable Specials: the executive summary; limitations, led by the note that 2 bills need review before the recoverable total can be relied on; the contradictions check; the totals; and the bills by provider, each cited to the statement and page it was read from.',
-        width: 850,
-        height: 1100,
-      },
-    ],
-    samples: [SAMPLE_FILES.pi],
+    samples: [SAMPLE_FILES.wc],
   },
   {
     id: 'qme_ame_memo',
@@ -193,6 +169,11 @@ export function samplePriceLine(id: ReportPriceId, prices: Readonly<Record<Repor
   const chronology = prices.chronology;
   if (own === null || chronology === null) return 'Priced on a call';
   return `+${dollars(own)} with a chronology · ${dollars(own + chronology)} per order`;
+}
+
+/** Whether a report has a sample on this page; the home band links only to ones that do. */
+export function hasSample(featureId: string): boolean {
+  return REPORT_SAMPLES.some((report) => report.featureId === featureId);
 }
 
 /** Where a report's "Read a sample" link goes: straight to its section on this page. */
