@@ -120,7 +120,7 @@ export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
     previews: [
       {
         src: '/sample-reports/howell-p1.png',
-        alt: 'First page of the sample Howell Recoverable Specials: the executive summary, which states the patient’s share apart from the charges insurance has not yet adjudicated; limitations; the contradictions check; the totals; and the bills by provider, each cited to the statement and the EOBs it was read from.',
+        alt: 'First page of the sample Howell Recoverable Specials: the executive summary, which states the patient’s share apart from the charges with no adjustment or payment recorded against them; limitations; the contradictions check; the totals; and the bills by provider, each cited to the statement and the EOBs it was read from.',
         width: 850,
         height: 1100,
       },
