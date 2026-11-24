@@ -590,7 +590,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
       'Collision reconstruction, injury mechanism, treatment, and daily limitations.',
       'What the record does not state is not drawn — every scene is bound to the evidence behind it.',
       'A second model re-inspects each finished image for reversed impact direction or an over-claimed spinal level, and an attorney approves it before it locks.',
-      'Running today with our team on your case, during a pilot.',
+      'Run by our team on your case, as a hands-on pilot.',
     ],
     output: 'Stills, and short video on request',
     slug: 'accident-and-injury-illustrations',

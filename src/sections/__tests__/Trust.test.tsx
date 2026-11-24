@@ -18,7 +18,7 @@ describe('Trust', () => {
     // attorney reading it. Same control, stated as what it does.
     expect(screen.getByText(/no other firm can see your cases/i)).toBeInTheDocument();
     expect(screen.getByText(/auditable access/i)).toBeInTheDocument();
-    expect(screen.getByText(/human confirmation required/i)).toBeInTheDocument();
+    expect(screen.getByText(/sign-off before a demand goes out/i)).toBeInTheDocument();
   });
 
   it('puts the comparison table in its own scroll container', () => {

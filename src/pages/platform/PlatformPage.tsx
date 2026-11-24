@@ -48,7 +48,7 @@ export function PlatformPage() {
       <Section
         id="adds"
         heading="What the platform adds"
-        intro="The work the reports tier never reaches. All of it live today, all of it on the same case file, all of it cited the same way."
+        intro="The work the reports tier never reaches, all of it on the same case file, all of it cited the same way."
       >
         <ul className="al-platform__adds" data-testid="platform-adds">
           {PLATFORM_ADDS.map((feature) => (
@@ -85,7 +85,7 @@ export function PlatformPage() {
         tone="navy"
         eyebrow="What it costs"
         heading="It depends on what you run, so we would rather ask."
-        intro="Twenty open matters and two hundred are not the same firm. Rather than publish a number that is wrong for one of you, we would sooner hear how the practice actually runs and quote against that. And if you would rather try it one case at a time, the reports tier has its own price and it is on the pricing page."
+        intro="Twenty open matters and two hundred are not the same firm. Rather than publish a number that is wrong for one of you, we would sooner hear how the practice actually runs and quote against that. And if you would rather try it one case at a time, the reports tier is sold by the report, and the pricing page explains how."
       >
         <div className="al-platform__heroCtas">
           <Button href={CONTACT_SALES_URL} variant="inverse" size="lg" withCaret>

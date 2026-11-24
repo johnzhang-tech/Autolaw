@@ -11,7 +11,7 @@ const CONTROLS: Array<{ title: string; body: string; privacyLink?: boolean }> = 
   { title: 'Autolaw does not train on your data', body: 'Autolaw trains no models on your case content, and the AI providers that read your documents work under paid terms that do not allow them to train on it.', privacyLink: true },
   { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
   { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
-  { title: 'Human confirmation required', body: 'Autolaw proposes. It never writes case truth on its own. An attorney confirms each value before it counts as a fact.' },
+  { title: 'Sign-off before a demand goes out', body: 'Every value Autolaw records cites the document and page it came from. A demand package cannot be exported until an attorney or firm administrator at your firm approves it, and our servers enforce that.' },
   /*
    * The pricing model, not a price. No one in this category publishes numbers, but the
    * model itself is the differentiator: record-review vendors bill per page, and a firm
@@ -25,7 +25,7 @@ const ROWS: Array<[string, string, string]> = [
   ['Two documents disagree', 'Picks one, silently', 'Surfaced as a conflict with both sources and dates'],
   ['A fact with no support', 'Reads identically to a supported one', 'Kept apart from cited facts and labeled uncited'],
   ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and lists what is needed'],
-  ['Becoming case truth', 'Output is the answer', 'Proposes only; an attorney confirms before anything is recorded'],
+  ['Sending work out', 'Output is the answer', 'Every value cites its source; a demand cannot be exported until an attorney or firm administrator approves it'],
   ['Practice fit', 'Generic', 'Separate PI and workers’ comp workflows on one engine, each with its own screens and outputs'],
   ['Your data', 'Consumer terms; retention varies', 'Walled off per firm, every document opened is logged, never used by Autolaw to train models'],
 ];

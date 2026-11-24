@@ -21,12 +21,12 @@ describe('AboutPage — what it says', () => {
     expect(practices.getByText(/not one workflow with the labels swapped/i)).toBeInTheDocument();
   });
 
-  it('states the human-confirmation principle and its legal reason', () => {
+  it('states the sign-off principle and its legal reason', () => {
     render(<AboutPage />);
     const principle = within(
-      screen.getByRole('region', { name: /autolaw proposes\. an attorney confirms\./i })
+      screen.getByRole('region', { name: /autolaw reads\. an attorney signs off\./i })
     );
-    expect(principle.getByText(/never writes case truth on its own/i)).toBeInTheDocument();
+    expect(principle.getByText(/cannot leave your firm until an attorney or firm administrator\s+approves it/i)).toBeInTheDocument();
     expect(principle.getByText(/statute-of-limitations and jurisdictional consequences/i)).toBeInTheDocument();
   });
 });

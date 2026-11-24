@@ -90,6 +90,42 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     pattern: /encrypt\w*\s+(?:in\s+transit\s+(?:and|&)\s+at\s+rest|at\s+rest\s+(?:and|&)\s+in\s+transit)|end[\s-]to[\s-]end\s+encrypt/i,
     reason: 'encryption is stated per connection and per store (case-app evidence EN-1, EN-2); the job queue and the graph host’s disks are not evidenced',
   },
+  /*
+   * Retired 2026-11-24 after a check against the live case-app service (revision
+   * case-app-01019-ssz) and its storage bucket.
+   */
+  {
+    pattern: /attorney\s+confirms(?:\s+(?:every|each)|\.)|never\s+writes\s+case\s+truth|confirms\s+before\s+anything\s+is\s+recorded/i,
+    reason: 'case-app records extracted values without a confirmation step (WC case vitals autofill; PI claim fields can be rejected only after they are written). The one server-enforced sign-off is demand export, by an attorney or firm administrator (canApproveDemandForExport)',
+  },
+  {
+    pattern: /bought\s+inside\s+your\s+firm|subscription\s+exists/i,
+    reason: 'checkout is off on the live service (no BILLING_CHECKOUT_ENABLED, no Stripe variables), credits are granted by Autolaw, and case-app has no subscription billing',
+  },
+  {
+    pattern: /Google\s+or\s+Microsoft\s+account/i,
+    reason: 'Google and Microsoft sign-in register only when CASE_GOOGLE_CLIENT_ID / CASE_MICROSOFT_CLIENT_ID are set, and neither is set on the live service',
+  },
+  {
+    pattern: /recovered\s+for\s+seven\s+days/i,
+    reason: 'the document bucket keeps deleted files as noncurrent versions for 30 days, then a 7-day soft delete; seven days understates retention',
+  },
+  {
+    pattern: /delete\s+its\s+data\s+on\s+request/i,
+    reason: 'case purge runs one case at a time and leaves demand packages, email, intake, derived text, media and graph nodes; there is no firm offboarding tool yet',
+  },
+  {
+    pattern: /with\s+selected\s+firms|small\s+number\s+of\s+firms|running\s+today\s+with\s+our\s+team/i,
+    reason: 'no reports preview grant and no illustration use is in evidence (media-engine served 0 API requests in the 30 days to 2026-11-18)',
+  },
+  {
+    pattern: /all\s+of\s+it\s+live\s+today/i,
+    reason: 'Dropbox change detection and checkout are off on the live service, and deadline reminders do not exist',
+  },
+  {
+    pattern: /its\s+own\s+price\s+and\s+it\s+is\s+on\s+the\s+pricing\s+page/i,
+    reason: 'every report price is null in the site config and renders "Priced on a call"',
+  },
 ];
 
 type PageFactory = () => ReactElement;
@@ -153,10 +189,20 @@ describe('claim guard', () => {
       'SOC 2 Type II', 'SOC\u00a02 Type\u00a0II', 'SOC 2 Type 2', 'BAA available on request',
       'BAA signed on request', 'a business associate agreement, signed on request',
       'deleted within 90 days of an account ending', 'Encrypted in transit and at rest', 'Data is encrypted at rest and in transit',
+      'Attorney confirms every fact', 'An attorney confirms each value', 'Autolaw proposes. An attorney confirms.',
+      'It never writes case truth on its own.', 'Packs are bought inside your firm’s own Autolaw workspace.',
+      'A firm-wide subscription exists', 'sign in with a password, or with a Google or Microsoft account',
+      'deleted files can be recovered for seven days', 'When your firm leaves, we delete its data on request.',
+      'In preview with selected firms', 'In pilot with a small number of firms', 'Running today with our team on your case',
+      'All of it live today', 'the reports tier has its own price and it is on the pricing page',
     ];
     const corrected = [
-      'SOC 2 in preparation', 'Type I report planned for Q2 2027',
-      'Business associate agreement planned', 'When your firm leaves, we delete its data on request.',
+      'SOC 2 in preparation', 'Type I report planned for Q2 2027', 'Business associate agreement planned',
+      'No demand leaves without sign-off', 'Autolaw reads. An attorney signs off.',
+      'When your firm leaves, we delete its case documents on request.',
+      'deleted files can be recovered for 30 days', 'In preview', 'Offered as a hands-on pilot run by our team',
+      'Does an attorney still confirm every fact before it counts?',
+      'The first produces candidate facts an attorney confirms, and the case file reflects what a human accepted.',
     ];
     retired.forEach((s) => expect(RETIRED.some((r) => r.pattern.test(s)), s).toBe(true));
     corrected.forEach((s) => expect(RETIRED.filter((r) => r.pattern.test(s)).map((r) => String(r.pattern)), s).toEqual([]));

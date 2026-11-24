@@ -114,7 +114,7 @@ export function Reports() {
             <h3 className="al-reports__pilotName">{pilot.name}</h3>
             <p>
               Diagrams drawn from the facts already in the record, carrying the same page
-              citations as everything else. In pilot with a small number of firms, and not
+              citations as everything else. Offered as a hands-on pilot run by our team, and not
               yet something a firm can order.
             </p>
           </div>

@@ -53,7 +53,7 @@ export const PRIVACY_CARDS: ReadonlyArray<TrustCard> = [
   },
   {
     title: 'Retention and deletion',
-    body: 'Case data is kept while your account is active. Archiving a case hides it and keeps its data so it can be restored, and deleted files can be recovered for seven days. When your firm leaves, we delete its data on request.',
+    body: 'Case data is kept while your account is active. Archiving a case hides it and keeps its data so it can be restored, and deleted files can be recovered for 30 days. When your firm leaves, we delete its case documents on request; removing every other record of the firm is the offboarding commitment below.',
     claims: ['RT-1', 'RT-2', 'RT-3'],
     commitments: [
       { quarter: 'Q4 2026', text: 'A published retention schedule for each kind of data.' },
@@ -62,7 +62,7 @@ export const PRIVACY_CARDS: ReadonlyArray<TrustCard> = [
   },
   {
     title: 'Signing in',
-    body: 'Your staff sign in with a password, or with a Google or Microsoft account. Passwords are stored as bcrypt hashes, and firm administrators manage users and firm settings.',
+    body: 'Your staff sign in with a password. Passwords are stored as bcrypt hashes, and firm administrators manage users and firm settings.',
     claims: ['AC-3', 'TI-10', 'AC-2'],
     commitments: [
       { quarter: 'Q1 2027', text: 'Multi-factor authentication.' },

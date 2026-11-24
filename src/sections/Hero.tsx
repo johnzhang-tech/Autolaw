@@ -5,7 +5,7 @@ import './Hero.css';
 
 const TRUST = [
   'Source-linked evidence',
-  'Attorney confirms every fact',
+  'No demand leaves without sign-off',
   'Autolaw trains no AI on your data',
   'Each firm’s data kept separate',
 ];

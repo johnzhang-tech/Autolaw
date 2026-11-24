@@ -110,7 +110,7 @@ export const FAQ = [
   },
   {
     q: 'Is a subscription required?',
-    a: 'No. Credits are a one-time purchase and do not expire. A firm-wide subscription exists for practices that want the whole platform, and it is a separate conversation.',
+    a: 'No. Credits are a one-time purchase and do not expire. The full platform is quoted to your firm separately.',
   },
   {
     q: 'How is confidential material handled?',
@@ -211,7 +211,7 @@ export function PricingPage() {
 
         <div className="al-price__note">
           <p className="al-price__noteLead">
-            Packs are bought inside your firm&rsquo;s own Autolaw workspace.
+            We add your pack to your firm&rsquo;s own Autolaw workspace.
           </p>
           <p>
             A short call sets the workspace up, verifies the firm, and runs your first report
@@ -276,7 +276,7 @@ export function PricingPage() {
               ))}
               <tr>
                 <th scope="row">Demand draft, lien exposure, lost earnings, benefits audit</th>
-                <td colSpan={2}>In preview with selected firms</td>
+                <td colSpan={2}>In preview</td>
                 <td>Ask on a call</td>
               </tr>
             </tbody>

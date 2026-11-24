@@ -120,19 +120,21 @@ export function AboutPage() {
         id="principle"
         tone="navy"
         eyebrow="The principle"
-        heading="Autolaw proposes. An attorney confirms."
+        heading="Autolaw reads. An attorney signs off."
         intro="This is the one design decision everything else in Autolaw follows from, so it is worth stating plainly."
       >
         <p className="al-about__lede">
-          Autolaw reads a document and proposes a value. It never writes case truth on its own.
-          An attorney confirms each value before it counts as a fact.
+          Autolaw reads each document and records what it says, with the document and page it
+          came from. A demand package cannot leave your firm until an attorney or firm administrator
+          approves it, and our servers enforce that.
         </p>
         <p className="al-about__lede al-about__lede--muted">
           The reason is legal, not technical. Establishing date of injury, employer, and claim
           status carries statute-of-limitations and jurisdictional consequences &mdash; a value
-          that decides whether a claim is still alive, and where it can be brought, is not
-          something software gets to assert. A product that quietly recorded its own guesses
-          would be faster, right up until the first time it was wrong about a date.
+          that decides whether a claim is still alive, and where it can be brought, has to show
+          where it came from, and what the firm sends out has to carry a person&rsquo;s approval.
+          A product that hid its sources would be faster to read, right up until the first time
+          it was wrong about a date.
         </p>
         <p className="al-about__more">
           <Button href={SECURITY_URL} variant="inverse-secondary" size="md" withCaret>
