@@ -75,7 +75,7 @@ export const SAMPLE_FILES = {
     href: '/sample-reports/autolaw-sample-wc-order.pdf',
     practice: 'WC',
     caseName: 'Leona Brightwater v. Calder Row Supply Co.',
-    pages: 17,
+    pages: 18,
   },
 } as const satisfies Record<string, SampleFile>;
 
