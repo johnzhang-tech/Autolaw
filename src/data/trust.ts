@@ -76,7 +76,7 @@ export const PRIVACY_CARDS: ReadonlyArray<TrustCard> = [
 export const AI_CARDS: ReadonlyArray<TrustCard> = [
   {
     title: 'Google Gemini reads your documents',
-    body: 'Document text, page images and intake recordings go to Google Gemini on its paid API tier. Under those terms Google does not use prompts or responses to improve its products; it keeps them for a limited period to detect abuse.',
+    body: 'Document text, page images and intake recordings go to Google Gemini through the paid tier of the Gemini Developer API. Under those terms Google does not use prompts or responses to improve its products; it keeps them for a limited period to detect abuse.',
     claims: ['DF-3', 'MT-2'],
   },
   {
@@ -99,7 +99,7 @@ export const AUDIT_CARDS: ReadonlyArray<TrustCard> = [
   },
   {
     title: 'HIPAA',
-    body: 'There is no certifying body for HIPAA and no audit that issues a HIPAA certificate, so no vendor can hold one. What a firm can be given is a business associate agreement. Autolaw will offer one once its AI processing moves to Google Cloud’s HIPAA-eligible platform, planned for Q2 2027. That is a different kind of thing from the SOC 2 report above.',
+    body: 'There is no certifying body for HIPAA and no audit that issues a HIPAA certificate, so no vendor can hold one. What a firm can be given is a business associate agreement. Autolaw cannot offer one today: its AI processing runs on the Gemini Developer API, which Google’s business associate agreement does not cover. Autolaw will offer one once that processing moves to Google Cloud’s HIPAA-eligible platform, planned for Q2 2027. That is a different kind of thing from the SOC 2 report above.',
     claims: ['OV-1'],
   },
 ];
@@ -157,7 +157,7 @@ const SITE_ANALYTICS_ON = UMAMI_WEBSITE_ID !== null;
 
 export const SUBPROCESSORS: ReadonlyArray<Subprocessor> = [
   { vendor: 'Google Cloud', purpose: 'Hosts the application, file storage, database and secrets', receives: 'All firm data', when: 'Always', region: 'US', training: NOT_AI, claims: ['SP-table'] },
-  { vendor: 'Google Gemini API (paid tier)', purpose: 'Extraction, transcription, search index, drafting, storyboard images', receives: 'Document text, page images, intake recordings', when: 'Always', region: 'Not region-pinned', training: 'Not used to improve Google’s products under paid terms; kept for a limited period to detect abuse', claims: ['SP-table', 'MT-2'] },
+  { vendor: 'Google Gemini Developer API (paid tier)', purpose: 'Extraction, transcription, search index, drafting, storyboard images', receives: 'Document text, page images, intake recordings', when: 'Always', region: 'Not region-pinned', training: 'Not used to improve Google’s products under paid terms; kept for a limited period to detect abuse', claims: ['SP-table', 'MT-2'] },
   { vendor: 'Anthropic', purpose: 'Storyboard writing', receives: 'Case briefs', when: 'Only with the media feature', region: 'Not stated by Anthropic', training: 'Not used for training; deleted within 30 days by default', claims: ['SP-table', 'MT-3', 'DF-8'] },
   { vendor: 'Replicate (runs the MiniMax Hailuo video model)', purpose: 'Storyboard video rendering', receives: 'Prompts built from a case brief', when: 'Only with the media feature', region: 'Not stated', training: 'No explicit no-training term, so we make no claim', claims: ['SP-table', 'MT-5'] },
   { vendor: 'Neo4j (managed host)', purpose: 'Case graph', receives: 'Facts and relationships derived from documents', when: 'Always', region: 'US (being confirmed)', training: NOT_AI, claims: ['SP-table'] },
@@ -205,9 +205,9 @@ export const AI_QUESTIONS: ReadonlyArray<AiQuestion> = [
     id: 'models',
     question: 'Which AI models see our files?',
     answers: [
-      { text: 'Google Gemini, on the paid API tier, receives document text, page images and intake recordings for extraction, transcription, search and drafting.', claims: ['DF-3'] },
+      { text: 'Google Gemini, through the paid tier of the Gemini Developer API, receives document text, page images and intake recordings for extraction, transcription, search and drafting.', claims: ['DF-3'] },
       { text: 'Document text is indexed for search in Gemini File Search stores created for each case and each intake session.', claims: ['DF-4'] },
-      { text: 'Anthropic’s Claude receives no document text in our current configuration. If your firm uses the optional media feature, a summary brief of the case, not the raw documents, is sent to Claude to write a storyboard, and to Gemini image models and Replicate to render it.', claims: ['DF-8', 'DF-7'] },
+      { text: 'Anthropic’s Claude receives no document text in our current configuration. If your firm uses the optional media feature, a summary brief of the case, not the raw documents, is sent to Claude to write a storyboard, and to Google Gemini image models and Replicate to render it.', claims: ['DF-8', 'DF-7'] },
       { text: 'OpenAI is not used.', claims: ['DF-6'] },
     ],
   },
@@ -238,7 +238,7 @@ export const AI_QUESTIONS: ReadonlyArray<AiQuestion> = [
     id: 'region',
     question: 'Where does the AI processing happen?',
     answers: [
-      { text: 'The Gemini API does not pin a processing region: Google states that API data may be stored transiently or cached in any country where it operates. Anthropic does not state a region. Autolaw’s own application, database and file storage run on Google Cloud in the United States.', claims: ['SP-table', 'DF-2'] },
+      { text: 'The Google Gemini Developer API does not pin a processing region: Google states that API data may be stored transiently or cached in any country where it operates. Anthropic does not state a region. Autolaw’s own application, database and file storage run on Google Cloud in the United States.', claims: ['SP-table', 'DF-2'] },
     ],
     commitments: [
       { quarter: 'Q2 2027', text: 'AI processing on Google Cloud’s HIPAA-eligible platform, with a fixed region.' },
