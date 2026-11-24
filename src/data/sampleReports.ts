@@ -88,7 +88,7 @@ export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
     practices: ['PI', 'WC'],
     howBought: 'Part of every order. Can also be ordered on its own.',
     contains: [
-      'Executive summary: visits, providers, diagnoses, and what needs follow-up, such as periods with no records or items flagged for review',
+      'Executive summary: visits and providers, and what needs follow-up, such as periods with no records or items flagged for review',
       'Records reviewed, with each file’s status, and what the report could not use',
       'Every visit in date order: complaints, findings, diagnoses, treatment and work status, each cited to its file and page, or quoted from the evaluator’s report',
       'Periods with no records, review flags and contradictions',
@@ -115,7 +115,7 @@ export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
       'Executive summary and limitations',
       'Totals: billed, adjustments, paid, patient balance and recoverable',
       'Bills by provider, each row cited to the bill it was read from',
-      'What the recoverable figure rests on, duplicates, and bills with no matching record',
+      'What the recoverable figure rests on, duplicates, and billed dates with no visit note',
     ],
     previews: [
       {
