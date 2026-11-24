@@ -139,13 +139,13 @@ export const FEATURES: ReadonlyArray<Feature> = [
     id: ASK_AL_FEATURE_ID,
     name: 'Ask AL',
     icon: 'assistant',
-    line: 'Ask anything about the case. Every answer cites document, page, and line.',
+    line: 'Ask anything about the case. Answers cite the document and page they draw on.',
     practice: 'both',
     phases: ['pre-lit', 'litigation'],
     availability: 'live',
     detail: [
       'Answers come from this case file and nothing else.',
-      'Every sentence carries a citation you can open.',
+      'Each citation opens the source it points to.',
       'Ask for something the file cannot support and it says so.',
     ],
     output: 'On screen, in every case',
@@ -551,7 +551,7 @@ export const FEATURES: ReadonlyArray<Feature> = [
     phases: ['litigation'],
     availability: 'live',
     detail: [
-      'The limitations estimate from the date of loss and the jurisdiction.',
+      'The limitations estimate under California rules, from the date of loss or injury recorded on the case.',
       'Said plainly when it cannot be determined, rather than guessed.',
     ],
     output: 'On screen',
@@ -652,12 +652,12 @@ export const PLATFORM: ReadonlyArray<{ id: string; name: string; line: string }>
   {
     id: 'case-files',
     name: 'Case Files',
-    line: 'Upload or sync from Dropbox. Every page read, classified, and searchable.',
+    line: 'Upload, or import from Dropbox. Read, classified, searchable, with unread pages marked.',
   },
   {
     id: 'review-queue',
     name: 'Attorney Review Queue',
-    line: 'Autolaw proposes. Someone at your firm confirms before it counts as a fact.',
+    line: 'Review what Autolaw extracted beside the source it came from.',
   },
   {
     id: 'firm-access',
@@ -693,6 +693,12 @@ export type ReportPracticeArea = 'PI' | 'WC';
 export interface ReportProduct {
   /** A FEATURES id. Resolved at module load; an unknown id fails the build. */
   featureId: string;
+  /**
+   * The report's own name, where it differs from the feature it belongs to: the name on the
+   * sample page and in case-app's order emails. The Howell report is not the whole Case Value
+   * screen, so it must not be sold under that screen's name.
+   */
+  name?: string;
   /** Mirrors reports-tier.ts. PI and WC are listed in that order where both apply. */
   practiceAreas: ReadonlyArray<ReportPracticeArea>;
   /** The buyer’s problem in the buyer’s words — not a description of what we built. */
@@ -712,11 +718,12 @@ export const REPORT_PRODUCTS: ReadonlyArray<ReportProduct> = [
     deliverables: [
       'Date-ordered treatment timeline across every provider',
       'Diagnoses, restrictions, and work status as recorded',
-      'Document and page on every entry, with the line it quotes',
+      'Document and page on every entry, opening the source in the workspace',
     ],
   },
   {
     featureId: 'case-value',
+    name: 'Howell Recoverable Specials',
     practiceAreas: ['PI'],
     problem:
       'Billed, paid, adjusted, and outstanding never reconcile across providers, liens, and insurers.',
@@ -725,10 +732,11 @@ export const REPORT_PRODUCTS: ReadonlyArray<ReportProduct> = [
       'Outstanding balances and the liens attached to them',
       'Each figure carrying the bill row it was read from, and a count of how many are cited',
     ],
-    boundary: 'Extracts and reconciles the figures. It does not advise on what is recoverable.',
+    boundary: 'Computes the Howell figures from the bills and shows the basis for each. What to claim is the attorney’s call.',
   },
   {
     featureId: 'qme-ame',
+    name: 'QME/AME Action Memo',
     practiceAreas: ['WC'],
     problem:
       'A sixty-page evaluation buries the four findings that actually decide the claim.',

@@ -56,7 +56,7 @@ describe('Reports band', () => {
     expect(cards).toHaveLength(ORDERABLE_REPORTS.length);
     cards.forEach((card, i) => {
       const report = ORDERABLE_REPORTS[i];
-      expect(within(card).getByRole('heading', { level: 3 })).toHaveTextContent(report.feature.name);
+      expect(within(card).getByRole('heading', { level: 3 })).toHaveTextContent(report.name ?? report.feature.name);
     });
   });
 

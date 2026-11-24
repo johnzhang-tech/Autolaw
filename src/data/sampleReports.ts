@@ -86,7 +86,7 @@ export const REPORT_SAMPLES: ReadonlyArray<ReportSample> = [
     title: 'Medical Chronology',
     anchor: 'chronology',
     practices: ['PI', 'WC'],
-    howBought: 'Included in every order. Can also be ordered on its own.',
+    howBought: 'Part of every order. Can also be ordered on its own.',
     contains: [
       'Executive summary: visits, providers, diagnoses, and what needs follow-up, such as periods with no records or items flagged for review',
       'Records reviewed, with each file’s status, and what the report could not use',

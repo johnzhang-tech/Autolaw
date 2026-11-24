@@ -3,7 +3,7 @@ import { PageHero } from '../PageHero';
 import { Section } from '../../components/primitives/Section';
 import { Button } from '../../components/primitives/Button';
 import { AI_USE_URL, CERTIFICATIONS, CONTACT_EMAIL, SCHEDULE_URL, SUBPROCESSORS_URL } from '../../config';
-import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, REVIEWER_COMMITMENTS, SECTION_INTROS, TRUST_LAST_VERIFIED } from '../../data/trust';
+import { AI_CARDS, AUDIT_CARDS, PRIVACY_CARDS, REVIEWER_COMMITMENTS, SECTION_INTROS, TRUST_LAST_RECHECKED, TRUST_LAST_VERIFIED } from '../../data/trust';
 import { PlannedList, TrustCardView } from './TrustCardView';
 import './SecurityPage.css';
 
@@ -55,7 +55,7 @@ export function SecurityPage() {
         intro={
           <>
             The privacy, AI and audit answers below are true in the product today, or are marked
-            as planned with their quarter. Last verified {TRUST_LAST_VERIFIED}. A firm evaluating Autolaw can read the
+            as planned with their quarter. Last verified {TRUST_LAST_VERIFIED}; sign-in, retention and deletion re-checked {TRUST_LAST_RECHECKED}. A firm evaluating Autolaw can read the
             full Trust Pack, with the evidence behind each statement and the limits we have not
             closed yet, under a confidentiality agreement.
           </>

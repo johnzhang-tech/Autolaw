@@ -94,7 +94,7 @@ describe('PricingPage', () => {
     render(<PricingPage />);
     const table = screen.getByRole('table', { name: /report/i });
     ORDERABLE_REPORTS.forEach((report) => {
-      expect(within(table).getByRole('rowheader', { name: report.feature.name })).toBeInTheDocument();
+      expect(within(table).getByRole('rowheader', { name: report.name ?? report.feature.name })).toBeInTheDocument();
     });
   });
 

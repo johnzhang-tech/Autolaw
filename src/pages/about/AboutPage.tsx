@@ -40,8 +40,8 @@ export const OPEN_ROLES: ReadonlyArray<{ title: string; location: string; url: s
 
 const PRINCIPLES = [
   {
-    title: 'Every fact cites where it came from',
-    body: 'A fact in an Autolaw case file names the document and the page it came from, and one click opens it. A summary you cannot check is a summary you have to redo.',
+    title: 'Facts cite where they came from',
+    body: 'Facts in an Autolaw case file name the document and page they came from, and one click opens the source. A summary you cannot check is a summary you have to redo.',
   },
   {
     title: 'Disagreements stay visible',
@@ -63,8 +63,8 @@ export function AboutPage() {
           <>
             Autolaw is case intelligence for personal injury and workers&rsquo; compensation
             firms. It reads what is already in a matter &mdash; intake notes, medical records,
-            expert reports &mdash; and builds one connected case file in which every fact cites
-            the document and page it came from.
+            expert reports &mdash; and builds one connected case file in which facts cite the
+            document and page they came from.
           </>
         }
       />

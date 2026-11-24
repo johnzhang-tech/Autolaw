@@ -215,7 +215,8 @@ export function PricingPage() {
           </p>
           <p>
             A short call sets the workspace up, verifies the firm, and runs your first report
-            on a real matter. After that your team orders reports without us.
+            on a real matter. After that your team orders reports itself, and each one is released
+            once we have checked it.
           </p>
           <Button href={SCHEDULE_URL} variant="primary" size="lg" withCaret>
             Schedule a call
@@ -267,7 +268,7 @@ export function PricingPage() {
               {ORDERABLE_REPORTS.map((report) => (
                 <tr key={report.featureId}>
                   <th scope="row">
-                    <a href={`/product/${report.feature.slug}/`}>{report.feature.name}</a>
+                    <a href={`/product/${report.feature.slug}/`}>{report.name ?? report.feature.name}</a>
                   </th>
                   <td>{report.practiceAreas.includes('PI') ? 'Available' : 'Not offered'}</td>
                   <td>{report.practiceAreas.includes('WC') ? 'Available' : 'Not offered'}</td>

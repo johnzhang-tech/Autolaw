@@ -8,20 +8,20 @@ import './Trust.css';
  * "extraction" is our word for our own component. Each claim below states what happens.
  */
 const CONTROLS: Array<{ title: string; body: string; privacyLink?: boolean }> = [
-  { title: 'Autolaw does not train on your data', body: 'Autolaw trains no models on your case content, and the AI providers that read your documents work under paid terms that do not allow them to train on it.', privacyLink: true },
+  { title: 'Autolaw does not train on your data', body: 'Autolaw trains no models on your case content, and the AI providers that read your documents work under paid terms that do not allow them to train on it. Google keeps prompts for a limited period to detect abuse.', privacyLink: true },
   { title: 'No other firm can see your cases', body: 'Every case, document, and job belongs to one firm. The rule is enforced on our servers, not in the browser.' },
-  { title: 'Auditable access', body: 'Who opened which document, and when, is recorded and reviewable.' },
+  { title: 'Auditable access', body: 'Who opened which document, and when, is recorded, and your firm can ask us for the log.' },
   { title: 'Sign-off before a demand goes out', body: 'Every value Autolaw records cites the document and page it came from. A demand package cannot be exported until an attorney or firm administrator at your firm approves it, and our servers enforce that.' },
   /*
    * The pricing model, not a price. No one in this category publishes numbers, but the
    * model itself is the differentiator: record-review vendors bill per page, and a firm
    * that has been quoted per-page reads this line and immediately knows the difference.
    */
-  { title: 'No per-page or per-document fees', body: 'A thousand-page file does not cost more to review than a hundred-page one. Record-review vendors bill by the page; Autolaw does not, so the size of a file never decides whether it is worth analysing.' },
+  { title: 'No per-page or per-document fees', body: 'A report covers up to 2,000 pages, so a thousand-page file costs no more to review than a hundred-page one. Record-review vendors bill by the page; Autolaw does not.' },
 ];
 
 const ROWS: Array<[string, string, string]> = [
-  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the quoted line — one click opens it'],
+  ['Where a fact came from', 'Summarizes; sources approximate or absent', 'Document, page, and the quoted text — one click opens it'],
   ['Two documents disagree', 'Picks one, silently', 'Surfaced as a conflict with both sources and dates'],
   ['A fact with no support', 'Reads identically to a supported one', 'Kept apart from cited facts and labeled uncited'],
   ['What is missing from the file', 'Cannot know what it was never given', 'Detects referenced-but-absent records and lists what is needed'],

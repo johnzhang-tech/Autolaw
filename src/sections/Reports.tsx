@@ -61,7 +61,7 @@ export function Reports() {
               </span>
             </div>
 
-            <h3 className="al-reports__name">{report.feature.name}</h3>
+            <h3 className="al-reports__name">{report.name ?? report.feature.name}</h3>
             <p className="al-reports__problem">{report.problem}</p>
 
             <ul className="al-reports__deliverables">

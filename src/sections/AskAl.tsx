@@ -52,7 +52,7 @@ export function AskAl() {
       id="ask-al"
       eyebrow="Ask AL"
       heading="Ask the file, not the model"
-      intro="Ask AL answers from the case file and nothing else. Every sentence cites a source you can open. Ask for something the file cannot support and it tells you so."
+      intro="Ask AL answers from the case file and nothing else. Answers cite the sources they draw on, and each citation opens. Ask for something the file cannot support and it tells you so."
     >
       <div className="al-askal al-on-navy">
         <div className="al-askal__top">

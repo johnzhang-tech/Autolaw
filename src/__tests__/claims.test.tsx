@@ -126,6 +126,50 @@ const RETIRED: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
     pattern: /its\s+own\s+price\s+and\s+it\s+is\s+on\s+the\s+pricing\s+page/i,
     reason: 'every report price is null in the site config and renders "Priced on a call"',
   },
+  {
+    pattern: /every\s+fact\s+cites/i,
+    reason: 'not every fact carries a page: the QME/AME summary cites the report, not the page',
+  },
+  {
+    pattern: /page,?\s+and\s+(?:the\s+)?(?:quoted\s+)?line\b|the\s+line\s+it\s+quotes/i,
+    reason: 'citations are {document, page, snippet}; nothing locates a line, and the report PDFs print file and page',
+  },
+  {
+    pattern: /every\s+sentence\s+(?:carries|cites)|every\s+answer\s+cites/i,
+    reason: 'Ask AL is told to cite, but nothing checks that each sentence carries a citation, and a truncated answer ships unmarked',
+  },
+  {
+    pattern: /recorded\s+and\s+reviewable/i,
+    reason: 'access is recorded; a firm reviews the log by asking Autolaw for it',
+  },
+  {
+    pattern: /never\s+decides\s+whether/i,
+    reason: 'an order past 2,000 pages is refused (REPORTS_ORDER_PAGE_LIMIT)',
+  },
+  {
+    pattern: /date\s+of\s+loss\s+and\s+the\s+jurisdiction/i,
+    reason: 'the limitations clocks are California-only',
+  },
+  {
+    pattern: /sync\s+from\s+Dropbox|every\s+page\s+read\b/i,
+    reason: 'Dropbox change detection is off, so import is manual; pages that cannot be read are marked not read',
+  },
+  {
+    pattern: /confirms\s+before\s+it\s+counts/i,
+    reason: 'case-app records extracted values without a confirmation step (see the attorney-confirms entry above)',
+  },
+  {
+    pattern: /does\s+not\s+advise\s+on\s+what\s+is\s+recoverable/i,
+    reason: 'the Howell report states recoverable figures; the honest boundary is that it computes them and the attorney decides',
+  },
+  {
+    pattern: /included\s+in\s+every\s+order/i,
+    reason: 'every order must name the chronology, and it costs a credit like any other report',
+  },
+  {
+    pattern: /orders\s+reports\s+without\s+us/i,
+    reason: 'a report is held for Autolaw release unless the firm holds the auto-release entitlement',
+  },
 ];
 
 type PageFactory = () => ReactElement;
@@ -195,6 +239,13 @@ describe('claim guard', () => {
       'deleted files can be recovered for seven days', 'When your firm leaves, we delete its data on request.',
       'In preview with selected firms', 'In pilot with a small number of firms', 'Running today with our team on your case',
       'All of it live today', 'the reports tier has its own price and it is on the pricing page',
+      'Every fact cites its document and page.', 'Document, page, and the quoted line', 'with the line it quotes',
+      'Every answer cites document, page, and line.', 'Every sentence carries a citation you can open.',
+      'Every sentence cites a source you can open.', 'is recorded and reviewable',
+      'the size of a file never decides whether it is worth analysing', 'from the date of loss and the jurisdiction',
+      'Upload or sync from Dropbox.', 'Every page read, classified, and searchable.',
+      'Someone at your firm confirms before it counts as a fact.', 'It does not advise on what is recoverable.',
+      'Included in every order.', 'After that your team orders reports without us.',
     ];
     const corrected = [
       'SOC 2 in preparation', 'Type I report planned for Q2 2027', 'Business associate agreement planned',
@@ -202,6 +253,13 @@ describe('claim guard', () => {
       'When your firm leaves, we delete its case documents on request.',
       'deleted files can be recovered for 30 days', 'In preview', 'Offered as a hands-on pilot run by our team',
       'Does an attorney still confirm every fact before it counts?',
+      'Facts cite the document and page they came from.', 'Document, page, and the quoted text',
+      'Answers cite the document and page they draw on.', 'Each citation opens the source it points to.',
+      'is recorded, and your firm can ask us for the log', 'A report covers up to 2,000 pages',
+      'Upload, or import from Dropbox. Read, classified, searchable, with unread pages marked.',
+      'What to claim is the attorney’s call.', 'Part of every order.',
+      'After that your team orders reports itself, and each one is released once we have checked it.',
+      'Every fact resolves to a document and a page, with the passage it quotes.',
       'The first produces candidate facts an attorney confirms, and the case file reflects what a human accepted.',
     ];
     retired.forEach((s) => expect(RETIRED.some((r) => r.pattern.test(s)), s).toBe(true));

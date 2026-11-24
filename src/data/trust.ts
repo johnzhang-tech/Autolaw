@@ -15,6 +15,8 @@
 import { UMAMI_WEBSITE_ID } from '../config';
 
 export const TRUST_LAST_VERIFIED = '3 October 2026';
+/** Sign-in, retention and deletion were re-checked against the live service on this date. */
+export const TRUST_LAST_RECHECKED = '24 November 2026';
 
 export type ClaimId = string;
 
@@ -108,7 +110,7 @@ export const SECTION_INTROS: Readonly<Record<'privacy' | 'model', { text: string
     claims: ['TI-1', 'IR-2', 'EN-1', 'RT-1'],
   },
   model: {
-    text: 'No. Autolaw trains no models on your data, and the AI providers that read your documents work under paid terms that do not allow them to train on it.',
+    text: 'No. Autolaw trains no models on your data, and the AI providers that read your documents work under paid terms that do not allow them to train on it. Google keeps prompts for a limited period to detect abuse.',
     claims: ['MT-1', 'MT-2', 'MT-3'],
   },
 };
